@@ -3,16 +3,15 @@
  * Greedy FIFO allocation is explicit; this is not an optimal fulfillment solver.
  */
 export const SKU_CATALOG=[
- {id:'A',name:'Producto A',initial:120},
- {id:'B',name:'Producto B',initial:90},
- {id:'C',name:'Producto C',initial:80},
- {id:'D',name:'Producto D',initial:50}
+ {id:'A',name:'Producto A · alta rotación',rotation:'alta',initial:150,unitCost:1800,leadDays:2,safetyDays:2},
+ {id:'B',name:'Producto B · media rotación',rotation:'media',initial:90,unitCost:3200,leadDays:5,safetyDays:4},
+ {id:'C',name:'Producto C · baja rotación',rotation:'baja',initial:55,unitCost:6500,leadDays:10,safetyDays:6}
 ];
 export const ORDER_TEMPLATES=[
- {id:'basic',name:'Pedido básico',share:40,lines:{A:1,B:1}},
- {id:'combo',name:'Pedido combinado',share:30,lines:{A:1,C:2}},
- {id:'premium',name:'Pedido premium',share:20,lines:{B:1,C:1,D:1}},
- {id:'bulk',name:'Pedido volumen',share:10,lines:{A:2,D:1}}
+ {id:'basic',name:'Pedido básico',share:45,lines:{A:2}},
+ {id:'combo',name:'Pedido combinado',share:30,lines:{A:1,B:1}},
+ {id:'premium',name:'Pedido especial',share:15,lines:{A:1,C:1}},
+ {id:'bulk',name:'Pedido mixto',share:10,lines:{A:2,B:1,C:1}}
 ];
 const nonnegative=n=>Number.isFinite(Number(n))?Math.max(0,Math.floor(Number(n))):0;
 export function skuOrderLab({orders=200,stock={},templates=ORDER_TEMPLATES,catalog=SKU_CATALOG,dispatchLimit=Infinity}={}){
@@ -27,7 +26,7 @@ export function skuOrderLab({orders=200,stock={},templates=ORDER_TEMPLATES,catal
  const splits=templates.map((t,i)=>{const exact=count*Number(t.share)/totalShare;return {t,i,requested:Math.floor(exact),remainder:exact-Math.floor(exact)}});
  let remaining=count-splits.reduce((n,t)=>n+t.requested,0);
  for(const t of [...splits].sort((a,b)=>b.remainder-a.remainder||a.i-b.i)){if(remaining--<=0)break;t.requested++}
- const rows=[];let complete=0,partial=0,shortage=0,dispatched=0;
+ const rows=[];let complete=0,shortage=0,dispatched=0;
  const missingBySku=Object.fromEntries(catalog.map(p=>[p.id,0]));
  const demandBySku=Object.fromEntries(catalog.map(p=>[p.id,0]));
  for(const {t,requested} of splits){
@@ -49,5 +48,18 @@ export function skuOrderLab({orders=200,stock={},templates=ORDER_TEMPLATES,catal
  }
  const stockInitial=Object.fromEntries(catalog.map(p=>[p.id,nonnegative(stock[p.id]??p.initial)]));
  const consumed=Object.fromEntries(catalog.map(p=>[p.id,stockInitial[p.id]-available[p.id]]));
- return {orders:count,complete,pending:count-complete,fulfillment:count?100*complete/count:100,rows,stockInitial,stockRemaining:available,consumed,demandBySku,missingBySku,blockedByStock:shortage,blockedByCapacity:count-complete-shortage,dispatchLimit:limit,method:'FIFO por tipo de pedido en orden de mezcla; pedidos completos solamente'};
+ const skuMetrics=catalog.map(p=>{
+  const demand=demandBySku[p.id],onHand=stockInitial[p.id],unitCost=nonnegative(p.unitCost??0);
+  const dailyDemand=demand/30,leadDays=nonnegative(p.leadDays??0),safetyDays=nonnegative(p.safetyDays??0);
+  const reorderPoint=Math.ceil(dailyDemand*(leadDays+safetyDays));
+  const daysCover=dailyDemand>0?onHand/dailyDemand:null;
+  const valueDemand=demand*unitCost;
+  return {id:p.id,name:p.name,rotation:p.rotation||'sin clasificar',demand,onHand,remaining:available[p.id],consumed:consumed[p.id],unitCost,valueDemand,leadDays,safetyDays,reorderPoint,daysCover,reorderSuggested:onHand<=reorderPoint,shortageUnits:Math.max(0,demand-onHand)};
+ });
+ const totalDemandValue=skuMetrics.reduce((n,p)=>n+p.valueDemand,0);
+ const abc=[...skuMetrics].sort((a,b)=>b.valueDemand-a.valueDemand).map((p,i,all)=>({id:p.id,share:totalDemandValue?p.valueDemand/totalDemandValue*100:0}));
+ let cumulative=0;for(const p of abc){cumulative+=p.share;p.cumulativeValue=cumulative;p.abc=cumulative<=80?'A':cumulative<=95?'B':'C';}
+ const abcById=Object.fromEntries(abc.map(p=>[p.id,p]));
+ for(const p of skuMetrics){p.valueShare=abcById[p.id].share;p.abc=abcById[p.id].abc;p.cumulativeValue=abcById[p.id].cumulativeValue;}
+ return {skuMetrics,orders:count,complete,pending:count-complete,fulfillment:count?100*complete/count:100,rows,stockInitial,stockRemaining:available,consumed,demandBySku,missingBySku,blockedByStock:shortage,blockedByCapacity:count-complete-shortage,dispatchLimit:limit,method:'FIFO por tipo de pedido en orden de mezcla; pedidos completos solamente'};
 }
