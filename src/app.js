@@ -172,9 +172,11 @@ for(const f of diag.findings){
  if(f.inherited)add(item,'p','diagnosis-note','Hay capacidad no utilizada por flujo heredado. Antes de reforzar esta área conviene resolver la restricción aguas arriba.');
  if(f.potential>0){
  const projected=flow(decisions,{...actions,[f.id]:ACTIONS[f.id][2]},scenario);
- const baselineCost=finance(r,scenario),projectedCost=finance(projected,scenario);
  const extra=projected.dispatched-r.dispatched;
- add(item,'p','diagnosis-note','Si no se corrige esta restricción, la campaña continuará con '+fmt(r.pending)+' unidades pendientes y '+(r.demand?((100*r.dispatched/r.demand).toFixed(1)):'0')+'% de cumplimiento. En esta área, la capacidad de recuperación disponible podría liberar '+fmt(extra)+' unidades adicionales para expedición, pero requiere un costo adicional estimado de 
+ const additional=finance(projected,scenario).total-finance(r,scenario).total;
+ add(item,'p','diagnosis-note','Si no se interviene, el cumplimiento se mantiene en '+(100*r.dispatched/r.demand).toFixed(1)+'% y seguirán pendientes '+fmt(r.pending)+' unidades. Una medida adicional en '+f.title+' podría permitir expedir '+fmt(extra)+' unidades más con un costo adicional estimado de '+fmt(additional)+' CLP. Evalúa si esa mejora justifica el gasto.');
+}else if(!actions[f.id]){
+ add(item,'p','muted','Mantener esta área no reduce por sí solo la expedición actual. Reforzarla aisladamente tampoco mejoraría el cumplimiento mientras exista otra restricción; revisa primero las etapas anteriores.');
 }
 const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const item=add(opts,'div','action'),body=add(item,'div','');add(body,'strong','',f.title+' · '+ACTIONS[f.id][0]);add(body,'small','','Elegido: '+(actions[f.id]||0)+' / '+ACTIONS[f.id][2]+' '+ACTIONS[f.id][1]+' · Mejora potencial adicional: +'+fmt(f.potential));const b=add(item,'button','mini','Configurar');b.onclick=()=>{phase='recover';showSection('recovery');nav(NODES.findIndex(n=>n.id===f.id))}});
 $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=diag.findings.filter(f=>f.potential>0).slice(0,3).map(f=>f.title).join(', ')||'Sin mejoras individuales';$('report').hidden=false;
