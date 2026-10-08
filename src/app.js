@@ -1,6 +1,6 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=71';
-import {flow,diagnose,ACTIONS} from './flow.js?v=71';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance} from './scenario.js?v=71';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=80';
+import {flow,diagnose,ACTIONS} from './flow.js?v=80';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance} from './scenario.js?v=80';
 const $=id=>document.getElementById(id),KEY='supply-lab-v62';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO};
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
@@ -25,7 +25,7 @@ input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isF
 function dashboard(r){
  const f=finance(r,scenario),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
  const cards=$('financeMetrics');cards.replaceChildren();
- const values=[['Unidades expedidas',fmt(r.dispatched)],['Costo por unidad',f.costPerUnit===null?'N/D':money(f.costPerUnit)],['Meta costo unitario',money(scenario.maxCostPerUnit)],['Ingreso estimado',money(f.revenue)],['Margen estimado',money(f.margin)],['Costo personal',money(f.laborTotal)],['Productividad Picking',scenario.pickingOperators?(r.picked/scenario.pickingOperators).toFixed(1)+' unid./operario':'N/D'],['Uso capacidad Picking',r.stages[6].capacity?(100*r.picked/r.stages[6].capacity).toFixed(1)+'%':'N/D'],['Cumple meta',f.meetsTarget?'Sí':'No']];
+ const values=[['Unidades expedidas',fmt(r.dispatched)],['Costo por unidad',f.costPerUnit===null?'N/D':money(f.costPerUnit)],['Meta costo unitario',money(scenario.maxCostPerUnit)],['Ingreso estimado',money(f.revenue)],['Saldo operativo simulado',money(f.margin)],['Costo personal',money(f.laborTotal)],['Productividad Picking',scenario.pickingOperators?(r.picked/scenario.pickingOperators).toFixed(1)+' unid./operario':'N/D'],['Uso capacidad Picking',r.stages[6].capacity?(100*r.picked/r.stages[6].capacity).toFixed(1)+'%':'N/D'],['Cumple meta',f.meetsTarget?'Sí':'No']];
  for(const [label,value] of values){const c=add(cards,'div','metric');add(c,'span','',label);add(c,'strong','',value)}
  $('costTotalHero').textContent=money(f.total);
  const budget=r.dispatched*scenario.maxCostPerUnit,over=f.total>budget;
@@ -38,6 +38,7 @@ function dashboard(r){
  ['Personal de recepción',f.labor.receiving,baseline.labor.receiving],
  ['Refuerzos de recuperación',f.recoveryLaborTotal,baseline.recoveryLaborTotal],
  ['Compra de unidades recibidas',f.purchase,baseline.purchase],
+ ['Recargo de compra urgente',f.urgentSurcharge,baseline.urgentSurcharge],
  ['Empaque de unidades preparadas',f.packaging,baseline.packaging],
  ['Transporte de unidades expedidas',f.transport,baseline.transport],
  ['Otros costos fijos',f.fixed,baseline.fixed]
@@ -91,8 +92,29 @@ function renderDiagnosis(current){
  add(rec,'p','summary','Antes: '+fmt(initial.dispatched)+' unidades. Ahora: '+fmt(current.dispatched)+'. Recuperadas: '+fmt(extra)+'. Costo incremental: '+cash(cost)+'.');
  if(extra===0)add(rec,'p','diagnosis-note','No existe mejora global con las medidas actuales. Revisa otras restricciones antes de agregar recursos.');
 }
+function renderKpiLesson(r){
+ const id=NODES[active].id,st=r.stages[active];
+ const percent=(a,b)=>b?(100*a/b).toFixed(1)+' %':'No aplica';
+ const perPerson=(a,b)=>b?(a/b).toFixed(1)+' unid./operario':'No aplica';
+ const data={
+ commercial:['Error absoluto del pronóstico',percent(Math.abs(r.estimated-r.demand),r.demand),'|Demanda pronosticada − demanda real| ÷ demanda real × 100','Un error alto puede provocar faltantes o sobreinventario. Una sobreestimación no implica que se vendan más unidades.','Decisión estratégica: equilibrar nivel de servicio y riesgo de inventario.'],
+ planning:['Cobertura de reposición',percent(r.ordered,Math.max(0,r.estimated-r.stock)),'Unidades solicitadas ÷ brecha planificada × 100','Una cobertura baja puede dejar demanda sin abastecer. Una cobertura alta eleva las necesidades de compra.','Decisión estratégica: disponibilidad frente a capital inmovilizado.'],
+ purchasing:['Cumplimiento de entrega',percent(r.delivered,r.ordered),'Unidades recibidas del proveedor antes del corte ÷ unidades solicitadas × 100','Una entrega incompleta limita las etapas posteriores aunque el centro tenga capacidad libre.','Decisión estratégica: costo de compra frente a confiabilidad del proveedor.'],
+ receiving:['Productividad de recepción',perPerson(r.received,scenario.receivingOperators),'Unidades recibidas ÷ operarios de recepción en la jornada','La productividad observada depende del volumen entregado; no equivale automáticamente a eficiencia individual.','Decisión estratégica: dimensionar recursos según volumen y variabilidad.'],
+ quality:['Tasa de liberación',percent(r.released,r.received),'Unidades liberadas ÷ unidades recibidas × 100','Una tasa baja reduce disponibilidad inmediata. Acelerar el proceso nunca significa saltarse los controles.','Decisión estratégica: proteger conformidad y nivel de servicio.'],
+ inventory:['Disponibilidad frente a demanda',percent(r.available,r.demand),'Unidades disponibles para preparar ÷ demanda real × 100','La disponibilidad depende del stock inicial, la recepción liberada, la confiabilidad y las reservas habilitadas.','Decisión estratégica: cobertura de inventario frente a costos y riesgo de quiebre.'],
+ picking:['Productividad de picking',perPerson(r.picked,scenario.pickingOperators),'Unidades preparadas ÷ operarios de picking en la jornada','Si no llegan unidades de Inventario, la productividad observada cae aunque exista capacidad. También revisa utilización: '+percent(r.picked,st.capacity)+'.','Decisión estratégica: aumentar productividad sin contratar capacidad ociosa.'],
+ transport:['Utilización de expedición',percent(r.dispatched,st.capacity),'Unidades expedibles ÷ capacidad de expedición × 100','Una utilización baja puede ser consecuencia de falta de unidades preparadas, no de rutas mal planificadas.','Decisión estratégica: capacidad logística, costo de despacho y cumplimiento.']
+ };
+ const root=$('kpiLesson');root.replaceChildren();
+ const [name,value,formula,reading,strategy]=data[id];
+ const lead=add(root,'div','kpi-lead');add(lead,'span','muted',name);add(lead,'strong','',value);
+ add(root,'p','',formula);add(root,'p','',reading);add(root,'p','kpi-strategy',strategy);
+ add(root,'small','','Ejercicio ilustrativo. El indicador usa los parámetros actuales y se actualiza con tus decisiones.');
+}
+
 function render(){
-const r=flow(decisions,actions,scenario),diag=diagnose(decisions,actions,scenario),n=NODES[active],st=r.stages[active];setup();dashboard(r);
+const r=flow(decisions,actions,scenario),diag=diagnose(decisions,actions,scenario),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent=phase==='plan'?'Planificación: las áreas pendientes usan valores iniciales; el resultado es provisional.':'Recuperación: define cuánto esfuerzo correctivo aplicar en cada área (0 = no actuar).';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?'Planificación':'Recuperación');
@@ -180,7 +202,7 @@ $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
 $('reset').onclick=()=>{if(!confirm('¿Reiniciar la campaña?'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';save();render();showSection('operations')};
-$('openReport').onclick=()=>{save();render();showSection('preliminary');$('report').scrollIntoView({behavior:'smooth',block:'start'})};
+$('openReport').onclick=()=>{save();showSection('preliminary');$('preliminarySection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('export').onclick=()=>{const r=flow(decisions,actions,scenario),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
 $('setupTab').onclick=()=>showSection('setup');
 $('operationsTab').onclick=()=>showSection('operations');
