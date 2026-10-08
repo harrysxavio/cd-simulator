@@ -1,4 +1,5 @@
 import {NODES,numericValue,TOTAL_ORDERS} from './engine.js';
+import {cleanScenario} from './scenario.js';
 export const ACTIONS={
 commercial:['Corregir desviación del forecast','puntos %',40,5],
 planning:['Ampliar cobertura de reposición','puntos %',40,5],
@@ -11,20 +12,21 @@ transport:['Ampliar capacidad de salida','unidades',600,25]
 };
 export function flow(d={},a={},scenario={}){
 const q=id=>numericValue(id,d),x=id=>Math.max(0,Math.min(ACTIONS[id][2],Number(a[id])||0));
+const labor=cleanScenario(scenario),hours=labor.effectiveHours;
 const plannedDemand=Math.max(1,Math.floor(Number(scenario.demand) || TOTAL_ORDERS));
 const demand=Math.max(1,Math.floor(Number(scenario.actualDemand??scenario.demand) || plannedDemand)),stock=Math.max(0,Math.floor(scenario.initialStock===undefined?250:Number(scenario.initialStock)));
 const forecast=q('commercial')+Math.sign(100-q('commercial'))*Math.min(x('commercial'),Math.abs(100-q('commercial')));
 const estimated=Math.floor(plannedDemand*forecast/100),gap=Math.max(0,estimated-stock);
 const ordered=Math.ceil(gap*(q('planning')+x('planning'))/100);
 const delivered=Math.floor(ordered*Math.min(100,q('purchasing')+x('purchasing'))/100);
-const receivingCapacity=Math.floor(q('receiving')*Math.max(0,Number(scenario.receivingOperators??2))/2+x('receiving'));
+const receivingCapacity=Math.floor(q('receiving')/650*labor.receivingOperators*hours*labor.receivingUnitsPerHour+x('receiving'));
 const received=Math.min(delivered,receivingCapacity);
 const released=Math.floor(received*Math.min(100,q('quality')+x('quality'))/100);
-const inventoryCapacity=Math.floor(Math.max(0,Number(scenario.inventoryOperators??3))*400);
+const inventoryCapacity=Math.floor(labor.inventoryOperators*hours*labor.inventoryUnitsPerHour);
 const eligibleReserve=Math.min(x('inventory'),Math.max(0,scenario.reserveStock===undefined?150:Number(scenario.reserveStock)));
 const usableBase=Math.floor((stock+released)*q('inventory')/100);
 const available=Math.min(demand,inventoryCapacity,usableBase+eligibleReserve);
-const pickingCapacity=Math.floor(q('picking')*Math.max(0,Number(scenario.pickingOperators??5))/5+x('picking'));
+const pickingCapacity=Math.floor(q('picking')/2300*labor.pickingOperators*hours*labor.pickingUnitsPerHour+x('picking'));
 const picked=Math.min(available,pickingCapacity);
 const dispatched=Math.min(picked,q('transport')+x('transport'));
 const data=[
