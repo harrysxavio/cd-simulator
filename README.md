@@ -140,3 +140,9 @@ Tras revelar la demanda, el motor usa `lockUpstream: true`: ya no acepta accione
 Se corrigió además la navegación entre pestañas: primero se resuelve la restricción de acceso (no permitir Recuperación/Resultado antes de revelar) y luego se actualiza la visibilidad. Antes podía quedar seleccionada una pestaña oculta tras una redirección.
 
 Se añadieron pruebas a `tests/demand.test.mjs` y se verificaron 9 escenarios funcionales con interfaz simulada. Pendiente: ejecutar suite Node en GitHub Actions y prueba visual real en Android; la operación sigue modelada como flujo agregado de un solo día y no representa compromisos por pedido/SKU.
+
+## v9.6 · Comparación temporal correcta de la sorpresa
+
+El diagnóstico preliminar conserva una fotografía **del plan original**, evaluada con demanda prevista, y al revelar la sorpresa presenta por separado el resultado del plan con la demanda realmente observada, antes de aplicar acciones de recuperación. Esto evita reinterpretar retroactivamente el diagnóstico original como si la demanda real ya se hubiera conocido. El motor mantiene iguales las compras y entregas originales para ambos escenarios.
+
+Se corrigió el valor por defecto de `cleanScenario`: si no se proporciona `actualDemand`, utiliza `demand`, y nunca presupone silenciosamente una sorpresa positiva. La sorpresa continúa calculándose solo al revelarla. Cambiar parámetros o restablecer la configuración reinicia el modo planificación y devuelve a Operación para evitar una recuperación abierta con escenario nuevo. Se añadieron dos pruebas a `tests/surprise.test.mjs` y se verificaron 7 recorridos de interfaz con DOM simulado. Suite Node real y QA visual Android pendientes.
