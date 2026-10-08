@@ -36,6 +36,8 @@ export function attentionSignals(decisions,actions,scenario){
  const add=(level,title,description)=>messages.push({level,title,description});
  if(r.demand>r.plannedDemand*1.05)add('warning','Demanda superior a lo previsto','La demanda real supera el plan en '+(100*(r.demand/r.plannedDemand-1)).toFixed(1)+' %. Comprueba stock, proveedores y capacidades antes de prometer servicio.');
  if(r.demand<r.plannedDemand*.95)add('warning','Demanda inferior a lo previsto','La demanda real es '+(100*(1-r.demand/r.plannedDemand)).toFixed(1)+' % menor al plan. Evalúa compras y dotación para evitar gasto o inventario sin rotación.');
+ const surplus=Math.max(0,r.usableBase+r.eligibleReserve-r.demand);
+ if(surplus>0)add('warning','Stock potencial sin demanda en la jornada','Hay '+surplus.toLocaleString('es-CL')+' unidades utilizables por encima de la demanda real. No es merma, pero podría implicar capital inmovilizado.');
  for(const id of ['receiving','picking','transport']){
   const index={receiving:3,picking:6,transport:7}[id],st=r.stages[index];
   const isReinforced=(actions[id]||0)>0;
