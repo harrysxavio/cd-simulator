@@ -65,4 +65,4 @@ $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 $('beginExercise').onclick=()=>showSection('operations');
 $('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};save();render()};
-load();render();
+load();render();showSection('setup');
