@@ -1,6 +1,6 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=62';
-import {flow,diagnose,ACTIONS} from './flow.js?v=62';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance} from './scenario.js?v=62';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=63';
+import {flow,diagnose,ACTIONS} from './flow.js?v=63';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance} from './scenario.js?v=63';
 const $=id=>document.getElementById(id),KEY='supply-lab-v62';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO};
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
