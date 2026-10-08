@@ -17,11 +17,11 @@ export const PARAMETERS={
 commercial:{key:'forecast',label:'Forecast respecto a demanda real',min:60,max:140,step:1,unit:'%',hint:'80 % = subestima 20 %; 120 % = sobreestima 20 %.'},
 planning:{key:'coverage',label:'Cobertura de brecha planificada',min:40,max:130,step:1,unit:'%',hint:'100 % cubre la brecha calculada; 110 % agrega 10 %.'},
 purchasing:{key:'delivery',label:'Entrega del proveedor antes del corte',min:30,max:100,step:1,unit:'%',hint:'Porcentaje de unidades compradas que llegan a tiempo.'},
-receiving:{key:'capacity',label:'Capacidad de recepción',min:100,max:1500,step:10,unit:' unid./día',hint:'Unidades que pueden descargarse y registrarse en la jornada.'},
+receiving:{key:'capacity',label:'Capacidad de recepción',min:100,max:100000,step:10,unit:' unid./día',hint:'Unidades que pueden descargarse y registrarse en la jornada.'},
 quality:{key:'release',label:'Unidades liberadas por Calidad',min:50,max:100,step:1,unit:'%',hint:'Porcentaje recibido que queda liberado durante la jornada.'},
 inventory:{key:'accuracy',label:'Stock realmente utilizable',min:70,max:100,step:1,unit:'%',hint:'Disponibilidad confiable tras ubicaciones y conciliación.'},
-picking:{key:'lines',label:'Capacidad total de picking',min:500,max:3500,step:50,unit:' unidades/día',hint:'Unidades preparables por jornada en esta versión agregada.'},
-transport:{key:'capacity',label:'Capacidad de expedición',min:200,max:1200,step:25,unit:' unidades/día',hint:'Unidades que pueden salir del centro de distribución.'}
+picking:{key:'lines',label:'Capacidad total de picking',min:500,max:100000,step:50,unit:' unidades/día',hint:'Unidades preparables por jornada en esta versión agregada.'},
+transport:{key:'capacity',label:'Capacidad de expedición',min:200,max:100000,step:25,unit:' unidades/día',hint:'Unidades que pueden salir del centro de distribución.'}
 };
 export function numericValue(id,decisions={}){
 const def=PARAMETERS[id],preset=choice(id,decisions[id]??DEFAULTS[id]);
