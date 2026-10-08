@@ -14,3 +14,13 @@
 #recoverySection .mission{max-width:880px;margin:18px auto}
 #dashboardSection .panel{margin-bottom:18px}
 #setupSection[hidden],#operationsSection[hidden],#recoverySection[hidden],#dashboardSection[hidden]{display:none}
+
+.campaign-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(110deg,#143a48,#14283e);border:1px solid #376477;border-radius:16px;padding:18px;margin:20px 0}
+.campaign-toolbar strong{color:#e8fffb;font-size:1.06rem}.campaign-toolbar p{margin:6px 0 0}
+.campaign-toolbar .btn{flex-shrink:0}
+.section-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 22px}
+.section-tabs button{appearance:none;-webkit-appearance:none;display:flex;justify-content:center;align-items:center;min-height:51px;min-width:0;width:100%;border-radius:13px;border:1px solid #3e607a;background:#193149;color:#c8daee;font-size:.95rem;font-weight:750;padding:12px 9px;box-shadow:none;transition:background .15s,border-color .15s}
+.section-tabs button[aria-selected="true"]{background:#16564f;border-color:#5eead4;color:#d8fff4;box-shadow:inset 0 0 0 1px #5eead4}
+.section-tabs button:focus-visible{outline:3px solid #5eead4;outline-offset:2px}
+#setupSection[hidden],#operationsSection[hidden],#recoverySection[hidden],#dashboardSection[hidden]{display:none!important}
+@media(max-width:600px){.campaign-toolbar{align-items:stretch;flex-direction:column}.campaign-toolbar .btn{width:100%}.section-tabs{gap:6px}.section-tabs button{font-size:.8rem;line-height:1.2;padding:10px 5px;min-height:54px}.shell{padding-top:12px}}
