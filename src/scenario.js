@@ -1,12 +1,14 @@
 export const DEFAULT_SCENARIO={
- demand:1000,initialStock:250,reserveStock:150,unitPrice:9000,
+ demand:1000,actualDemand:1000,areaCostTolerance:10,initialStock:250,reserveStock:150,unitPrice:9000,
  unitPurchaseCost:2500,initialStockUnitCost:2500,unitTransportCost:500,unitPackagingCost:250,urgentPurchaseSurcharge:500,
  inventoryOperators:3,pickingOperators:5,receivingOperators:2,
  inventoryDailyWage:42000,pickingDailyWage:42000,receivingDailyWage:42000,
  otherFixedCost:90000,maxCostPerUnit:4800,targetFulfillment:95
 };
 export const FIELDS=[
-['demand','Demanda objetivo','unidades',100,100000,100],
+['demand','Demanda prevista base (plan comercial)','unidades',100,100000,100],
+['actualDemand','Demanda real observada (pedidos del día)','unidades',100,100000,100],
+['areaCostTolerance','Tolerancia de sobrecosto por área','%',0,100,1],
 ['initialStock','Stock inicial','unidades',0,100000,50],
 ['reserveStock','Stock de reserva elegible','unidades',0,100000,25],
 ['unitPrice','Ingreso estimado por unidad expedida','$ CLP',0,10000000,500],
@@ -28,6 +30,7 @@ export const FIELDS=[
 export function cleanScenario(raw={}){
  const result={};
  for(const [key,, ,min,max] of FIELDS){const v=Number(raw[key]);result[key]=raw[key]!==undefined&&raw[key]!==''&&Number.isFinite(v)?Math.min(max,Math.max(min,v)):DEFAULT_SCENARIO[key]}
+ if(raw.actualDemand===undefined)result.actualDemand=result.demand;
  return result;
 }
 // Modelo didáctico de una jornada: los costos de mercancía vendida y el flujo de caja
