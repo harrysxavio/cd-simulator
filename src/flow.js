@@ -11,7 +11,7 @@ picking:['Reforzar preparación','unidades',600,25],
 transport:['Ampliar capacidad de salida','unidades',600,25]
 };
 export function flow(d={},a={},scenario={}){
-const q=id=>numericValue(id,d),x=id=>Math.max(0,Math.min(ACTIONS[id][2],Number(a[id])||0));
+const q=id=>numericValue(id,d),x=id=>scenario.lockUpstream&&['commercial','planning','purchasing'].includes(id)?0:Math.max(0,Math.min(ACTIONS[id][2],Number(a[id])||0));
 const labor=cleanScenario(scenario),hours=labor.effectiveHours;
 const plannedDemand=Math.max(1,Math.floor(Number(scenario.demand) || TOTAL_ORDERS));
 const demand=Math.max(1,Math.floor(Number(scenario.actualDemand??scenario.demand) || plannedDemand)),stock=Math.max(0,Math.floor(scenario.initialStock===undefined?250:Number(scenario.initialStock)));
