@@ -72,7 +72,7 @@ export function finance(flow,scenario){
  const newlyConsumed=Math.max(0,flow.dispatched-initialConsumed);
  const costOfGoods=initialConsumed*s.initialStockUnitCost+newlyConsumed*s.unitPurchaseCost;
  const modeCosts={receiving:flow.choices?.receiving==='extra'?30000:0,quality:flow.choices?.quality==='priority'?22000:0,inventory:flow.choices?.inventory==='count'?18000:0,picking:flow.choices?.picking==='reinforce'?32000:0,transport:flow.choices?.transport==='extra'?50000:0};
- const extraCapacityCosts={transport:Math.max(0,(flow.stages?.[7]?.capacity||0)-(flow.choices?.transport==='extra'?1000:flow.choices?.transport==='low'?500:800)-(a.transport||0))*100,quality:Math.max(0,(flow.stages?.[4]?.output||0)-Math.floor((flow.received||0)*.95))*80};
+ const extraCapacityCosts={transport:Math.max(0,(flow.stages?.[7]?.capacity||0)-(flow.choices?.transport==='extra'?1000:flow.choices?.transport==='low'?500:800)-(a.transport||0))*100,quality:Math.max(0,(flow.stages?.[4]?.output||0)-Math.floor((flow.received||0)*(flow.choices?.quality==='priority'?1:flow.choices?.quality==='slow'?.75:.95)))*80};
  const extraCapacityTotal=Object.values(extraCapacityCosts).reduce((x,y)=>x+y,0);
  const modeCostTotal=Object.values(modeCosts).reduce((a,b)=>a+b,0)+extraCapacityTotal;
  const operationalExpenses=laborTotal+transport+packaging+s.otherFixedCost+urgentSurcharge+actionCostTotal+modeCostTotal;
