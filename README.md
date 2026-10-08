@@ -1,4 +1,4 @@
-# Supply Chain Operations Lab — v8.0
+# Supply Chain Operations Lab — v8.2
 
 **[Abrir el laboratorio interactivo](https://harrysxavio.github.io/cd-simulator/)**
 
@@ -29,16 +29,16 @@ Simulador educativo, gratuito y sin registro para practicar decisiones conectada
 
 Los indicadores se calculan con el escenario actual. **Productividad observada ≠ productividad intrínseca del trabajador:** puede existir capacidad ociosa por restricciones aguas arriba. No se calcula OTIF, fill rate por pedido ni precisión estadística real de pronósticos históricos.
 
-## Modelo y límites
+## Modelo económico y límites
 
-- Una sola jornada, unidades agregadas y un único flujo de distribución; no hay SKU, pedidos individuales, plazos de entrega detallados, múltiples centros ni aleatoriedad.
-- Los resultados son deterministas y **no equivalen a datos reales de ninguna empresa**.
-- Las compras, recepciones, liberaciones, inventario disponible, preparación y expedición están encadenadas. Las acciones pueden mejorar un área sin mejorar el total.
-- El costo operativo estimado considera personal, refuerzos, compras recibidas, recargo de compras urgentes, empaque, transporte y otros costos fijos.
-- El **saldo operativo simulado** es ingresos de unidades expedibles menos desembolsos y costos modelados; **no es margen contable ni utilidad neta**. El costo de compras recibidas puede incluir unidades no expedidas y no se valoriza el consumo del inventario inicial. No hay impuestos, depreciación, devoluciones, costo de oportunidad ni inventario final contable.
-- Los semáforos de costos usan un **presupuesto pedagógico distribuido proporcionalmente** desde la meta global, no presupuestos reales por centro de costo.
-- La capacidad predeterminada representa una operación pequeña; si elevas la demanda, debes adaptar las capacidades y dotaciones en cada área.
-- Los datos se guardan en el navegador (localStorage). No se envían a un servidor.
+- El resultado operacional simulado es ingreso potencial menos costo de mercancía expedible y gastos operacionales.
+- El desembolso de la jornada contabiliza compras recibidas por separado; no se reconoce todo lo comprado como costo de venta.
+- El stock inicial y la reserva utilizada se valorizan según el costo unitario configurado.
+- Las decisiones especiales y las acciones correctivas incorporan recargos de referencia didácticos.
+- La meta de costo unitario es global. No se inventan presupuestos por área.
+- No se trata de un estado de resultados completo: se excluyen impuestos, depreciación, mermas valorizadas, inventario final contable y entregas confirmadas.
+- Una jornada, unidades agregadas, sin SKU ni pedidos individuales. Datos ficticios y deterministas.
+- La información se guarda localmente en el navegador.
 
 ## Arquitectura
 
@@ -48,6 +48,7 @@ Los indicadores se calculan con el escenario actual. **Productividad observada �
 - `src/scenario.js` — configuración, validación y modelo económico.
 - `src/app.js` — experiencia de usuario, KPI, diagnóstico, navegación y exportación CSV.
 - `src/styles.css` — estilos responsivos.
+- `tests/model.test.mjs` — regresión del modelo (`node --test tests/model.test.mjs`).
 - `archive/` — versiones anteriores.
 
 Aplicación estática en GitHub Pages, sin dependencias de frontend ni backend.
@@ -59,3 +60,7 @@ Se realizan pruebas de sintaxis, cálculo y navegación simulada; estas pruebas 
 ## Portafolio y autoría
 
 Proyecto conceptualizado y dirigido con criterios de Supply Chain, mejora continua, productividad y costos, desarrollado iterativamente con asistencia de IA. El valor del ejercicio está en definir las reglas de negocio, cuestionar resultados, detectar inconsistencias y decidir qué merece automatizarse, no en presentar la generación de código como una hazaña técnica.
+
+## Próximas fases
+
+Pendiente: metas estratégicas, KPI con objetivos por área, evaluación del criterio del usuario, comparación de escenarios y validación con usuarios externos.
