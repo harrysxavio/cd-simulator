@@ -116,3 +116,11 @@ Las capacidades de Recepción, Inventario y Picking ahora se calculan desde **do
 Se añadió `src/labor.js` con auditoría de productividad realizada, utilización, dotación teórica necesaria para el flujo, y exposición monetaria indicativa de dotación superior a la teórica. La cifra **no** es un ahorro realizable automáticamente ni una recomendación de despedir personas: faltan tareas indirectas, restricciones de turnos, variabilidad por SKU y tiempos de cambio. El reporte aparece al final junto a semáforos y costos.
 
 Pruebas nuevas en `tests/labor.test.mjs`. Pendiente ejecutar la suite Node completa y pruebas visuales reales. Fase 1 todavía abierta: auditar el vínculo de cada modo con costo de personal, el tratamiento de stock por SKU y la gestión de presupuesto por volumen y nivel de servicio.
+
+## v9.3 · Auditoría de dotación y variación presupuestaria
+
+La referencia de presupuesto por área usa ahora los **modos operativos predeterminados** (no las decisiones del ejercicio), sin capacidades personalizadas. Esto evita comparar decisiones contra una referencia contaminada por un modo especial. Las tarjetas muestran separadamente desviación de gasto frente al presupuesto flexible y efecto volumen frente al presupuesto estático.
+
+El motor expone `stockUsableTotal` antes del límite de demanda y `unusedStock` después de expedición. La auditoría de Inventario ya no usa toda la demanda como carga de trabajo: usa el stock utilizable y muestra también dotación teórica para atender la demanda posible. Los semáforos detectan dotación superior a la carga teórica o carga superior a la dotación en Recepción, Inventario y Picking, con exposición monetaria **indicativa**, no ahorro realizable. Los indicadores no incluyen dotación mínima, tareas indirectas, restricciones laborales ni variabilidad de mezcla; no deben emplearse para decisiones reales de personal.
+
+Se ampliaron las pruebas en `tests/labor.test.mjs`. Se ejecutaron 11 verificaciones funcionales con DOM simulado (11 correctas); la suite real de Node y QA visual Android continúan pendientes. El simulador sigue siendo de unidades agregadas, no una herramienta de dimensionamiento industrial.
