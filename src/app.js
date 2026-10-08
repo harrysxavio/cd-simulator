@@ -1,10 +1,11 @@
-import {demandJourney} from './journey.js?v=97';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=97';
-import {flow,diagnose,ACTIONS} from './flow.js?v=97';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=97';
-import {areaKpis} from './kpis.js?v=97';
-import {causalAudit} from './causal.js?v=97';
-import {attentionSignals} from './attention.js?v=97';
+import {skuOrderLab} from './sku.js?v=98';
+import {demandJourney} from './journey.js?v=98';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=98';
+import {flow,diagnose,ACTIONS} from './flow.js?v=98';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=98';
+import {areaKpis} from './kpis.js?v=98';
+import {causalAudit} from './causal.js?v=98';
+import {attentionSignals} from './attention.js?v=98';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -206,6 +207,22 @@ function renderLabor(){
   add(card,'small','','Dotación teórica para el flujo: '+a.staffRequired+' · exposición indicativa por capacidad no requerida: CLP '+fmt(a.idleCostIndicator));
  }
 }
+function renderSkuLab(){
+ const root=$('skuLab');root.replaceChildren();
+ const report=skuOrderLab();
+ const summary=add(root,'div','area-kpi-tile');
+ add(summary,'strong','','Pedidos completos: '+fmt(report.complete)+' / '+fmt(report.orders)+' · '+report.fulfillment.toFixed(1)+' %');
+ add(summary,'small','','Pendientes '+fmt(report.pending)+' · bloqueo por stock '+fmt(report.blockedByStock)+' · por capacidad '+fmt(report.blockedByCapacity));
+ for(const p of report.rows){
+  const card=add(root,'div','area-kpi-tile');
+  add(card,'strong','',p.name);
+  add(card,'small','','Pedidos '+fmt(p.requested)+' · completos '+fmt(p.complete)+' · pendientes '+fmt(p.unfulfilled));
+ }
+ const stock=add(root,'div','area-kpi-tile');
+ add(stock,'strong','','Stock por SKU al cierre del ejercicio piloto');
+ for(const id of Object.keys(report.stockInitial))add(stock,'small','','SKU '+id+': inicial '+fmt(report.stockInitial[id])+' · consumido '+fmt(report.consumed[id])+' · restante '+fmt(report.stockRemaining[id])+' · pedidos bloqueados por falta de este SKU '+fmt(report.missingBySku[id]));
+ add(root,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. Este laboratorio aún no está conectado a las compras ni al inventario de la campaña principal.');
+}
 function renderAttention(){
  const root=$('attentionSummary'),costs=$('areaCostCards');root.replaceChildren();costs.replaceChildren();
  const report=attentionSignals(decisions,actions,effectiveScenario());
@@ -226,7 +243,7 @@ function renderAttention(){
 }
 function render(){
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
-const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();
+const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab();
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?'Planificación':'Recuperación');
