@@ -194,9 +194,9 @@ function renderAttention(){
   const card=add(costs,'div','area-kpi-tile '+(c.over?'cost-over':''));
   add(card,'small','',c.title+' · '+(c.over?'🟠 Sobre referencia':'Dentro de referencia'));
   add(card,'strong','','CLP '+fmt(c.cost));
-  add(card,'small','','Referencia: CLP '+fmt(c.reference)+' · diferencia '+(c.delta>=0?'+':'')+fmt(c.delta));
+  add(card,'small','','Presupuesto flexible: CLP '+fmt(c.reference)+' · desv. gasto '+(c.delta>=0?'+':'')+fmt(c.delta));
  }
- add(root,'small','','Referencia: costos con modos operativos estándar, sin recuperación y con demanda real igual a la prevista. Incluye dotación base y gastos variables asignables; excluye costos fijos compartidos y costo de mercancía para evitar asignaciones arbitrarias. Tolerancia configurable: '+scenario.areaCostTolerance+' %. Un gasto menor por bajo volumen no se considera ahorro de eficiencia.');
+ add(root,'small','','Referencia flexible: dotación estándar más gastos variables ajustados al volumen efectivamente procesado. La diferencia contra la referencia fija se muestra como efecto volumen. Incluye dotación base y gastos variables asignables; excluye costos fijos compartidos y costo de mercancía para evitar asignaciones arbitrarias. Tolerancia configurable: '+scenario.areaCostTolerance+' %. Un gasto menor por bajo volumen no se considera ahorro de eficiencia.');
 }
 function render(){
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
