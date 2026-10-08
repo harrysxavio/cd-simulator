@@ -189,7 +189,7 @@ function renderLabor(){
   add(card,'strong','',a.name+' · '+a.staff+' personas');
   add(card,'small','','Capacidad '+fmt(a.capacity)+' · entrada '+fmt(a.inflow)+' · procesadas '+fmt(a.processed));
   add(card,'small','','Productividad '+(a.productivity===null?'N/D':a.productivity.toFixed(1))+' unid./hora-persona · utilización '+(100*a.utilization).toFixed(1)+' %');
-  add(card,'small','','Dotación teórica para el flujo: '+a.staffRequired+' · exposición por dotación superior: CLP '+fmt(a.idleCostIndicator));
+  add(card,'small','','Dotación teórica para el flujo: '+a.staffRequired+' · exposición indicativa por capacidad no requerida: CLP '+fmt(a.idleCostIndicator));
  }
 }
 function renderAttention(){
@@ -206,6 +206,7 @@ function renderAttention(){
   add(card,'small','',c.title+' · '+(c.over?'🟠 Sobre referencia':'Dentro de referencia'));
   add(card,'strong','','CLP '+fmt(c.cost));
   add(card,'small','','Presupuesto flexible: CLP '+fmt(c.reference)+' · desv. gasto '+(c.delta>=0?'+':'')+fmt(c.delta));
+  add(card,'small','','Efecto volumen vs. presupuesto estático: '+(c.volumeVariance>=0?'+':'')+fmt(c.volumeVariance)+' CLP');
  }
  add(root,'small','','Referencia flexible: dotación estándar más gastos variables ajustados al volumen efectivamente procesado. La diferencia contra la referencia fija se muestra como efecto volumen. Incluye dotación base y gastos variables asignables; excluye costos fijos compartidos y costo de mercancía para evitar asignaciones arbitrarias. Tolerancia configurable: '+scenario.areaCostTolerance+' %. Un gasto menor por bajo volumen no se considera ahorro de eficiencia.');
 }
