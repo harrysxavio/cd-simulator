@@ -79,6 +79,18 @@ function renderDiagnosis(current){
  const box=add(root,'div','diagnosis-card');add(box,'strong','',f.icon+' '+f.title);
  const st=f.stage,util=percent(st.output,st.capacity);
  add(box,'p','',descriptions[f.id]);
+ const metrics={
+ commercial:['Error del pronóstico',percent(Math.abs(initial.estimated-initial.demand),initial.demand)],
+ planning:['Cobertura de compra',percent(initial.ordered,Math.max(0,initial.estimated-initial.stock))],
+ purchasing:['Cumplimiento del proveedor',percent(initial.delivered,initial.ordered)],
+ receiving:['Unidades por operario',scenario.receivingOperators?(initial.received/scenario.receivingOperators).toFixed(1):'No aplica'],
+ quality:['Tasa de liberación',percent(initial.released,initial.received)],
+ inventory:['Disponibilidad sobre demanda',percent(initial.available,initial.demand)],
+ picking:['Unidades por operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'No aplica'],
+ transport:['Utilización de expedición',percent(initial.dispatched,initial.stages[7].capacity)]
+ };
+ const metric=metrics[f.id];
+ add(box,'p','kpi-strategy',metric[0]+': '+metric[1]+'.');
  add(box,'p','muted','Entrada '+fmt(st.input)+' · salida '+fmt(st.output)+' · capacidad '+fmt(st.capacity)+' · utilización '+util+'.');
  if(f.inherited)add(box,'p','diagnosis-note','La capacidad supera el flujo recibido. Reforzar aquí sin resolver el área anterior puede aumentar costos sin mejorar el resultado.');
  const button=add(box,'button','mini','Evaluar recuperación');button.onclick=()=>{active=NODES.findIndex(n=>n.id===f.id);showSection('recovery')};
@@ -88,6 +100,12 @@ function renderDiagnosis(current){
  for(const item of [['Cumplimiento inicial',percent(initial.dispatched,initial.demand)],['Cumplimiento final',percent(current.dispatched,current.demand)],['Unidades recuperadas',fmt(extra)],['Costo incremental',cash(cost)],['Costo por unidad adicional',extra>0?cash(cost/extra):'Sin mejora global']]){
  const c=add(final,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1]);
  }
+ const insight=$('strategyInsight');insight.replaceChildren();
+ const initialRate=initial.dispatched/initial.demand,finalRate=current.dispatched/current.demand;
+ const deltaCost=newCost.total-oldCost.total,deltaRevenue=newCost.revenue-oldCost.revenue;
+ add(insight,'strong','','¿Qué significan las decisiones para el negocio?');
+ add(insight,'p','',extra>0?'El cumplimiento mejora '+((finalRate-initialRate)*100).toFixed(1)+' puntos porcentuales. Recuperaste '+fmt(extra)+' unidades expedibles, con '+cash(deltaCost)+' de variación de costo y '+cash(deltaRevenue)+' de ingreso potencial adicional.':'El cumplimiento no mejoró con las medidas actuales. Si se incurrió en costos extra, esas decisiones consumen recursos sin generar más unidades expedibles. Revisa primero el cuello de botella.');
+ add(insight,'p','muted','El saldo económico modelado cambia '+cash(newCost.margin-oldCost.margin)+'. Es una aproximación didáctica de ingresos menos desembolsos modelados, no un margen contable.');
  const rec=$('recoverySummary');rec.replaceChildren();
  add(rec,'p','summary','Antes: '+fmt(initial.dispatched)+' unidades. Ahora: '+fmt(current.dispatched)+'. Recuperadas: '+fmt(extra)+'. Costo incremental: '+cash(cost)+'.');
  if(extra===0)add(rec,'p','diagnosis-note','No existe mejora global con las medidas actuales. Revisa otras restricciones antes de agregar recursos.');
