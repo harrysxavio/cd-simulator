@@ -1,9 +1,9 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=93';
-import {flow,diagnose,ACTIONS} from './flow.js?v=93';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=93';
-import {areaKpis} from './kpis.js?v=93';
-import {causalAudit} from './causal.js?v=93';
-import {attentionSignals} from './attention.js?v=93';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=94';
+import {flow,diagnose,ACTIONS} from './flow.js?v=94';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=94';
+import {areaKpis} from './kpis.js?v=94';
+import {causalAudit} from './causal.js?v=94';
+import {attentionSignals} from './attention.js?v=94';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
 const effectiveScenario=()=>({...scenario,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
