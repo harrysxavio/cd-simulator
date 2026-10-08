@@ -15,6 +15,7 @@ function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'
 function showSection(name){
 for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
 if((name==='recovery'||name==='dashboard')&&!revealed){name='preliminary'}
+if(name==='operations'&&revealed){name='preliminary'}
 if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
 if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
 save();render();
@@ -307,4 +308,4 @@ $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 $('beginExercise').onclick=()=>showSection('operations');
 $('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;actions={};save();render()};
-load();render();showSection('operations');
+load();render();showSection(revealed?'preliminary':'operations');
