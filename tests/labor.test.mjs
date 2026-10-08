@@ -40,3 +40,25 @@ test('departmental cost allocation remains reconciled',()=>{
  const e=areaEconomics(d,{},DEFAULT_SCENARIO);
  assert.equal(e.allocatedCurrent+e.finance.fixed,e.finance.operationalExpenses);
 });
+
+test('low demand triggers an explicit staffing exposure warning',async()=>{
+ const {attentionSignals}=await import('../src/attention.js');
+ const signals=attentionSignals(START,{}, {...DEFAULT_SCENARIO,actualDemand:300});
+ assert.ok(signals.messages.some(m=>m.title.includes('Dotación por encima')));
+});
+test('high workload with insufficient staffing triggers warning',async()=>{
+ const {attentionSignals}=await import('../src/attention.js');
+ const signals=attentionSignals(START,{}, {...DEFAULT_SCENARIO,receivingOperators:1,receivingUnitsPerHour:20});
+ assert.ok(signals.messages.some(m=>m.title.includes('Carga superior')));
+});
+test('reference uses standard modes and never inherits custom capacity',()=>{
+ const d={...START,receiving:'extra',values:{receiving:4000}};
+ const e=areaEconomics(d,{},DEFAULT_SCENARIO);
+ assert.equal(e.reference.receivingCapacity,650);
+ assert.ok(e.current.receivingCapacity>e.reference.receivingCapacity);
+});
+test('stock available before demand cap is conserved as unshipped usable stock',()=>{
+ const r=flow(START,{}, {...DEFAULT_SCENARIO,actualDemand:300});
+ assert.equal(r.unusedStock,r.stockUsableTotal-r.dispatched);
+ assert.ok(r.stockUsableTotal>=r.available);
+});
