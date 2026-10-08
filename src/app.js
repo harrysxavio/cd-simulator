@@ -8,6 +8,58 @@ function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls
 function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario}))}catch{}}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan'}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
+function showSection(name){
+for(const x of ['setup','operations','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
+if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
+if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
+save();render();
+}
+function setup(){
+const root=$('scenarioFields');root.replaceChildren();
+for(const [key,label,unit,min,max,step] of FIELDS){
+const box=add(root,'div','setup-field');add(box,'label','',label+' ('+unit+')');
+const input=add(box,'input','numeric-input');input.type='number';input.min=min;input.max=max;input.step=step;input.value=scenario[key];
+input.setAttribute('aria-label',label);
+input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;save();render()};
+}}
+function dashboard(r){
+const f=finance(r,scenario),money=v=>'
+const r=flow(decisions,actions,scenario),diag=diagnose(decisions,actions,scenario),n=NODES[active],st=r.stages[active];setup();dashboard(r);
+$('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
+$('forecastNotice').textContent=phase==='plan'?'Planificación: las áreas pendientes usan valores iniciales; el resultado es provisional.':'Recuperación: define cuánto esfuerzo correctivo aplicar en cada área (0 = no actuar).';
+$('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?'Planificación':'Recuperación');
+$('progressFill').style.width=NODES.filter(x=>decisions[x.id]).length/8*100+'%';
+const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));add(b,'span','node-icon',x.icon);const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');add(b,'span','node-state',i===active?'●':'→');b.onclick=()=>nav(i)});
+$('missionNumber').textContent=(phase==='plan'?'PLANIFICAR':'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent=n.kpi;
+const choices=$('choices');choices.replaceChildren();add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.onclick=()=>{decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
+const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.onchange=()=>{const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
+const box=add(choices,'div','flow-summary');add(box,'strong','','Relación con las otras áreas');add(box,'p','','Recibe '+fmt(st.input)+' → entrega '+fmt(st.output)+' unidades. Capacidad '+fmt(st.capacity)+'.');add(box,'small','',st.detail);
+if(phase==='recover'){const cfg=ACTIONS[n.id];add(choices,'h3','','Medida correctiva opcional');add(choices,'p','muted',cfg[0]+'. Elige 0 para no aplicar cambios.');const rr=add(choices,'div','numeric-control');const label=add(rr,'label','','Cantidad a aplicar: '+(actions[n.id]||0)+' '+cfg[1]);const line=add(rr,'div','numeric-row'),num=add(line,'input','numeric-input'),slider=add(line,'input','numeric-range');for(const x of [num,slider]){x.type=x===num?'number':'range';x.min=0;x.max=cfg[2];x.step=cfg[3];x.value=actions[n.id]||0}const apply=v=>{if(v===''||!Number.isFinite(+v)||+v<0||+v>cfg[2])return;actions[n.id]=+v;save();render()};num.onchange=()=>apply(num.value);slider.onchange=()=>apply(slider.value);const max=flow(decisions,{...actions,[n.id]:cfg[2]},scenario);add(rr,'small','','Potencial máximo individual: +'+fmt(Math.max(0,max.dispatched-r.dispatched))+' unidades expedibles, con otras áreas constantes.')}
+$('nodeResult').textContent='Entrada: '+fmt(st.input)+' · Salida: '+fmt(st.output)+' · Capacidad: '+fmt(st.capacity)+' unidades. '+(st.input<st.capacity?'Parte de la capacidad puede estar ociosa por falta de flujo heredado.':st.output<st.input?'Esta área reduce el flujo que recibe la siguiente.':'Sin pérdida adicional en esta etapa.');
+$('prev').disabled=active===0;$('next').textContent=active===7?(phase==='plan'?'Iniciar recuperación →':'Ver diagnóstico →'):'Siguiente área →';
+const list=$('results');list.replaceChildren();r.stages.forEach((s,i)=>{const x=NODES[i],line=add(list,'div','stage-result');add(line,'span','',x.icon+' '+x.title);add(line,'strong','',fmt(s.output)+' unid.');add(line,'small','','Recibe '+fmt(s.input)+' · Entrega '+fmt(s.output)+' · Capacidad '+fmt(s.capacity)+' · '+s.detail);if(i>0){add(line,'small','',i===5?'Integra stock inicial y unidades liberadas por Calidad.':'Depende de lo recibido en el proceso anterior.')}});
+$('sku').replaceChildren();const totals=$('sku');for(const [label,value] of [['Demanda real',r.demand],['Stock inicial',r.stock],['Compra solicitada',r.ordered],['Entrega proveedor',r.delivered],['Recepción',r.received],['Liberación Calidad',r.released],['Stock disponible',r.available],['Preparado',r.picked],['Expedido',r.dispatched]]){const item=add(totals,'div','stage-result');add(item,'span','',label);add(item,'strong','',fmt(value)+' unid.')}
+$('cause').textContent='Transporte recibe '+fmt(r.picked)+' unidades desde Picking y despacha '+fmt(r.dispatched)+'. Su capacidad es '+fmt(r.stages[7].capacity)+'. '+(r.picked<r.stages[7].capacity?'Capacidad ociosa por falta de flujo o demanda aguas arriba.':'El despacho está limitado por capacidad o disponibilidad.');
+const causes=$('rootCauses');causes.replaceChildren();diag.findings.forEach(f=>{const item=add(causes,'div','action');add(item,'span','action-index',f.icon);const body=add(item,'div','');add(body,'strong','',f.title);add(body,'small','','Recibe '+fmt(f.stage.input)+' · entrega '+fmt(f.stage.output)+' · capacidad '+fmt(f.stage.capacity)+'. '+(f.inherited?'Capacidad mayor que la entrada: restricción heredada.':'')+' Recuperación aplicada: +'+fmt(f.recovered)+' · potencial adicional: +'+fmt(f.potential)+'.')});
+const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const item=add(opts,'div','action'),body=add(item,'div','');add(body,'strong','',f.title+' · '+ACTIONS[f.id][0]);add(body,'small','','Elegido: '+(actions[f.id]||0)+' / '+ACTIONS[f.id][2]+' '+ACTIONS[f.id][1]+' · Mejora potencial adicional: +'+fmt(f.potential));const b=add(item,'button','mini','Configurar');b.onclick=()=>{phase='recover';nav(NODES.findIndex(n=>n.id===f.id))}});
+$('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=diag.findings.filter(f=>f.potential>0).slice(0,3).map(f=>f.title).join(', ')||'Sin mejoras individuales';$('report').hidden=phase!=='recover';
+}
+$('prev').onclick=()=>nav(Math.max(0,active-1));
+$('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){phase='recover';active=0}else{render();$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
+$('reset').onclick=()=>{if(!confirm('¿Reiniciar la campaña?'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';scenario={...DEFAULT_SCENARIO};save();render()};
+$('openReport').onclick=()=>{phase='recover';save();render();$('report').scrollIntoView({behavior:'smooth',block:'start'})};
+$('export').onclick=()=>{const r=flow(decisions,actions,scenario),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
+load();render();
++Math.round(v).toLocaleString('es-CL');
+const cards=$('financeMetrics');cards.replaceChildren();
+for(const [label,value] of [['Unidades expedidas',fmt(r.dispatched)],['Costo total',money(f.total)],['Costo unitario',f.costPerUnit===null?'N/D':money(f.costPerUnit)],['Meta costo unitario',money(scenario.maxCostPerUnit)],['Ingreso estimado',money(f.revenue)],['Margen estimado',money(f.margin)],['Costo personal',money(f.laborTotal)],['Cumple meta',f.meetsTarget?'Sí':'No']]){
+const card=add(cards,'div','metric');add(card,'span','',label);add(card,'strong','',value)}
+const costs=$('costBreakdown');costs.replaceChildren();
+for(const [label,value] of [['Inventario personal',f.labor.inventory],['Picking personal',f.labor.picking],['Recepción personal',f.labor.receiving],['Compras recibidas',f.purchase],['Empaque',f.packaging],['Transporte',f.transport],['Otros costos fijos',f.fixed]]){
+const row=add(costs,'div','stage-result');add(row,'span','',label);add(row,'strong','',money(value))}
+$('financialInsight').textContent=f.costPerUnit===null?'Sin expedición no hay costo unitario definido.':(f.meetsTarget?'Cumple la meta de costo unitario.':'Supera la meta de costo unitario.')+' El costo de dotación se incurre incluso con capacidad ociosa.';
+}
+
 function render(){
 const r=flow(decisions,actions,scenario),diag=diagnose(decisions,actions,scenario),n=NODES[active],st=r.stages[active];
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
