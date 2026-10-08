@@ -1,6 +1,6 @@
 export const DEFAULT_SCENARIO={
  demand:1000,initialStock:250,reserveStock:150,unitPrice:9000,
- unitPurchaseCost:2500,unitTransportCost:500,unitPackagingCost:250,
+ unitPurchaseCost:2500,unitTransportCost:500,unitPackagingCost:250,urgentPurchaseSurcharge:500,
  inventoryOperators:3,pickingOperators:5,receivingOperators:2,
  inventoryDailyWage:42000,pickingDailyWage:42000,receivingDailyWage:42000,
  otherFixedCost:90000,maxCostPerUnit:4800
@@ -11,6 +11,7 @@ export const FIELDS=[
 ['reserveStock','Stock de reserva elegible','unidades',0,100000,25],
 ['unitPrice','Ingreso estimado por unidad expedida','$ CLP',0,10000000,500],
 ['unitPurchaseCost','Costo de compra por unidad recibida','$ CLP',0,10000000,100],
+['urgentPurchaseSurcharge','Recargo por unidad de compra urgente','$ CLP',0,10000000,50],
 ['unitTransportCost','Costo variable por unidad expedida','$ CLP',0,10000000,50],
 ['unitPackagingCost','Costo de empaque por unidad preparada','$ CLP',0,10000000,50],
 ['inventoryOperators','Operarios de inventario','personas',0,500,1],
@@ -38,9 +39,10 @@ export function finance(flow,scenario){
 const recoveryLaborTotal=Object.values(recoveryLabor).reduce((a,b)=>a+b,0);
 const laborTotal=Object.values(labor).reduce((a,b)=>a+b,0)+recoveryLaborTotal;
  const purchase=flow.received*s.unitPurchaseCost;
+ const urgentSurcharge=flow.procurementMode==='express'?flow.received*s.urgentPurchaseSurcharge:0;
  const transport=flow.dispatched*s.unitTransportCost;
  const packaging=flow.picked*s.unitPackagingCost;
- const total=laborTotal+purchase+transport+packaging+s.otherFixedCost;
+ const total=laborTotal+purchase+urgentSurcharge+transport+packaging+s.otherFixedCost;
  const revenue=flow.dispatched*s.unitPrice;
- return {labor,recoveryLabor,recoveryLaborTotal,laborTotal,purchase,transport,packaging,fixed:s.otherFixedCost,total,revenue,margin:revenue-total,costPerUnit:flow.dispatched?total/flow.dispatched:null,unitMargin:flow.dispatched?(revenue-total)/flow.dispatched:null,meetsTarget:flow.dispatched>0&&total/flow.dispatched<=s.maxCostPerUnit,utilization:flow.demand?flow.dispatched/flow.demand:0};
+ return {labor,recoveryLabor,recoveryLaborTotal,laborTotal,purchase,urgentSurcharge,transport,packaging,fixed:s.otherFixedCost,total,revenue,margin:revenue-total,costPerUnit:flow.dispatched?total/flow.dispatched:null,unitMargin:flow.dispatched?(revenue-total)/flow.dispatched:null,meetsTarget:flow.dispatched>0&&total/flow.dispatched<=s.maxCostPerUnit,utilization:flow.demand?flow.dispatched/flow.demand:0};
 }
