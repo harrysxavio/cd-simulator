@@ -75,8 +75,8 @@ $('prev').disabled=active===0;$('next').textContent=active===7?(phase==='plan'?'
 const list=$('results');list.replaceChildren();
 r.stages.forEach((stage,i)=>{
  const area=NODES[i],lost=Math.max(0,stage.input-stage.output);
- const card=add(list,'details','flow-step');
- const summary=add(card,'summary','flow-step-summary');
+ const card=add(list,'div','flow-step');
+ const summary=add(card,'div','flow-step-summary');
  const badge=add(summary,'span','flow-step-index',String(i+1).padStart(2,'0'));
  const label=add(summary,'span','flow-step-title');
  add(label,'strong','',area.icon+' '+area.title);
@@ -85,7 +85,7 @@ r.stages.forEach((stage,i)=>{
  const body=add(card,'div','flow-step-detail');
  const stats=add(body,'div','flow-step-stats');
  for(const [name,amount] of [['Entrada',stage.input],['Salida',stage.output],['Capacidad',stage.capacity]]){const cell=add(stats,'div','');add(cell,'small','',name);add(cell,'strong','',fmt(amount))}
- add(body,'p','muted',stage.detail);
+ add(body,'p','muted',stage.detail);if(stage.id==='picking')add(body,'p','muted','Productividad observada: '+(scenario.pickingOperators?(stage.output/scenario.pickingOperators).toFixed(1)+' unidades por operario':'N/D')+'. Utilización: '+(stage.capacity?(stage.output/stage.capacity*100).toFixed(1)+'%':'N/D')+'.');if(stage.id==='receiving')add(body,'p','muted','Productividad observada: '+(scenario.receivingOperators?(stage.output/scenario.receivingOperators).toFixed(1)+' unidades por operario':'N/D')+'.');
  add(body,'p','muted',i===5?'Inventario combina stock inicial, unidades liberadas y reservas elegibles.':i>0?'La entrada depende de lo entregado por el área anterior.':'Comercial establece el pronóstico para la planificación.');
  if(stage.input>0&&i!==5){const bar=add(body,'div','flow-bar'),fill=add(bar,'div','flow-bar-fill');fill.style.width=Math.min(100,stage.output/stage.input*100)+'%'}
 });
