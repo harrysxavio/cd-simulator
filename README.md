@@ -132,3 +132,11 @@ Se corrigió la doble imputación en Calidad: la modalidad **priority** ya paga 
 Los semáforos comparan ahora las modalidades operativas especiales de Recepción, Calidad, Inventario, Picking y Transporte con la modalidad normal manteniendo las demás decisiones y acciones. Cuando una modalidad no mejora las unidades despachadas y además reduce el resultado simulado, aparece la alerta «Modo sin retorno demostrado». Esta prueba es un contrafactual aislado y no considera seguridad, SLA, calidad de servicio ni beneficios futuros no modelados.
 
 Se añadieron pruebas de regresión de ambos casos en `tests/labor.test.mjs` y un workflow `.github/workflows/model-tests.yml` para ejecutar la suite Node 22 en cada push/PR. En esta iteración pasaron **11 de 11 verificaciones funcionales con DOM simulado**; no se ha confirmado todavía la ejecución exitosa de GitHub Actions ni realizado una prueba visual real en Android.
+
+## v9.5 · Cierre de decisiones previas a la sorpresa
+
+Tras revelar la demanda, el motor usa `lockUpstream: true`: ya no acepta acciones correctivas de Comercial, Planning o Compras que alterarían retroactivamente el forecast, las unidades solicitadas o las entregas comprometidas. La interfaz muestra esas áreas como decisiones cerradas y explica el motivo; las acciones de Recepción, Calidad, Inventario, Picking y Transporte continúan disponibles. Las acciones antiguas guardadas en el navegador para las tres áreas cerradas se ignoran también en el motor y no generan costos fantasma.
+
+Se corrigió además la navegación entre pestañas: primero se resuelve la restricción de acceso (no permitir Recuperación/Resultado antes de revelar) y luego se actualiza la visibilidad. Antes podía quedar seleccionada una pestaña oculta tras una redirección.
+
+Se añadieron pruebas a `tests/demand.test.mjs` y se verificaron 9 escenarios funcionales con interfaz simulada. Pendiente: ejecutar suite Node en GitHub Actions y prueba visual real en Android; la operación sigue modelada como flujo agregado de un solo día y no representa compromisos por pedido/SKU.
