@@ -16,19 +16,22 @@ const forecast=q('commercial')+(q('commercial')>100?-1:1)*Math.min(x('commercial
 const estimated=Math.floor(demand*forecast/100),gap=Math.max(0,estimated-stock);
 const ordered=Math.ceil(gap*(q('planning')+x('planning'))/100);
 const delivered=Math.floor(ordered*Math.min(100,q('purchasing')+x('purchasing'))/100);
-const received=Math.min(delivered,q('receiving')+x('receiving'));
+const receivingCapacity=Math.floor(q('receiving')*Math.max(0,Number(scenario.receivingOperators??2))/2+x('receiving'));
+const received=Math.min(delivered,receivingCapacity);
 const released=Math.floor(received*Math.min(100,q('quality')+x('quality'))/100);
-const available=Math.min(demand,Math.floor((stock+released)*q('inventory')/100)+Math.min(x('inventory'),Math.max(0,scenario.reserveStock===undefined?150:Number(scenario.reserveStock))));
-const picked=Math.min(available,q('picking')+x('picking'));
+const inventoryCapacity=Math.floor(Math.max(0,Number(scenario.inventoryOperators??3))*400);
+const available=Math.min(demand,inventoryCapacity,Math.floor((stock+released)*q('inventory')/100)+Math.min(x('inventory'),Math.max(0,scenario.reserveStock===undefined?150:Number(scenario.reserveStock))));
+const pickingCapacity=Math.floor(q('picking')*Math.max(0,Number(scenario.pickingOperators??5))/5+x('picking'));
+const picked=Math.min(available,pickingCapacity);
 const dispatched=Math.min(picked,q('transport')+x('transport'));
 const data=[
 ['commercial',demand,estimated,estimated,'Demanda real → forecast'],
 ['planning',gap,ordered,ordered,'Brecha forecast - stock inicial → compra solicitada'],
 ['purchasing',ordered,delivered,delivered,'Solicitud → entrega real del proveedor'],
-['receiving',delivered,received,q('receiving')+x('receiving'),'Entrega → ingreso por capacidad'],
+['receiving',delivered,received,receivingCapacity,'Entrega → ingreso por capacidad'],
 ['quality',received,released,received,'Ingreso → liberación de calidad'],
-['inventory',stock+released,available,Math.floor((stock+released)*q('inventory')/100)+x('inventory'),'Stock inicial + liberado + reserva habilitada'],
-['picking',available,picked,q('picking')+x('picking'),'Stock disponible → preparación'],
+['inventory',stock+released,available,Math.min(inventoryCapacity,Math.floor((stock+released)*q('inventory')/100)+x('inventory')),'Stock inicial + liberado + reserva habilitada'],
+['picking',available,picked,pickingCapacity,'Stock disponible → preparación'],
 ['transport',picked,dispatched,q('transport')+x('transport'),'Preparado → expedición']
 ];
 const stages=data.map(([id,input,output,capacity,detail])=>({id,input,output,capacity,detail,unit:'unidades'}));
