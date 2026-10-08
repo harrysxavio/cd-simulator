@@ -2,6 +2,7 @@ export const DEFAULT_SCENARIO={
  demand:1000,actualDemand:1000,demandShockPercent:30,areaCostTolerance:10,initialStock:250,reserveStock:150,unitPrice:9000,
  unitPurchaseCost:2500,initialStockUnitCost:2500,unitTransportCost:500,unitPackagingCost:250,urgentPurchaseSurcharge:500,
  inventoryOperators:3,pickingOperators:5,receivingOperators:2,
+ effectiveHours:8,receivingUnitsPerHour:40.625,pickingUnitsPerHour:57.5,inventoryUnitsPerHour:50,
  inventoryDailyWage:42000,pickingDailyWage:42000,receivingDailyWage:42000,
  otherFixedCost:90000,maxCostPerUnit:4800,targetFulfillment:95
 };
@@ -20,6 +21,10 @@ export const FIELDS=[
 ['inventoryOperators','Operarios de inventario','personas',0,500,1],
 ['pickingOperators','Operarios de picking','personas',0,500,1],
 ['receivingOperators','Operarios de recepción','personas',0,500,1],
+['effectiveHours','Horas efectivas por operario y jornada','horas',1,12,0.5],
+['receivingUnitsPerHour','Productividad estándar Recepción','unid./hora',1,1000,1],
+['pickingUnitsPerHour','Productividad estándar Picking','unid./hora',1,1000,1],
+['inventoryUnitsPerHour','Productividad estándar Inventario','unid./hora',1,1000,1],
 ['inventoryDailyWage','Costo diario por operario de inventario','$ CLP',0,1000000,1000],
 ['pickingDailyWage','Costo diario por operario de picking','$ CLP',0,1000000,1000],
 ['receivingDailyWage','Costo diario por operario de recepción','$ CLP',0,1000000,1000],
@@ -41,9 +46,9 @@ export const RECOVERY_RATES={
 };
 export function finance(flow,scenario){
  const s=cleanScenario(scenario),a=flow.actions||{};
- const baseReceivingCapacity=(flow.choices?.receiving==='low'?350:flow.choices?.receiving==='extra'?1000:650)*s.receivingOperators/2;
- const basePickingCapacity=(flow.choices?.picking==='low'?1400:flow.choices?.picking==='reinforce'?3000:2300)*s.pickingOperators/5;
- const capacityStaff={receiving:Math.max(0,Math.ceil((flow.receivingCapacity-(a.receiving||0)-baseReceivingCapacity)/325)),picking:Math.max(0,Math.ceil((flow.pickingCapacity-(a.picking||0)-basePickingCapacity)/460))};
+ const baseReceivingCapacity=(flow.choices?.receiving==='low'?350/650:flow.choices?.receiving==='extra'?1000/650:1)*s.receivingOperators*s.effectiveHours*s.receivingUnitsPerHour;
+ const basePickingCapacity=(flow.choices?.picking==='low'?1400/2300:flow.choices?.picking==='reinforce'?3000/2300:1)*s.pickingOperators*s.effectiveHours*s.pickingUnitsPerHour;
+ const capacityStaff={receiving:Math.max(0,Math.ceil((flow.receivingCapacity-(a.receiving||0)-baseReceivingCapacity)/(s.effectiveHours*s.receivingUnitsPerHour))),picking:Math.max(0,Math.ceil((flow.pickingCapacity-(a.picking||0)-basePickingCapacity)/(s.effectiveHours*s.pickingUnitsPerHour)))};
  const capacityLabor={receiving:capacityStaff.receiving*s.receivingDailyWage,picking:capacityStaff.picking*s.pickingDailyWage};
  const labor={
  inventory:s.inventoryOperators*s.inventoryDailyWage,
@@ -51,8 +56,8 @@ export function finance(flow,scenario){
  receiving:s.receivingOperators*s.receivingDailyWage
  };
  const recoveryLabor={
- receiving:Math.ceil((a.receiving||0)/325)*s.receivingDailyWage,
- picking:Math.ceil((a.picking||0)/460)*s.pickingDailyWage,
+ receiving:Math.ceil((a.receiving||0)/(s.effectiveHours*s.receivingUnitsPerHour))*s.receivingDailyWage,
+ picking:Math.ceil((a.picking||0)/(s.effectiveHours*s.pickingUnitsPerHour))*s.pickingDailyWage,
  inventory:0
  };
  const recoveryLaborTotal=Object.values(recoveryLabor).reduce((x,y)=>x+y,0);
