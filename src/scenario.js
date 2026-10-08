@@ -35,7 +35,7 @@ export const FIELDS=[
 export function cleanScenario(raw={}){
  const result={};
  for(const [key,, ,min,max] of FIELDS){const v=Number(raw[key]);result[key]=raw[key]!==undefined&&raw[key]!==''&&Number.isFinite(v)?Math.min(max,Math.max(min,v)):DEFAULT_SCENARIO[key]}
- result.actualDemand=raw.actualDemand===undefined?Math.max(1,Math.round(result.demand*(1+result.demandShockPercent/100))):Math.max(1,Math.round(Number(raw.actualDemand)||result.demand));
+ result.actualDemand=raw.actualDemand===undefined?result.demand:Math.max(1,Math.round(Number(raw.actualDemand)||result.demand));
  return result;
 }
 // Modelo didáctico de una jornada: los costos de mercancía vendida y el flujo de caja
