@@ -1,54 +1,58 @@
 # CD Simulator — Operations Decision Lab
 
-Aplicación web responsive para experimentar con capacidad, dotación, restricciones de picking y despacho, nivel de cumplimiento y costos laborales en un centro de distribución.
-
 **Demo:** https://harrysxavio.github.io/cd-simulator/
 
-## Versión 1.1 — funcionalidades
+Simulador web responsive y gratuito para explorar decisiones básicas de capacidad, dotación, acumulación de pedidos y costo laboral en un centro de distribución. Datos ilustrativos, no operacionales reales.
 
-1. **Simulador original:** demanda, dotación, productividad, jornada, eficiencia, costo horario, capacidad de despacho, diagnóstico, exportación CSV y copia de resumen.
-2. **Comparador de escenarios:** la referencia inicial queda fija hasta pulsar **Fijar situación actual**. Los controles superiores representan la propuesta. **Recuperar referencia** restablece esos parámetros.
-3. **Recomendador de dotación:** meta de cumplimiento entre 1 y 100%; calcula pedidos necesarios y dotación mínima para picking. Avisa cuando despacho no tiene capacidad suficiente o se supera el máximo de 35 operarios.
-4. **Gráficos interactivos:** selector de capacidad, costos o cumplimiento, con barras de referencia y propuesta.
-5. **Impacto económico:** comparación de costo laboral diario, costo laboral unitario y pedidos procesados. No calcula ROI ni ahorro neto.
-6. **Escenarios guardados:** hasta 12 escenarios en localStorage, con carga y eliminación. Se almacenan solo en el navegador actual y pueden desaparecer al limpiar los datos del sitio.
+## Versión 1.2 — flujo más realista
 
-## Modelo y fórmulas
+El flujo ahora incluye **picking → packing → despacho → salida/transporte**, además de pendientes de días anteriores. El volumen procesado es el mínimo entre demanda total y capacidad de cada etapa.
 
-- `capacidad_picking = floor(operarios × pedidos_por_hora × horas × eficiencia/100)`
-- `pedidos_procesados = min(demanda, capacidad_picking, capacidad_despacho)`
-- `cumplimiento = 100 × pedidos_procesados / demanda`
-- `costo_laboral_diario = operarios × horas × costo_hora`
-- `costo_laboral_unitario = costo_laboral_diario / pedidos_procesados`
-- `pedidos_meta = ceil(demanda × meta_porcentaje / 100)`
-- `operarios_meta = ceil(pedidos_meta / (productividad × horas × eficiencia/100))`
+Variables: pedidos nuevos, pedidos pendientes, operarios de picking/packing/despacho, productividad horaria de cada etapa, horas por jornada, eficiencia común, costo horario por operario y límite de salida/transporte.
 
-La factibilidad de la meta exige simultáneamente capacidad de picking y despacho suficiente. La recomendación de operarios **no aumenta automáticamente** la capacidad de despacho.
+El costo laboral diario suma la dotación de **las tres etapas**, no solo picking. Los indicadores muestran carga procesada y pendientes; **cumplimiento de capacidad no equivale a OTIF** ni garantiza entregas a tiempo.
 
-## Caso de prueba manual: valores iniciales
+Se conservan las funciones de v1.1: comparador de referencia y propuesta, meta de cumplimiento y dotación de picking, barras comparativas, costos, exportación CSV y escenarios guardados en localStorage.
 
-- Demanda: 1.200; operarios: 10; productividad: 18 pedidos/h; jornada: 8 h; eficiencia: 85%; despacho: 1.100; costo horario: 5.500 CLP.
-- Picking: **1.224**; procesados: **1.100**; pendientes: **100**; cumplimiento: **91,67%**.
-- Costo laboral diario: **440.000 CLP**; costo por pedido: **400 CLP**.
-- Para meta 95%, pedidos meta = **1.140**; operarios de picking = **10**; meta **no factible** hasta ampliar despacho al menos a 1.140.
+## Fórmulas
 
-## Uso y publicación
+- Carga = pedidos nuevos + pedidos atrasados.
+- Capacidad por etapa = piso(operarios de la etapa × productividad por hora × horas × eficiencia/100).
+- Procesados = mínimo(carga, picking, packing, despacho, salida/transporte).
+- Pendientes = carga - procesados.
+- Cumplimiento de capacidad = procesados / carga × 100.
+- Costo laboral diario = (operarios picking + packing + despacho) × horas × costo horario.
+- Costo laboral unitario = costo laboral diario / procesados.
+- Dotación picking para meta = techo(techo(carga × meta/100) / (productividad picking × horas × eficiencia/100)).
 
-Abrir `index.html` localmente o habilitar GitHub Pages: Settings → Pages → Deploy from a branch → main / (root). Sin dependencias, servidor, APIs ni cuentas de usuario.
+La recomendación advierte si packing, despacho o salida no permiten cumplir la meta; **no optimiza automáticamente dotación de todas las áreas**.
 
-## Alcance y limitaciones
+## Prueba de referencia v1.2
 
-Modelo **determinista** con datos ficticios, pedidos homogéneos y una jornada. No representa un WMS ni simulación de eventos discretos. No incluye inventario, mix de SKU, desplazamientos, ausentismo, congestión, overtime, costos indirectos, ingresos, márgenes ni valor económico del incumplimiento. El costo unitario usa **solo mano de obra de picking**. No se debe interpretar el costo incremental como inversión total o retorno financiero.
+Datos iniciales: 1.200 pedidos, 0 atrasados, 10 operarios picking a 18 pedidos/h, 8 operarios packing a 25 pedidos/h, 8 operarios despacho a 25 pedidos/h, 8 horas, 85% de eficiencia, 1.100 de límite de salida, costo 5.500 CLP/h por operario.
 
-## Tecnologías
+Resultados esperados:
+- Picking: **1.224**; packing: **1.360**; despacho: **1.360**; salida: **1.100**.
+- Procesados: **1.100**; pendientes: **100**; cumplimiento de capacidad: **91,67%**.
+- Dotación total: **26**; costo laboral directo: **1.144.000 CLP/día**; costo unitario: **1.040 CLP/pedido**.
+- Meta 95%: 1.140 pedidos, picking requiere 10 operarios; no es factible sin ampliar salida al menos a 1.140.
 
-HTML, CSS y JavaScript nativo; almacenamiento local del navegador. Compatible con despliegue estático en GitHub Pages.
+## Limitaciones y supuestos
+
+Es un **modelo determinista de capacidad**, no un gemelo digital ni un WMS. Supone pedidos homogéneos, un único turno, misma eficiencia y costo horario para todas las áreas. No contempla SKU/líneas por pedido, tiempos de desplazamiento, inventario, ausentismo, variabilidad, horas extra, costos de transporte, instalaciones, CAPEX ni SLA por pedido. No predice OTIF, rentabilidad total ni ROI. Para uso real, calibrar las productividades y restricciones con datos medidos.
+
+## Uso desde Android
+
+Abrir el enlace de demo. Ajustar parámetros, fijar referencia y comparar propuestas. Los escenarios guardados permanecen **solo en el navegador y dispositivo actual** mientras no se borren los datos del sitio. No requiere login, API, servidor ni instalación.
+
+## Tecnologías y publicación
+
+HTML5, CSS3, JavaScript nativo, localStorage. Publicación estática en GitHub Pages desde `main` / `root`.
 
 ## Historial
-
-- **1.0:** simulador y diagnóstico de restricciones.
-- **1.1:** comparación, recomendación de dotación, gráficos, impacto económico y escenarios guardados.
+- **1.0:** capacidad simple de picking y despacho.
+- **1.1:** comparación, recomendador, gráficos, economía y guardado.
+- **1.2:** picking, packing, despacho, salida, backlog y costo laboral directo de las tres áreas.
 
 ## Licencia
-
 MIT.
