@@ -56,9 +56,42 @@ function dashboard(r){
 
 
 function renderDiagnosis(current){
- const initial=flow(decisions,{},scenario),baselineFinance=finance(initial,scenario),nowFinance=finance(current,scenario);
- const pct=(v,d)=>d>0?(100*v/d).toFixed(1).replace('.',',')+'%':'N/D';
- const money=v=>'
+ const initial=flow(decisions,{},scenario);
+ const oldCost=finance(initial,scenario),newCost=finance(current,scenario);
+ const percent=(a,b)=>b?((100*a/b).toFixed(1)+'%'):'N/D';
+ const cash=v=>'CLP '+Math.round(v).toLocaleString('es-CL');
+ const pre=$('preliminaryMetrics');pre.replaceChildren();
+ const items=[['Cumplimiento',percent(initial.dispatched,initial.demand)],['Picking unid./operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso Picking',percent(initial.picked,initial.stages[6].capacity)],['Costo por unidad',oldCost.costPerUnit===null?'N/D':cash(oldCost.costPerUnit)],['Unidades pendientes',fmt(initial.pending)]];
+ for(const item of items){const c=add(pre,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1])}
+ const descriptions={
+ commercial:'El sesgo del pronóstico cambia la reposición y puede crear quiebres o exceso de compra.',
+ planning:'La cobertura elegida determina las unidades solicitadas al proveedor.',
+ purchasing:'La entrega real condiciona cuánto puede recibir el centro.',
+ receiving:'La dotación y la capacidad limitan cuánto ingresa a Calidad.',
+ quality:'Solo las unidades liberadas pasan a disponibilidad de Inventario.',
+ inventory:'El stock inicial, la liberación y la reserva determinan la oferta a Picking.',
+ picking:'La productividad observada puede caer por falta de unidades disponibles, aunque exista capacidad.',
+ transport:'La expedición depende de las unidades preparadas y de la capacidad de salida.'
+ };
+ const root=$('preliminaryFindings');root.replaceChildren();
+ for(const f of diagnose(decisions,{},scenario).findings){
+ const box=add(root,'div','diagnosis-card');add(box,'strong','',f.icon+' '+f.title);
+ const st=f.stage,util=percent(st.output,st.capacity);
+ add(box,'p','',descriptions[f.id]);
+ add(box,'p','muted','Entrada '+fmt(st.input)+' · salida '+fmt(st.output)+' · capacidad '+fmt(st.capacity)+' · utilización '+util+'.');
+ if(f.inherited)add(box,'p','diagnosis-note','La capacidad supera el flujo recibido. Reforzar aquí sin resolver el área anterior puede aumentar costos sin mejorar el resultado.');
+ const button=add(box,'button','mini','Evaluar recuperación');button.onclick=()=>{active=NODES.findIndex(n=>n.id===f.id);showSection('recovery')};
+ }
+ const final=$('finalComparison');final.replaceChildren();
+ const extra=current.dispatched-initial.dispatched,cost=newCost.total-oldCost.total;
+ for(const item of [['Cumplimiento inicial',percent(initial.dispatched,initial.demand)],['Cumplimiento final',percent(current.dispatched,current.demand)],['Unidades recuperadas',fmt(extra)],['Costo incremental',cash(cost)],['Costo por unidad adicional',extra>0?cash(cost/extra):'Sin mejora global']]){
+ const c=add(final,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1]);
+ }
+ const rec=$('recoverySummary');rec.replaceChildren();
+ add(rec,'p','summary','Antes: '+fmt(initial.dispatched)+' unidades. Ahora: '+fmt(current.dispatched)+'. Recuperadas: '+fmt(extra)+'. Costo incremental: '+cash(cost)+'.');
+ if(extra===0)add(rec,'p','diagnosis-note','No existe mejora global con las medidas actuales. Revisa otras restricciones antes de agregar recursos.');
+}
+function render(){
 const r=flow(decisions,actions,scenario),diag=diagnose(decisions,actions,scenario),n=NODES[active],st=r.stages[active];setup();dashboard(r);
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent=phase==='plan'?'Planificación: las áreas pendientes usan valores iniciales; el resultado es provisional.':'Recuperación: define cuánto esfuerzo correctivo aplicar en cada área (0 = no actuar).';
