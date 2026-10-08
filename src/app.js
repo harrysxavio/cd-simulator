@@ -23,7 +23,17 @@ input.setAttribute('aria-label',label);
 input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;save();render()};
 }}
 function dashboard(r){
-const f=finance(r,scenario),money=v=>'
+const f=finance(r,scenario);
+const money=v=>'$'+Math.round(v).toLocaleString('es-CL');
+const cards=$('financeMetrics');cards.replaceChildren();
+const values=[['Unidades expedidas',fmt(r.dispatched)],['Costo total',money(f.total)],['Costo unitario',f.costPerUnit===null?'N/D':money(f.costPerUnit)],['Meta por unidad',money(scenario.maxCostPerUnit)],['Ingreso estimado',money(f.revenue)],['Margen estimado',money(f.margin)],['Costo personal',money(f.laborTotal)],['Cumple meta',f.meetsTarget?'Sí':'No']];
+for(const [label,value] of values){const c=add(cards,'div','metric');add(c,'span','',label);add(c,'strong','',value)}
+const costs=$('costBreakdown');costs.replaceChildren();
+const items=[['Personal inventario',f.labor.inventory],['Personal picking',f.labor.picking],['Personal recepción',f.labor.receiving],['Compra recibida',f.purchase],['Empaque',f.packaging],['Transporte',f.transport],['Otros fijos',f.fixed]];
+for(const [label,value] of items){const row=add(costs,'div','stage-result');add(row,'span','',label);add(row,'strong','',money(value))}
+$('financialInsight').textContent=f.costPerUnit===null?'Sin expedición no existe costo unitario.':(f.meetsTarget?'Cumple la meta de costo unitario.':'Supera la meta de costo unitario.')+' La dotación genera costo incluso con capacidad ociosa.';
+}
+function render(){
 const r=flow(decisions,actions,scenario),diag=diagnose(decisions,actions,scenario),n=NODES[active],st=r.stages[active];setup();dashboard(r);
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent=phase==='plan'?'Planificación: las áreas pendientes usan valores iniciales; el resultado es provisional.':'Recuperación: define cuánto esfuerzo correctivo aplicar en cada área (0 = no actuar).';
