@@ -36,7 +36,7 @@ const data=[
 ['transport',picked,dispatched,q('transport')+x('transport'),'Preparado → expedición']
 ];
 const stages=data.map(([id,input,output,capacity,detail])=>({id,input,output,capacity,detail,unit:'unidades'}));
-return {stages,demand,stock,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
+return {stages,demand,stock,eligibleReserve,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',choices:Object.fromEntries(NODES.map(n=>[n.id,d[n.id]||null])),actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
 }
 export function diagnose(d={},a={},scenario={}){
 const current=flow(d,a,scenario);
