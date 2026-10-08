@@ -26,25 +26,31 @@ export function skuOrderLab({orders=200,stock={},templates=ORDER_TEMPLATES,catal
  const splits=templates.map((t,i)=>{const exact=count*Number(t.share)/totalShare;return {t,i,requested:Math.floor(exact),remainder:exact-Math.floor(exact)}});
  let remaining=count-splits.reduce((n,t)=>n+t.requested,0);
  for(const t of [...splits].sort((a,b)=>b.remainder-a.remainder||a.i-b.i)){if(remaining--<=0)break;t.requested++}
- const rows=[];let complete=0,shortage=0,dispatched=0;
+ const rows=splits.map(({t,requested})=>({id:t.id,name:t.name,requested,complete:0,unfulfilled:0}));
+ let complete=0,shortage=0,dispatched=0;
  const missingBySku=Object.fromEntries(catalog.map(p=>[p.id,0]));
  const demandBySku=Object.fromEntries(catalog.map(p=>[p.id,0]));
- for(const {t,requested} of splits){
-  const lines=Object.fromEntries(Object.entries(t.lines).map(([id,qty])=>[id,Number(qty)]));
-  for(const [id,qty] of Object.entries(lines))demandBySku[id]+=requested*qty;
-  let filled=0,blocked=0;
-  for(let i=0;i<requested;i++){
-   const enough=Object.entries(lines).every(([id,qty])=>available[id]>=qty);
-   if(enough&&dispatched<limit){
-    for(const [id,qty] of Object.entries(lines))available[id]-=qty;
-    filled++;dispatched++;
-   }else{
-    blocked++;
-    if(!enough){shortage++;for(const [id,qty] of Object.entries(lines))if(available[id]<qty)missingBySku[id]++}
-   }
+ for(const {t,requested} of splits)for(const [id,qty] of Object.entries(t.lines))demandBySku[id]+=requested*Number(qty);
+ // Interleave types proportionally to avoid an artificial advantage for the first type.
+ // A deterministic fair sequence, not a true time-stamped FIFO queue.
+ const pending=splits.map(x=>x.requested),assigned=splits.map(()=>0);
+ for(let step=0;step<count;step++){
+  let best=-1,bestScore=-Infinity;
+  for(let j=0;j<splits.length;j++){
+   if(pending[j]<=0)continue;
+   const score=(step+1)*splits[j].requested/count-assigned[j];
+   if(score>bestScore){bestScore=score;best=j;}
   }
-  rows.push({id:t.id,name:t.name,requested,complete:filled,unfulfilled:blocked});
-  complete+=filled;
+  const lines=splits[best].t.lines;
+  const enough=Object.entries(lines).every(([id,qty])=>available[id]>=Number(qty));
+  if(enough&&dispatched<limit){
+   for(const [id,qty] of Object.entries(lines))available[id]-=Number(qty);
+   rows[best].complete++;complete++;dispatched++;
+  }else{
+   rows[best].unfulfilled++;
+   if(!enough){shortage++;for(const [id,qty] of Object.entries(lines))if(available[id]<Number(qty))missingBySku[id]++}
+  }
+  pending[best]--;assigned[best]++;
  }
  const stockInitial=Object.fromEntries(catalog.map(p=>[p.id,nonnegative(stock[p.id]??p.initial)]));
  const consumed=Object.fromEntries(catalog.map(p=>[p.id,stockInitial[p.id]-available[p.id]]));
@@ -54,12 +60,12 @@ export function skuOrderLab({orders=200,stock={},templates=ORDER_TEMPLATES,catal
   const reorderPoint=Math.ceil(dailyDemand*(leadDays+safetyDays));
   const daysCover=dailyDemand>0?onHand/dailyDemand:null;
   const valueDemand=demand*unitCost;
-  return {id:p.id,name:p.name,rotation:p.rotation||'sin clasificar',demand,onHand,remaining:available[p.id],consumed:consumed[p.id],unitCost,valueDemand,leadDays,safetyDays,reorderPoint,daysCover,reorderSuggested:onHand<=reorderPoint,shortageUnits:Math.max(0,demand-onHand)};
+  return {id:p.id,name:p.name,rotation:p.rotation||'sin clasificar',demand,onHand,remaining:available[p.id],consumed:consumed[p.id],unitCost,valueDemand,leadDays,safetyDays,reorderPoint,daysCover,reorderSuggested:available[p.id]<=reorderPoint,reorderAtStart:onHand<=reorderPoint,shortageUnits:Math.max(0,demand-onHand)};
  });
  const totalDemandValue=skuMetrics.reduce((n,p)=>n+p.valueDemand,0);
  const abc=[...skuMetrics].sort((a,b)=>b.valueDemand-a.valueDemand).map((p,i,all)=>({id:p.id,share:totalDemandValue?p.valueDemand/totalDemandValue*100:0}));
  let cumulative=0;for(const p of abc){const before=cumulative;cumulative+=p.share;p.cumulativeValue=cumulative;p.abc=before<80?'A':before<95?'B':'C';}
  const abcById=Object.fromEntries(abc.map(p=>[p.id,p]));
  for(const p of skuMetrics){p.valueShare=abcById[p.id].share;p.abc=abcById[p.id].abc;p.cumulativeValue=abcById[p.id].cumulativeValue;}
- return {skuMetrics,orders:count,complete,pending:count-complete,fulfillment:count?100*complete/count:100,rows,stockInitial,stockRemaining:available,consumed,demandBySku,missingBySku,blockedByStock:shortage,blockedByCapacity:count-complete-shortage,dispatchLimit:limit,method:'FIFO por tipo de pedido en orden de mezcla; pedidos completos solamente'};
+ return {skuMetrics,orders:count,complete,pending:count-complete,fulfillment:count?100*complete/count:100,rows,stockInitial,stockRemaining:available,consumed,demandBySku,missingBySku,blockedByStock:shortage,blockedByCapacity:count-complete-shortage,dispatchLimit:limit,method:'Secuencia intercalada proporcional y determinista; pedidos completos solamente (no FIFO cronológico)'};
 }
