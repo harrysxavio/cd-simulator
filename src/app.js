@@ -1,9 +1,9 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=91';
-import {flow,diagnose,ACTIONS} from './flow.js?v=91';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=91';
-import {areaKpis} from './kpis.js?v=91';
-import {causalAudit} from './causal.js?v=91';
-import {attentionSignals} from './attention.js?v=91';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=92';
+import {flow,diagnose,ACTIONS} from './flow.js?v=92';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=92';
+import {areaKpis} from './kpis.js?v=92';
+import {causalAudit} from './causal.js?v=92';
+import {attentionSignals} from './attention.js?v=92';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
 const effectiveScenario=()=>({...scenario,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -181,6 +181,17 @@ function renderKpiLesson(r){
  add(root,'small','','Datos de una jornada ficticia. Los indicadores cambian con las decisiones y no sustituyen métricas históricas, por SKU, por hora ni por pedido.');
 }
 
+function renderLabor(){
+ const root=$('laborAudit');root.replaceChildren();
+ const report=laborAudit(decisions,actions,effectiveScenario());
+ for(const a of report.result){
+  const card=add(root,'div','area-kpi-tile');
+  add(card,'strong','',a.name+' · '+a.staff+' personas');
+  add(card,'small','','Capacidad '+fmt(a.capacity)+' · entrada '+fmt(a.inflow)+' · procesadas '+fmt(a.processed));
+  add(card,'small','','Productividad '+(a.productivity===null?'N/D':a.productivity.toFixed(1))+' unid./hora-persona · utilización '+(100*a.utilization).toFixed(1)+' %');
+  add(card,'small','','Dotación teórica para el flujo: '+a.staffRequired+' · exposición por dotación superior: CLP '+fmt(a.idleCostIndicator));
+ }
+}
 function renderAttention(){
  const root=$('attentionSummary'),costs=$('areaCostCards');root.replaceChildren();costs.replaceChildren();
  const report=attentionSignals(decisions,actions,effectiveScenario());
@@ -200,7 +211,7 @@ function renderAttention(){
 }
 function render(){
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
-const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();
+const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?'Planificación':'Recuperación');
