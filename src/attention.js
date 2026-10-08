@@ -21,17 +21,23 @@ export function areaEconomics(decisions,actions,scenario){
   transport:(y.actionCosts.transport||0)+(y.modeCosts.transport||0)+(y.extraCapacityCosts?.transport||0)+y.transport
  });
  const current=costs(r,f),reference=costs(baseline,fb);
+ // Flexible reference: retain standard fixed staffing, adjust standard variable costs to actual throughput.
+ // This avoids calling volume-driven cost changes inefficiency or savings.
+ const flexible={...reference,
+  picking:fb.labor.picking+(baseline.picked?fb.packaging*r.picked/baseline.picked:r.picked*s.unitPackagingCost),
+  transport:(baseline.dispatched?fb.transport*r.dispatched/baseline.dispatched:r.dispatched*s.unitTransportCost)};
  const tolerance=s.areaCostTolerance/100;
  const result=Object.keys(AREA_NAMES).map(id=>{
-  const value=current[id],base=reference[id],over=value>base*(1+tolerance)+0.01;
+  const value=current[id],base=flexible[id],over=value>base*(1+tolerance)+0.01;
   const additional=value-base;
   const status=over?'over':additional<0?'under':'ok';
-  return {id,title:AREA_NAMES[id],cost:value,reference:base,delta:additional,over,status,
+  return {id,title:AREA_NAMES[id],cost:value,reference:base,staticReference:reference[id],volumeVariance:base-reference[id],efficiencyVariance:additional,delta:additional,over,status,
    label:over?'Sobrecosto frente a referencia':additional<0?'Menor gasto; validar volumen':'Dentro de tolerancia'};
  });
  return {result,current:r,finance:f,reference:baseline,referenceFinance:fb,tolerance:s.areaCostTolerance,
   allocatedCurrent:Object.values(current).reduce((a,b)=>a+b,0),
-  allocatedReference:Object.values(reference).reduce((a,b)=>a+b,0)};
+  allocatedReference:Object.values(reference).reduce((a,b)=>a+b,0),
+  allocatedFlexible:Object.values(flexible).reduce((a,b)=>a+b,0)};
 }
 export function attentionSignals(decisions,actions,scenario){
  const s=cleanScenario(scenario),data=areaEconomics(decisions,actions,s);
