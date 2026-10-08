@@ -1,4 +1,4 @@
-# Supply Chain Operations Lab — v8.2
+# Supply Chain Operations Lab — v8.3
 
 **[Abrir el laboratorio interactivo](https://harrysxavio.github.io/cd-simulator/)**
 
@@ -8,11 +8,11 @@ Simulador educativo, gratuito y sin registro para practicar decisiones conectada
 
 ## Recorrido de aprendizaje
 
-1. **Configura (opcional):** parte con valores ficticios de ejemplo o personaliza demanda, stock, reservas, personal, costos y objetivos.
+1. **Configura (opcional):** elige estrategia (servicio, equilibrio o eficiencia), meta de cumplimiento, demanda, stock, reservas, personal y costos. La estrategia modifica la evaluación, no las reglas físicas del flujo.
 2. **Planifica:** toma decisiones en Comercial, Planning, Compras, Recepción, Calidad, Inventario, Picking y Transporte. En cada área puedes abrir **«Aprende el indicador»** para ver su fórmula, interpretación y vínculo con la estrategia.
 3. **Diagnóstico preliminar:** identifica la diferencia entre capacidad propia y restricciones heredadas; revisa el resultado antes de cualquier recuperación.
 4. **Recuperación opcional:** mantén la operación o elige mejoras puntuales, equilibradas, intensivas o cantidades personalizadas. El impacto se recalcula en toda la cadena.
-5. **Resultado final:** compara cumplimiento, unidades expedibles y costos; consulta trazabilidad, flujo y economía en paneles desplegables.
+5. **Resultado final:** compara cumplimiento, unidades expedibles y costos; consulta trazabilidad, flujo y economía en paneles desplegables. Revisa una rúbrica pedagógica de 0 a 100 con pesos visibles según estrategia.
 
 ## KPI de aprendizaje
 
@@ -61,6 +61,12 @@ Se realizan pruebas de sintaxis, cálculo y navegación simulada; estas pruebas 
 
 Proyecto conceptualizado y dirigido con criterios de Supply Chain, mejora continua, productividad y costos, desarrollado iterativamente con asistencia de IA. El valor del ejercicio está en definir las reglas de negocio, cuestionar resultados, detectar inconsistencias y decidir qué merece automatizarse, no en presentar la generación de código como una hazaña técnica.
 
+## Rúbrica pedagógica v8.3
+
+La evaluación pondera tres dimensiones: cumplimiento relativo a la meta, costo unitario relativo a la meta y resultado operacional relativo al ingreso potencial. Pesos: servicio 65/20/15; equilibrio 45/35/20; eficiencia 25/55/20. La escala es ilustrativa, **no evalúa las capacidades personales ni garantiza una decisión óptima**. Los resultados antes y después de la recuperación se comparan con la misma estrategia.
+
+Para ejecutar la suite ESM en Node 22 sin package.json: `node --experimental-default-type=module --test tests/model.test.mjs`. La revisión de interfaz Android con navegador real continúa pendiente.
+
 ## Próximas fases
 
-Pendiente: metas estratégicas, KPI con objetivos por área, evaluación del criterio del usuario, comparación de escenarios y validación con usuarios externos.
+Pendiente: metas diferenciadas por área, diagnóstico causal más riguroso, evaluación de decisiones con retroalimentación detallada, comparación de escenarios y validación con usuarios externos.
