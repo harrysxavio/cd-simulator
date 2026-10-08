@@ -21,7 +21,8 @@ const received=Math.min(delivered,receivingCapacity);
 const released=Math.floor(received*Math.min(100,q('quality')+x('quality'))/100);
 const inventoryCapacity=Math.floor(Math.max(0,Number(scenario.inventoryOperators??3))*400);
 const eligibleReserve=Math.min(x('inventory'),Math.max(0,scenario.reserveStock===undefined?150:Number(scenario.reserveStock)));
-const available=Math.min(demand,inventoryCapacity,Math.floor((stock+released)*q('inventory')/100)+eligibleReserve);
+const usableBase=Math.floor((stock+released)*q('inventory')/100);
+const available=Math.min(demand,inventoryCapacity,usableBase+eligibleReserve);
 const pickingCapacity=Math.floor(q('picking')*Math.max(0,Number(scenario.pickingOperators??5))/5+x('picking'));
 const picked=Math.min(available,pickingCapacity);
 const dispatched=Math.min(picked,q('transport')+x('transport'));
@@ -36,7 +37,7 @@ const data=[
 ['transport',picked,dispatched,q('transport')+x('transport'),'Preparado → expedición']
 ];
 const stages=data.map(([id,input,output,capacity,detail])=>({id,input,output,capacity,detail,unit:'unidades'}));
-return {stages,demand,stock,eligibleReserve,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',choices:Object.fromEntries(NODES.map(n=>[n.id,d[n.id]||null])),actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
+return {stages,demand,stock,eligibleReserve,usableBase,receivingCapacity,inventoryCapacity,pickingCapacity,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',choices:Object.fromEntries(NODES.map(n=>[n.id,d[n.id]||null])),actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
 }
 export function diagnose(d={},a={},scenario={}){
 const current=flow(d,a,scenario);
