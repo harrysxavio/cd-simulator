@@ -53,3 +53,19 @@
 .cost-over{border-color:#f07575;background:#43252d}.cost-over strong{color:#ffd0d0}.cost-over small{color:#ffc4c4}
 .cost-ok{border-color:#45bb89;background:#17392f}.cost-ok strong{color:#b3f6d0}.cost-ok small{color:#a9dec3}
 @media(max-width:600px){.flow-step-summary{gap:7px;padding:11px 9px}.flow-step-value{font-size:.78rem}.flow-step-title strong{font-size:.82rem}.detail-hint{font-size:.7rem}}
+
+.section-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+#preliminarySection[hidden]{display:none!important}
+.diagnosis-list{display:grid;gap:13px;margin:20px 0}
+.diagnosis-card{background:#122c40;border:1px solid #35536b;border-radius:14px;padding:17px}
+.diagnosis-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.diagnosis-indicator{color:#a5f3e5;background:#174d4c;border-radius:9px;padding:8px 10px;font-weight:700;font-size:.85rem}
+.diagnosis-card p{line-height:1.6;margin:12px 0}
+.diagnosis-note{color:#ffd89c!important}
+.cost-summary-title{display:grid;gap:4px}.cost-summary-title strong{font-size:1.55rem;color:#e5f7ff}
+.cost-details>summary{flex-wrap:wrap}
+.flow-panel .expandable{background:transparent;border:0}
+.flow-panel{padding:12px}
+.flow-step-summary:after{display:none}
+.flow-step-detail{padding:10px 14px}
+@media(max-width:600px){.section-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.section-tabs button{font-size:.83rem}.diagnosis-head{align-items:flex-start;flex-direction:column}}
