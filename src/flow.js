@@ -29,6 +29,8 @@ const available=Math.min(demand,inventoryCapacity,usableBase+eligibleReserve);
 const pickingCapacity=Math.floor(q('picking')/2300*labor.pickingOperators*hours*labor.pickingUnitsPerHour+x('picking'));
 const picked=Math.min(available,pickingCapacity);
 const dispatched=Math.min(picked,q('transport')+x('transport'));
+const stockUsableTotal=usableBase+eligibleReserve;
+const unusedStock=Math.max(0,stockUsableTotal-dispatched);
 const data=[
 ['commercial',plannedDemand,estimated,estimated,'Demanda prevista base → pronóstico ajustado; demanda real se observa después'],
 ['planning',gap,ordered,ordered,'Brecha forecast - stock inicial → compra solicitada'],
@@ -40,7 +42,7 @@ const data=[
 ['transport',picked,dispatched,q('transport')+x('transport'),'Preparado → expedición']
 ];
 const stages=data.map(([id,input,output,capacity,detail])=>({id,input,output,capacity,detail,unit:'unidades'}));
-return {stages,demand,plannedDemand,stock,eligibleReserve,usableBase,receivingCapacity,inventoryCapacity,pickingCapacity,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',choices:Object.fromEntries(NODES.map(n=>[n.id,d[n.id]||null])),actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
+return {stages,demand,plannedDemand,stock,eligibleReserve,usableBase,receivingCapacity,inventoryCapacity,pickingCapacity,stockUsableTotal,unusedStock,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',choices:Object.fromEntries(NODES.map(n=>[n.id,d[n.id]||null])),actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
 }
 export function diagnose(d={},a={},scenario={}){
 const current=flow(d,a,scenario);
