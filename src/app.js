@@ -127,7 +127,18 @@ for(const [label,value] of [['Demanda real',r.demand],['Stock inicial',r.stock],
  const item=add($('sku'),'div','stage-result');add(item,'span','',label);add(item,'strong','',fmt(value)+' unid.');
 }
 $('cause').textContent='Transporte recibe '+fmt(r.picked)+' unidades desde Picking y despacha '+fmt(r.dispatched)+'. Su capacidad es '+fmt(r.stages[7].capacity)+'. '+(r.picked<r.stages[7].capacity?'Capacidad ociosa por falta de flujo o demanda aguas arriba.':'El despacho está limitado por capacidad o disponibilidad.');
-renderDiagnosis(r);const causes=$('rootCauses');causes.replaceChildren();diag.findings.forEach(f=>{const item=add(causes,'div','action');add(item,'span','action-index',f.icon);const body=add(item,'div','');add(body,'strong','',f.title);add(body,'small','','Recibe '+fmt(f.stage.input)+' · entrega '+fmt(f.stage.output)+' · capacidad '+fmt(f.stage.capacity)+'. '+(f.inherited?'Capacidad mayor que la entrada: restricción heredada.':'')+' Recuperación aplicada: +'+fmt(f.recovered)+' · potencial adicional: +'+fmt(f.potential)+'.')});
+renderDiagnosis(r);const causes=$('rootCauses');causes.replaceChildren();
+const initial=flow(decisions,{},scenario);
+const explanations={commercial:'El pronóstico afecta la necesidad calculada para reponer.',planning:'La cobertura determina cuánto se compra para cerrar la brecha.',purchasing:'El cumplimiento del proveedor condiciona la llegada de unidades.',receiving:'La productividad de recepción depende de dotación y entregas recibidas.',quality:'La tasa de liberación define cuánto inventario queda autorizado.',inventory:'La disponibilidad combina stock inicial, calidad y reserva.',picking:'La productividad puede estar limitada por el abastecimiento anterior.',transport:'El cumplimiento de expedición depende del preparado y de la capacidad de salida.'};
+for(const f of diag.findings){
+ const item=add(causes,'div','diagnosis-card'),before=initial.stages.find(x=>x.id===f.id),after=f.stage;
+ add(item,'strong','',f.icon+' '+f.title);
+ add(item,'p','',explanations[f.id]);
+ const utilization=after.capacity?((after.output/after.capacity)*100).toFixed(1)+'%':'N/D';
+ add(item,'p','muted','Salida inicial '+fmt(before.output)+' → salida final '+fmt(after.output)+' unidades. Utilización final '+utilization+'. Recuperación aplicada: '+fmt(actions[f.id]||0)+' '+ACTIONS[f.id][1]+'.');
+ if(f.inherited)add(item,'p','diagnosis-note','Hay capacidad no utilizada por flujo heredado. Antes de reforzar esta área conviene resolver la restricción aguas arriba.');
+ if(f.potential>0)add(item,'p','muted','Una intervención adicional aislada podría mejorar la expedición hasta '+fmt(f.potential)+' unidades, manteniendo el resto constante.');
+}
 const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const item=add(opts,'div','action'),body=add(item,'div','');add(body,'strong','',f.title+' · '+ACTIONS[f.id][0]);add(body,'small','','Elegido: '+(actions[f.id]||0)+' / '+ACTIONS[f.id][2]+' '+ACTIONS[f.id][1]+' · Mejora potencial adicional: +'+fmt(f.potential));const b=add(item,'button','mini','Configurar');b.onclick=()=>{phase='recover';showSection('recovery');nav(NODES.findIndex(n=>n.id===f.id))}});
 $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=diag.findings.filter(f=>f.potential>0).slice(0,3).map(f=>f.title).join(', ')||'Sin mejoras individuales';$('report').hidden=false;
 }
