@@ -1,10 +1,13 @@
 import {flow} from './flow.js';
+import {START} from './engine.js';
 import {finance,cleanScenario} from './scenario.js';
 
 export const AREA_NAMES={commercial:'Comercial',planning:'Planning',purchasing:'Compras',receiving:'Recepción',quality:'Calidad',inventory:'Inventario',picking:'Picking',transport:'Transporte'};
 export function areaEconomics(decisions,actions,scenario){
  const s=cleanScenario(scenario),r=flow(decisions,actions,s),f=finance(r,s);
- const baseline=flow(decisions,{}, {...s,actualDemand:s.demand});
+ const standardDecisions={...decisions};
+ for(const id of Object.keys(AREA_NAMES))standardDecisions[id]=START[id];
+ const baseline=flow(standardDecisions,{}, {...s,actualDemand:s.demand});
  const fb=finance(baseline,{...s,actualDemand:s.demand});
  const costs=(x,y)=>({
   commercial:y.actionCosts.commercial||0,
