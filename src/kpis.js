@@ -36,7 +36,8 @@ export function areaKpis(r,s){
  entry('Disponibilidad para preparación',pct(r.available,r.demand),'Unidades disponibles para picking / demanda real × 100','La disponibilidad operativa no es exactitud de inventario físico.'),
  entry('Stock no habilitado en base',Math.max(0,releaseBase-r.usableBase).toLocaleString('es-CL')+' unid.','Stock inicial + unidades liberadas − base utilizable','Representa unidades no habilitadas según el supuesto de confiabilidad, antes de reservas. No es merma.'),
  entry('Reserva habilitada',r.eligibleReserve.toLocaleString('es-CL')+' unid.','Mínimo(reserva física, unidades de reserva habilitadas)','Stock de contingencia activado; no representa compra nueva.'),
- entry('Cobertura disponible de demanda',pct(r.available,r.demand),'Unidades utilizables / demanda real × 100','Es cobertura en unidades para la jornada; no son días de inventario.')
+ entry('Cobertura disponible de demanda',pct(r.available,r.demand),'Unidades utilizables / demanda real × 100','Es cobertura en unidades para la jornada; no son días de inventario.'),
+ entry('Excedente potencial de stock',Math.max(0,r.usableBase+r.eligibleReserve-r.demand).toLocaleString('es-CL')+' unid.','Máximo(0, stock utilizable + reserva habilitada − demanda real)','Posible inventario sin demanda de la jornada; no es inventario final contable ni obsolescencia.')
  ],
  picking:[
  entry('Productividad de picking',ratio(r.picked,s.pickingOperators),'Unidades preparadas / operarios asignados en la jornada','Productividad observada por persona-jornada, no UPH ni líneas por hora.'),
