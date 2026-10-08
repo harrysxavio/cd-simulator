@@ -53,7 +53,11 @@ $('share').addEventListener('click',async()=>{try{await navigator.clipboard.writ
 $('export').addEventListener('click',()=>{const r=calculate(state),data={...state,...r};const csv='\ufeff'+Object.keys(data).join(';')+'\r\n'+Object.values(data).map(v=>String(v).replace('.',',')).join(';')+'\r\n';const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='cd-simulator-escenario.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);$('message').textContent='CSV exportado.'});
 render();
 </script>
-<section class="v11" aria-label="Herramientas de decisión versión 1.1">
+<section class="v11" aria-label="Herramientas de decisión versión 1.2">
+<div class="panel" style="margin-bottom:16px"><div class="tag">PRUEBA GUIADA · 2 MINUTOS</div><h2>¿Dónde conviene invertir para procesar más pedidos?</h2>
+<p>Con el escenario inicial se procesan 1.100 de 1.200 pedidos porque la salida/transporte limita la operación. Prueba estas decisiones y observa los indicadores superiores y el comparador:</p>
+<div class="buttons"><button id="demo-bad">Aumentar picking (+5)</button><button id="demo-good">Ampliar salida (1.300)</button><button class="secondary" id="demo-reset">Volver al inicio</button></div>
+<p id="demo-explanation" class="result" aria-live="polite">Elige una decisión: la primera eleva costos sin aumentar la producción; la segunda libera capacidad sin agregar operarios.</p></div>
 <div class="v11grid">
 <div class="panel"><div class="tag">NUEVO · V1.1</div><h2>Comparador de escenarios</h2><p>La referencia permanece fija hasta que pulses «Fijar situación actual». Los controles superiores modifican la propuesta.</p>
 <div class="buttons"><button id="set-baseline">Fijar situación actual</button><button class="secondary" id="load-baseline">Recuperar referencia</button></div>
@@ -82,7 +86,7 @@ const valid=s=>s&&defs.every(d=>Number.isFinite(Number(s[d.id]))&&Number(s[d.id]
 function metricRow(parent,label,value,extra=''){const line=document.createElement('div');line.className='stat';const a=document.createElement('span');a.textContent=label;const b=document.createElement('strong');b.textContent=value;b.className=extra;line.append(a,b);parent.append(line)}
 function recommendation(s,target){const requiredOrders=Math.ceil((s.orders+s.backlog)*target/100);const perWorker=s.rate*s.hours*s.eff/100;const workers=Math.ceil(requiredOrders/perWorker);return{requiredOrders,workers,feasible:requiredOrders<=Math.min(s.dock,Math.floor(s.packWorkers*s.packRate*s.hours*s.eff/100),Math.floor(s.dispatchWorkers*s.dispatchRate*s.hours*s.eff/100))&&workers<=defs.find(d=>d.id==='workers').max,dispatchGap:Math.max(0,requiredOrders-s.dock),packingGap:Math.max(0,requiredOrders-Math.floor(s.packWorkers*s.packRate*s.hours*s.eff/100)),dispatchStaffGap:Math.max(0,requiredOrders-Math.floor(s.dispatchWorkers*s.dispatchRate*s.hours*s.eff/100))}}
 function update(){const b=calculate(baseline),p=calculate(state),comparison=$('comparison');comparison.replaceChildren();metricRow(comparison,'Pedidos procesados',fmt(b.processed)+' → '+fmt(p.processed));metricRow(comparison,'Cumplimiento',b.service.toFixed(1)+'% → '+p.service.toFixed(1)+'%');metricRow(comparison,'Dotación total',fmt(baseline.workers+baseline.packWorkers+baseline.dispatchWorkers)+' → '+fmt(state.workers+state.packWorkers+state.dispatchWorkers));metricRow(comparison,'Costo unitario',money(b.unit)+' → '+money(p.unit));
-const raw=Number($('target').value),target=Number.isFinite(raw)?Math.min(100,Math.max(1,raw)):95,rec=recommendation(state,target);
+const raw=Number($('target').value),target=Number.isFinite(raw)&&raw>=1?Math.min(100,Math.max(1,raw)):95,rec=recommendation(state,target);
 $('staff-result').textContent='Meta: '+target+'% ('+fmt(rec.requiredOrders)+' pedidos). Picking requiere '+fmt(rec.workers)+' operarios. '+(rec.feasible?'La meta es factible con la capacidad de despacho actual y el rango de dotación disponible.':'Meta no factible en la configuración actual.'+(rec.dispatchGap?' Faltan '+fmt(rec.dispatchGap)+' pedidos de capacidad de despacho.':'')+(rec.packingGap?' Faltan '+fmt(rec.packingGap)+' de capacidad en packing.':'')+(rec.dispatchStaffGap?' Faltan '+fmt(rec.dispatchStaffGap)+' de capacidad en despacho.':'')+(rec.workers>35?' Supera el máximo de 35 operarios configurado.':''));
 $('apply-staff').disabled=rec.workers>35;
 const economics=$('economics');economics.replaceChildren();metricRow(economics,'Costo laboral diario (referencia)',money(b.labor));metricRow(economics,'Costo laboral diario (propuesta)',money(p.labor));metricRow(economics,'Variación del costo diario',money(p.labor-b.labor),p.labor>b.labor?'negative':'positive');metricRow(economics,'Variación pedidos procesados',(p.processed-b.processed>=0?'+':'')+fmt(p.processed-b.processed));metricRow(economics,'Variación costo por pedido',money(p.unit-b.unit),p.unit>b.unit?'negative':'positive');const detail=document.createElement('p');detail.className='muted';detail.textContent='La variación de costo unitario puede ser favorable incluso si el costo total sube. Sin valor económico por pedido ni costos indirectos no se puede inferir ROI.';economics.append(detail);
@@ -100,6 +104,11 @@ $('apply-staff').addEventListener('click',()=>{const t=Math.min(100,Math.max(1,N
 $('save-scenario').addEventListener('click',()=>{const name=$('scenario-name').value.trim();if(!name){$('save-status').textContent='Escribe un nombre para guardar.';return}saved.unshift({name,state:clone(state)});saved=saved.slice(0,12);if(!persist())saved.shift();listSaved()});
 for(const d of defs)$(d.id).addEventListener('input',update);
 $('reset').addEventListener('click',update);$('scenario').addEventListener('click',update);
+// Demostración ejecutiva reproducible: comparar una inversión ineficaz vs una mejora de la restricción.
+function demoSet(change,message){baseline=clone(Object.fromEntries(defs.map(d=>[d.id,d.value])));apply({...baseline,...change});update();$('demo-explanation').textContent=message}
+$('demo-bad').addEventListener('click',()=>demoSet({workers:15},'Resultado: la salida sigue limitada a 1.100 pedidos. Contratar cinco operarios de picking incrementa el costo laboral, sin aumentar la producción.'));
+$('demo-good').addEventListener('click',()=>demoSet({dock:1300},'Resultado: ahora se pueden procesar los 1.200 pedidos. La mejora de salida libera el cuello de botella sin aumentar la dotación.'));
+$('demo-reset').addEventListener('click',()=>demoSet({},'Escenario inicial restaurado. Prueba otra decisión.'));
 loadSaved();listSaved();update();
 })();
 </script></body></html>
