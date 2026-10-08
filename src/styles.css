@@ -146,3 +146,37 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid
  .flow-step-stats>div{padding:7px 5px}
  .flow-step-stats strong{font-size:.87rem}
 }
+
+/* v8.4: prevent the operations map from stretching the phone viewport */
+html,body{max-width:100%;overflow-x:clip}
+.columns,.columns>*{min-width:0}
+#operationsSection{min-width:0;max-width:100%}
+#operationsSection .panel{min-width:0}
+.area-kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.area-kpi-tile{min-width:0;display:grid;align-content:start;gap:6px;background:#1c3a4e;border:1px solid #356477;border-radius:11px;padding:12px;overflow-wrap:anywhere}
+.area-kpi-tile small{font-size:.77rem;line-height:1.4}
+.area-kpi-tile strong{font-size:1.2rem;color:#baffee;overflow-wrap:anywhere}
+.kpi-explainer{padding:0 0 14px;margin:0 0 15px;border-bottom:1px solid #38546b}
+.kpi-explainer:last-of-type{border-bottom:0}
+.kpi-explainer p{overflow-wrap:anywhere}
+@media(max-width:700px){
+ #operationsSection .columns{display:block!important;width:100%;min-width:0}
+ #operationsSection .columns>.panel{width:100%;max-width:100%;margin:0 0 12px}
+ #operationHost{width:100%;min-width:0;max-width:100%}
+ #roadmap.roadmap{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px;overflow:visible!important;width:100%;padding:0;scroll-snap-type:none}
+ #roadmap .node{width:100%;min-width:0;min-height:74px;flex:initial;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding:8px 3px;border-radius:10px}
+ #roadmap .node-icon{width:27px;height:27px;font-size:1rem;border-radius:7px}
+ #roadmap .node-content{min-width:0;max-width:100%;width:100%;display:block}
+ #roadmap .node-content strong{display:block;font-size:.66rem;line-height:1.2;overflow-wrap:anywhere}
+ #roadmap .node-content small{display:none}
+ #roadmap .node-state{display:none}
+ .area-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .area-kpi-tile{padding:10px}
+ .area-kpi-tile strong{font-size:1.02rem}
+ .kpi-explainer .kpi-lead{align-items:flex-start}
+}
+@media(max-width:350px){
+ #roadmap .node-content strong{font-size:.59rem}
+ #roadmap .node{min-height:69px}
+ .area-kpi-grid{grid-template-columns:1fr}
+}
