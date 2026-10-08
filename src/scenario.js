@@ -55,16 +55,18 @@ export function finance(flow,scenario){
  const urgentSurcharge=flow.procurementMode==='express'?flow.received*s.urgentPurchaseSurcharge:0;
  const transport=flow.dispatched*s.unitTransportCost;
  const packaging=flow.picked*s.unitPackagingCost;
- const initialConsumed=Math.min(flow.dispatched,flow.stock);
+ const initialConsumed=Math.min(flow.dispatched,flow.stock+(flow.eligibleReserve||0));
  const newlyConsumed=Math.max(0,flow.dispatched-initialConsumed);
  const costOfGoods=initialConsumed*s.initialStockUnitCost+newlyConsumed*s.unitPurchaseCost;
- const operationalExpenses=laborTotal+transport+packaging+s.otherFixedCost+urgentSurcharge+actionCostTotal;
+ const modeCosts={receiving:flow.choices?.receiving==='extra'?30000:0,quality:flow.choices?.quality==='priority'?22000:0,inventory:flow.choices?.inventory==='count'?18000:0,picking:flow.choices?.picking==='reinforce'?32000:0,transport:flow.choices?.transport==='extra'?50000:0};
+ const modeCostTotal=Object.values(modeCosts).reduce((a,b)=>a+b,0);
+ const operationalExpenses=laborTotal+transport+packaging+s.otherFixedCost+urgentSurcharge+actionCostTotal+modeCostTotal;
  const total=costOfGoods+operationalExpenses;
- const cashOutflow=laborTotal+purchase+urgentSurcharge+transport+packaging+s.otherFixedCost+actionCostTotal;
+ const cashOutflow=laborTotal+purchase+urgentSurcharge+transport+packaging+s.otherFixedCost+actionCostTotal+modeCostTotal;
  const revenue=flow.dispatched*s.unitPrice;
  const contribution=revenue-costOfGoods-transport-packaging-urgentSurcharge;
  return {
- labor,recoveryLabor,recoveryLaborTotal,laborTotal,actionCosts,actionCostTotal,
+ labor,recoveryLabor,recoveryLaborTotal,laborTotal,actionCosts,actionCostTotal,modeCosts,modeCostTotal,
  purchase,urgentSurcharge,transport,packaging,fixed:s.otherFixedCost,
  costOfGoods,initialConsumed,newlyConsumed,operationalExpenses,cashOutflow,
  total,revenue,contribution,margin:revenue-total,
