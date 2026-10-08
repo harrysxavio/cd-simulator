@@ -1,6 +1,6 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=81';
-import {flow,diagnose,ACTIONS} from './flow.js?v=81';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance} from './scenario.js?v=81';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=82';
+import {flow,diagnose,ACTIONS} from './flow.js?v=82';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance} from './scenario.js?v=82';
 const $=id=>document.getElementById(id),KEY='supply-lab-v62';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO};
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
@@ -25,37 +25,43 @@ input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isF
 function dashboard(r){
  const f=finance(r,scenario),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
  const cards=$('financeMetrics');cards.replaceChildren();
- const values=[['Unidades expedidas',fmt(r.dispatched)],['Costo por unidad',f.costPerUnit===null?'N/D':money(f.costPerUnit)],['Meta costo unitario',money(scenario.maxCostPerUnit)],['Ingreso estimado',money(f.revenue)],['Saldo operativo simulado',money(f.margin)],['Costo personal',money(f.laborTotal)],['Productividad Picking',scenario.pickingOperators?(r.picked/scenario.pickingOperators).toFixed(1)+' unid./operario':'N/D'],['Uso capacidad Picking',r.stages[6].capacity?(100*r.picked/r.stages[6].capacity).toFixed(1)+'%':'N/D'],['Cumple meta',f.meetsTarget?'Sí':'No']];
+ const values=[
+ ['Unidades expedibles',fmt(r.dispatched)],
+ ['Costo por unidad expedible',f.costPerUnit===null?'N/D':money(f.costPerUnit)],
+ ['Meta de costo unitario',money(scenario.maxCostPerUnit)],
+ ['Ingresos potenciales',money(f.revenue)],
+ ['Costo de mercancía expedible',money(f.costOfGoods)],
+ ['Gastos operacionales',money(f.operationalExpenses)],
+ ['Resultado operacional simulado',money(f.margin)],
+ ['Desembolso total de jornada',money(f.cashOutflow)],
+ ['Compra recibida (desembolso)',money(f.purchase)],
+ ['Contribución antes de gastos fijos',money(f.contribution)],
+ ['Productividad Picking',scenario.pickingOperators?(r.picked/scenario.pickingOperators).toFixed(1)+' unid./operario':'N/D'],
+ ['Uso capacidad Picking',r.stages[6].capacity?(100*r.picked/r.stages[6].capacity).toFixed(1)+'%':'N/D']
+ ];
  for(const [label,value] of values){const c=add(cards,'div','metric');add(c,'span','',label);add(c,'strong','',value)}
  $('costTotalHero').textContent=money(f.total);
- const budget=r.dispatched*scenario.maxCostPerUnit,over=f.total>budget;
+ const budget=r.dispatched*scenario.maxCostPerUnit,over=r.dispatched>0&&f.total>budget;
  const status=$('costTotalStatus');status.className='cost-status '+(over?'status-bad':'status-good');
- status.textContent=r.dispatched===0?'Sin expedición':over?'Sobre meta: +'+money(f.total-budget):'Dentro de meta';
- const baseline=finance(r,DEFAULT_SCENARIO);
+ status.textContent=r.dispatched===0?'Sin expedición':over?'Meta no cumplida: +'+money(f.total-budget):'Meta de costo cumplida';
  const items=[
- ['Personal de inventario',f.labor.inventory,baseline.labor.inventory],
- ['Personal de picking',f.labor.picking,baseline.labor.picking],
- ['Personal de recepción',f.labor.receiving,baseline.labor.receiving],
- ['Refuerzos de recuperación',f.recoveryLaborTotal,baseline.recoveryLaborTotal],
- ['Compra de unidades recibidas',f.purchase,baseline.purchase],
- ['Recargo de compra urgente',f.urgentSurcharge,baseline.urgentSurcharge],
- ['Empaque de unidades preparadas',f.packaging,baseline.packaging],
- ['Transporte de unidades expedidas',f.transport,baseline.transport],
- ['Otros costos fijos',f.fixed,baseline.fixed]
+ ['Costo de mercancía expedible',f.costOfGoods],
+ ['Personal base y refuerzos',f.laborTotal],
+ ['Decisiones operativas especiales',f.modeCostTotal],
+ ['Acciones correctivas',f.actionCostTotal],
+ ['Recargo por proveedor urgente',f.urgentSurcharge],
+ ['Empaque de unidades preparadas',f.packaging],
+ ['Transporte de unidades expedibles',f.transport],
+ ['Otros costos fijos',f.fixed]
  ];
- const baselineTotal=items.reduce((acc,item)=>acc+item[2],0);
  const costs=$('costBreakdown');costs.replaceChildren();
- for(const [label,value,reference] of items){
- const allocation=baselineTotal>0?budget*reference/baselineTotal:0;
- const excess=value>allocation+0.5,delta=value-allocation;
- const row=add(costs,'div','cost-line '+(excess?'cost-over':'cost-ok'));
+ for(const [label,value] of items){
+ const row=add(costs,'div','cost-line');
  const head=add(row,'div','cost-line-head');add(head,'strong','',label);add(head,'strong','',money(value));
- add(row,'small','', 'Presupuesto de referencia: '+money(allocation)+' · '+(excess?'Sobrecosto '+money(delta):'Dentro de referencia'));
+ add(row,'small','','Participación en costo total: '+(f.total?(100*value/f.total).toFixed(1):'0')+'%.');
  }
- $('financialInsight').textContent=r.dispatched===0?'No es posible calcular costo unitario sin expedición.':over?'El costo total supera el presupuesto de '+money(budget)+' calculado con la meta de '+money(scenario.maxCostPerUnit)+' por unidad. Abre el desglose para identificar conceptos que exceden su referencia.':'El costo total está dentro del presupuesto de '+money(budget)+' según tu meta por unidad. Puedes abrir el desglose para revisar desviaciones individuales.';
+ $('financialInsight').textContent=r.dispatched===0?'No hay expedición posible: no se calcula costo unitario. Los gastos y desembolsos pueden mantenerse.':over?'El costo por unidad supera la meta. La comparación se hace contra el costo total, no contra presupuestos arbitrarios por área.':'El costo por unidad está dentro de la meta global. Revisa también el resultado operacional y los desembolsos.';
 }
-
-
 function renderDiagnosis(current){
  const initial=flow(decisions,{},scenario);
  const oldCost=finance(initial,scenario),newCost=finance(current,scenario);
