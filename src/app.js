@@ -1,6 +1,7 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=83';
-import {flow,diagnose,ACTIONS} from './flow.js?v=83';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=83';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=84';
+import {flow,diagnose,ACTIONS} from './flow.js?v=84';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=84';
+import {areaKpis} from './kpis.js?v=84';
 const $=id=>document.getElementById(id),KEY='supply-lab-v62';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced';
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
@@ -94,19 +95,14 @@ function renderDiagnosis(current){
  const box=add(root,'div','diagnosis-card');add(box,'strong','',f.icon+' '+f.title);
  const st=f.stage,util=percent(st.output,st.capacity);
  add(box,'p','',descriptions[f.id]);
- const metrics={
- commercial:['Error del pronóstico',percent(Math.abs(initial.estimated-initial.demand),initial.demand)],
- planning:['Cobertura de compra',percent(initial.ordered,Math.max(0,initial.estimated-initial.stock))],
- purchasing:['Cumplimiento del proveedor',percent(initial.delivered,initial.ordered)],
- receiving:['Unidades por operario',scenario.receivingOperators?(initial.received/scenario.receivingOperators).toFixed(1):'No aplica'],
- quality:['Tasa de liberación',percent(initial.released,initial.received)],
- inventory:['Disponibilidad sobre demanda',percent(initial.available,initial.demand)],
- picking:['Unidades por operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'No aplica'],
- transport:['Utilización de expedición',percent(initial.dispatched,initial.stages[7].capacity)]
- };
- const metric=metrics[f.id];
- add(box,'p','kpi-strategy',metric[0]+': '+metric[1]+'.');
- add(box,'p','muted',f.id==='commercial'||f.id==='planning'?'Indicador de planificación: '+fmt(st.output)+' unidades. No corresponde interpretar este cociente como utilización de capacidad física.':'Entrada '+fmt(st.input)+' · salida '+fmt(st.output)+' · capacidad '+fmt(st.capacity)+' · utilización '+util+'.');
+ const indicators=areaKpis(initial,scenario)[f.id];
+ const kpiGrid=add(box,'div','area-kpi-grid');
+ for(const indicator of indicators){
+  const tile=add(kpiGrid,'div','area-kpi-tile');
+  add(tile,'small','',indicator.label);
+  add(tile,'strong','',indicator.value);
+ }
+ add(box,'p','muted',f.id==='commercial'||f.id==='planning'?'Indicadores de planificación; no son utilización de capacidad física.':'Entrada '+fmt(st.input)+' · salida '+fmt(st.output)+' · capacidad '+fmt(st.capacity)+' · utilización '+util+'.');
  if(f.inherited&&['receiving','picking','transport'].includes(f.id))add(box,'p','diagnosis-note','Esta área dispone de más capacidad que unidades recibidas. Reforzarla sin corregir las restricciones anteriores puede aumentar costos sin mejorar el despacho.');
  const button=add(box,'button','mini','Evaluar recuperación');button.onclick=()=>{active=NODES.findIndex(n=>n.id===f.id);showSection('recovery')};
  }
@@ -148,24 +144,18 @@ function renderAssessment(initial,current){
  add(root,'small','','Cálculo didáctico: servicio = mínimo(100, cumplimiento/meta × 100). Costo = mínimo(100, meta de costo/costo unitario × 100). Resultado = valor limitado entre 0 y 100 de [50 + 50 × resultado operacional/ingresos potenciales]. Se ponderan con los pesos indicados. No mide habilidades personales ni identifica una solución óptima.');
 }
 function renderKpiLesson(r){
- const id=NODES[active].id,st=r.stages[active];
- const percent=(a,b)=>b?(100*a/b).toFixed(1)+' %':'No aplica';
- const perPerson=(a,b)=>b?(a/b).toFixed(1)+' unid./operario':'No aplica';
- const data={
- commercial:['Error absoluto del pronóstico',percent(Math.abs(r.estimated-r.demand),r.demand),'|Demanda pronosticada − demanda real| ÷ demanda real × 100','Un error alto puede provocar faltantes o sobreinventario. Una sobreestimación no implica que se vendan más unidades.','Decisión estratégica: equilibrar nivel de servicio y riesgo de inventario.'],
- planning:['Cobertura de reposición',percent(r.ordered,Math.max(0,r.estimated-r.stock)),'Unidades solicitadas ÷ brecha planificada × 100','Una cobertura baja puede dejar demanda sin abastecer. Una cobertura alta eleva las necesidades de compra.','Decisión estratégica: disponibilidad frente a capital inmovilizado.'],
- purchasing:['Cumplimiento de entrega',percent(r.delivered,r.ordered),'Unidades recibidas del proveedor antes del corte ÷ unidades solicitadas × 100','Una entrega incompleta limita las etapas posteriores aunque el centro tenga capacidad libre.','Decisión estratégica: costo de compra frente a confiabilidad del proveedor.'],
- receiving:['Productividad de recepción',perPerson(r.received,scenario.receivingOperators),'Unidades recibidas ÷ operarios de recepción en la jornada','La productividad observada depende del volumen entregado; no equivale automáticamente a eficiencia individual.','Decisión estratégica: dimensionar recursos según volumen y variabilidad.'],
- quality:['Tasa de liberación',percent(r.released,r.received),'Unidades liberadas ÷ unidades recibidas × 100','Una tasa baja reduce disponibilidad inmediata. Acelerar el proceso nunca significa saltarse los controles.','Decisión estratégica: proteger conformidad y nivel de servicio.'],
- inventory:['Disponibilidad frente a demanda',percent(r.available,r.demand),'Unidades disponibles para preparar ÷ demanda real × 100','La disponibilidad depende del stock inicial, la recepción liberada, la confiabilidad y las reservas habilitadas.','Decisión estratégica: cobertura de inventario frente a costos y riesgo de quiebre.'],
- picking:['Productividad de picking',perPerson(r.picked,scenario.pickingOperators),'Unidades preparadas ÷ operarios de picking en la jornada','Si no llegan unidades de Inventario, la productividad observada cae aunque exista capacidad. También revisa utilización: '+percent(r.picked,st.capacity)+'.','Decisión estratégica: aumentar productividad sin contratar capacidad ociosa.'],
- transport:['Utilización de expedición',percent(r.dispatched,st.capacity),'Unidades expedibles ÷ capacidad de expedición × 100','Una utilización baja puede ser consecuencia de falta de unidades preparadas, no de rutas mal planificadas.','Decisión estratégica: capacidad logística, costo de despacho y cumplimiento.']
- };
- const root=$('kpiLesson');root.replaceChildren();
- const [name,value,formula,reading,strategy]=data[id];
- const lead=add(root,'div','kpi-lead');add(lead,'span','muted',name);add(lead,'strong','',value);
- add(root,'p','','Fórmula: '+formula);add(root,'p','',reading);add(root,'p','kpi-strategy',strategy);
- add(root,'small','','Ejercicio ilustrativo. El indicador usa los parámetros actuales y se actualiza con tus decisiones.');
+ const id=NODES[active].id,root=$('kpiLesson');
+ root.replaceChildren();
+ const indicators=areaKpis(r,scenario)[id];
+ for(const indicator of indicators){
+  const section=add(root,'section','kpi-explainer');
+  const lead=add(section,'div','kpi-lead');
+  add(lead,'span','muted',indicator.label);
+  add(lead,'strong','',indicator.value);
+  add(section,'p','','Cómo se calcula: '+indicator.formula+'.');
+  add(section,'p','',indicator.meaning);
+ }
+ add(root,'small','','Datos de una jornada ficticia. Los indicadores cambian con las decisiones y no sustituyen métricas históricas, por SKU, por hora ni por pedido.');
 }
 
 function render(){
@@ -175,8 +165,8 @@ $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pend
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?'Planificación':'Recuperación');
 $('progressFill').style.width=NODES.filter(x=>decisions[x.id]).length/8*100+'%';
-const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));add(b,'span','node-icon',x.icon);const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');add(b,'span','node-state',i===active?'●':'→');b.onclick=()=>nav(i)});
-$('missionNumber').textContent=(phase==='plan'?'PLANIFICAR':'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent=n.kpi;
+const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));add(b,'span','node-icon',x.icon);const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');add(b,'span','node-state',i===active?'●':'→');b.setAttribute('aria-current',i===active?'step':'false');b.onclick=()=>nav(i)});
+$('missionNumber').textContent=(phase==='plan'?'PLANIFICAR':'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent='2 indicadores del área';
 const choices=$('choices');choices.replaceChildren();if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.onclick=()=>{decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
 const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.onchange=()=>{const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
 }const box=add(choices,'div','flow-summary');add(box,'strong','','Relación con las otras áreas');add(box,'p','','Recibe '+fmt(st.input)+' → entrega '+fmt(st.output)+' unidades. Capacidad '+fmt(st.capacity)+'.');add(box,'small','',st.detail);
