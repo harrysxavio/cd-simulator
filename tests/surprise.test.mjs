@@ -36,3 +36,20 @@ test('idle recovery costs money even with low demand',()=>{
  assert.equal(before.revenue,after.revenue);
  assert.ok(after.operationalExpenses>before.operationalExpenses);
 });
+
+test('premium operating modes do not also trigger custom capacity staffing',()=>{
+ const d={...START,receiving:'extra',picking:'reinforce'};
+ const f=finance(flow(d,{},DEFAULT_SCENARIO),DEFAULT_SCENARIO);
+ assert.equal(f.capacityStaff.receiving,0);
+ assert.equal(f.capacityStaff.picking,0);
+ assert.ok(f.modeCosts.receiving>0);
+ assert.ok(f.modeCosts.picking>0);
+});
+test('flexible area budget separates volume and spend',()=>{
+ const s={...DEFAULT_SCENARIO,actualDemand:300};
+ const e=areaEconomics(START,{},s);
+ const t=e.result.find(x=>x.id==='transport');
+ assert.equal(t.reference,e.current.dispatched*s.unitTransportCost);
+ assert.equal(t.efficiencyVariance,t.cost-t.reference);
+ assert.equal(t.volumeVariance,t.reference-t.staticReference);
+});
