@@ -12,7 +12,7 @@
 <div class="muted" id="demoNote" aria-live="polite">Escenario inicial. Observa el área que limita el flujo y qué productos faltan.</div></section>
 <div class="hero">
 <section class="card"><h2>Resultado del pedido</h2><div class="kpis"><div class="kpi"><small>Pedidos completos</small><strong id="done" class="green">—</strong></div><div class="kpi"><small>Pedidos pendientes</small><strong id="pending" class="amber">—</strong></div><div class="kpi"><small>Cumplimiento del lote</small><strong id="service">—</strong></div></div><p id="diagnosis" class="callout" aria-live="polite"></p><div class="legend">Un pedido solo cuenta como completo si dispone de todos los SKU y pasa por las etapas operativas. No representa OTIF ni entregas efectivas al cliente.</div></section>
-<section class="card"><h2>Composición de cada pedido</h2><table class="sku-table"><thead><tr><th>SKU</th><th>Unid./pedido</th><th>Stock inicial</th><th>Compra prevista</th></tr></thead><tbody><tr><td>A · Envase</td><td>2</td><td>180</td><td>80</td></tr><tr><td>B · Tapa</td><td>1</td><td>95</td><td>35</td></tr><tr><td>C · Etiqueta</td><td>3</td><td>210</td><td>150</td></tr></tbody></table><p class="muted">Ejemplo simplificado de kit de tres componentes. No se sustituyen SKU faltantes por otros.</p></section></div>
+<section class="card"><h2>Composición de cada pedido</h2><table class="sku-table"><thead><tr><th>SKU</th><th>Unid./pedido</th><th>Stock inicial</th><th>Compra prevista</th></tr></thead><tbody><tr><td>A · Envase</td><td>2</td><td>180</td><td>80</td></tr><tr><td>B · Tapa</td><td>1</td><td>95</td><td>35</td></tr><tr><td>C · Etiqueta</td><td>3</td><td>150</td><td>150</td></tr></tbody></table><p class="muted">Ejemplo simplificado de kit de tres componentes. No se sustituyen SKU faltantes por otros.</p></section></div>
 <section class="card"><h2>La cadena de trabajo, de principio a fin</h2><p>Los números muestran la contribución de cada área. <strong>El área resaltada es la restricción principal</strong> de la configuración actual.</p><div id="areas" class="areas"></div></section>
 <div class="two">
 <section class="card"><h2>¿Dónde se pierde capacidad?</h2><div id="funnel" aria-label="Gráfico de capacidad por área"></div><p class="muted">Barras expresadas en pedidos completos equivalentes. El abastecimiento depende del SKU con menor cobertura.</p></section>
@@ -25,15 +25,15 @@
 </main>
 <script>
 'use strict';
-const SKU=[{name:'A',qty:2,stock:180,buy:80},{name:'B',qty:1,stock:95,buy:35},{name:'C',qty:3,stock:210,buy:150}];
+const SKU=[{name:'A',qty:2,stock:180,buy:80},{name:'B',qty:1,stock:95,buy:35},{name:'C',qty:3,stock:150,buy:150}];
 const DEFINITIONS=[
 {id:'plan',name:'Planificación',label:'Pedidos liberados',min:60,max:100,step:5,value:100,unit:'%',help:'Porcentaje del lote que se libera a operación hoy.'},
 {id:'purchase',name:'Compras',label:'Entrega de proveedor',min:40,max:100,step:5,value:75,unit:'%',help:'Porcentaje de unidades compradas que llega hoy.'},
 {id:'receive',name:'Recepción',label:'Capacidad de descarga',min:80,max:500,step:20,value:300,unit:' unid.',help:'Máximo de unidades entrantes que se procesan hoy.'},
 {id:'quality',name:'Calidad',label:'Unidades aprobadas',min:60,max:100,step:5,value:95,unit:'%',help:'Porcentaje de lo recibido que pasa inspección.'},
 {id:'inventory',name:'Inventario',label:'Exactitud utilizable',min:80,max:100,step:5,value:95,unit:'%',help:'Porcentaje del stock físico disponible para prometer.'},
-{id:'pick',name:'Picking',label:'Líneas preparadas por día',min:180,max:900,step:30,value:480,unit:' líneas',help:'Cada pedido requiere 3 líneas de picking (SKU A, B y C).'},
-{id:'transport',name:'Transporte',label:'Capacidad de expedición',min:40,max:130,step:5,value:90,unit:' pedidos',help:'Pedidos completos que pueden salir del CD hoy.'}
+{id:'pick',name:'Picking',label:'Líneas preparadas por día',min:180,max:900,step:30,value:360,unit:' líneas',help:'Cada pedido requiere 3 líneas de picking (SKU A, B y C).'},
+{id:'transport',name:'Transporte',label:'Capacidad de expedición',min:40,max:130,step:5,value:110,unit:' pedidos',help:'Pedidos completos que pueden salir del CD hoy.'}
 ];
 const $=id=>document.getElementById(id);
 const base=Object.fromEntries(DEFINITIONS.map(d=>[d.id,d.value]));
