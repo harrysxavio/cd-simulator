@@ -58,7 +58,7 @@ export function skuOrderLab({orders=200,stock={},templates=ORDER_TEMPLATES,catal
  });
  const totalDemandValue=skuMetrics.reduce((n,p)=>n+p.valueDemand,0);
  const abc=[...skuMetrics].sort((a,b)=>b.valueDemand-a.valueDemand).map((p,i,all)=>({id:p.id,share:totalDemandValue?p.valueDemand/totalDemandValue*100:0}));
- let cumulative=0;for(const p of abc){cumulative+=p.share;p.cumulativeValue=cumulative;p.abc=cumulative<=80?'A':cumulative<=95?'B':'C';}
+ let cumulative=0;for(const p of abc){const before=cumulative;cumulative+=p.share;p.cumulativeValue=cumulative;p.abc=before<80?'A':before<95?'B':'C';}
  const abcById=Object.fromEntries(abc.map(p=>[p.id,p]));
  for(const p of skuMetrics){p.valueShare=abcById[p.id].share;p.abc=abcById[p.id].abc;p.cumulativeValue=abcById[p.id].cumulativeValue;}
  return {skuMetrics,orders:count,complete,pending:count-complete,fulfillment:count?100*complete/count:100,rows,stockInitial,stockRemaining:available,consumed,demandBySku,missingBySku,blockedByStock:shortage,blockedByCapacity:count-complete-shortage,dispatchLimit:limit,method:'FIFO por tipo de pedido en orden de mezcla; pedidos completos solamente'};
