@@ -1,9 +1,10 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=96';
-import {flow,diagnose,ACTIONS} from './flow.js?v=96';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=96';
-import {areaKpis} from './kpis.js?v=96';
-import {causalAudit} from './causal.js?v=96';
-import {attentionSignals} from './attention.js?v=96';
+import {demandJourney} from './journey.js?v=97';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=97';
+import {flow,diagnose,ACTIONS} from './flow.js?v=97';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=97';
+import {areaKpis} from './kpis.js?v=97';
+import {causalAudit} from './causal.js?v=97';
+import {attentionSignals} from './attention.js?v=97';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -37,7 +38,7 @@ for(const [key,label,unit,min,max,step] of FIELDS){
 const box=add(root,'div','setup-field');add(box,'label','',label+' ('+unit+')');
 const input=add(box,'input','numeric-input');input.type='number';input.min=min;input.max=max;input.step=step;input.value=scenario[key];
 input.setAttribute('aria-label',label);
-input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario.actualDemand=Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100)));scenario=cleanScenario(scenario);revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
+input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario.actualDemand=scenario.demand;scenario=cleanScenario(scenario);revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
 }}
 function dashboard(r){
  const f=finance(r,effectiveScenario()),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
@@ -94,6 +95,15 @@ function renderDiagnosis(current){
  add(comparison,'strong','',revealed?'Sorpresa revelada: nueva demanda real':'Diagnóstico del plan antes de conocer la demanda real');
  add(comparison,'p','','Plan base: '+fmt(initial.plannedDemand)+' unidades · Pronóstico ajustado: '+fmt(initial.estimated)+(revealed?' · Pedidos reales: '+fmt(initial.demand):' · Pedidos reales: todavía desconocidos')+'.');
  if(revealed)add(comparison,'p','','Antes de la sorpresa: '+fmt(initialPlan.dispatched)+' / '+fmt(initialPlan.demand)+' unidades ('+percent(initialPlan.dispatched,initialPlan.demand)+'). Tras la sorpresa y antes de recuperar: '+fmt(initial.dispatched)+' / '+fmt(initial.demand)+' unidades ('+percent(initial.dispatched,initial.demand)+'). La capacidad, el abastecimiento y el costo inicial se mantienen; cambia el volumen de pedidos.');
+ if(revealed){
+  const journey=demandJourney(decisions,actions,effectiveScenario());
+  const line=(title,v)=>{const p=add(comparison,'p','');add(p,'strong','',title+' · ');add(p,'span','',fmt(v.dispatched)+' / '+fmt(v.demand)+' unidades · servicio '+v.fulfillment.toFixed(1)+' % · resultado '+cash(v.margin));};
+  add(comparison,'strong','','Tres momentos de la misma campaña');
+  line('1. Plan inicial',journey.plan);
+  line('2. Demanda observada sin recuperar',journey.surprise);
+  line('3. Después de tus intervenciones',journey.recovery);
+  add(comparison,'p','muted','Efecto exclusivo de la recuperación: '+(journey.recoveryImpact.dispatched>=0?'+':'')+fmt(journey.recoveryImpact.dispatched)+' unidades expedibles · '+(journey.recoveryImpact.servicePoints>=0?'+':'')+journey.recoveryImpact.servicePoints.toFixed(1)+' puntos de servicio · variación del resultado '+cash(journey.recoveryImpact.marginChange)+'. Es una comparación de escenarios, no una reconstrucción de movimientos físicos por hora.');
+ }
  add(comparison,'p','muted',revealed?'Desviación real vs. plan: '+((initial.demand/initial.plannedDemand-1)*100).toFixed(1)+' %. Las compras originales se mantienen.':'Este diagnóstico usa la demanda prevista. Pulsa «Revelar sorpresa» para descubrir la demanda efectiva y decidir cómo responder.');
  $('revealDemand').hidden=revealed;
  $('startRecovery').hidden=!revealed;
@@ -320,7 +330,7 @@ $('export').onclick=()=>{const r=flow(decisions,actions,effectiveScenario()),row
 $('setupTab').onclick=()=>showSection('setup');
 $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
-$('revealDemand').onclick=()=>{shockDirection=Math.random()<0.5?-1:1;revealed=true;actions={};save();render();$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
+$('revealDemand').onclick=()=>{if(revealed)return;shockDirection=Math.random()<0.5?-1:1;revealed=true;actions={};save();render();$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
 $('startRecovery').onclick=()=>showSection('recovery');
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
