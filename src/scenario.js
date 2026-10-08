@@ -34,11 +34,13 @@ export function finance(flow,scenario){
  picking:s.pickingOperators*s.pickingDailyWage,
  receiving:s.receivingOperators*s.receivingDailyWage
  };
- const laborTotal=Object.values(labor).reduce((a,b)=>a+b,0);
+ const recoveryLabor={receiving:Math.ceil((flow.actions?.receiving||0)/325)*s.receivingDailyWage,picking:Math.ceil((flow.actions?.picking||0)/460)*s.pickingDailyWage,inventory:(flow.actions?.inventory||0)>0?s.inventoryDailyWage:0};
+const recoveryLaborTotal=Object.values(recoveryLabor).reduce((a,b)=>a+b,0);
+const laborTotal=Object.values(labor).reduce((a,b)=>a+b,0)+recoveryLaborTotal;
  const purchase=flow.received*s.unitPurchaseCost;
  const transport=flow.dispatched*s.unitTransportCost;
  const packaging=flow.picked*s.unitPackagingCost;
  const total=laborTotal+purchase+transport+packaging+s.otherFixedCost;
  const revenue=flow.dispatched*s.unitPrice;
- return {labor,laborTotal,purchase,transport,packaging,fixed:s.otherFixedCost,total,revenue,margin:revenue-total,costPerUnit:flow.dispatched?total/flow.dispatched:null,unitMargin:flow.dispatched?(revenue-total)/flow.dispatched:null,meetsTarget:flow.dispatched>0&&total/flow.dispatched<=s.maxCostPerUnit,utilization:flow.demand?flow.dispatched/flow.demand:0};
+ return {labor,recoveryLabor,recoveryLaborTotal,laborTotal,purchase,transport,packaging,fixed:s.otherFixedCost,total,revenue,margin:revenue-total,costPerUnit:flow.dispatched?total/flow.dispatched:null,unitMargin:flow.dispatched?(revenue-total)/flow.dispatched:null,meetsTarget:flow.dispatched>0&&total/flow.dispatched<=s.maxCostPerUnit,utilization:flow.demand?flow.dispatched/flow.demand:0};
 }
