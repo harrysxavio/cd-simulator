@@ -166,7 +166,12 @@ for(const f of diag.findings){
  const utilization=after.capacity?((after.output/after.capacity)*100).toFixed(1)+'%':'N/D';
  add(item,'p','muted','Salida inicial '+fmt(before.output)+' → salida final '+fmt(after.output)+' unidades. Utilización final '+utilization+'. Recuperación aplicada: '+fmt(actions[f.id]||0)+' '+ACTIONS[f.id][1]+'.');
  if(f.inherited)add(item,'p','diagnosis-note','Hay capacidad no utilizada por flujo heredado. Antes de reforzar esta área conviene resolver la restricción aguas arriba.');
- if(f.potential>0){add(item,'p','diagnosis-note','Si no se interviene, se mantiene el cumplimiento de '+(100*r.dispatched/r.demand).toFixed(1)+'% y quedan '+fmt(r.pending)+' unidades pendientes. En '+f.title+', la medida disponible podría liberar '+fmt(f.potential)+' unidades adicionales para expedición. Antes de ejecutarla, compara el costo con el valor de esa recuperación.');}
+ if(f.potential>0){
+ const projected=flow(decisions,{...actions,[f.id]:ACTIONS[f.id][2]},scenario);
+ const costChange=finance(projected,scenario).total-finance(r,scenario).total;
+ const localGap=Math.max(0,after.input-after.output);
+ add(item,'p','diagnosis-note','Si mantienes la decisión actual en '+f.title+', esta etapa seguirá procesando '+fmt(after.output)+' de '+fmt(after.input)+' unidades de entrada'+(localGap?' (brecha de '+fmt(localGap)+').':'.')+' La campaña conservaría '+fmt(r.pending)+' unidades pendientes. Una medida adicional podría aumentar la expedición global en '+fmt(f.potential)+' unidades, con una variación de costo modelada de '+fmt(costChange)+' CLP. Compara ese costo con el beneficio antes de intervenir.');
+}
  else if(!actions[f.id]){add(item,'p','muted','Mantener esta área no reduce por sí solo el despacho actual. Reforzarla aisladamente tampoco mejoraría el cumplimiento mientras exista otra restricción.');}
 }
 const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const item=add(opts,'div','action'),body=add(item,'div','');add(body,'strong','',f.title+' · '+ACTIONS[f.id][0]);add(body,'small','','Elegido: '+(actions[f.id]||0)+' / '+ACTIONS[f.id][2]+' '+ACTIONS[f.id][1]+' · Mejora potencial adicional: +'+fmt(f.potential));const b=add(item,'button','mini','Configurar');b.onclick=()=>{phase='recover';showSection('recovery');nav(NODES.findIndex(n=>n.id===f.id))}});
