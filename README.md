@@ -1,4 +1,4 @@
-# Supply Chain Operations Lab v3.0
+# Supply Chain Operations Lab v4.0
 
 **Demo:** https://harrysxavio.github.io/cd-simulator/
 
@@ -54,3 +54,12 @@ Sin dependencias externas, APIs, login ni backend. Funciona como sitio estático
 - v3.0: laboratorio modular por misiones y roadmap de dependencias.
 
 Licencia MIT.
+
+
+## v4.0 — Flujo en cadena y recuperación
+
+El motor `src/flow.js` propaga unidades por SKU entre compra, entrega, recepción, calidad y stock disponible; posteriormente transforma la cobertura del mix en pedidos preparables y expedibles. Picking no procesa más pedidos que los que cuentan con disponibilidad y Transporte no despacha más de los recibidos de Picking, aunque tenga capacidad sobrante. Cada nodo presenta entrada, procesamiento, capacidad y unidad de medida. El stock inicial y las reservas elegibles se consideran por separado del flujo de recepción.
+
+**Fase 1: planificación.** El usuario recorre las ocho áreas y configura indicadores y decisiones. **Fase 2: recuperación.** Puede aplicar acciones correctivas específicas por área (forecast, reposición, proveedor alternativo, recepción, inspección, reservas, picking y transporte). El motor vuelve a ejecutar toda la cadena. Las acciones tienen límites y no implican costos calculados ni liberaciones fuera de control de calidad.
+
+El diagnóstico compara cambios individuales respecto a la referencia y oportunidades correctivas. Estos resultados no deben sumarse: hay restricciones simultáneas y un efecto que se recupera en una etapa puede seguir limitado en otra. Los resultados son estimaciones deterministas agregadas, no órdenes reales ni una simulación detallada por pedido. 
