@@ -62,3 +62,16 @@ test('stock available before demand cap is conserved as unshipped usable stock',
  assert.equal(r.unusedStock,r.stockUsableTotal-r.dispatched);
  assert.ok(r.stockUsableTotal>=r.available);
 });
+
+test('priority quality mode does not pay custom acceleration on top of its fixed premium',()=>{
+ const d={...START,quality:'priority'};
+ const r=flow(d,{},DEFAULT_SCENARIO),f=finance(r,DEFAULT_SCENARIO);
+ assert.equal(f.extraCapacityCosts.quality,0);
+ assert.equal(f.modeCosts.quality,22000);
+});
+test('non-standard paid mode without output gain is flagged',async()=>{
+ const {attentionSignals}=await import('../src/attention.js');
+ const s={...DEFAULT_SCENARIO,actualDemand:200};
+ const report=attentionSignals({...START,receiving:'extra'}, {},s);
+ assert.ok(report.messages.some(m=>m.title.includes('Modo sin retorno')&&m.title.includes('Recepción')));
+});
