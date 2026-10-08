@@ -1,12 +1,12 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=82';
-import {flow,diagnose,ACTIONS} from './flow.js?v=82';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance} from './scenario.js?v=82';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=83';
+import {flow,diagnose,ACTIONS} from './flow.js?v=83';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=83';
 const $=id=>document.getElementById(id),KEY='supply-lab-v62';
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO};
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced';
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario}))}catch{}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan'}catch{}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy}))}catch{}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan'}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function showSection(name){
 for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
@@ -15,6 +15,10 @@ if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
 save();render();
 }
 function setup(){
+ const choices=$('strategyChoices');choices.replaceChildren();
+ for(const [id,title,desc] of [['service','Servicio al cliente','Prioriza cumplir la demanda.'],['balanced','Equilibrio','Equilibra cumplimiento, costos y resultado.'],['cost','Eficiencia económica','Prioriza costo unitario sin ignorar el servicio.']]){
+ const button=add(choices,'button','choice '+(strategy===id?'selected':''));add(button,'strong','',title);add(button,'small','',desc);button.setAttribute('aria-pressed',String(strategy===id));button.onclick=()=>{strategy=id;save();render()};
+ }
 const root=$('scenarioFields');root.replaceChildren();
 for(const [key,label,unit,min,max,step] of FIELDS){
 const box=add(root,'div','setup-field');add(box,'label','',label+' ('+unit+')');
@@ -70,6 +74,11 @@ function renderDiagnosis(current){
  const pre=$('preliminaryMetrics');pre.replaceChildren();
  const items=[['Cumplimiento',percent(initial.dispatched,initial.demand)],['Picking unid./operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso Picking',percent(initial.picked,initial.stages[6].capacity)],['Costo por unidad',oldCost.costPerUnit===null?'N/D':cash(oldCost.costPerUnit)],['Unidades pendientes',fmt(initial.pending)]];
  for(const item of items){const c=add(pre,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1])}
+ const preSummary=$('preliminarySummary');preSummary.replaceChildren();
+ const initialAssessment=strategyAssessment(initial,scenario,strategy);
+ add(preSummary,'strong','','Lectura preliminar de la empresa');
+ add(preSummary,'p','','Meta de servicio: '+scenario.targetFulfillment+' %. Resultado: '+percent(initial.dispatched,initial.demand)+'. Brecha para cumplir: '+fmt(Math.max(0,Math.ceil(initial.demand*scenario.targetFulfillment/100)-initial.dispatched))+' unidades.');
+ add(preSummary,'p','muted',initialAssessment.service>=initialAssessment.goal?'El nivel de servicio alcanza el objetivo. Evalúa ahora si el costo es sostenible.':'El servicio está bajo la meta. Revisa restricciones aguas arriba antes de reforzar capacidades locales.');
  const descriptions={
  commercial:'El sesgo del pronóstico cambia la reposición y puede crear quiebres o exceso de compra.',
  planning:'La cobertura elegida determina las unidades solicitadas al proveedor.',
@@ -111,10 +120,32 @@ function renderDiagnosis(current){
  const deltaCost=newCost.total-oldCost.total,deltaRevenue=newCost.revenue-oldCost.revenue;
  add(insight,'strong','','¿Qué significan las decisiones para el negocio?');
  add(insight,'p','',extra>0?'El cumplimiento mejora '+((finalRate-initialRate)*100).toFixed(1)+' puntos porcentuales. Recuperaste '+fmt(extra)+' unidades expedibles, con '+cash(deltaCost)+' de variación de costo y '+cash(deltaRevenue)+' de ingreso potencial adicional.':'El cumplimiento no mejoró con las medidas actuales. Si se incurrió en costos extra, esas decisiones consumen recursos sin generar más unidades expedibles. Revisa primero el cuello de botella.');
- add(insight,'p','muted','El saldo económico modelado cambia '+cash(newCost.margin-oldCost.margin)+'. Es una aproximación didáctica de ingresos menos desembolsos modelados, no un margen contable.');
+ add(insight,'p','muted','El resultado operacional modelado cambia '+cash(newCost.margin-oldCost.margin)+'. No es utilidad neta ni equivale al desembolso de la jornada.');
+ renderAssessment(initial,current);
  const rec=$('recoverySummary');rec.replaceChildren();
  add(rec,'p','summary','Antes: '+fmt(initial.dispatched)+' unidades. Ahora: '+fmt(current.dispatched)+'. Recuperadas: '+fmt(extra)+'. Costo incremental: '+cash(cost)+'.');
  if(extra===0)add(rec,'p','diagnosis-note','No existe mejora global con las medidas actuales. Revisa otras restricciones antes de agregar recursos.');
+}
+function renderAssessment(initial,current){
+ const root=$('strategyScore');root.replaceChildren();
+ const previous=strategyAssessment(initial,scenario,strategy),now=strategyAssessment(current,scenario,strategy);
+ const labels={service:'Servicio al cliente',balanced:'Equilibrio entre servicio y costo',cost:'Eficiencia económica'};
+ add(root,'h3','','Evaluación del criterio · '+labels[strategy]);
+ add(root,'p','','Índice pedagógico inicial '+previous.score+'/100 → final '+now.score+'/100. No representa una calificación laboral ni existe una decisión perfecta para todos los escenarios.');
+ const rows=[['Servicio vs. meta',now.serviceScore],['Costo unitario vs. meta',now.costScore],['Resultado económico',now.profitability]];
+ const weight={service:[65,20,15],balanced:[45,35,20],cost:[25,55,20]}[strategy];
+ for(let i=0;i<rows.length;i++){
+ const [name,value]=rows[i],row=add(root,'div','score-row');
+ const header=add(row,'div','score-head');add(header,'span','',name+' · peso '+weight[i]+'%');add(header,'strong','',value.toFixed(0)+'/100');
+ const bar=add(row,'div','score-track');const fill=add(bar,'div','score-fill');fill.style.width=Math.max(0,Math.min(100,value))+'%';
+ }
+ const serviceGap=Math.max(0,Math.ceil(current.demand*scenario.targetFulfillment/100)-current.dispatched);
+ const f=finance(current,scenario),base=finance(initial,scenario);
+ if(serviceGap>0)add(root,'p','diagnosis-note','Faltan '+fmt(serviceGap)+' unidades para la meta de servicio. Identifica la restricción efectiva antes de gastar más.');
+ else add(root,'p','kpi-strategy','La meta de servicio se cumple. Considera si los costos y la utilización justifican la capacidad elegida.');
+ if(f.costPerUnit!==null&&f.costPerUnit>scenario.maxCostPerUnit)add(root,'p','diagnosis-note','El costo unitario excede la meta en CLP '+fmt(f.costPerUnit-scenario.maxCostPerUnit)+'.');
+ if(f.margin<base.margin)add(root,'p','diagnosis-note','El resultado operacional es CLP '+fmt(base.margin-f.margin)+' inferior al escenario sin recuperación. Revisa el retorno de las medidas.');
+ add(root,'small','','Fórmula visible: servicio, costo y resultado se convierten a escalas de 0 a 100 y se ponderan según la estrategia elegida. El componente económico compara resultado operacional / ingresos potenciales; es una rúbrica de aprendizaje, no una optimización matemática global.');
 }
 function renderKpiLesson(r){
  const id=NODES[active].id,st=r.stages[active];
