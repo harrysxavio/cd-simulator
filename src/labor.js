@@ -3,7 +3,7 @@ import {finance,cleanScenario} from './scenario.js';
 
 const AREAS=[
  {id:'receiving',name:'Recepción',operators:'receivingOperators',rate:'receivingUnitsPerHour',volume:'delivered',processed:'received',capacity:'receivingCapacity',wage:'receivingDailyWage'},
- {id:'inventory',name:'Inventario',operators:'inventoryOperators',rate:'inventoryUnitsPerHour',volume:'demand',processed:'available',capacity:'inventoryCapacity',wage:'inventoryDailyWage'},
+ {id:'inventory',name:'Inventario',operators:'inventoryOperators',rate:'inventoryUnitsPerHour',volume:'stockUsableTotal',processed:'available',capacity:'inventoryCapacity',wage:'inventoryDailyWage'},
  {id:'picking',name:'Picking',operators:'pickingOperators',rate:'pickingUnitsPerHour',volume:'available',processed:'picked',capacity:'pickingCapacity',wage:'pickingDailyWage'}
 ];
 export function laborAudit(decisions={},actions={},scenario={}){
@@ -17,8 +17,12 @@ export function laborAudit(decisions={},actions={},scenario={}){
   const staffRequired=Math.ceil(inflow/(hours*rate));
   const unmet=Math.max(0,inflow-processed);
   const excessStaff=Math.max(0,staff-staffRequired);
-  return {id:area.id,name:area.name,staff,rate,hours,laborHours,capacity,inflow,processed,productivity,utilization,staffRequired,excessStaff,unmet,wage:s[area.wage],
-    idleCostIndicator:excessStaff*s[area.wage],note:'Dotación teórica para cubrir el flujo entrante con productividad estándar. No equivale a personal prescindible ni considera otras tareas, seguridad o restricciones de turnos.'};
+  const serviceNeed=area.id==='inventory'?Math.min(r.demand,inflow):inflow;
+  const serviceStaffRequired=Math.ceil(serviceNeed/(hours*rate));
+  const underused=processed<capacity&&staff>serviceStaffRequired;
+  const effectiveCapacityPerStaff=hours*rate;
+  return {id:area.id,name:area.name,staff,rate,hours,laborHours,capacity,inflow,processed,productivity,utilization,staffRequired,serviceStaffRequired,underused,effectiveCapacityPerStaff,excessStaff,unmet,wage:s[area.wage],
+    idleCostIndicator:Math.max(0,staff-serviceStaffRequired)*s[area.wage],note:'Dotación teórica de la jornada; exposición indicativa, no ahorro realizable. No incluye tareas indirectas, variabilidad, turnos ni dotación mínima segura.'};
  });
  return {result,operationalExpenses:f.operationalExpenses,dispatched:r.dispatched,demand:r.demand};
 }
