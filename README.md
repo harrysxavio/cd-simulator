@@ -1,63 +1,56 @@
-# CD Flow Lab — un pedido, siete áreas
+# Supply Chain Operations Lab v3.0
 
-**Aplicación pública:** https://harrysxavio.github.io/cd-simulator/
+**Demo:** https://harrysxavio.github.io/cd-simulator/
 
-Aplicación didáctica y responsive para mostrar **cómo se relacionan las decisiones de planificación, compras, recepción, calidad, inventario, picking y transporte** en el procesamiento de pedidos mult-SKU de un centro de distribución.
+Laboratorio interactivo de decisiones operacionales inspirado en el flujo de una campaña de cosmética de venta directa. **Datos completamente ficticios**; no representa cifras ni procedimientos internos de Natura.
 
-## Caso base
+## Qué se hace
 
-Un lote de **100 pedidos**. Cada pedido requiere:
-- SKU A: 2 unidades, stock inicial 180, compra prevista 80.
-- SKU B: 1 unidad, stock inicial 95, compra prevista 35.
-- SKU C: 3 unidades, stock inicial 150, compra prevista 150.
+Recorre ocho misiones con iconos y decisiones independientes:
 
-Las áreas se conectan así:
-1. **Planificación:** porcentaje de pedidos liberados al flujo.
-2. **Compras:** porcentaje de la compra prevista que llega hoy del proveedor.
-3. **Recepción:** unidades entregadas que se pueden procesar en el día.
-4. **Calidad:** porcentaje de unidades recibidas aprobadas.
-5. **Inventario:** exactitud/disponibilidad utilizable del stock inicial más unidades aprobadas.
-6. **Picking:** líneas preparables por día; cada pedido tiene 3 líneas (una por SKU).
-7. **Transporte:** límite de pedidos completos que pueden expedirse.
+1. 📈 Comercial: forecast de campaña.
+2. 🗓️ Planning: cobertura de necesidades de reposición.
+3. 🛒 Compras: cumplimiento de entrega del proveedor.
+4. 📦 Recepción: capacidad de ingreso de unidades.
+5. 🛡️ Calidad: liberación de mercancía inspeccionada.
+6. 🗃️ Inventario: stock disponible para preparación.
+7. 🧺 Picking: líneas procesadas por jornada.
+8. 🚚 Transporte: capacidad de salida de pedidos.
 
-**Nota de procesos:** P2P se refiere al abastecimiento desde compras hasta recepción/stock; picking y transporte son parte del fulfillment del pedido y no son etapas de P2P estrictamente.
+El usuario puede regresar a cualquier nodo, cambiar una decisión y revisar las consecuencias en el dashboard y el diagnóstico. El reporte final prioriza alternativas que incrementan pedidos completables con las demás decisiones constantes.
 
-## Cálculo
+## Escenario y supuestos
 
-- Unidades entregadas de cada SKU = piso(compra prevista × porcentaje entrega).
-- Capacidad de recepción se distribuye proporcionalmente a unidades entregadas, con redondeo conservador.
-- Unidades aprobadas = piso(unidades recibidas × porcentaje de aprobación de calidad).
-- Stock utilizable = piso((stock inicial + aprobado) × porcentaje de disponibilidad).
-- Cobertura por SKU = piso(stock utilizable / unidades por pedido).
-- Pedidos con stock = mínimo de las coberturas de A, B y C.
-- Pedidos preparados = mínimo(100, pedidos liberados, pedidos con stock, piso(líneas picking/3), capacidad de transporte).
-- Pendientes = 100 - pedidos preparados.
+Campaña de 1.000 pedidos con mix agregado de tres productos: perfume (60 % de pedidos, 600 unidades), crema corporal (80 %, 800 unidades) y shampoo (50 %, 500 unidades). Cada pedido que contiene el producto demanda una unidad. Los stocks iniciales son 380, 470 y 330 unidades.
 
-El modelo no asume que aumentar una capacidad siempre mejore la salida: las restricciones aguas abajo o la falta de un SKU pueden neutralizar el efecto.
+El cálculo es determinista: forecast → brecha → compra → entrega → recepción → liberación de calidad → stock utilizable → capacidad de picking → capacidad de transporte. La cobertura se limita por el SKU con menor capacidad de abastecer su proporción del mix. Para este nivel se asume un mix fijo y fraccional, sin simular pedidos individuales ni combinaciones exactas de productos.
 
-## Cómo probarlo
+**Importante:** la métrica «pedidos completables» es una estimación de capacidad y disponibilidad, no OTIF, entregas confirmadas, ventas ni cumplimiento contractual. El resultado por área muestra métricas en unidades diferentes (unidades, líneas o pedidos) y no debe interpretarse como un embudo de cantidades homogéneas.
 
-- **Mejorar compras:** sube entregas del proveedor y disponibilidad de inventario, con impacto visible en el SKU limitante.
-- **Problema de calidad:** disminuye la aprobación de unidades y reduce la cantidad de pedidos completos.
-- **Reforzar picking:** muestra que incrementar capacidad de picking puede no aumentar el flujo cuando faltan productos.
-- **Aplicar mejora sugerida:** propone un ajuste incremental que aumenta pedidos completos, si existe alguno dentro del rango.
-- **Guardar y exportar:** escenarios locales y CSV de los resultados.
+P2P comprende abastecimiento hasta recepción/stock; picking y transporte pertenecen a fulfillment. Se omiten lead times detallados, costos, variabilidad, prioridades por cliente, pedidos individuales, inventario reservado, horas extra y restricciones de múltiples jornadas.
 
-## Alcance y limitaciones
+## Arquitectura escalable
 
-Herramienta **educativa de capacidad y disponibilidad**, no WMS, APS, MRP, gemelo digital ni cálculo OTIF. Un solo lote y día, sin cronograma de entregas, lead times, inventario reservado, lotes de proveedor, trazabilidad, costos ni simulación estocástica. Los porcentajes representan supuestos configurables. El indicador de pedidos completos no significa que hayan sido entregados al cliente.
+- `index.html`: entrada accesible y semántica.
+- `src/engine.js`: definiciones de áreas, decisiones, motor puro de simulación, causas y recomendaciones.
+- `src/app.js`: navegación por nodos, render, eventos, guardado local y exportación CSV.
+- `src/styles.css`: diseño responsive, roadmap, tarjetas e indicadores.
+- `archive/v2.0-index.html`: copia de la versión anterior.
 
-Sin servidor, dependencias, cuentas, seguimiento ni transmisión de datos. Los escenarios guardados utilizan localStorage en el navegador actual.
+Para extender un área, agregar decisiones o parámetros en `NODES` y actualizar la función pura `evaluate` para propagar el impacto; la interfaz renderiza las alternativas declaradas automáticamente. Futuras mejoras pueden separar cada nodo en su propio módulo e incorporar tests de integración y E2E de navegador.
 
-## Tecnología
+## Verificación
 
-HTML, CSS, JavaScript nativo. GitHub Pages desde rama `main` y carpeta raíz.
+Pruebas de sintaxis de los módulos, nueve comprobaciones del motor y ejecución simulada de arranque, navegación, decisiones, diagnóstico y reinicio. Estas comprobaciones **no equivalen a pruebas de navegador real** en Android, ni validan visualmente GitHub Pages.
 
-## Evolución
+## Uso y privacidad
 
-- v1.0: cálculo simple de picking/despacho.
-- v1.1: comparaciones y costos.
-- v1.2: ampliación de etapas de capacidad.
-- **v2.0:** rediseño orientado a áreas conectadas, disponibilidad de tres SKU y ejemplos operativos prácticos.
+Sin dependencias externas, APIs, login ni backend. Funciona como sitio estático GitHub Pages. Las decisiones se guardan en localStorage del navegador actual. El CSV se genera localmente.
+
+## Versiones
+
+- v1.0–v1.2: prototipo inicial de capacidad.
+- v2.0: flujo mult-SKU de siete áreas.
+- v3.0: laboratorio modular por misiones y roadmap de dependencias.
 
 Licencia MIT.
