@@ -4,9 +4,9 @@ import {START} from '../src/engine.js';
 import {flow} from '../src/flow.js';
 import {DEFAULT_SCENARIO,cleanScenario,finance} from '../src/scenario.js';
 import {areaEconomics} from '../src/attention.js';
-test('signed surprise percent is deterministic and does not change planned purchasing',()=>{
- const low=cleanScenario({...DEFAULT_SCENARIO,demandShockPercent:-30,actualDemand:undefined});
- const high=cleanScenario({...DEFAULT_SCENARIO,demandShockPercent:40,actualDemand:undefined});
+test('configurable magnitude supports positive or negative revealed demand',()=>{
+ const low=cleanScenario({...DEFAULT_SCENARIO,demandShockPercent:30,actualDemand:700});
+ const high=cleanScenario({...DEFAULT_SCENARIO,demandShockPercent:40,actualDemand:1400});
  assert.equal(low.actualDemand,700);assert.equal(high.actualDemand,1400);
  const a=flow(START,{},low),b=flow(START,{},high);
  assert.equal(a.ordered,b.ordered);assert.equal(a.estimated,b.estimated);
