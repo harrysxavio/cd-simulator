@@ -53,3 +53,19 @@ test('flexible area budget separates volume and spend',()=>{
  assert.equal(t.efficiencyVariance,t.cost-t.reference);
  assert.equal(t.volumeVariance,t.reference-t.staticReference);
 });
+
+test('unrevealed scenario does not silently assume a positive shock',()=>{
+ const c=cleanScenario({demand:1000,demandShockPercent:30});
+ assert.equal(c.actualDemand,1000);
+ assert.equal(flow(START,{},c).demand,1000);
+});
+test('original planning result remains comparable to post-shock result',()=>{
+ const original=flow(START,{}, {...DEFAULT_SCENARIO,actualDemand:1000});
+ for(const actualDemand of [700,1300]){
+  const actual=flow(START,{}, {...DEFAULT_SCENARIO,actualDemand,lockUpstream:true});
+  assert.equal(actual.ordered,original.ordered);
+  assert.equal(actual.delivered,original.delivered);
+  assert.equal(actual.plannedDemand,original.plannedDemand);
+  assert.equal(actual.demand,actualDemand);
+ }
+});
