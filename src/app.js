@@ -1,7 +1,8 @@
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=84';
-import {flow,diagnose,ACTIONS} from './flow.js?v=84';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=84';
-import {areaKpis} from './kpis.js?v=84';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=85';
+import {flow,diagnose,ACTIONS} from './flow.js?v=85';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=85';
+import {areaKpis} from './kpis.js?v=85';
+import {causalAudit} from './causal.js?v=85';
 const $=id=>document.getElementById(id),KEY='supply-lab-v62';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced';
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
@@ -90,6 +91,11 @@ function renderDiagnosis(current){
  picking:'La productividad observada puede caer por falta de unidades disponibles, aunque exista capacidad.',
  transport:'La expedición depende de las unidades preparadas y de la capacidad de salida.'
  };
+ const initialCausal=causalAudit(decisions,{},scenario);
+ const prelimCausal=$('preliminaryCausal');prelimCausal.replaceChildren();
+ add(prelimCausal,'strong','','¿Dónde conviene investigar primero?');
+ add(prelimCausal,'p','',initialCausal.summary);
+ add(prelimCausal,'small','','Análisis de intervenciones individuales bajo supuestos ficticios. No confundir con causa raíz verificada.');
  const root=$('preliminaryFindings');root.replaceChildren();
  for(const f of diagnose(decisions,{},scenario).findings){
  const box=add(root,'div','diagnosis-card');add(box,'strong','',f.icon+' '+f.title);
@@ -225,15 +231,22 @@ for(const [label,value] of [['Demanda real',r.demand],['Stock inicial',r.stock],
 }
 $('cause').textContent='Transporte recibe '+fmt(r.picked)+' unidades desde Picking y despacha '+fmt(r.dispatched)+'. Su capacidad es '+fmt(r.stages[7].capacity)+'. '+(r.picked<r.stages[7].capacity?'Capacidad ociosa por falta de flujo o demanda aguas arriba.':'El despacho está limitado por capacidad o disponibilidad.');
 renderDiagnosis(r);const causes=$('rootCauses');causes.replaceChildren();
+const causal=causalAudit(decisions,actions,scenario),causalSummary=$('causalSummary');causalSummary.replaceChildren();
+add(causalSummary,'strong','','Diagnóstico de restricciones y efecto económico');
+add(causalSummary,'p','',causal.summary);
+add(causalSummary,'small','','Se prueba cada medida por separado con las demás decisiones constantes. Una restricción simultánea puede ocultar mejoras que solo funcionan en conjunto.');
 const initial=flow(decisions,{},scenario);
 const explanations={commercial:'El pronóstico afecta la necesidad calculada para reponer.',planning:'La cobertura determina cuánto se compra para cerrar la brecha.',purchasing:'El cumplimiento del proveedor condiciona la llegada de unidades.',receiving:'La productividad de recepción depende de dotación y entregas recibidas.',quality:'La tasa de liberación define cuánto inventario queda autorizado.',inventory:'La disponibilidad combina stock inicial, calidad y reserva.',picking:'La productividad puede estar limitada por el abastecimiento anterior.',transport:'El cumplimiento de expedición depende del preparado y de la capacidad de salida.'};
 for(const f of diag.findings){
+ const counter=causal.evidence.find(x=>x.id===f.id);
  const item=add(causes,'div','diagnosis-card'),before=initial.stages.find(x=>x.id===f.id),after=f.stage;
  add(item,'strong','',f.icon+' '+f.title);
  add(item,'p','',explanations[f.id]);
  const utilization=after.capacity?((after.output/after.capacity)*100).toFixed(1)+'%':'N/D';
  add(item,'p','muted','Salida inicial '+fmt(before.output)+' → salida final '+fmt(after.output)+' unidades. Utilización final '+utilization+'. Recuperación aplicada: '+fmt(actions[f.id]||0)+' '+ACTIONS[f.id][1]+'.');
- if(f.inherited)add(item,'p','diagnosis-note','Hay capacidad no utilizada por flujo heredado. Antes de reforzar esta área conviene resolver la restricción aguas arriba.');
+ if(f.inherited&&['receiving','picking','transport'].includes(f.id))add(item,'p','diagnosis-note','Existe capacidad sin utilizar. Puede ser por flujo insuficiente aguas arriba; verifica las etapas anteriores antes de invertir.');
+ add(item,'p','kpi-strategy','Prueba de intervención aislada: '+(counter.delta>0?'+':'')+fmt(counter.delta)+' unidades expedibles · cambio en resultado '+(counter.net>=0?'+':'')+fmt(counter.net)+' CLP.');
+ add(item,'p','muted',counter.warning);
  if(f.potential>0){
  const projected=flow(decisions,{...actions,[f.id]:ACTIONS[f.id][2]},scenario);
  const costChange=finance(projected,scenario).total-finance(r,scenario).total;
@@ -243,7 +256,7 @@ for(const f of diag.findings){
  else if(!actions[f.id]){add(item,'p','muted','Mantener esta área no reduce por sí solo el despacho actual. Reforzarla aisladamente tampoco mejoraría el cumplimiento mientras exista otra restricción.');}
 }
 const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const item=add(opts,'div','action'),body=add(item,'div','');add(body,'strong','',f.title+' · '+ACTIONS[f.id][0]);add(body,'small','','Elegido: '+(actions[f.id]||0)+' / '+ACTIONS[f.id][2]+' '+ACTIONS[f.id][1]+' · Mejora potencial adicional: +'+fmt(f.potential));const b=add(item,'button','mini','Configurar');b.onclick=()=>{phase='recover';showSection('recovery');nav(NODES.findIndex(n=>n.id===f.id))}});
-$('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=diag.findings.filter(f=>f.potential>0).slice(0,3).map(f=>f.title).join(', ')||'Sin mejoras individuales';$('report').hidden=false;
+$('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=causal.focus?causal.focus.title+' · +'+fmt(causal.focus.delta)+' unid.':'Sin mejora individual';$('report').hidden=false;
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
