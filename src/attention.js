@@ -70,6 +70,20 @@ export function attentionSignals(decisions,actions,scenario){
   }
   if(operators<necessary&&volume>0)add('warning','Carga superior a dotación: '+AREA_NAMES[id], 'Se requieren teóricamente '+necessary+' personas frente a '+operators+' asignadas. Antes de contratar, revisa el flujo y las alternativas de turnos, productividad y reasignación.');
  }
+ // Compare each paid operating mode with the ordinary mode, holding other choices constant.
+ // Only flag a demonstrably dominated choice: no more dispatch and lower margin.
+ for(const id of ['receiving','quality','inventory','picking','transport']){
+  const mode=decisions?.[id];
+  if(!mode||mode===DEFAULTS[id])continue;
+  const alternative={...decisions,[id]:DEFAULTS[id]};
+  const baseline=flow(alternative,actions,s),baselineFinance=finance(baseline,s);
+  const gain=r.dispatched-baseline.dispatched;
+  const marginGain=f.margin-baselineFinance.margin;
+  if(gain<=0&&marginGain<0){
+   add('warning','Modo sin retorno demostrado: '+AREA_NAMES[id],
+    'La alternativa '+mode+' no aumenta el despacho frente al modo estándar y reduce el resultado simulado en '+Math.round(-marginGain).toLocaleString('es-CL')+' CLP. Considera restricciones y beneficios no modelados antes de decidir.');
+  }
+ }
  for(const x of data.result.filter(x=>x.over))add('warning','Sobrecosto en '+x.title,'Costo '+Math.round(x.cost).toLocaleString('es-CL')+' CLP frente a referencia '+Math.round(x.reference).toLocaleString('es-CL')+' CLP; tolerancia '+s.areaCostTolerance+' %. No implica que la decisión sea incorrecta si mejora el negocio.');
  if(r.dispatched/r.demand<s.targetFulfillment/100)add('danger','Meta de servicio no alcanzada','Solo '+(100*r.dispatched/r.demand).toFixed(1)+' % de demanda real puede expedirse, frente a meta de '+s.targetFulfillment+' %.');
  if(!messages.length)add('good','Sin alertas críticas del modelo','Se cumplen las condiciones revisadas. Esto no garantiza ausencia de riesgos reales.');
