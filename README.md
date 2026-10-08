@@ -1,4 +1,4 @@
-# Supply Chain Operations Lab — v8.4
+# Supply Chain Operations Lab — v8.5
 
 **[Abrir el laboratorio interactivo](https://harrysxavio.github.io/cd-simulator/)**
 
@@ -71,8 +71,14 @@ Para ejecutar la suite ESM en Node 22 sin package.json: `node --experimental-def
 
 Pendiente: metas diferenciadas por área, diagnóstico causal más riguroso, evaluación de decisiones con retroalimentación detallada, comparación de escenarios y validación con usuarios externos.
 
-## Indicadores operativos v8.4
+## Indicadores operativos v8.5
 
 Se muestran **dos indicadores por cada una de las ocho áreas** en la misión y el diagnóstico preliminar, con fórmulas e interpretación: Comercial (error y sesgo del pronóstico); Planning (cobertura de compra y cobertura teórica de demanda); Compras (cumplimiento al corte y brecha de entrega); Recepción (productividad por persona-jornada y utilización de capacidad); Calidad (tasa de liberación y unidades pendientes de liberación); Inventario (disponibilidad y stock base no habilitado); Picking (productividad por persona-jornada y utilización); Transporte (cumplimiento expedible y utilización de expedición).
 
 **Alcance:** no se calculan OTIF, lead time, defectos, exactitud física, productividad horaria, días de inventario ni cumplimiento por pedido porque el escenario no contiene esos datos. La cifra de proveedor puede diferir décimas del porcentaje configurado debido al redondeo a unidades enteras. El mapa de operación utiliza una cuadrícula de 4 × 2 en teléfonos para evitar desbordamientos de tarjetas horizontales. Falta validación visual en Chrome Android real.
+
+## Fase v8.5: diagnóstico contrafactual
+
+Se calcula para cada área una intervención adicional aislada manteniendo las demás decisiones constantes, mostrando unidades expedibles adicionales, variación de costo, ingreso potencial y resultado operacional. El foco prioriza la variación del resultado entre intervenciones que sí aumentan expedición. **No se presenta como causa raíz verificada**: restricciones simultáneas pueden requerir combinaciones y las pruebas aisladas no son aditivas. El diagnóstico inicial y final muestra este contexto, y las explicaciones de KPI siguen basadas en datos de una jornada ficticia.
+
+Pruebas adicionales: `tests/causal.test.mjs`. Para ejecutar toda la suite: `node --experimental-default-type=module --test tests/*.test.mjs`. La comprobación visual real en Android permanece pendiente.
