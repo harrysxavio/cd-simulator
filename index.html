@@ -77,7 +77,7 @@ const KEY='cd-simulator-v1.1-scenarios';
 const defaults=Object.fromEntries(defs.map(d=>[d.id,d.value]));
 const clone=s=>Object.fromEntries(defs.map(d=>[d.id,Number(s[d.id])]));
 let baseline=clone(state),saved=[];
-const money=n=>'</html>+fmt(n)+' CLP';
+const money=n=>String.fromCharCode(36)+fmt(n)+' CLP';
 const valid=s=>s&&defs.every(d=>Number.isFinite(Number(s[d.id]))&&Number(s[d.id])>=d.min&&Number(s[d.id])<=d.max&&((Number(s[d.id])-d.min)/d.step-Math.round((Number(s[d.id])-d.min)/d.step))<1e-7);
 function metricRow(parent,label,value,extra=''){const line=document.createElement('div');line.className='stat';const a=document.createElement('span');a.textContent=label;const b=document.createElement('strong');b.textContent=value;b.className=extra;line.append(a,b);parent.append(line)}
 function recommendation(s,target){const requiredOrders=Math.ceil((s.orders+s.backlog)*target/100);const perWorker=s.rate*s.hours*s.eff/100;const workers=Math.ceil(requiredOrders/perWorker);return{requiredOrders,workers,feasible:requiredOrders<=Math.min(s.dock,Math.floor(s.packWorkers*s.packRate*s.hours*s.eff/100),Math.floor(s.dispatchWorkers*s.dispatchRate*s.hours*s.eff/100))&&workers<=defs.find(d=>d.id==='workers').max,dispatchGap:Math.max(0,requiredOrders-s.dock),packingGap:Math.max(0,requiredOrders-Math.floor(s.packWorkers*s.packRate*s.hours*s.eff/100)),dispatchStaffGap:Math.max(0,requiredOrders-Math.floor(s.dispatchWorkers*s.dispatchRate*s.hours*s.eff/100))}}
