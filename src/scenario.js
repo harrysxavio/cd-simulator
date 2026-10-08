@@ -77,3 +77,13 @@ export function finance(flow,scenario){
  utilization:flow.demand?flow.dispatched/flow.demand:0
  };
 }
+
+export function strategyAssessment(r,s,mode='balanced'){
+ const f=finance(r,s),goal=cleanScenario(s).targetFulfillment/100;
+ const service=r.dispatched/r.demand;
+ const serviceScore=Math.min(100,100*service/goal);
+ const costScore=f.costPerUnit===null?0:Math.min(100,100*cleanScenario(s).maxCostPerUnit/Math.max(1,f.costPerUnit));
+ const profitability=f.revenue>0?Math.max(0,Math.min(100,50+50*f.margin/f.revenue)):0;
+ const weights={service:[.65,.2,.15],balanced:[.45,.35,.2],cost:[.25,.55,.2]}[mode]||[.45,.35,.2];
+ return {score:Math.round(serviceScore*weights[0]+costScore*weights[1]+profitability*weights[2]),serviceScore,costScore,profitability,service,goal,mode,finance:f};
+}
