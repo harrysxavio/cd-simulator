@@ -6,16 +6,16 @@ import {causalAudit} from './causal.js?v=94';
 import {attentionSignals} from './attention.js?v=94';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
-const effectiveScenario=()=>({...scenario,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
+const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed,shockDirection}))}catch{}}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;shockDirection=s.shockDirection===-1?-1:1}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function showSection(name){
-for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
 if((name==='recovery'||name==='dashboard')&&!revealed){name='preliminary'}
 if(name==='operations'&&revealed){name='preliminary'}
+for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
 if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
 if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
 save();render();
@@ -222,7 +222,11 @@ $('missionNumber').textContent=(phase==='plan'?'PLANIFICAR':'RECUPERAR')+' · '+
 const choices=$('choices');choices.replaceChildren();if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.onclick=()=>{decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
 const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.onchange=()=>{const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
 }const box=add(choices,'div','flow-summary');add(box,'strong','','Relación con las otras áreas');add(box,'p','','Recibe '+fmt(st.input)+' → entrega '+fmt(st.output)+' unidades. Capacidad '+fmt(st.capacity)+'.');add(box,'small','',st.detail);
-if(phase==='recover'){
+if(phase==='recover'&&['commercial','planning','purchasing'].includes(n.id)){
+ add(choices,'h3','','Decisión de planificación cerrada');
+ add(choices,'p','muted','El pronóstico, la compra y la entrega comprometida ya ocurrieron antes de revelar la demanda. No puedes reescribirlos retroactivamente. Evalúa intervenciones físicas posteriores o reinicia el ejercicio para probar otro plan.');
+}
+if(phase==='recover'&&!['commercial','planning','purchasing'].includes(n.id)){
  const cfg=ACTIONS[n.id],selected=actions[n.id]||0;
  const before=flow(decisions,actions,effectiveScenario()),baseCost=finance(before,effectiveScenario()).total;
  add(choices,'h3','','Decide si intervenir');
