@@ -180,3 +180,10 @@ html,body{max-width:100%;overflow-x:clip}
  #roadmap .node{min-height:69px}
  .area-kpi-grid{grid-template-columns:1fr}
 }
+
+/* v8.5: clear causal evidence without overwhelming narrow screens */
+.causal-summary{padding:15px 16px;border:1px solid #3a7d86;border-radius:12px;background:#123447;margin:16px 0}
+.causal-summary strong{color:#b5fff0;display:block;margin-bottom:7px}
+.causal-summary p{margin:5px 0 10px;line-height:1.55}
+.causal-summary small{display:block;line-height:1.5}
+@media(max-width:700px){.causal-summary{padding:13px;margin:12px 0}.diagnosis-card{overflow-wrap:anywhere}.diagnosis-card .mini{min-height:44px}}
