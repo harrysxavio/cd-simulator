@@ -36,3 +36,19 @@ test('inventory surplus can be shown when demand falls',()=>{
  const r=flow(START,{}, {...base,actualDemand:300});
  assert.ok(areaKpis(r,{...base,actualDemand:300}).inventory.some(x=>x.label.includes('Excedente')));
 });
+
+test('reveal locks forecast, purchase and supplier receipt against retroactive recovery',()=>{
+ const config={...base,actualDemand:1300,lockUpstream:true};
+ const initial=flow(START,{},config);
+ const stale=flow(START,{commercial:40,planning:40,purchasing:50},config);
+ assert.equal(stale.estimated,initial.estimated);
+ assert.equal(stale.ordered,initial.ordered);
+ assert.equal(stale.delivered,initial.delivered);
+ assert.equal(finance(stale,config).actionCostTotal,0);
+});
+test('upstream adjustments remain available in unlocked legacy model',()=>{
+ const config={...base,actualDemand:1300};
+ const initial=flow(START,{},config);
+ const changed=flow(START,{planning:40,purchasing:50},config);
+ assert.ok(changed.delivered>=initial.delivered);
+});
