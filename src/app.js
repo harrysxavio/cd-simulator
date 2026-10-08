@@ -23,9 +23,9 @@ function setup(){
  const presets=$('demandPresets');presets.replaceChildren();
  for(const [id,label,mult] of [['low','Menor demanda',0.7],['same','Demanda esperada',1],['high','Mayor demanda',1.3]]){
   const value=Math.max(100,Math.round(scenario.demand*mult));
-  const b=add(presets,'button','choice '+(scenario.actualDemand===value?'selected':''));
+  const b=add(presets,'button','choice '+(scenario.demandShockPercent===Math.round((mult-1)*100)?'selected':''));
   add(b,'strong','',label);add(b,'small','',id==='low'?'−30 %':id==='high'?'+30 %':'0 %');
-  b.setAttribute('aria-pressed',String(scenario.actualDemand===value));
+  b.setAttribute('aria-pressed',String(scenario.demandShockPercent===Math.round((mult-1)*100)));
   b.onclick=()=>{scenario.demandShockPercent=Math.round((mult-1)*100);scenario.actualDemand=value;revealed=false;actions={};save();render()};
  }
  const choices=$('strategyChoices');choices.replaceChildren();
