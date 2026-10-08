@@ -4,22 +4,20 @@ export function areaKpis(r,s){
  const pct=(a,b)=>b>0?(100*a/b).toFixed(1)+' %':'N/D';
  const ratio=(a,b,unit=' unid./operario')=>b>0?(a/b).toFixed(1)+unit:'N/D';
  const entry=(label,value,formula,meaning,scope='Calculado')=>({label,value,formula,meaning,scope});
- const demandGap=Math.max(0,r.demand-r.stock);
  const planningGap=Math.max(0,r.estimated-r.stock);
  const releaseBase=r.stock+r.released;
  const forecastBias=r.demand>0?(100*(r.estimated-r.demand)/r.demand).toFixed(1):'N/D';
- const financeUnits=r.dispatched;
  return {
  commercial:[
  entry('Error absoluto de pronóstico',pct(Math.abs(r.estimated-r.demand),r.demand),'|Pronóstico − demanda real| / demanda real × 100','Cuanto menor, mejor. Es un error de una sola campaña, no WAPE histórico.'),
  entry('Sesgo de pronóstico',forecastBias==='N/D'?'N/D':forecastBias+' %','(Pronóstico − demanda real) / demanda real × 100','Positivo: sobreestimación y riesgo de exceso. Negativo: subestimación y riesgo de quiebre.')
  ],
  planning:[
- entry('Cobertura de compra planificada',pct(r.ordered,planningGap),'Unidades solicitadas / brecha prevista tras stock inicial × 100','Mide la decisión de reposición. No equivale a cobertura de días.'),
+ entry('Cobertura de compra planificada',pct(r.ordered,planningGap),'Unidades solicitadas / brecha prevista tras stock inicial × 100','Mide la decisión de reposición. No equivale a cobertura de días. Si no hay brecha, se muestra N/D.'),
  entry('Cobertura de demanda real con plan',pct(Math.min(r.demand,r.stock+r.ordered),r.demand),'Mínimo(demanda real, stock inicial + compra solicitada) / demanda real × 100','Es cobertura teórica antes de entrega, recepción y calidad; no garantiza disponibilidad física.')
  ],
  purchasing:[
- entry('Cumplimiento de proveedor al corte',pct(r.delivered,r.ordered),'Unidades entregadas al corte / unidades solicitadas × 100','Cumplimiento en cantidad dentro de la jornada. No mide OTIF por pedido.'),
+ entry('Cumplimiento de proveedor al corte',pct(r.delivered,r.ordered),'Unidades entregadas al corte / unidades solicitadas × 100','Cumplimiento en cantidad dentro de la jornada. Puede variar ligeramente por redondeo de unidades; no mide OTIF por pedido.'),
  entry('Brecha de entrega de proveedor',Math.max(0,r.ordered-r.delivered).toLocaleString('es-CL')+' unid.','Máximo(0, unidades solicitadas − unidades entregadas)','Unidades faltantes del proveedor antes de la recepción. No atribuirlas a capacidad del CD.')
  ],
  receiving:[
