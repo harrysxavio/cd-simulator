@@ -5,12 +5,12 @@ import {areaKpis} from './kpis.js?v=86';
 import {causalAudit} from './causal.js?v=86';
 import {attentionSignals} from './attention.js?v=86';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false;
-const effectiveScenario=()=>({...scenario,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100))):scenario.demand});
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
+const effectiveScenario=()=>({...scenario,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed}))}catch{}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed}catch{}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed,shockDirection}))}catch{}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;shockDirection=s.shockDirection===-1?-1:1}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function showSection(name){
 for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
@@ -22,12 +22,11 @@ save();render();
 }
 function setup(){
  const presets=$('demandPresets');presets.replaceChildren();
- for(const [id,label,mult] of [['low','Menor demanda',0.7],['same','Demanda esperada',1],['high','Mayor demanda',1.3]]){
-  const value=Math.max(100,Math.round(scenario.demand*mult));
-  const b=add(presets,'button','choice '+(scenario.demandShockPercent===Math.round((mult-1)*100)?'selected':''));
-  add(b,'strong','',label);add(b,'small','',id==='low'?'−30 %':id==='high'?'+30 %':'0 %');
-  b.setAttribute('aria-pressed',String(scenario.demandShockPercent===Math.round((mult-1)*100)));
-  b.onclick=()=>{scenario.demandShockPercent=Math.round((mult-1)*100);scenario.actualDemand=value;revealed=false;actions={};save();render()};
+ for(const [id,label,percent] of [['light','Leve',10],['medium','Moderada',20],['strong','Intensa',30]]){
+  const b=add(presets,'button','choice '+(scenario.demandShockPercent===percent?'selected':''));
+  add(b,'strong','',label);add(b,'small','',percent+' % de variación (signo oculto)');
+  b.setAttribute('aria-pressed',String(scenario.demandShockPercent===percent));
+  b.onclick=()=>{scenario.demandShockPercent=percent;revealed=false;shockDirection=null;actions={};save();render()};
  }
  const choices=$('strategyChoices');choices.replaceChildren();
  for(const [id,title,desc] of [['service','Servicio al cliente','Prioriza cumplir la demanda.'],['balanced','Equilibrio','Equilibra cumplimiento, costos y resultado.'],['cost','Eficiencia económica','Prioriza costo unitario sin ignorar el servicio.']]){
@@ -38,7 +37,7 @@ for(const [key,label,unit,min,max,step] of FIELDS){
 const box=add(root,'div','setup-field');add(box,'label','',label+' ('+unit+')');
 const input=add(box,'input','numeric-input');input.type='number';input.min=min;input.max=max;input.step=step;input.value=scenario[key];
 input.setAttribute('aria-label',label);
-input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario.actualDemand=Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100)));scenario=cleanScenario(scenario);revealed=false;actions={};save();render()};
+input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario.actualDemand=Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100)));scenario=cleanScenario(scenario);revealed=false;shockDirection=null;actions={};save();render()};
 }}
 function dashboard(r){
  const f=finance(r,effectiveScenario()),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
@@ -295,17 +294,17 @@ $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
-$('reset').onclick=()=>{if(!confirm('¿Reiniciar la campaña?'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;save();render();showSection('operations')};
+$('reset').onclick=()=>{if(!confirm('¿Reiniciar la campaña?'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;save();render();showSection('operations')};
 $('openReport').onclick=()=>{save();showSection('preliminary');$('preliminarySection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('export').onclick=()=>{const r=flow(decisions,actions,effectiveScenario()),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
 $('setupTab').onclick=()=>showSection('setup');
 $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
-$('revealDemand').onclick=()=>{revealed=true;actions={};save();render();$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
+$('revealDemand').onclick=()=>{shockDirection=Math.random()<0.5?-1:1;revealed=true;actions={};save();render();$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
 $('startRecovery').onclick=()=>showSection('recovery');
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 $('beginExercise').onclick=()=>showSection('operations');
-$('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;actions={};save();render()};
+$('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;shockDirection=null;actions={};save();render()};
 load();render();showSection(revealed?'preliminary':'operations');
