@@ -1,5 +1,5 @@
 export const DEFAULT_SCENARIO={
- demand:1000,actualDemand:1000,areaCostTolerance:10,initialStock:250,reserveStock:150,unitPrice:9000,
+ demand:1000,actualDemand:1000,demandShockPercent:30,areaCostTolerance:10,initialStock:250,reserveStock:150,unitPrice:9000,
  unitPurchaseCost:2500,initialStockUnitCost:2500,unitTransportCost:500,unitPackagingCost:250,urgentPurchaseSurcharge:500,
  inventoryOperators:3,pickingOperators:5,receivingOperators:2,
  inventoryDailyWage:42000,pickingDailyWage:42000,receivingDailyWage:42000,
@@ -7,7 +7,7 @@ export const DEFAULT_SCENARIO={
 };
 export const FIELDS=[
 ['demand','Demanda prevista base (plan comercial)','unidades',100,100000,100],
-['actualDemand','Demanda real observada (pedidos del día)','unidades',100,100000,100],
+['demandShockPercent','Sorpresa de demanda para el ejercicio (variación con signo)','%',-80,200,5],
 ['areaCostTolerance','Tolerancia de sobrecosto por área','%',0,100,1],
 ['initialStock','Stock inicial','unidades',0,100000,50],
 ['reserveStock','Stock de reserva elegible','unidades',0,100000,25],
@@ -30,7 +30,7 @@ export const FIELDS=[
 export function cleanScenario(raw={}){
  const result={};
  for(const [key,, ,min,max] of FIELDS){const v=Number(raw[key]);result[key]=raw[key]!==undefined&&raw[key]!==''&&Number.isFinite(v)?Math.min(max,Math.max(min,v)):DEFAULT_SCENARIO[key]}
- if(raw.actualDemand===undefined)result.actualDemand=result.demand;
+ result.actualDemand=Math.max(1,Math.round(result.demand*(1+result.demandShockPercent/100)));
  return result;
 }
 // Modelo didáctico de una jornada: los costos de mercancía vendida y el flujo de caja
@@ -41,6 +41,8 @@ export const RECOVERY_RATES={
 };
 export function finance(flow,scenario){
  const s=cleanScenario(scenario),a=flow.actions||{};
+ const capacityStaff={receiving:Math.max(0,Math.ceil((Math.max(0,flow.receivingCapacity-(a.receiving||0))-650)/325)),picking:Math.max(0,Math.ceil((Math.max(0,flow.pickingCapacity-(a.picking||0))-2300)/460))};
+ const capacityLabor={receiving:capacityStaff.receiving*s.receivingDailyWage,picking:capacityStaff.picking*s.pickingDailyWage};
  const labor={
  inventory:s.inventoryOperators*s.inventoryDailyWage,
  picking:s.pickingOperators*s.pickingDailyWage,
@@ -54,7 +56,7 @@ export function finance(flow,scenario){
  const recoveryLaborTotal=Object.values(recoveryLabor).reduce((x,y)=>x+y,0);
  const actionCosts=Object.fromEntries(Object.entries(RECOVERY_RATES).map(([key,rate])=>[key,(a[key]||0)*rate]));
  const actionCostTotal=Object.values(actionCosts).reduce((x,y)=>x+y,0);
- const laborTotal=Object.values(labor).reduce((x,y)=>x+y,0)+recoveryLaborTotal;
+ const laborTotal=Object.values(labor).reduce((x,y)=>x+y,0)+recoveryLaborTotal+Object.values(capacityLabor).reduce((x,y)=>x+y,0);
  const purchase=flow.received*s.unitPurchaseCost;
  const urgentSurcharge=flow.procurementMode==='express'?flow.received*s.urgentPurchaseSurcharge:0;
  const transport=flow.dispatched*s.unitTransportCost;
@@ -70,7 +72,7 @@ export function finance(flow,scenario){
  const revenue=flow.dispatched*s.unitPrice;
  const contribution=revenue-costOfGoods-transport-packaging-urgentSurcharge;
  return {
- labor,recoveryLabor,recoveryLaborTotal,laborTotal,actionCosts,actionCostTotal,modeCosts,modeCostTotal,
+ labor,recoveryLabor,capacityStaff,capacityLabor,recoveryLaborTotal,laborTotal,actionCosts,actionCostTotal,modeCosts,modeCostTotal,
  purchase,urgentSurcharge,transport,packaging,fixed:s.otherFixedCost,
  costOfGoods,initialConsumed,newlyConsumed,operationalExpenses,cashOutflow,
  total,revenue,contribution,margin:revenue-total,
