@@ -102,3 +102,9 @@ Pruebas: `tests/demand.test.mjs`. Pendiente validar visualmente en Android y ext
 El usuario define la magnitud de la sorpresa y el sistema sortea el signo positivo o negativo al revelarla. La dirección sorteada se guarda localmente durante el ejercicio. Quedan pendientes escenarios preparados por otra persona, comparación entre escenarios y presupuesto flexible.
 
 Pruebas de regresión nuevas: `tests/surprise.test.mjs`. Ejecución prevista: `node --experimental-default-type=module --test tests/*.test.mjs`.
+
+## v9.1 · Fase 1: control de costos por capacidad y presupuesto flexible
+
+Se corrigió un doble cargo: elegir el modo reforzado de Recepción/Picking ya tiene una tarifa especial y **no** vuelve a cobrar dotación por esa misma capacidad. Las capacidades personalizadas por encima de la capacidad del modo elegido y su dotación sí generan un cargo incremental. El control por área utiliza ahora un presupuesto flexible: el costo estándar de personal se mantiene y el gasto estándar de empaque/transporte se ajusta a las unidades efectivamente procesadas. Se informan por separado desviación de volumen y desviación de gasto; los costos por área siguen conciliando con los gastos operacionales excluyendo costos fijos compartidos. No se interpreta menor volumen como eficiencia.
+
+**Limitación aún abierta:** el presupuesto flexible es parcial: recepción, calidad, inventario y otras variaciones de productividad no tienen todavía un estándar de horas/productividad suficientemente rico. Los recargos son didácticos, no cotizaciones reales. La fase 1 no se considera cerrada hasta auditar todos los parámetros y escenarios extremos, añadir presupuesto de mano de obra ajustado por dotación y ejecutar la suite real de Node y una prueba de navegador.
