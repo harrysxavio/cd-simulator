@@ -108,3 +108,7 @@
  .kpi-label{font-size:.73rem}
  .economic-details>summary{gap:10px}
 }
+
+.strategy-insight{margin:18px 0 22px;border:1px solid #36726b;background:#123e3e;border-radius:14px;padding:18px}
+.strategy-insight>strong{color:#a6fff0;font-size:1.02rem}
+.strategy-insight p{margin:10px 0 0;line-height:1.65}
