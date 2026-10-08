@@ -26,7 +26,7 @@ function dashboard(r){
 const f=finance(r,scenario);
 const money=v=>'$'+Math.round(v).toLocaleString('es-CL');
 const cards=$('financeMetrics');cards.replaceChildren();
-const values=[['Unidades expedidas',fmt(r.dispatched)],['Costo total',money(f.total)],['Costo unitario',f.costPerUnit===null?'N/D':money(f.costPerUnit)],['Meta por unidad',money(scenario.maxCostPerUnit)],['Ingreso estimado',money(f.revenue)],['Margen estimado',money(f.margin)],['Costo personal',money(f.laborTotal)],['Cumple meta',f.meetsTarget?'Sí':'No']];
+const values=[['Unidades expedidas',fmt(r.dispatched)],['Costo total',money(f.total)],['Costo unitario',f.costPerUnit===null?'N/D':money(f.costPerUnit)],['Meta por unidad',money(scenario.maxCostPerUnit)],['Ingreso estimado',money(f.revenue)],['Margen estimado',money(f.margin)],['Costo personal',money(f.laborTotal)],['Unid. por operario Picking',scenario.pickingOperators?(r.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso de capacidad Picking',r.stages[6].capacity?(100*r.picked/r.stages[6].capacity).toFixed(1)+'%':'N/D'],['Uso de capacidad Transporte',r.stages[7].capacity?(100*r.dispatched/r.stages[7].capacity).toFixed(1)+'%':'N/D'],['Cumple meta',f.meetsTarget?'Sí':'No']];
 for(const [label,value] of values){const c=add(cards,'div','metric');add(c,'span','',label);add(c,'strong','',value)}
 const costs=$('costBreakdown');costs.replaceChildren();
 const items=[['Personal inventario',f.labor.inventory],['Personal picking',f.labor.picking],['Personal recepción',f.labor.receiving],['Compra recibida',f.purchase],['Empaque',f.packaging],['Transporte',f.transport],['Otros fijos',f.fixed]];
