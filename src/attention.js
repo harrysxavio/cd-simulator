@@ -7,17 +7,18 @@ export function areaEconomics(decisions,actions,scenario){
  const s=cleanScenario(scenario),r=flow(decisions,actions,s),f=finance(r,s);
  const standardDecisions={...decisions};
  for(const id of Object.keys(AREA_NAMES))standardDecisions[id]=START[id];
+ standardDecisions.values={};
  const baseline=flow(standardDecisions,{}, {...s,actualDemand:s.demand});
  const fb=finance(baseline,{...s,actualDemand:s.demand});
  const costs=(x,y)=>({
   commercial:y.actionCosts.commercial||0,
   planning:y.actionCosts.planning||0,
   purchasing:(y.actionCosts.purchasing||0)+y.urgentSurcharge,
-  receiving:y.labor.receiving+y.recoveryLabor.receiving+(y.modeCosts.receiving||0),
-  quality:(y.actionCosts.quality||0)+(y.modeCosts.quality||0),
+  receiving:y.labor.receiving+y.recoveryLabor.receiving+(y.capacityLabor?.receiving||0)+(y.modeCosts.receiving||0),
+  quality:(y.actionCosts.quality||0)+(y.modeCosts.quality||0)+(y.extraCapacityCosts?.quality||0),
   inventory:y.labor.inventory+(y.actionCosts.inventory||0)+(y.modeCosts.inventory||0),
-  picking:y.labor.picking+y.recoveryLabor.picking+(y.modeCosts.picking||0)+y.packaging,
-  transport:(y.actionCosts.transport||0)+(y.modeCosts.transport||0)+y.transport
+  picking:y.labor.picking+y.recoveryLabor.picking+(y.capacityLabor?.picking||0)+(y.modeCosts.picking||0)+y.packaging,
+  transport:(y.actionCosts.transport||0)+(y.modeCosts.transport||0)+(y.extraCapacityCosts?.transport||0)+y.transport
  });
  const current=costs(r,f),reference=costs(baseline,fb);
  const tolerance=s.areaCostTolerance/100;
