@@ -1,5 +1,5 @@
-// Legado de v3: el modelo vigente usa unidades agregadas, sin SKU.
-export const PRODUCTS=[];
+// Datos legados usados solo por evaluate() de versiones anteriores; el laboratorio actual opera en unidades agregadas.
+export const PRODUCTS=[{id:'a',name:'Producto A',icon:'📦',perOrder:1,initial:380,need:600},{id:'b',name:'Producto B',icon:'📦',perOrder:1,initial:470,need:800},{id:'c',name:'Producto C',icon:'📦',perOrder:1,initial:330,need:500}];
 export const NODES=[
 {id:'commercial',title:'Comercial',icon:'📈',kpi:'Precisión del forecast',desc:'Valida la demanda de la campaña.',choices:[{id:'under',label:'Forecast conservador',note:'Subestima un 20 % de la demanda.',forecast:80},{id:'accurate',label:'Forecast basado en campaña',note:'Mantiene la demanda proyectada.',forecast:100},{id:'over',label:'Forecast optimista',note:'Sobrestima un 15 % de la demanda.',forecast:115}]},
 {id:'planning',title:'Planning',icon:'🗓️',kpi:'Cobertura planificada',desc:'Define cuánto de la brecha de stock se repondrá.',choices:[{id:'partial',label:'Priorizar 70 % de faltantes',note:'Menos compra, mayor riesgo de quiebre.',coverage:70},{id:'full',label:'Cubrir toda la brecha',note:'Compra la necesidad calculada.',coverage:100},{id:'buffer',label:'Agregar colchón de 10 %',note:'Protege la campaña, con más inventario.',coverage:110}]},
