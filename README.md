@@ -160,3 +160,15 @@ Se incorporó un motor independiente `src/sku.js` con cuatro SKU, cuatro tipos d
 El tablero final incluye una sección piloto que muestra este ejercicio separado. **Importante:** por ahora el laboratorio SKU no altera la demanda, los costos, las compras, los KPI ni el cumplimiento del motor agregado principal. Es una fase de integración controlada para evitar regresiones. El ejemplo estándar resuelve 120 de 200 pedidos completos, aunque queden existencias de otros SKU.
 
 Pruebas en `tests/sku.test.mjs`: reparto exacto, conservación de stock, stock cero, capacidad cero, stock suficiente, pedidos impares y validación de SKU. Se comprobaron 10 invariantes del módulo y 7 verificaciones de integración con interfaz simulada; todavía no se confirma la suite real de Node ni la QA visual en Android. Siguiente fase: conectar la mezcla de SKU al aprovisionamiento y demanda sorpresa, con asignación explícita de compras por producto y contabilidad consistente.
+
+## v9.9 · Rotación física y políticas de inventario (fase 3A)
+
+El laboratorio SKU se rediseñó con **tres referencias** de rotación **alta, media y baja** y cuatro tipos de pedidos. La demanda de unidades de cada SKU se deriva de la mezcla de pedidos, no de una etiqueta arbitraria. La asignación intercala tipos de pedido proporcionalmente para evitar que un tipo consuma artificialmente todo el SKU A antes de evaluar los demás; no representa FIFO cronológico.
+
+Se agregaron costo unitario ilustrativo, plazo de reposición, días de seguridad, demanda mensual supuesta, cobertura en días, punto de pedido = demanda diaria promedio × (lead time + seguridad), y señal de reposición calculada sobre **stock final**. La rotación (unidades consumidas/solicitadas) se distingue explícitamente de **ABC por valor de demanda** (unidades demandadas × costo unitario). Con solo tres SKU, una clasificación ABC de Pareto puede agrupar varias referencias en A; no se fuerza artificialmente una letra por SKU.
+
+**Advertencia de interpretación:** la demanda de 200 pedidos se utiliza como *muestra mensual supuesta* exclusivamente para el cálculo de cobertura y reposición; la campaña principal sigue representando una sola jornada y no comparte inventario con este piloto. No se debe sumar la demanda de ambos ejercicios ni utilizar el punto de pedido como decisión real sin variabilidad de demanda, nivel de servicio, revisión de stock y calendario de proveedores.
+
+### Ampliación del roadmap
+
+La fase 3 se divide en **3A: rotación, mezcla y pedidos completos (piloto)**, **3B: política de reposición, cobertura, seguridad y costo de mantener stock**, y **3C: integración de inventario SKU con compras, recepción, sorpresa de demanda y economía del simulador principal**. No se crea una sexta fase, porque estos componentes son dependencias naturales del modelado de inventario. Pruebas ampliadas en `tests/sku.test.mjs`; 8 comprobaciones de integración simulada correctas. Suite Node y navegador Android aún sin confirmar.
