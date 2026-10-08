@@ -124,3 +124,11 @@ La referencia de presupuesto por área usa ahora los **modos operativos predeter
 El motor expone `stockUsableTotal` antes del límite de demanda y `unusedStock` después de expedición. La auditoría de Inventario ya no usa toda la demanda como carga de trabajo: usa el stock utilizable y muestra también dotación teórica para atender la demanda posible. Los semáforos detectan dotación superior a la carga teórica o carga superior a la dotación en Recepción, Inventario y Picking, con exposición monetaria **indicativa**, no ahorro realizable. Los indicadores no incluyen dotación mínima, tareas indirectas, restricciones laborales ni variabilidad de mezcla; no deben emplearse para decisiones reales de personal.
 
 Se ampliaron las pruebas en `tests/labor.test.mjs`. Se ejecutaron 11 verificaciones funcionales con DOM simulado (11 correctas); la suite real de Node y QA visual Android continúan pendientes. El simulador sigue siendo de unidades agregadas, no una herramienta de dimensionamiento industrial.
+
+## v9.4 · Regresión financiera y controles de decisiones
+
+Se corrigió la doble imputación en Calidad: la modalidad **priority** ya paga su recargo fijo de 22.000 CLP y no paga adicionalmente la aceleración de liberación hasta el 100 % propia de ese modo. Solo una liberación por encima del estándar del modo seleccionado activa el costo variable ilustrativo.
+
+Los semáforos comparan ahora las modalidades operativas especiales de Recepción, Calidad, Inventario, Picking y Transporte con la modalidad normal manteniendo las demás decisiones y acciones. Cuando una modalidad no mejora las unidades despachadas y además reduce el resultado simulado, aparece la alerta «Modo sin retorno demostrado». Esta prueba es un contrafactual aislado y no considera seguridad, SLA, calidad de servicio ni beneficios futuros no modelados.
+
+Se añadieron pruebas de regresión de ambos casos en `tests/labor.test.mjs` y un workflow `.github/workflows/model-tests.yml` para ejecutar la suite Node 22 en cada push/PR. En esta iteración pasaron **11 de 11 verificaciones funcionales con DOM simulado**; no se ha confirmado todavía la ejecución exitosa de GitHub Actions ni realizado una prueba visual real en Android.
