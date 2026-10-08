@@ -11,9 +11,10 @@ transport:['Ampliar capacidad de salida','unidades',600,25]
 };
 export function flow(d={},a={},scenario={}){
 const q=id=>numericValue(id,d),x=id=>Math.max(0,Math.min(ACTIONS[id][2],Number(a[id])||0));
-const demand=Math.max(1,Math.floor(Number(scenario.demand) || TOTAL_ORDERS)),stock=Math.max(0,Math.floor(scenario.initialStock===undefined?250:Number(scenario.initialStock)));
+const plannedDemand=Math.max(1,Math.floor(Number(scenario.demand) || TOTAL_ORDERS));
+const demand=Math.max(1,Math.floor(Number(scenario.actualDemand??scenario.demand) || plannedDemand)),stock=Math.max(0,Math.floor(scenario.initialStock===undefined?250:Number(scenario.initialStock)));
 const forecast=q('commercial')+Math.sign(100-q('commercial'))*Math.min(x('commercial'),Math.abs(100-q('commercial')));
-const estimated=Math.floor(demand*forecast/100),gap=Math.max(0,estimated-stock);
+const estimated=Math.floor(plannedDemand*forecast/100),gap=Math.max(0,estimated-stock);
 const ordered=Math.ceil(gap*(q('planning')+x('planning'))/100);
 const delivered=Math.floor(ordered*Math.min(100,q('purchasing')+x('purchasing'))/100);
 const receivingCapacity=Math.floor(q('receiving')*Math.max(0,Number(scenario.receivingOperators??2))/2+x('receiving'));
@@ -27,7 +28,7 @@ const pickingCapacity=Math.floor(q('picking')*Math.max(0,Number(scenario.picking
 const picked=Math.min(available,pickingCapacity);
 const dispatched=Math.min(picked,q('transport')+x('transport'));
 const data=[
-['commercial',demand,estimated,estimated,'Demanda real → forecast'],
+['commercial',plannedDemand,estimated,estimated,'Demanda prevista base → pronóstico ajustado; demanda real se observa después'],
 ['planning',gap,ordered,ordered,'Brecha forecast - stock inicial → compra solicitada'],
 ['purchasing',ordered,delivered,delivered,'Solicitud → entrega real del proveedor'],
 ['receiving',delivered,received,receivingCapacity,'Entrega → ingreso por capacidad'],
@@ -37,7 +38,7 @@ const data=[
 ['transport',picked,dispatched,q('transport')+x('transport'),'Preparado → expedición']
 ];
 const stages=data.map(([id,input,output,capacity,detail])=>({id,input,output,capacity,detail,unit:'unidades'}));
-return {stages,demand,stock,eligibleReserve,usableBase,receivingCapacity,inventoryCapacity,pickingCapacity,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',choices:Object.fromEntries(NODES.map(n=>[n.id,d[n.id]||null])),actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
+return {stages,demand,plannedDemand,stock,eligibleReserve,usableBase,receivingCapacity,inventoryCapacity,pickingCapacity,estimated,ordered,delivered,received,released,available,picked,dispatched,pending:demand-dispatched,procurementMode:d.purchasing||'cheap',choices:Object.fromEntries(NODES.map(n=>[n.id,d[n.id]||null])),actions:Object.fromEntries(NODES.map(n=>[n.id,x(n.id)]))};
 }
 export function diagnose(d={},a={},scenario={}){
 const current=flow(d,a,scenario);
