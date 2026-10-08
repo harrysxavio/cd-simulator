@@ -6,7 +6,7 @@ import {causalAudit} from './causal.js?v=86';
 import {attentionSignals} from './attention.js?v=86';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false;
-const effectiveScenario=()=>({...scenario,actualDemand:revealed?scenario.actualDemand:scenario.demand});
+const effectiveScenario=()=>({...scenario,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed}))}catch{}}
@@ -37,7 +37,7 @@ for(const [key,label,unit,min,max,step] of FIELDS){
 const box=add(root,'div','setup-field');add(box,'label','',label+' ('+unit+')');
 const input=add(box,'input','numeric-input');input.type='number';input.min=min;input.max=max;input.step=step;input.value=scenario[key];
 input.setAttribute('aria-label',label);
-input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario=cleanScenario(scenario);revealed=false;actions={};save();render()};
+input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario.actualDemand=Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100)));scenario=cleanScenario(scenario);revealed=false;actions={};save();render()};
 }}
 function dashboard(r){
  const f=finance(r,effectiveScenario()),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
