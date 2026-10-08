@@ -4,15 +4,17 @@ import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from '
 import {areaKpis} from './kpis.js?v=86';
 import {causalAudit} from './causal.js?v=86';
 import {attentionSignals} from './attention.js?v=86';
-const $=id=>document.getElementById(id),KEY='supply-lab-v62';
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced';
+const $=id=>document.getElementById(id),KEY='supply-lab-v90';
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false;
+const effectiveScenario=()=>({...scenario,actualDemand:revealed?scenario.actualDemand:scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy}))}catch{}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan'}catch{}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed}))}catch{}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function showSection(name){
 for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
+if((name==='recovery'||name==='dashboard')&&!revealed){name='preliminary'}
 if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
 if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
 save();render();
@@ -22,9 +24,9 @@ function setup(){
  for(const [id,label,mult] of [['low','Menor demanda',0.7],['same','Demanda esperada',1],['high','Mayor demanda',1.3]]){
   const value=Math.max(100,Math.round(scenario.demand*mult));
   const b=add(presets,'button','choice '+(scenario.actualDemand===value?'selected':''));
-  add(b,'strong','',label);add(b,'small','',fmt(value)+' unidades reales');
+  add(b,'strong','',label);add(b,'small','',id==='low'?'−30 %':id==='high'?'+30 %':'0 %');
   b.setAttribute('aria-pressed',String(scenario.actualDemand===value));
-  b.onclick=()=>{scenario.actualDemand=value;save();render()};
+  b.onclick=()=>{scenario.demandShockPercent=Math.round((mult-1)*100);scenario.actualDemand=value;revealed=false;actions={};save();render()};
  }
  const choices=$('strategyChoices');choices.replaceChildren();
  for(const [id,title,desc] of [['service','Servicio al cliente','Prioriza cumplir la demanda.'],['balanced','Equilibrio','Equilibra cumplimiento, costos y resultado.'],['cost','Eficiencia económica','Prioriza costo unitario sin ignorar el servicio.']]){
@@ -35,10 +37,10 @@ for(const [key,label,unit,min,max,step] of FIELDS){
 const box=add(root,'div','setup-field');add(box,'label','',label+' ('+unit+')');
 const input=add(box,'input','numeric-input');input.type='number';input.min=min;input.max=max;input.step=step;input.value=scenario[key];
 input.setAttribute('aria-label',label);
-input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;save();render()};
+input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario=cleanScenario(scenario);revealed=false;actions={};save();render()};
 }}
 function dashboard(r){
- const f=finance(r,scenario),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
+ const f=finance(r,effectiveScenario()),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
  const cards=$('financeMetrics');cards.replaceChildren();
  const values=[
  ['Unidades expedibles',fmt(r.dispatched)],
@@ -78,20 +80,22 @@ function dashboard(r){
  $('financialInsight').textContent=r.dispatched===0?'No hay expedición posible: no se calcula costo unitario. Los gastos y desembolsos pueden mantenerse.':over?'El costo por unidad supera la meta. La comparación se hace contra el costo total, no contra presupuestos arbitrarios por área.':'El costo por unidad está dentro de la meta global. Revisa también el resultado operacional y los desembolsos.';
 }
 function renderDiagnosis(current){
- const initial=flow(decisions,{},scenario);
- const oldCost=finance(initial,scenario),newCost=finance(current,scenario);
+ const initial=flow(decisions,{},effectiveScenario());
+ const oldCost=finance(initial,effectiveScenario()),newCost=finance(current,effectiveScenario());
  const percent=(a,b)=>b?((100*a/b).toFixed(1)+'%'):'N/D';
  const cash=v=>'CLP '+Math.round(v).toLocaleString('es-CL');
  const pre=$('preliminaryMetrics');pre.replaceChildren();
  const items=[['Cumplimiento',percent(initial.dispatched,initial.demand)],['Picking unid./operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso Picking',percent(initial.picked,initial.stages[6].capacity)],['Costo por unidad',oldCost.costPerUnit===null?'N/D':cash(oldCost.costPerUnit)],['Unidades pendientes',fmt(initial.pending)]];
  for(const item of items){const c=add(pre,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1])}
  const comparison=$('demandComparison');comparison.replaceChildren();
- add(comparison,'strong','','Pronóstico y demanda observada');
- add(comparison,'p','','Plan base: '+fmt(initial.plannedDemand)+' unidades · Pronóstico ajustado: '+fmt(initial.estimated)+' · Pedidos reales: '+fmt(initial.demand)+'.');
- add(comparison,'p','muted','Desviación real vs. plan: '+((initial.demand/initial.plannedDemand-1)*100).toFixed(1)+' %. La compra se decidió sobre el pronóstico, no con conocimiento anticipado de los pedidos reales.');
+ add(comparison,'strong','',revealed?'Sorpresa revelada: nueva demanda real':'Diagnóstico del plan antes de conocer la demanda real');
+ add(comparison,'p','','Plan base: '+fmt(initial.plannedDemand)+' unidades · Pronóstico ajustado: '+fmt(initial.estimated)+(revealed?' · Pedidos reales: '+fmt(initial.demand):' · Pedidos reales: todavía desconocidos')+'.');
+ add(comparison,'p','muted',revealed?'Desviación real vs. plan: '+((initial.demand/initial.plannedDemand-1)*100).toFixed(1)+' %. Las compras originales se mantienen.':'Este diagnóstico usa la demanda prevista. Pulsa «Revelar sorpresa» para descubrir la demanda efectiva y decidir cómo responder.');
+ $('revealDemand').hidden=revealed;
+ $('startRecovery').hidden=!revealed;
  const preSummary=$('preliminarySummary');preSummary.replaceChildren();
  const initialAssessment=strategyAssessment(initial,scenario,strategy);
- add(preSummary,'strong','','Lectura preliminar de la empresa');
+ add(preSummary,'strong','',revealed?'Situación después de la sorpresa':'Lectura inicial de la empresa (demanda prevista)');
  add(preSummary,'p','','Meta de servicio: '+scenario.targetFulfillment+' %. Resultado: '+percent(initial.dispatched,initial.demand)+'. Brecha para cumplir: '+fmt(Math.max(0,Math.ceil(initial.demand*scenario.targetFulfillment/100)-initial.dispatched))+' unidades.');
  add(preSummary,'p','muted',initialAssessment.service>=initialAssessment.goal?'El nivel de servicio alcanza el objetivo. Evalúa ahora si el costo es sostenible.':'El servicio está bajo la meta. Revisa restricciones aguas arriba antes de reforzar capacidades locales.');
  const descriptions={
@@ -104,17 +108,17 @@ function renderDiagnosis(current){
  picking:'La productividad observada puede caer por falta de unidades disponibles, aunque exista capacidad.',
  transport:'La expedición depende de las unidades preparadas y de la capacidad de salida.'
  };
- const initialCausal=causalAudit(decisions,{},scenario);
+ const initialCausal=causalAudit(decisions,{},effectiveScenario());
  const prelimCausal=$('preliminaryCausal');prelimCausal.replaceChildren();
  add(prelimCausal,'strong','','¿Dónde conviene investigar primero?');
  add(prelimCausal,'p','',initialCausal.summary);
  add(prelimCausal,'small','','Análisis de intervenciones individuales bajo supuestos ficticios. No confundir con causa raíz verificada.');
  const root=$('preliminaryFindings');root.replaceChildren();
- for(const f of diagnose(decisions,{},scenario).findings){
+ for(const f of diagnose(decisions,{},effectiveScenario()).findings){
  const box=add(root,'div','diagnosis-card');add(box,'strong','',f.icon+' '+f.title);
  const st=f.stage,util=percent(st.output,st.capacity);
  add(box,'p','',descriptions[f.id]);
- const indicators=areaKpis(initial,scenario)[f.id];
+ const indicators=areaKpis(initial,effectiveScenario())[f.id];
  const kpiGrid=add(box,'div','area-kpi-grid');
  for(const indicator of indicators){
   const tile=add(kpiGrid,'div','area-kpi-tile');
@@ -155,7 +159,7 @@ function renderAssessment(initial,current){
  const bar=add(row,'div','score-track');const fill=add(bar,'div','score-fill');fill.style.width=Math.max(0,Math.min(100,value))+'%';
  }
  const serviceGap=Math.max(0,Math.ceil(current.demand*scenario.targetFulfillment/100)-current.dispatched);
- const f=finance(current,scenario),base=finance(initial,scenario);
+ const f=finance(current,effectiveScenario()),base=finance(initial,effectiveScenario());
  if(serviceGap>0)add(root,'p','diagnosis-note','Faltan '+fmt(serviceGap)+' unidades para la meta de servicio. Identifica la restricción efectiva antes de gastar más.');
  else add(root,'p','kpi-strategy','La meta de servicio se cumple. Considera si los costos y la utilización justifican la capacidad elegida.');
  if(f.costPerUnit!==null&&f.costPerUnit>scenario.maxCostPerUnit)add(root,'p','diagnosis-note','El costo unitario excede la meta en CLP '+fmt(f.costPerUnit-scenario.maxCostPerUnit)+'.');
@@ -165,7 +169,7 @@ function renderAssessment(initial,current){
 function renderKpiLesson(r){
  const id=NODES[active].id,root=$('kpiLesson');
  root.replaceChildren();
- const indicators=areaKpis(r,scenario)[id];
+ const indicators=areaKpis(r,effectiveScenario())[id];
  for(const indicator of indicators){
   const section=add(root,'section','kpi-explainer');
   const lead=add(section,'div','kpi-lead');
@@ -179,7 +183,7 @@ function renderKpiLesson(r){
 
 function renderAttention(){
  const root=$('attentionSummary'),costs=$('areaCostCards');root.replaceChildren();costs.replaceChildren();
- const report=attentionSignals(decisions,actions,scenario);
+ const report=attentionSignals(decisions,actions,effectiveScenario());
  for(const m of report.messages){
   const card=add(root,'div','attention-item '+m.level);
   add(card,'strong','',m.level==='danger'?'🔴 ':m.level==='warning'?'🟠 ':'🟢 '+m.title);
@@ -196,19 +200,19 @@ function renderAttention(){
 }
 function render(){
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
-const r=flow(decisions,actions,scenario),diag=diagnose(decisions,actions,scenario),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();
+const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?'Planificación':'Recuperación');
 $('progressFill').style.width=NODES.filter(x=>decisions[x.id]).length/8*100+'%';
 const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));add(b,'span','node-icon',x.icon);const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');add(b,'span','node-state',i===active?'●':'→');b.setAttribute('aria-current',i===active?'step':'false');b.onclick=()=>nav(i)});
-$('missionNumber').textContent=(phase==='plan'?'PLANIFICAR':'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent=areaKpis(r,scenario)[n.id].length+' KPI del área';
+$('missionNumber').textContent=(phase==='plan'?'PLANIFICAR':'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent=areaKpis(r,effectiveScenario())[n.id].length+' KPI del área';
 const choices=$('choices');choices.replaceChildren();if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.onclick=()=>{decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
 const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.onchange=()=>{const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
 }const box=add(choices,'div','flow-summary');add(box,'strong','','Relación con las otras áreas');add(box,'p','','Recibe '+fmt(st.input)+' → entrega '+fmt(st.output)+' unidades. Capacidad '+fmt(st.capacity)+'.');add(box,'small','',st.detail);
 if(phase==='recover'){
  const cfg=ACTIONS[n.id],selected=actions[n.id]||0;
- const before=flow(decisions,actions,scenario),baseCost=finance(before,scenario).total;
+ const before=flow(decisions,actions,effectiveScenario()),baseCost=finance(before,effectiveScenario()).total;
  add(choices,'h3','','Decide si intervenir');
  add(choices,'p','muted','Todas las medidas son opcionales. Puedes mantener la situación o ajustar cuánto esfuerzo aplicar.');
  const opts=[
@@ -218,9 +222,9 @@ if(phase==='recover'){
  ['Intervención intensiva',cfg[2],'Mayor esfuerzo disponible; puede tener costo sin beneficio global.']
  ];
  for(const [title,value,description] of opts){
- const trial=flow(decisions,{...actions,[n.id]:value},scenario);
+ const trial=flow(decisions,{...actions,[n.id]:value},effectiveScenario());
  const difference=trial.dispatched-before.dispatched;
- const extraCost=finance(trial,scenario).total-baseCost;
+ const extraCost=finance(trial,effectiveScenario()).total-baseCost;
  const button=add(choices,'button','choice recovery-option '+(selected===value?'selected':''));
  add(button,'strong','',title+' · '+value+' '+cfg[1]);
  add(button,'small','',description);
@@ -232,7 +236,7 @@ if(phase==='recover'){
  add(control,'label','','O define una cantidad propia ('+cfg[1]+')');
  const num=add(control,'input','numeric-input');num.type='number';num.min=0;num.max=cfg[2];num.step=cfg[3];num.value=selected;
  num.onchange=()=>{const v=Number(num.value);if(num.value===''||!Number.isFinite(v)||v<0||v>cfg[2]){num.value=selected;return}actions[n.id]=v;save();render()};
- const noAction=flow(decisions,{...actions,[n.id]:0},scenario);
+ const noAction=flow(decisions,{...actions,[n.id]:0},effectiveScenario());
  const contribution=before.dispatched-noAction.dispatched;
  add(control,'p','muted',selected===0?'Sin intervención: la operación mantiene sus restricciones actuales.':contribution>0?'La intervención seleccionada aporta '+fmt(contribution)+' unidades expedibles con las demás decisiones actuales.':'Esta medida todavía no aumenta la expedición global; puede haber otra restricción que debas resolver.');
 }
@@ -261,11 +265,11 @@ for(const [label,value] of [['Demanda real',r.demand],['Stock inicial',r.stock],
 }
 $('cause').textContent='Transporte recibe '+fmt(r.picked)+' unidades desde Picking y despacha '+fmt(r.dispatched)+'. Su capacidad es '+fmt(r.stages[7].capacity)+'. '+(r.picked<r.stages[7].capacity?'Capacidad ociosa por falta de flujo o demanda aguas arriba.':'El despacho está limitado por capacidad o disponibilidad.');
 renderDiagnosis(r);const causes=$('rootCauses');causes.replaceChildren();
-const causal=causalAudit(decisions,actions,scenario),causalSummary=$('causalSummary');causalSummary.replaceChildren();
+const causal=causalAudit(decisions,actions,effectiveScenario()),causalSummary=$('causalSummary');causalSummary.replaceChildren();
 add(causalSummary,'strong','','Diagnóstico de restricciones y efecto económico');
 add(causalSummary,'p','',causal.summary);
 add(causalSummary,'small','','Se prueba cada medida por separado con las demás decisiones constantes. Una restricción simultánea puede ocultar mejoras que solo funcionan en conjunto.');
-const initial=flow(decisions,{},scenario);
+const initial=flow(decisions,{},effectiveScenario());
 const explanations={commercial:'El pronóstico afecta la necesidad calculada para reponer.',planning:'La cobertura determina cuánto se compra para cerrar la brecha.',purchasing:'El cumplimiento del proveedor condiciona la llegada de unidades.',receiving:'La productividad de recepción depende de dotación y entregas recibidas.',quality:'La tasa de liberación define cuánto inventario queda autorizado.',inventory:'La disponibilidad combina stock inicial, calidad y reserva.',picking:'La productividad puede estar limitada por el abastecimiento anterior.',transport:'El cumplimiento de expedición depende del preparado y de la capacidad de salida.'};
 for(const f of diag.findings){
  const counter=causal.evidence.find(x=>x.id===f.id);
@@ -278,8 +282,8 @@ for(const f of diag.findings){
  add(item,'p','kpi-strategy','Prueba de intervención aislada: '+(counter.delta>0?'+':'')+fmt(counter.delta)+' unidades expedibles · cambio en resultado '+(counter.net>=0?'+':'')+fmt(counter.net)+' CLP.');
  add(item,'p','muted',counter.warning);
  if(f.potential>0){
- const projected=flow(decisions,{...actions,[f.id]:ACTIONS[f.id][2]},scenario);
- const costChange=finance(projected,scenario).total-finance(r,scenario).total;
+ const projected=flow(decisions,{...actions,[f.id]:ACTIONS[f.id][2]},effectiveScenario());
+ const costChange=finance(projected,effectiveScenario()).total-finance(r,effectiveScenario()).total;
  const localGap=Math.max(0,after.input-after.output);
  add(item,'p','diagnosis-note','Si mantienes la decisión actual en '+f.title+', esta etapa seguirá procesando '+fmt(after.output)+' de '+fmt(after.input)+' unidades de entrada'+(localGap?' (brecha de '+fmt(localGap)+').':'.')+' La campaña conservaría '+fmt(r.pending)+' unidades pendientes. Una medida adicional podría aumentar la expedición global en '+fmt(f.potential)+' unidades, con una variación de costo modelada de '+fmt(costChange)+' CLP. Compara ese costo con el beneficio antes de intervenir.');
 }
@@ -290,16 +294,17 @@ $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
-$('reset').onclick=()=>{if(!confirm('¿Reiniciar la campaña?'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';save();render();showSection('operations')};
+$('reset').onclick=()=>{if(!confirm('¿Reiniciar la campaña?'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;save();render();showSection('operations')};
 $('openReport').onclick=()=>{save();showSection('preliminary');$('preliminarySection').scrollIntoView({behavior:'smooth',block:'start'})};
-$('export').onclick=()=>{const r=flow(decisions,actions,scenario),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
+$('export').onclick=()=>{const r=flow(decisions,actions,effectiveScenario()),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
 $('setupTab').onclick=()=>showSection('setup');
 $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
+$('revealDemand').onclick=()=>{revealed=true;actions={};save();render();$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
 $('startRecovery').onclick=()=>showSection('recovery');
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 $('beginExercise').onclick=()=>showSection('operations');
-$('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};save();render()};
+$('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;actions={};save();render()};
 load();render();showSection('operations');
