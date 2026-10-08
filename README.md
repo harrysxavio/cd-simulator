@@ -1,58 +1,63 @@
-# CD Simulator — Operations Decision Lab
+# CD Flow Lab — un pedido, siete áreas
 
-**Demo:** https://harrysxavio.github.io/cd-simulator/
+**Aplicación pública:** https://harrysxavio.github.io/cd-simulator/
 
-Simulador web responsive y gratuito para explorar decisiones básicas de capacidad, dotación, acumulación de pedidos y costo laboral en un centro de distribución. Datos ilustrativos, no operacionales reales.
+Aplicación didáctica y responsive para mostrar **cómo se relacionan las decisiones de planificación, compras, recepción, calidad, inventario, picking y transporte** en el procesamiento de pedidos mult-SKU de un centro de distribución.
 
-## Versión 1.2 — flujo más realista
+## Caso base
 
-El flujo ahora incluye **picking → packing → despacho → salida/transporte**, además de pendientes de días anteriores. El volumen procesado es el mínimo entre demanda total y capacidad de cada etapa.
+Un lote de **100 pedidos**. Cada pedido requiere:
+- SKU A: 2 unidades, stock inicial 180, compra prevista 80.
+- SKU B: 1 unidad, stock inicial 95, compra prevista 35.
+- SKU C: 3 unidades, stock inicial 150, compra prevista 150.
 
-Variables: pedidos nuevos, pedidos pendientes, operarios de picking/packing/despacho, productividad horaria de cada etapa, horas por jornada, eficiencia común, costo horario por operario y límite de salida/transporte.
+Las áreas se conectan así:
+1. **Planificación:** porcentaje de pedidos liberados al flujo.
+2. **Compras:** porcentaje de la compra prevista que llega hoy del proveedor.
+3. **Recepción:** unidades entregadas que se pueden procesar en el día.
+4. **Calidad:** porcentaje de unidades recibidas aprobadas.
+5. **Inventario:** exactitud/disponibilidad utilizable del stock inicial más unidades aprobadas.
+6. **Picking:** líneas preparables por día; cada pedido tiene 3 líneas (una por SKU).
+7. **Transporte:** límite de pedidos completos que pueden expedirse.
 
-El costo laboral diario suma la dotación de **las tres etapas**, no solo picking. Los indicadores muestran carga procesada y pendientes; **cumplimiento de capacidad no equivale a OTIF** ni garantiza entregas a tiempo.
+**Nota de procesos:** P2P se refiere al abastecimiento desde compras hasta recepción/stock; picking y transporte son parte del fulfillment del pedido y no son etapas de P2P estrictamente.
 
-Se conservan las funciones de v1.1: comparador de referencia y propuesta, meta de cumplimiento y dotación de picking, barras comparativas, costos, exportación CSV y escenarios guardados en localStorage.
+## Cálculo
 
-## Fórmulas
+- Unidades entregadas de cada SKU = piso(compra prevista × porcentaje entrega).
+- Capacidad de recepción se distribuye proporcionalmente a unidades entregadas, con redondeo conservador.
+- Unidades aprobadas = piso(unidades recibidas × porcentaje de aprobación de calidad).
+- Stock utilizable = piso((stock inicial + aprobado) × porcentaje de disponibilidad).
+- Cobertura por SKU = piso(stock utilizable / unidades por pedido).
+- Pedidos con stock = mínimo de las coberturas de A, B y C.
+- Pedidos preparados = mínimo(100, pedidos liberados, pedidos con stock, piso(líneas picking/3), capacidad de transporte).
+- Pendientes = 100 - pedidos preparados.
 
-- Carga = pedidos nuevos + pedidos atrasados.
-- Capacidad por etapa = piso(operarios de la etapa × productividad por hora × horas × eficiencia/100).
-- Procesados = mínimo(carga, picking, packing, despacho, salida/transporte).
-- Pendientes = carga - procesados.
-- Cumplimiento de capacidad = procesados / carga × 100.
-- Costo laboral diario = (operarios picking + packing + despacho) × horas × costo horario.
-- Costo laboral unitario = costo laboral diario / procesados.
-- Dotación picking para meta = techo(techo(carga × meta/100) / (productividad picking × horas × eficiencia/100)).
+El modelo no asume que aumentar una capacidad siempre mejore la salida: las restricciones aguas abajo o la falta de un SKU pueden neutralizar el efecto.
 
-La recomendación advierte si packing, despacho o salida no permiten cumplir la meta; **no optimiza automáticamente dotación de todas las áreas**.
+## Cómo probarlo
 
-## Prueba de referencia v1.2
+- **Mejorar compras:** sube entregas del proveedor y disponibilidad de inventario, con impacto visible en el SKU limitante.
+- **Problema de calidad:** disminuye la aprobación de unidades y reduce la cantidad de pedidos completos.
+- **Reforzar picking:** muestra que incrementar capacidad de picking puede no aumentar el flujo cuando faltan productos.
+- **Aplicar mejora sugerida:** propone un ajuste incremental que aumenta pedidos completos, si existe alguno dentro del rango.
+- **Guardar y exportar:** escenarios locales y CSV de los resultados.
 
-Datos iniciales: 1.200 pedidos, 0 atrasados, 10 operarios picking a 18 pedidos/h, 8 operarios packing a 25 pedidos/h, 8 operarios despacho a 25 pedidos/h, 8 horas, 85% de eficiencia, 1.100 de límite de salida, costo 5.500 CLP/h por operario.
+## Alcance y limitaciones
 
-Resultados esperados:
-- Picking: **1.224**; packing: **1.360**; despacho: **1.360**; salida: **1.100**.
-- Procesados: **1.100**; pendientes: **100**; cumplimiento de capacidad: **91,67%**.
-- Dotación total: **26**; costo laboral directo: **1.144.000 CLP/día**; costo unitario: **1.040 CLP/pedido**.
-- Meta 95%: 1.140 pedidos, picking requiere 10 operarios; no es factible sin ampliar salida al menos a 1.140.
+Herramienta **educativa de capacidad y disponibilidad**, no WMS, APS, MRP, gemelo digital ni cálculo OTIF. Un solo lote y día, sin cronograma de entregas, lead times, inventario reservado, lotes de proveedor, trazabilidad, costos ni simulación estocástica. Los porcentajes representan supuestos configurables. El indicador de pedidos completos no significa que hayan sido entregados al cliente.
 
-## Limitaciones y supuestos
+Sin servidor, dependencias, cuentas, seguimiento ni transmisión de datos. Los escenarios guardados utilizan localStorage en el navegador actual.
 
-Es un **modelo determinista de capacidad**, no un gemelo digital ni un WMS. Supone pedidos homogéneos, un único turno, misma eficiencia y costo horario para todas las áreas. No contempla SKU/líneas por pedido, tiempos de desplazamiento, inventario, ausentismo, variabilidad, horas extra, costos de transporte, instalaciones, CAPEX ni SLA por pedido. No predice OTIF, rentabilidad total ni ROI. Para uso real, calibrar las productividades y restricciones con datos medidos.
+## Tecnología
 
-## Uso desde Android
+HTML, CSS, JavaScript nativo. GitHub Pages desde rama `main` y carpeta raíz.
 
-Abrir el enlace de demo. Ajustar parámetros, fijar referencia y comparar propuestas. Los escenarios guardados permanecen **solo en el navegador y dispositivo actual** mientras no se borren los datos del sitio. No requiere login, API, servidor ni instalación.
+## Evolución
 
-## Tecnologías y publicación
+- v1.0: cálculo simple de picking/despacho.
+- v1.1: comparaciones y costos.
+- v1.2: ampliación de etapas de capacidad.
+- **v2.0:** rediseño orientado a áreas conectadas, disponibilidad de tres SKU y ejemplos operativos prácticos.
 
-HTML5, CSS3, JavaScript nativo, localStorage. Publicación estática en GitHub Pages desde `main` / `root`.
-
-## Historial
-- **1.0:** capacidad simple de picking y despacho.
-- **1.1:** comparación, recomendador, gráficos, economía y guardado.
-- **1.2:** picking, packing, despacho, salida, backlog y costo laboral directo de las tres áreas.
-
-## Licencia
-MIT.
+Licencia MIT.
