@@ -41,12 +41,16 @@ const cause=upstreamCause(r);$('cause').textContent=cause.text;
 const detail=$('sku');detail.replaceChildren();
 for(const p of r.sku){const row=add(detail,'div','sku-row');add(row,'strong','',p.name);add(row,'span','','Demanda '+fmt(p.forecast)+' · Disponible '+fmt(p.usable));const bar=add(row,'div','sku-track');const fill=add(bar,'div','sku-fill');fill.style.width=Math.min(100,p.usable/(p.forecast||1)*100)+'%';}
 const results=$('results');results.replaceChildren();for(const s of r.stage){const node=NODES.find(n=>n.id===s.id);const line=add(results,'div','stage-result');add(line,'span','',node.icon+' '+node.title);add(line,'strong','',fmt(s.value));add(line,'small','',s.label)}
+const diag=diagnostic(decisions),focus=$('rootCauses');focus.replaceChildren();
+const findings=diag.focus.slice(0,5);
+if(!findings.length)add(focus,'p','muted','Sin pérdidas atribuibles a una sola área frente a su referencia; podrían existir restricciones simultáneas.');
+for(const c of findings){const row=add(focus,'div','action');add(row,'span','action-index',c.icon);const content=add(row,'div','');add(content,'strong','',c.title+' · '+c.value+c.unit);add(content,'small','','Referencia '+c.reference+c.unit+' · Recuperación aislada al volver a referencia: +'+c.lost+' pedidos · Mejora individual posible: +'+c.gain+'.');}
 const recommendations=impacts(decisions),box=$('actions');box.replaceChildren();
 if(!recommendations.length)add(box,'p','muted','No hay una mejora individual positiva dentro de las alternativas actuales. Prueba combinaciones de decisiones o revisa si el lote ya está cubierto.');
 recommendations.slice(0,4).forEach((x,i)=>{const item=add(box,'div','action');add(item,'span','action-index',String(i+1));const content=add(item,'div','');add(content,'strong','',x.node.title+' · '+x.parameter.label+' a '+x.value+x.parameter.unit);add(content,'small','','Potencial estimado: +'+fmt(x.delta)+' pedidos completables, manteniendo las otras decisiones.');const b=add(item,'button','mini','Aplicar');b.addEventListener('click',()=>{decisions[x.node.id]=decisions[x.node.id]??DEFAULTS[x.node.id];decisions.values[x.node.id]=x.value;saved();render()})});
 $('riskCount').textContent=String(r.limiting.length);$('focus').textContent=r.limiting.map(id=>NODES.find(n=>n.id===id)?.title).join(' y ')||'Sin restricciones';
 }
-function render(){const r=evaluate(decisions);showMap(r);mission(r);summary(r);$('report').hidden=Object.keys(decisions).length<8}
+function render(){const r=evaluate(decisions);showMap(r);mission(r);summary(r);const count=NODES.filter(n=>decisions[n.id]).length;$('forecastNotice').textContent=count<8?'Proyección provisional: las áreas pendientes usan valores estándar hasta que decidas.':'Simulación completa: todas las áreas tienen decisiones registradas.';$('report').hidden=count<8}
 $('prev').addEventListener('click',()=>nav(Math.max(0,active-1)));
 $('next').addEventListener('click',()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];saved();if(active<7)nav(active+1);else{$('report').hidden=false;render();$('report').scrollIntoView({behavior:'smooth',block:'start'})}});
 $('reset').addEventListener('click',()=>{if(!confirm('¿Reiniciar todas las decisiones de esta campaña?'))return;decisions={...START,values:{}};active=0;saved();render()});
