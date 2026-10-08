@@ -104,37 +104,33 @@ const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hi
 }const box=add(choices,'div','flow-summary');add(box,'strong','','Relación con las otras áreas');add(box,'p','','Recibe '+fmt(st.input)+' → entrega '+fmt(st.output)+' unidades. Capacidad '+fmt(st.capacity)+'.');add(box,'small','',st.detail);
 if(phase==='recover'){
  const cfg=ACTIONS[n.id],selected=actions[n.id]||0;
- const before=flow(decisions,actions,scenario);
- const baselineFinance=finance(before,scenario);
- add(choices,'h3','','¿Qué decisión tomarías?');
- add(choices,'p','muted','No es obligatorio intervenir. Compara las alternativas y su efecto en toda la campaña.');
- const options=[
- {label:'Mantener la operación',value:0,why:'No utilizar recursos adicionales. Se mantienen las restricciones actuales.'},
- {label:'Mejora puntual',value:Math.min(cfg[2],Math.round(cfg[2]*.25/cfg[3])*cfg[3]),why:'Actuar con un refuerzo acotado para contener el impacto.'},
- {label:'Recuperación equilibrada',value:Math.min(cfg[2],Math.round(cfg[2]*.6/cfg[3])*cfg[3]),why:'Recuperar una parte relevante sin asumir el máximo esfuerzo.'},
- {label:'Intervención intensiva',value:cfg[2],why:'Aplicar el máximo esfuerzo disponible; no siempre mejora el resultado global.'}
+ const before=flow(decisions,actions,scenario),baseCost=finance(before,scenario).total;
+ add(choices,'h3','','Decide si intervenir');
+ add(choices,'p','muted','Todas las medidas son opcionales. Puedes mantener la situación o ajustar cuánto esfuerzo aplicar.');
+ const opts=[
+ ['Mantener como está',0,'Sin recursos adicionales. Conserva los indicadores actuales.'],
+ ['Mejora puntual',Math.round(cfg[2]*.25/cfg[3])*cfg[3],'Recuperación acotada.'],
+ ['Mejora equilibrada',Math.round(cfg[2]*.6/cfg[3])*cfg[3],'Refuerzo intermedio.'],
+ ['Intervención intensiva',cfg[2],'Mayor esfuerzo disponible; puede tener costo sin beneficio global.']
  ];
- const pick=v=>{actions[n.id]=v;save();render()};
- for(const opt of options){
- const trial=flow(decisions,{...actions,[n.id]:opt.value},scenario);
- const trialCost=finance(trial,scenario);
- const delta=trial.dispatched-before.dispatched,cost=trialCost.total-baselineFinance.total;
- const button=add(choices,'button','choice recovery-option '+(selected===opt.value?'selected':''));
- add(button,'strong','',opt.label+' · '+opt.value+' '+cfg[1]);
- add(button,'small','',opt.why);
- add(button,'small','', 'Frente a la situación actual: '+(delta>=0?'+':'')+fmt(delta)+' unidades expedibles · costo total '+(cost>=0?'+':'−')+'$'+fmt(Math.abs(cost))+'.');
- button.setAttribute('aria-pressed',String(selected===opt.value));
- button.onclick=()=>pick(opt.value);
+ for(const [title,value,description] of opts){
+ const trial=flow(decisions,{...actions,[n.id]:value},scenario);
+ const difference=trial.dispatched-before.dispatched;
+ const extraCost=finance(trial,scenario).total-baseCost;
+ const button=add(choices,'button','choice recovery-option '+(selected===value?'selected':''));
+ add(button,'strong','',title+' · '+value+' '+cfg[1]);
+ add(button,'small','',description);
+ add(button,'small','','Cambio vs. ahora: '+(difference>=0?'+':'')+fmt(difference)+' unidades expedibles · costo '+(extraCost>=0?'+':'')+fmt(extraCost)+' CLP.');
+ button.setAttribute('aria-pressed',String(selected===value));
+ button.onclick=()=>{actions[n.id]=value;save();render()};
  }
- const rr=add(choices,'div','numeric-control');
- add(rr,'label','','Ajuste personalizado de la medida ('+cfg[1]+')');
- const row=add(rr,'div','numeric-row'),num=add(row,'input','numeric-input');
- num.type='number';num.min=0;num.max=cfg[2];num.step=cfg[3];num.value=selected;
- num.setAttribute('aria-label','Cantidad de recuperación de '+n.title);
- num.onchange=()=>{const v=Number(num.value);if(num.value===''||!Number.isFinite(v)||v<0||v>cfg[2]){num.value=selected;return}pick(v)};
- const noChange=flow(decisions,{...actions,[n.id]:0},scenario);
- const withoutDelta=before.dispatched-noChange.dispatched;
- add(rr,'p','muted',selected===0?'Sin intervención en esta área. El indicador seguirá condicionado por las decisiones iniciales y las restricciones heredadas.':withoutDelta>0?'La acción actual contribuye '+fmt(withoutDelta)+' unidades a la expedición global. Si la retiras, esas unidades dejarían de ser expedibles con las demás decisiones actuales.':'La medida seleccionada no está aumentando las unidades expedibles de toda la campaña. Revisa el costo y las restricciones de otras áreas.');
+ const control=add(choices,'div','numeric-control');
+ add(control,'label','','O define una cantidad propia ('+cfg[1]+')');
+ const num=add(control,'input','numeric-input');num.type='number';num.min=0;num.max=cfg[2];num.step=cfg[3];num.value=selected;
+ num.onchange=()=>{const v=Number(num.value);if(num.value===''||!Number.isFinite(v)||v<0||v>cfg[2]){num.value=selected;return}actions[n.id]=v;save();render()};
+ const noAction=flow(decisions,{...actions,[n.id]:0},scenario);
+ const contribution=before.dispatched-noAction.dispatched;
+ add(control,'p','muted',selected===0?'Sin intervención: la operación mantiene sus restricciones actuales.':contribution>0?'La intervención seleccionada aporta '+fmt(contribution)+' unidades expedibles con las demás decisiones actuales.':'Esta medida todavía no aumenta la expedición global; puede haber otra restricción que debas resolver.');
 }
 $('nodeResult').textContent='Entrada: '+fmt(st.input)+' · Salida: '+fmt(st.output)+' · Capacidad: '+fmt(st.capacity)+' unidades. '+(st.input<st.capacity?'Parte de la capacidad puede estar ociosa por falta de flujo heredado.':st.output<st.input?'Esta área reduce el flujo que recibe la siguiente.':'Sin pérdida adicional en esta etapa.');
 $('prev').disabled=active===0;$('next').textContent=active===7?(phase==='plan'?'Ver diagnóstico preliminar →':'Ver resultado final →'):'Siguiente área →';
@@ -170,14 +166,8 @@ for(const f of diag.findings){
  const utilization=after.capacity?((after.output/after.capacity)*100).toFixed(1)+'%':'N/D';
  add(item,'p','muted','Salida inicial '+fmt(before.output)+' → salida final '+fmt(after.output)+' unidades. Utilización final '+utilization+'. Recuperación aplicada: '+fmt(actions[f.id]||0)+' '+ACTIONS[f.id][1]+'.');
  if(f.inherited)add(item,'p','diagnosis-note','Hay capacidad no utilizada por flujo heredado. Antes de reforzar esta área conviene resolver la restricción aguas arriba.');
- if(f.potential>0){
- const projected=flow(decisions,{...actions,[f.id]:ACTIONS[f.id][2]},scenario);
- const extra=projected.dispatched-r.dispatched;
- const additional=finance(projected,scenario).total-finance(r,scenario).total;
- add(item,'p','diagnosis-note','Si no se interviene, el cumplimiento se mantiene en '+(100*r.dispatched/r.demand).toFixed(1)+'% y seguirán pendientes '+fmt(r.pending)+' unidades. Una medida adicional en '+f.title+' podría permitir expedir '+fmt(extra)+' unidades más con un costo adicional estimado de '+fmt(additional)+' CLP. Evalúa si esa mejora justifica el gasto.');
-}else if(!actions[f.id]){
- add(item,'p','muted','Mantener esta área no reduce por sí solo la expedición actual. Reforzarla aisladamente tampoco mejoraría el cumplimiento mientras exista otra restricción; revisa primero las etapas anteriores.');
-}
+ if(f.potential>0){add(item,'p','diagnosis-note','Si no se interviene, se mantiene el cumplimiento de '+(100*r.dispatched/r.demand).toFixed(1)+'% y quedan '+fmt(r.pending)+' unidades pendientes. En '+f.title+', la medida disponible podría liberar '+fmt(f.potential)+' unidades adicionales para expedición. Antes de ejecutarla, compara el costo con el valor de esa recuperación.');}
+ else if(!actions[f.id]){add(item,'p','muted','Mantener esta área no reduce por sí solo el despacho actual. Reforzarla aisladamente tampoco mejoraría el cumplimiento mientras exista otra restricción.');}
 }
 const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const item=add(opts,'div','action'),body=add(item,'div','');add(body,'strong','',f.title+' · '+ACTIONS[f.id][0]);add(body,'small','','Elegido: '+(actions[f.id]||0)+' / '+ACTIONS[f.id][2]+' '+ACTIONS[f.id][1]+' · Mejora potencial adicional: +'+fmt(f.potential));const b=add(item,'button','mini','Configurar');b.onclick=()=>{phase='recover';showSection('recovery');nav(NODES.findIndex(n=>n.id===f.id))}});
 $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=diag.findings.filter(f=>f.potential>0).slice(0,3).map(f=>f.title).join(', ')||'Sin mejoras individuales';$('report').hidden=false;
@@ -192,28 +182,6 @@ $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
 $('startRecovery').onclick=()=>showSection('recovery');
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
-$('recoveryTab').onclick=()=>showSection('recovery');
-$('dashboardTab').onclick=()=>showSection('dashboard');
-$('beginExercise').onclick=()=>showSection('operations');
-$('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};save();render()};
-load();render();showSection('operations');
-+fmt(projectedCost.total-baselineCost.total)+'. La decisión debe justificarse por su contribución real al resultado.');
- }else if(!actions[f.id]){
- add(item,'p','muted','No actuar en esta área mantiene su indicador actual. Aumentar su capacidad de forma aislada no eleva la expedición mientras persistan las demás restricciones. Prioriza las áreas que realmente limitan el cumplimiento.');
- }
-}
-const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const item=add(opts,'div','action'),body=add(item,'div','');add(body,'strong','',f.title+' · '+ACTIONS[f.id][0]);add(body,'small','','Elegido: '+(actions[f.id]||0)+' / '+ACTIONS[f.id][2]+' '+ACTIONS[f.id][1]+' · Mejora potencial adicional: +'+fmt(f.potential));const b=add(item,'button','mini','Configurar');b.onclick=()=>{phase='recover';showSection('recovery');nav(NODES.findIndex(n=>n.id===f.id))}});
-$('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=diag.findings.filter(f=>f.potential>0).slice(0,3).map(f=>f.title).join(', ')||'Sin mejoras individuales';$('report').hidden=false;
-}
-$('prev').onclick=()=>nav(Math.max(0,active-1));
-$('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
-$('reset').onclick=()=>{if(!confirm('¿Reiniciar la campaña?'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';save();render();showSection('operations');showSection('operations')};
-$('openReport').onclick=()=>{save();render();showSection('preliminary');$('report').scrollIntoView({behavior:'smooth',block:'start'})};
-$('export').onclick=()=>{const r=flow(decisions,actions,scenario),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
-$('setupTab').onclick=()=>showSection('setup');
-$('operationsTab').onclick=()=>showSection('operations');
-$('preliminaryTab').onclick=()=>showSection('preliminary');
-$('startRecovery').onclick=()=>showSection('recovery');
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 $('beginExercise').onclick=()=>showSection('operations');
