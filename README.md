@@ -92,3 +92,13 @@ Se muestran entre 2 y 5 KPI por área (más en Inventario, Picking y Transporte)
 **Costos por área:** referencia con modos operativos estándar, sin recuperación, con demanda observada igual a la prevista. El usuario configura tolerancia porcentual de sobrecosto (10 % por defecto). Se distribuyen solo gastos atribuibles: dotación, intervenciones, recargos, empaque y transporte. No se reparten costos fijos compartidos ni mercancía entre áreas. Un costo inferior causado por bajo volumen **no se califica como eficiencia**. Las alertas incluyen refuerzos sin unidades adicionales, capacidad insuficiente, desviación de demanda, excedente potencial y servicio bajo meta. Las referencias son pedagógicas, no presupuestos reales ni benchmarking externo.
 
 Pruebas: `tests/demand.test.mjs`. Pendiente validar visualmente en Android y extender a un modelo por SKU/pedido con tiempos de proceso y de entrega.
+
+## v9.0 · Inicio del plan de cinco fases
+
+**Fase 1 (en desarrollo):** se cobran recursos adicionales por capacidad personalizada sobre referencia de Recepción (325 unidades por operario incremental) y Picking (460 unidades por operario incremental), un recargo de capacidad personalizada de Transporte (100 CLP por unidad de capacidad diaria extra) y aceleración de Calidad (80 CLP por unidad liberada sobre 95 %). Estos parámetros son supuestos pedagógicos y no tarifas reales. Los costos adicionales se asignan a sus áreas y la referencia de costo se recalcula sin parámetros personalizados. La fase económica aún requiere presupuestos flexibles, validación completa de otras decisiones personalizadas y pruebas visuales.
+
+**Adelanto de Fase 2, sorpresa de demanda:** en Configuración se introduce una variación porcentual con signo (por defecto +30 %, editable de −80 % a +200 %). Durante la planificación y el diagnóstico inicial, el motor utiliza la demanda prevista y oculta la real. Al pulsar «Revelar sorpresa de demanda», aplica la variación a la demanda real, preserva la compra planificada y habilita Recuperación. Se impide volver a planificar sin reiniciar el ejercicio. Cambiar la configuración reinicia la revelación y las recuperaciones.
+
+La sorpresa es **configurada por el usuario**, por lo que no es aleatoria: es una incógnita para el recorrido de aprendizaje, no necesariamente para quien creó el ejercicio. Queda pendiente un modo aleatorio o preparado por otra persona, comparación entre escenarios y presupuesto flexible.
+
+Pruebas de regresión nuevas: `tests/surprise.test.mjs`. Ejecución prevista: `node --experimental-default-type=module --test tests/*.test.mjs`.
