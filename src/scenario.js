@@ -41,7 +41,9 @@ export const RECOVERY_RATES={
 };
 export function finance(flow,scenario){
  const s=cleanScenario(scenario),a=flow.actions||{};
- const capacityStaff={receiving:Math.max(0,Math.ceil((Math.max(0,flow.receivingCapacity-(a.receiving||0))-650)/325)),picking:Math.max(0,Math.ceil((Math.max(0,flow.pickingCapacity-(a.picking||0))-2300)/460))};
+ const baseReceivingCapacity=(flow.choices?.receiving==='low'?350:flow.choices?.receiving==='extra'?1000:650)*s.receivingOperators/2;
+ const basePickingCapacity=(flow.choices?.picking==='low'?1400:flow.choices?.picking==='reinforce'?3000:2300)*s.pickingOperators/5;
+ const capacityStaff={receiving:Math.max(0,Math.ceil((flow.receivingCapacity-(a.receiving||0)-baseReceivingCapacity)/325)),picking:Math.max(0,Math.ceil((flow.pickingCapacity-(a.picking||0)-basePickingCapacity)/460))};
  const capacityLabor={receiving:capacityStaff.receiving*s.receivingDailyWage,picking:capacityStaff.picking*s.pickingDailyWage};
  const labor={
  inventory:s.inventoryOperators*s.inventoryDailyWage,
