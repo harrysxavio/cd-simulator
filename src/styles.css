@@ -187,3 +187,20 @@ html,body{max-width:100%;overflow-x:clip}
 .causal-summary p{margin:5px 0 10px;line-height:1.55}
 .causal-summary small{display:block;line-height:1.5}
 @media(max-width:700px){.causal-summary{padding:13px;margin:12px 0}.diagnosis-card{overflow-wrap:anywhere}.diagnosis-card .mini{min-height:44px}}
+
+/* v8.6: demand comparison and management traffic lights */
+.attention-panel{margin:20px 0;padding:17px;border:1px solid #375c70;border-radius:15px;background:#10283a}
+.attention-item{border-left:4px solid #d6a64d;background:#20394b;padding:12px 14px;margin:10px 0;border-radius:7px;overflow-wrap:anywhere}
+.attention-item.danger{border-left-color:#ef7777}
+.attention-item.good{border-left-color:#61d8aa}
+.attention-item strong{display:block;line-height:1.4}
+.attention-item p{margin:7px 0 0;line-height:1.5;font-size:.91rem}
+.area-kpi-tile.cost-over{border-color:#d6a64d}
+#demandPresets .choice{min-height:70px}
+#demandComparison{margin-bottom:16px}
+@media(max-width:700px){
+ .attention-panel{padding:12px}
+ #areaCostCards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #areaCostCards .area-kpi-tile strong{font-size:.95rem}
+ #demandPresets .choice{min-height:60px}
+}
