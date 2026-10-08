@@ -3,7 +3,7 @@ export const DEFAULT_SCENARIO={
  unitPurchaseCost:2500,initialStockUnitCost:2500,unitTransportCost:500,unitPackagingCost:250,urgentPurchaseSurcharge:500,
  inventoryOperators:3,pickingOperators:5,receivingOperators:2,
  inventoryDailyWage:42000,pickingDailyWage:42000,receivingDailyWage:42000,
- otherFixedCost:90000,maxCostPerUnit:4800
+ otherFixedCost:90000,maxCostPerUnit:4800,targetFulfillment:95
 };
 export const FIELDS=[
 ['demand','Demanda objetivo','unidades',100,100000,100],
@@ -22,7 +22,8 @@ export const FIELDS=[
 ['pickingDailyWage','Costo diario por operario de picking','$ CLP',0,1000000,1000],
 ['receivingDailyWage','Costo diario por operario de recepción','$ CLP',0,1000000,1000],
 ['otherFixedCost','Otros costos fijos de campaña','$ CLP',0,100000000,1000],
-['maxCostPerUnit','Meta de costo máximo por unidad expedida','$ CLP',0,10000000,100]
+['maxCostPerUnit','Meta de costo máximo por unidad expedida','$ CLP',0,10000000,100],
+['targetFulfillment','Meta de cumplimiento','%',1,100,1]
 ];
 export function cleanScenario(raw={}){
  const result={};
