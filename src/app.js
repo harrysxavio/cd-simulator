@@ -1,11 +1,11 @@
-import {skuOrderLab} from './sku.js?v=98';
-import {demandJourney} from './journey.js?v=98';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=98';
-import {flow,diagnose,ACTIONS} from './flow.js?v=98';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=98';
-import {areaKpis} from './kpis.js?v=98';
-import {causalAudit} from './causal.js?v=98';
-import {attentionSignals} from './attention.js?v=98';
+import {skuOrderLab} from './sku.js?v=99';
+import {demandJourney} from './journey.js?v=99';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=99';
+import {flow,diagnose,ACTIONS} from './flow.js?v=99';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=99';
+import {areaKpis} from './kpis.js?v=99';
+import {causalAudit} from './causal.js?v=99';
+import {attentionSignals} from './attention.js?v=99';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -220,8 +220,13 @@ function renderSkuLab(){
  }
  const stock=add(root,'div','area-kpi-tile');
  add(stock,'strong','','Stock por SKU al cierre del ejercicio piloto');
- for(const id of Object.keys(report.stockInitial))add(stock,'small','','SKU '+id+': inicial '+fmt(report.stockInitial[id])+' · consumido '+fmt(report.consumed[id])+' · restante '+fmt(report.stockRemaining[id])+' · pedidos bloqueados por falta de este SKU '+fmt(report.missingBySku[id]));
- add(root,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. Este laboratorio aún no está conectado a las compras ni al inventario de la campaña principal.');
+ for(const p of report.skuMetrics){
+  add(stock,'strong','',p.name+' · rotación '+p.rotation+' · ABC por valor '+p.abc);
+  add(stock,'small','','Demanda mensual simulada '+fmt(p.demand)+' unid. · stock '+fmt(p.onHand)+' · consumido '+fmt(p.consumed)+' · restante '+fmt(p.remaining));
+  add(stock,'small','','Cobertura '+(p.daysCover===null?'N/D':p.daysCover.toFixed(1)+' días')+' · punto de pedido '+fmt(p.reorderPoint)+' unid. · plazo proveedor '+p.leadDays+' días + seguridad '+p.safetyDays+' días');
+  add(stock,'small','',p.reorderSuggested?'🟠 Stock en o bajo punto de reposición':'🟢 Stock sobre punto de reposición');
+ }
+ add(root,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Este laboratorio aún no está conectado a las compras ni al inventario de la campaña principal.');
 }
 function renderAttention(){
  const root=$('attentionSummary'),costs=$('areaCostCards');root.replaceChildren();costs.replaceChildren();
