@@ -26,7 +26,7 @@ function setup(){
   const b=add(presets,'button','choice '+(scenario.demandShockPercent===percent?'selected':''));
   add(b,'strong','',label);add(b,'small','',percent+' % de variación (signo oculto)');
   b.setAttribute('aria-pressed',String(scenario.demandShockPercent===percent));
-  b.onclick=()=>{scenario.demandShockPercent=percent;revealed=false;shockDirection=null;actions={};save();render()};
+  b.onclick=()=>{scenario.demandShockPercent=percent;revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
  }
  const choices=$('strategyChoices');choices.replaceChildren();
  for(const [id,title,desc] of [['service','Servicio al cliente','Prioriza cumplir la demanda.'],['balanced','Equilibrio','Equilibra cumplimiento, costos y resultado.'],['cost','Eficiencia económica','Prioriza costo unitario sin ignorar el servicio.']]){
@@ -37,7 +37,7 @@ for(const [key,label,unit,min,max,step] of FIELDS){
 const box=add(root,'div','setup-field');add(box,'label','',label+' ('+unit+')');
 const input=add(box,'input','numeric-input');input.type='number';input.min=min;input.max=max;input.step=step;input.value=scenario[key];
 input.setAttribute('aria-label',label);
-input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario.actualDemand=Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100)));scenario=cleanScenario(scenario);revealed=false;shockDirection=null;actions={};save();render()};
+input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<min||v>max){input.value=scenario[key];return}scenario[key]=v;scenario.actualDemand=Math.max(1,Math.round(scenario.demand*(1+scenario.demandShockPercent/100)));scenario=cleanScenario(scenario);revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
 }}
 function dashboard(r){
  const f=finance(r,effectiveScenario()),money=v=>'$'+Math.round(v).toLocaleString('es-CL');
@@ -80,21 +80,25 @@ function dashboard(r){
  $('financialInsight').textContent=r.dispatched===0?'No hay expedición posible: no se calcula costo unitario. Los gastos y desembolsos pueden mantenerse.':over?'El costo por unidad supera la meta. La comparación se hace contra el costo total, no contra presupuestos arbitrarios por área.':'El costo por unidad está dentro de la meta global. Revisa también el resultado operacional y los desembolsos.';
 }
 function renderDiagnosis(current){
+ const planScenario={...scenario,actualDemand:scenario.demand,lockUpstream:false};
+ const initialPlan=flow(decisions,{},planScenario);
  const initial=flow(decisions,{},effectiveScenario());
+ const planCost=finance(initialPlan,planScenario);
  const oldCost=finance(initial,effectiveScenario()),newCost=finance(current,effectiveScenario());
  const percent=(a,b)=>b?((100*a/b).toFixed(1)+'%'):'N/D';
  const cash=v=>'CLP '+Math.round(v).toLocaleString('es-CL');
  const pre=$('preliminaryMetrics');pre.replaceChildren();
- const items=[['Cumplimiento',percent(initial.dispatched,initial.demand)],['Picking unid./operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso Picking',percent(initial.picked,initial.stages[6].capacity)],['Costo por unidad',oldCost.costPerUnit===null?'N/D':cash(oldCost.costPerUnit)],['Unidades pendientes',fmt(initial.pending)]];
+ const items=[['Cumplimiento del plan original',percent(initialPlan.dispatched,initialPlan.demand)],['Cumplimiento tras sorpresa',revealed?percent(initial.dispatched,initial.demand):'Pendiente'],['Cumplimiento',percent(initial.dispatched,initial.demand)],['Picking unid./operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso Picking',percent(initial.picked,initial.stages[6].capacity)],['Costo por unidad',oldCost.costPerUnit===null?'N/D':cash(oldCost.costPerUnit)],['Unidades pendientes',fmt(initial.pending)]];
  for(const item of items){const c=add(pre,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1])}
  const comparison=$('demandComparison');comparison.replaceChildren();
  add(comparison,'strong','',revealed?'Sorpresa revelada: nueva demanda real':'Diagnóstico del plan antes de conocer la demanda real');
  add(comparison,'p','','Plan base: '+fmt(initial.plannedDemand)+' unidades · Pronóstico ajustado: '+fmt(initial.estimated)+(revealed?' · Pedidos reales: '+fmt(initial.demand):' · Pedidos reales: todavía desconocidos')+'.');
+ if(revealed)add(comparison,'p','','Antes de la sorpresa: '+fmt(initialPlan.dispatched)+' / '+fmt(initialPlan.demand)+' unidades ('+percent(initialPlan.dispatched,initialPlan.demand)+'). Tras la sorpresa y antes de recuperar: '+fmt(initial.dispatched)+' / '+fmt(initial.demand)+' unidades ('+percent(initial.dispatched,initial.demand)+'). La capacidad, el abastecimiento y el costo inicial se mantienen; cambia el volumen de pedidos.');
  add(comparison,'p','muted',revealed?'Desviación real vs. plan: '+((initial.demand/initial.plannedDemand-1)*100).toFixed(1)+' %. Las compras originales se mantienen.':'Este diagnóstico usa la demanda prevista. Pulsa «Revelar sorpresa» para descubrir la demanda efectiva y decidir cómo responder.');
  $('revealDemand').hidden=revealed;
  $('startRecovery').hidden=!revealed;
  const preSummary=$('preliminarySummary');preSummary.replaceChildren();
- const initialAssessment=strategyAssessment(initial,scenario,strategy);
+ const initialAssessment=strategyAssessment(initial, effectiveScenario(),strategy);
  add(preSummary,'strong','',revealed?'Situación después de la sorpresa':'Lectura inicial de la empresa (demanda prevista)');
  add(preSummary,'p','','Meta de servicio: '+scenario.targetFulfillment+' %. Resultado: '+percent(initial.dispatched,initial.demand)+'. Brecha para cumplir: '+fmt(Math.max(0,Math.ceil(initial.demand*scenario.targetFulfillment/100)-initial.dispatched))+' unidades.');
  add(preSummary,'p','muted',initialAssessment.service>=initialAssessment.goal?'El nivel de servicio alcanza el objetivo. Evalúa ahora si el costo es sostenible.':'El servicio está bajo la meta. Revisa restricciones aguas arriba antes de reforzar capacidades locales.');
@@ -147,7 +151,7 @@ function renderDiagnosis(current){
 }
 function renderAssessment(initial,current){
  const root=$('strategyScore');root.replaceChildren();
- const previous=strategyAssessment(initial,scenario,strategy),now=strategyAssessment(current,scenario,strategy);
+ const previous=strategyAssessment(initial,effectiveScenario(),strategy),now=strategyAssessment(current,effectiveScenario(),strategy);
  const labels={service:'Servicio al cliente',balanced:'Equilibrio entre servicio y costo',cost:'Eficiencia económica'};
  add(root,'h3','','Evaluación del criterio · '+labels[strategy]);
  add(root,'p','','Índice pedagógico inicial '+previous.score+'/100 → final '+now.score+'/100. No representa una calificación laboral ni existe una decisión perfecta para todos los escenarios.');
@@ -322,5 +326,5 @@ $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('da
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 $('beginExercise').onclick=()=>showSection('operations');
-$('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;shockDirection=null;actions={};save();render()};
+$('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
 load();render();showSection(revealed?'preliminary':'operations');
