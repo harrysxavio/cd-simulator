@@ -1,6 +1,6 @@
 # Plan UX/UI móvil y didáctica · Supply Chain Operations Lab
 
-**Investigación v11.16; U1 implementado v11.17; U2a (compra extraordinaria SKU) implementado v11.18** · Fecha 2026-10-09 · **Estado:** U1 aplicado a Diagnóstico; U2a aplicada a la Recuperación SKU con confirmación de nueva orden; U2b y U3–U5 siguen pendientes. La experiencia de las ocho áreas todavía tendrá refinamientos posteriores.
+**Investigación v11.16; U1 v11.17; U2a compra SKU v11.18; U2b reserva ubicada y plan diario SKU v11.19** · Fecha 2026-10-09 · **Estado:** U1 aplicado a Diagnóstico; U2a compra SKU confirmable y U2b traslado de reserva con misma conservación física más calendario de pedidos expedidos. U2c (SLA/compromisos reales de cliente) y U3–U5 siguen pendientes. La experiencia de las ocho áreas todavía tendrá refinamientos posteriores.
 
 Documento complementario: [pruebas reproducidas de sobredemanda y restricciones](SCENARIO-BUSINESS-ACCEPTANCE.md). Se conserva el [roadmap general](ROADMAP.md) de M1–M8: **no se crea un proyecto paralelo ni se salta la integración física.**
 
