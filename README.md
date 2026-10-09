@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.6
+# Supply Chain Operations Lab · v11.7
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=116) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=117) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -259,3 +259,18 @@ El flujo visible se ordenó para facilitar la toma de decisiones en móvil: prim
 **Límite importante:** el cálculo sigue siendo del laboratorio SKU de pedidos, mientras el motor principal de ocho áreas permanece agregado y no comparte aún un libro de eventos único. Sus ingresos y gastos **no deben sumarse**. La decisión reduce el riesgo de sobredimensionar compras, pero no equivale a un recomendador óptimo de reposición ni constituye una operación financiera real.
 
 **Estado estimado v11.6:** F1 80 %, F2 89 %, F3 89 %, F4 83 %, F5 66 %. Promedio simple **81 %**. Los porcentajes son orientativos; el CI, las pruebas en Android y la integración de ambos motores deben verificarse independientemente.
+
+## v11.7 · Primera integración real de capacidades entre motores
+
+**Hasta v11.6**, una campaña podía tener cero operarios de recepción y, aun así, el laboratorio SKU mostraba todos los pedidos de proveedor automáticamente recibidos. Esta versión corrige ese desacople operacional:
+
+- El laboratorio SKU ahora lee la capacidad diaria de **Recepción, Picking y Transporte** directamente de las decisiones, acciones y dotación del flujo principal de ocho áreas.
+- Las entregas ordinarias y urgentes **esperan recepción física** cuando la capacidad del área es insuficiente. Nunca se incorporan al inventario anticipadamente.
+- Picking y Transporte limitan el **número de unidades SKU físicas** de pedidos completos despachados cada día. Una orden de cuatro unidades consume cuatro unidades de capacidad, no una.
+- El reporte de Compras → Recepción → Inventario → Picking indica las capacidades compartidas, las unidades aún por recibir y el gasto de compras que no produjo mejora de servicio.
+- La auditoría SKU recibe **los mismos parámetros de recuperación, cobertura, fecha y capacidad** que el comparador visible, evitando dos conciliaciones de escenarios distintos.
+- Se añaden pruebas de regresión de cero capacidad, restricciones diarias, conservación de stock, fechas de recepción y propagación de cuellos de botella.
+
+**Alcance actual de la integración:** la cohorte SKU mantiene 200 pedidos planificados e interpreta el shock como variación proporcional de pedidos; las capacidades importadas son unidades SKU/día. Calidad, pronóstico, proveedores y contabilidad todavía no están unificados en un único libro de eventos. Los resultados monetarios de ambos motores se presentan por separado para no contar compras o ventas dos veces. La simulación no representa inventario en preparación entre Picking y Transporte: cada pedido se prepara y expide como una transacción indivisible.
+
+**Fases estimadas v11.7:** F1 83 %, F2 89 %, F3 91 %, F4 84 %, F5 69 %; promedio simple **83 %**. La integración física de 3 áreas no significa que las 8 áreas y la contabilidad estén terminadas. Antes de declararla estable, GitHub Actions debe terminar en verde y corresponde hacer una revisión visual real en Android.
