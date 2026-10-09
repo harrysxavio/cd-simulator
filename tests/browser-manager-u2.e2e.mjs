@@ -37,7 +37,7 @@ async function scenario(mode,arrival=1){
   assert.match(preview,/SKU A · 218 unidades/);
   assert.equal((await state()).skuDecisions.length,0,'Preview alone must NOT commit purchase');
   if(arrival===13){
-   assert.match(preview,/no recupera pedidos/);
+   assert.match(preview,/no rescata pedidos/);
    assert.match(preview,/después del corte/);
   }else{
    assert.match(preview,/139/);
