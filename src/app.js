@@ -1,19 +1,19 @@
-import {supplyBridge} from './supply-bridge.js?v=119';
-import {laborAudit} from './labor.js?v=119';
-import {skuAudit} from './audit.js?v=119';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=119';
-import {integratedDemand} from './integrated.js?v=119';
-import {eventSimulation} from './events.js?v=119';
-import {deliveryTimeline} from './timeline.js?v=119';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=119';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=119';
-import {demandJourney} from './journey.js?v=119';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=119';
-import {flow,diagnose,ACTIONS} from './flow.js?v=119';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=119';
-import {areaKpis} from './kpis.js?v=119';
-import {causalAudit} from './causal.js?v=119';
-import {attentionSignals} from './attention.js?v=119';
+import {supplyBridge} from './supply-bridge.js?v=120';
+import {laborAudit} from './labor.js?v=120';
+import {skuAudit} from './audit.js?v=120';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=120';
+import {integratedDemand} from './integrated.js?v=120';
+import {eventSimulation} from './events.js?v=120';
+import {deliveryTimeline} from './timeline.js?v=120';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=120';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=120';
+import {demandJourney} from './journey.js?v=120';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=120';
+import {flow,diagnose,ACTIONS} from './flow.js?v=120';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=120';
+import {areaKpis} from './kpis.js?v=120';
+import {causalAudit} from './causal.js?v=120';
+import {attentionSignals} from './attention.js?v=120';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -297,6 +297,17 @@ function renderSkuLab(){
   add(trace,'small','','Inventario: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
   add(trace,'small','','Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
+  const commitment=chain.procurementLedger;
+  add(trace,'small','','Compromisos de compra SKU (no pagos): original CLP '+fmt(commitment.obligations.originalCommitment)+' + extraordinaria CLP '+fmt(commitment.obligations.urgentCommitment)+' + recargo CLP '+fmt(commitment.obligations.urgentSurcharge)+'. No sumar con el estado de resultados agregado.');
+  add(trace,'small','','Abastecimiento pendiente de ingresar: '+fmt(commitment.totals.originalInTransit+commitment.totals.urgentInTransit)+' unidades aún no arribadas · '+fmt(commitment.totals.waitingReceiving)+' en cola de Recepción · '+fmt(commitment.totals.originalSupplierShortfall)+' unidades incumplidas por proveedor.');
+  const commitmentDetail=add(trace,'details','supply-trace-detail');
+  add(commitmentDetail,'summary','','Ver conciliación de compras por SKU');
+  for(const item of commitment.bySku){
+   const line=add(commitmentDetail,'div','supply-trace-day');
+   add(line,'strong','','SKU '+item.id+' · pedido original '+fmt(item.originalOrdered)+' · urgente '+fmt(item.urgentOrdered));
+   add(line,'small','','Proveedor incumple '+fmt(item.originalSupplierShortfall)+' · aún por arribar '+fmt(item.originalInTransit+item.urgentInTransit)+' · cola Recepción '+fmt(item.waitingReceiving));
+   add(line,'small','','Recibido CD '+fmt(item.inventory.received)+' · retenido Calidad '+fmt(item.inventory.held)+' · disponible '+fmt(item.inventory.available)+(item.balanced?' ✓':' ⚠'));
+  }
   const verdict=add(trace,'div','supply-verdict '+chain.decision.quality);
   add(verdict,'strong','',chain.decision.quality==='effective'?'Compra con impacto operativo':chain.decision.quality==='late'?'Atención: reposición fuera de plazo':chain.decision.quality==='no-gain'?'Compra sin mejora de servicio':chain.decision.quality==='receiving-blocked'?'Recepción bloquea la compra':chain.decision.quality==='no-order'?'Sin reposición extraordinaria':'No es necesaria una compra adicional');
   add(verdict,'p','',chain.decision.advice);
@@ -381,6 +392,7 @@ function renderSkuLab(){
   for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' − retenido en calidad '+fmt(p.held)+' = disponible final '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
   add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' − stock retenido CLP '+fmt(audit.stockValue.held)+' = disponible final CLP '+fmt(audit.stockValue.closing));
   add(auditCard,'small','','Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(audit.orders.completed)+' completos + '+fmt(audit.orders.pending)+' pendientes');
+  add(auditCard,'small','',audit.procurement.passed?'✓ Compras, proveedor, tránsito, recepción y stock reconciliados':'⚠ Descuadre entre compromisos y movimientos de inventario');
   add(auditCard,'small','',audit.assumptions);
   // Put cross-area explanation after the user selects recovery inputs.
   root.append(trace);
