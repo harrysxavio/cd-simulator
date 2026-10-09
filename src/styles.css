@@ -310,3 +310,9 @@ html,body{max-width:100%;overflow-x:clip}
  .sku-purchase-decision{gap:12px}
  .supply-trace{overflow-wrap:break-word;min-width:0}
 }
+
+/* v11.7: area capacities and unreceived stock are operational data, not annotations */
+.supply-trace>.supply-verdict{margin-block:12px}
+.supply-trace .supply-trace-day small{line-height:1.55}
+.supply-trace .supply-trace-days{max-width:100%;min-width:0}
+@media(max-width:760px){.supply-trace{grid-column:1/-1}.supply-trace .supply-trace-day{overflow-wrap:break-word}}

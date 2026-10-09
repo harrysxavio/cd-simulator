@@ -70,3 +70,28 @@ test('partial purchases preserve the causal stock and cash trade-off',()=>{
   assert.equal(initial+received-partial.inventory.consumed[id],partial.inventory.ending[id]);
  }
 });
+
+
+test('shared campaign Receiving capacity prevents premature SKU purchases from entering stock',()=>{
+ const blocked=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:1,receivingUnitCapacity:0});
+ assert.equal(blocked.receiving.receivedExtraUnits,0);
+ assert.ok(blocked.receiving.outsideHorizonUnits>0);
+ assert.ok(blocked.receiving.waitingReceiving>0);
+ assert.equal(blocked.decision.quality,'receiving-blocked');
+ assert.equal(blocked.picking.improvement,0);
+ assert.equal(blocked.purchasing.extraUnits,blocked.receiving.outsideHorizonUnits);
+ const constrained=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:1,receivingUnitCapacity:10});
+ assert.ok(constrained.receipts.every(d=>Object.values(d.received).reduce((n,x)=>n+x,0)<=10));
+ assert.equal(constrained.purchasing.extraUnits,constrained.receiving.receivedExtraUnits+constrained.receiving.outsideHorizonUnits);
+});
+test('shared picking and transport constraints propagate to complete orders',()=>{
+ const base=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:1});
+ const pickBlocked=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:1,pickingUnitCapacity:0});
+ const transportBlocked=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:1,transportUnitCapacity:0});
+ assert.equal(pickBlocked.picking.completed,0);
+ assert.equal(transportBlocked.picking.completed,0);
+ assert.ok(base.picking.completed>0);
+ const limited=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:1,pickingUnitCapacity:4,transportUnitCapacity:3});
+ assert.ok(limited.receipts.every(d=>d.shippedUnits<=3));
+ assert.ok(limited.picking.completed<base.picking.completed);
+});

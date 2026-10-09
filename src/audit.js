@@ -4,8 +4,8 @@ import {recoveryComparison} from './recovery.js';
 /** Single-source audit of the SKU event ledger. Does NOT merge the aggregate engine.
  * Every receipt, unit consumed, completed order and cost derives from one replay.
  */
-export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},dailyCapacity=200,days=12}={}){
- const comparison=recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,dailyCapacity,days});
+export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},dailyCapacity=200,days=12,urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null}={}){
+ const comparison=recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,dailyCapacity,days,urgentArrivalDay,purchaseCoveragePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity});
  const r=comparison.recovered;
  const receipts=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,r.ledger.reduce((sum,day)=>sum+day.received[p.id],0)]));
  const bySku=SKU_CATALOG.map(p=>{
