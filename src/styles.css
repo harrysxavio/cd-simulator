@@ -534,3 +534,38 @@ html,body{max-width:100%;overflow-x:clip}
  .canonical-area-expand{padding:13px 12px}
 }
 @media(prefers-reduced-motion:reduce){.canonical-area-step,.canonical-area-summary{scroll-behavior:auto}}
+
+
+/* v11.21: make release freshness verifiable on real Android browsers */
+.release-control{display:flex;flex-wrap:wrap;align-items:center;gap:9px 12px;margin:10px 0 16px;font-size:.84rem;line-height:1.5}
+.release-current{display:inline-flex;gap:6px;align-items:center;color:#d2f1e9;font-weight:600}
+.release-current strong{font-variant-numeric:tabular-nums}
+.release-dot{width:8px;height:8px;flex:0 0 8px;background:#56d9b8;border-radius:99px}
+.release-check,.release-open{font:inherit;font-weight:700;color:#c7f2e9;background:#16384d;border:1px solid #58758b;border-radius:10px;padding:10px 12px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer;touch-action:manipulation}
+.release-check[disabled]{opacity:.7;cursor:progress}
+.release-check:focus-visible,.release-open:focus-visible{outline:3px solid #80ecd0;outline-offset:3px}
+.release-status{font-size:.79rem;color:#b9d3e3;overflow-wrap:anywhere}
+.release-status.current{color:#a5e8ce}
+.release-status.update{color:#ffe2aa}
+.canonical-overview{max-width:1060px;margin-inline:auto;min-width:0}
+.canonical-overview-kicker{font-size:.76rem;font-weight:800;letter-spacing:.05em;color:#9ae9d3;line-height:1.45;margin-bottom:9px}
+.canonical-overview h2{font-size:clamp(1.2rem,4vw,1.6rem);line-height:1.35;margin:0 0 12px}
+.canonical-overview-intro{font-size:1rem;line-height:1.65;margin:0 0 16px;max-width:72ch}
+.canonical-overview-insight{background:#123e43;border-left:3px solid #61c5a7;border-radius:10px;padding:15px;margin-top:12px}
+.canonical-overview-insight strong{font-size:1rem;line-height:1.5;color:#dbfbeb}
+.canonical-overview-insight p{margin:7px 0 0;font-size:.95rem;line-height:1.6}
+.canonical-overview-actions{margin-top:14px}
+.canonical-overview-actions .btn{min-height:48px;width:100%;line-height:1.5}
+.legacy-aggregate-details{max-width:1060px;margin:14px auto 0;min-width:0}
+.legacy-aggregate-details>summary{font-size:.91rem;min-height:48px;padding:12px 15px;line-height:1.5}
+.legacy-aggregate-details>section{margin:10px 0 0}
+.legacy-aggregate-details>.canonical-boundary{margin:10px 13px}
+@media(max-width:650px){
+ .release-control{display:grid;grid-template-columns:1fr 1fr;gap:7px 9px}
+ .release-current{grid-column:1/-1}
+ .release-status{grid-column:1/-1}
+ .release-check,.release-open{font-size:.78rem;padding:11px 7px;text-align:center}
+ .canonical-overview{padding:15px}
+ .canonical-overview-insight{padding:13px}
+ .legacy-aggregate-details>summary{font-size:.87rem}
+}

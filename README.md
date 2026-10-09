@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.20
+# Supply Chain Operations Lab · v11.21
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=129) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.21-r130) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -16,7 +16,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - [Roadmap integrado M1–M8 con entregas U0–U5](docs/ROADMAP.md).
 
-**Prioridad tras v11.19:** converger ambos motores y añadir decisiones de reprogramación con fechas/SLA, no seguir agregando resultados separados. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
+**Prioridad tras v11.21:** completar convergencia M2/M3 (pedido y stock común), después U2c/U3 con compromisos de servicio y M4 contabilidad única. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
 
 ## v11.17 · U1 misión de Diagnóstico para gerente de CD
 
@@ -62,6 +62,21 @@ En **Resultados → Áreas** hay una nueva vista didáctica de la campaña de 12
 - Los eventos día a día quedan bajo «Ver los movimientos diarios» y el detalle técnico de cada área permanece disponible a petición.
 
 El código valida pedidos, stocks, transferencias y envíos contra el snapshot compartido y no muestra lecturas inconciliables. [Estado de M1–M8 y U0–U5](docs/STATUS-V11.20.md) · [Roadmap](docs/ROADMAP.md).
+
+## v11.21 · Corrección visible de GitHub Pages + avance real en M2/M3
+
+**Problema reportado:** el usuario seguía viendo el encabezado **V11.19** pese a haber desplegado **V11.20**. GitHub registraba el HTML `V11.20` en `main` y el despliegue de ese commit como exitoso; eso **no acredita** qué HTML estaba recibiendo cada teléfono o caché.
+
+Se añadieron controles verificables:
+
+- **Encabezado con versión visible V11.21**, botón **«Verificar actualización»** que consulta `release.json` con `Cache-Control: no-cache`, `cache: no-store` y query único; enlaces de apertura forzada con revisión de caché.
+- `release.json` pública con versión y revisión de recursos. La comprobación detecta si el servidor indica una versión anterior o posterior a la cargada.
+- Workflow independiente `Live GitHub Pages release verification` que consulta **el HTML realmente servido en https://harrysxavio.github.io/cd-simulator/** y confirma cabecera, HTML, manifiesto, JavaScript y número de asset con reintentos posteriores al push de `main`. **GitHub Pages success** por sí solo ya no se utiliza como evidencia suficiente del contenido visible.
+- E2E Chromium en teléfono emulado comprueba versión, botones táctiles, aviso de actualización, ausencia de overflow y persistencia.
+
+**M2/M3:** el Resumen de Resultados ahora prioriza **pedidos reales / pedidos completos expedidos / pedidos pendientes** desde el **mismo registro físico SKU de doce días** que alimenta las ocho áreas. El modelo anterior, de una jornada en unidades agregadas, queda dentro de un panel plegable y rotulado **no sumable**. Es un paso efectivo de migración del resultado físico, no la unificación completa de eventos y economía.
+
+**Abrir la versión sin depender de la URL antigua:** [Simulador v11.21](https://harrysxavio.github.io/cd-simulator/?release=11.21-r130). Si una pestaña antigua está abierta, usar ese enlace en una pestaña nueva y seleccionar «Verificar actualización». Un servidor o caché que responda con HTML anterior se detectará en la nueva prueba en vivo.
 
 ## Cómo utilizarlo
 

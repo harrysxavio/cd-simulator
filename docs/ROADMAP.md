@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante M2/M3: lectura común de ocho áreas SKU v11.20 (2026-10-09).
+> Documento de ejecución. Revisado durante corrección de Pages y migración parcial del Resumen SKU v11.21 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -165,6 +165,8 @@ La prueba de referencia fija 1.000 unidades previstas, forecast al 80 %, reposic
 **U2b · Incremento v11.19:** zona de reserva `RESERVA-CD` proveniente del stock inicial ya existente, habilitación mediante evento de traslado `RESERVA-CD → PICK-FACE` por SKU y día, balances y valores auditados, comparación contra baseline con la misma partición física. Incluye confirmación persistente y resumen diario de pedidos expedidos del CD con pendientes sin fecha confirmada. **No modela aún bin/lote WMS, costo/capacidad de traslado, promesa SLA ni inventario agregado unido; U2 sigue parcial.** Se agrega [matriz del estado actual de fases](STATUS-V11.19.md).
 
 **M2/M3 · Incremento v11.20:** se agrega una **proyección inmutable de ocho áreas** desde el mismo `campaignSnapshot` de pedidos SKU de doce días. `campaignAreaReadModel()` reconcilia pronóstico, manifiesto original, compras nuevas, ingresos, lotes de Calidad, stock de reserva, Picking y despachos. Un panel responsive en Resultados → Áreas presenta las ocho explicaciones y su evidencia/cronología sin confundir pedidos completos con unidades SKU ni con el agregado de una jornada. **Sigue pendiente** usar el mismo libro como fuente del diagnóstico/resumen económico principal, unificar horizonte y stock inicial, y separar en el motor eventos de Picking y Transporte; M2/M3 NO se declaran finalizados. [Detalle del estado actualizado de todas las fases](STATUS-V11.20.md).
+
+**M2/M3 · Incremento v11.21:** en Resultados → Resumen, las tres métricas de servicio **prioritarias** ahora provienen de la cohorte canónica de 12 días y utilizan el mismo objeto `campaignAreaReadModel()` de Resultados → Áreas: demanda, pedidos completos expedidos desde el CD y pendientes. El motor agregado de una jornada continúa en panel histórico plegable, sin sumar unidades ni costos; **M2/M3 siguen parciales** hasta sustituir el cálculo físico principal y unificar base/horizonte. **Corrección de publicación:** manifiesto público `release.json`, comprobación de versión en pantalla, y nueva puerta `pages-live-check.yml` que lee la URL real después del push de `main`, para detectar HTML/CDN obsoleto. No atribuir el problema exclusivamente a caché sin prueba HTTP. Ver `README.md`.
 
 ### Secuencia de entregas UX incorporada (U0–U5)
 
