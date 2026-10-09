@@ -316,3 +316,10 @@ html,body{max-width:100%;overflow-x:clip}
 .supply-trace .supply-trace-day small{line-height:1.55}
 .supply-trace .supply-trace-days{max-width:100%;min-width:0}
 @media(max-width:760px){.supply-trace{grid-column:1/-1}.supply-trace .supply-trace-day{overflow-wrap:break-word}}
+
+/* v11.8: keep legacy hypothetical stock analysis separate from real shared-capacity campaign */
+.sku-supplementary{grid-column:1/-1;min-width:0;margin:14px 0;border:1px solid #3e6b7d;border-radius:12px;padding:12px;background:#102b3b}
+.sku-supplementary summary{cursor:pointer;min-height:48px;padding:10px 8px;line-height:1.4;font-weight:700;color:#c2f2e7}
+.sku-supplementary .area-kpi-tile{margin-top:12px;overflow-wrap:break-word}
+.supply-trace-day{overflow-wrap:break-word}
+@media(max-width:760px){.sku-supplementary{padding:9px}.sku-supplementary .area-kpi-tile{min-width:0;width:100%}}
