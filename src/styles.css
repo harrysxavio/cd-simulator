@@ -323,3 +323,18 @@ html,body{max-width:100%;overflow-x:clip}
 .sku-supplementary .area-kpi-tile{margin-top:12px;overflow-wrap:break-word}
 .supply-trace-day{overflow-wrap:break-word}
 @media(max-width:760px){.sku-supplementary{padding:9px}.sku-supplementary .area-kpi-tile{min-width:0;width:100%}}
+
+/* v11.14: keep escape hatch on-screen in every stage, including saved sessions. */
+.session-controls{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:10px 12px;background:rgba(9,19,35,.97);border:1px solid #4b6e82;border-radius:12px;box-shadow:0 7px 20px #050d1a75}
+.session-status{font-weight:700;color:#bfe4f2;font-size:.84rem;min-width:0}
+.session-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.session-buttons .btn{min-height:44px;white-space:nowrap}
+.session-controls #resetAnytime{border-color:#9dbad2;color:#fff}
+.session-controls #resetAnytime:hover{background:#23455d}
+@media(max-width:600px){
+ .session-controls{padding:7px;gap:6px}
+ .session-status{display:none}
+ .session-buttons{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);width:100%;gap:7px}
+ .session-buttons .btn{padding:11px 5px;font-size:.78rem;white-space:normal;line-height:1.2}
+}
+@media(prefers-reduced-motion:reduce){.session-controls{scroll-behavior:auto}}
