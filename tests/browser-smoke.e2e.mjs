@@ -68,7 +68,8 @@ async function verifyExperience(mode){
   await date.selectOption('13');
   assert.equal(await date.inputValue(),'13');
   await page.reload({waitUntil:'networkidle'});
-  assert.equal(await page.locator('#preliminarySection').isVisible(),true,'No se restauró demanda revelada');
+  assert.equal(await page.locator('#dashboardSection').isVisible(),true,'La campaña debe reabrir la última pantalla de resultados');
+  assert.equal((await page.evaluate(()=>JSON.parse(localStorage.getItem('supply-lab-v90')))).revealed,true,'La demanda revelada no persistió');
   assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('supply-lab-v90')).campaignId),originalCampaignId,'Cambió el ID al recargar');
   await page.locator('#dashboardTab').click();
   await page.locator('#resultTabs [data-result-target="inventory"]').click();
