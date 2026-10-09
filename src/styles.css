@@ -275,3 +275,13 @@ html,body{max-width:100%;overflow-x:clip}
 .improvement-preview small{line-height:1.5}
 .improvement-decision button{min-height:46px;max-width:240px;white-space:normal}
 @media(max-width:760px){.improvement-decision{grid-template-columns:minmax(0,1fr)}.improvement-decision button{width:100%;max-width:none}}
+
+/* v11.2 · decision advisor for purchasing, stock and service */
+.sku-advisor{display:grid;gap:10px;margin:15px 0;padding:14px;border:1px solid #3a7180;border-radius:14px;background:#102b3c;min-width:0}
+.sku-advisor-option{display:grid;gap:8px;padding:13px;border:1px solid #36596f;border-radius:12px;background:#19374c;min-width:0}
+.sku-advisor-option.current{border-color:#4de1c5;background:#174942}
+.sku-advisor-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between}
+.sku-advisor-option small{line-height:1.5;overflow-wrap:anywhere}
+.sku-advisor-option button{min-height:44px;white-space:normal}
+.sku-advisor-insight{padding:11px;border-left:3px solid #56d9be;background:#1b3a49;border-radius:6px;line-height:1.5}
+@media(max-width:760px){.sku-advisor{padding:11px}.sku-advisor-option{padding:11px}.sku-advisor-option button{width:100%}.sku-advisor-head{display:grid}}
