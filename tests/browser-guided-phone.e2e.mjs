@@ -27,7 +27,7 @@ async function mobileCheck(stage){
    await page.locator('.mission-impact-details summary').click();
    assert.equal(await page.locator('#nodeResult').isVisible(),true);
    await page.locator('#next').click();
-   assert.match(await page.locator('#missionTitle').innerText(),/Planificación/);
+   assert.match(await page.locator('#missionTitle').innerText(),/Planning/);
   }else{
    await page.evaluate(key=>{
     const s=JSON.parse(localStorage.getItem(key));
