@@ -204,3 +204,13 @@ Nuevo `src/integrated.js`: calcula una compra por SKU desde la **demanda planifi
 En el tablero, al revelar la demanda de la campaña principal, se aplica su variación porcentual a la muestra ilustrativa de 200 pedidos y aparece un panel separado con la comparación SKU. Ejemplo: plan 200, demanda real 260, política de protección: 200 pedidos completos y 60 pendientes al día 12 con compras de CLP 530.900, suponiendo proveedores puntuales y capacidad suficiente.
 
 **Importante:** se comparte la señal porcentual de sorpresa, **no** el inventario físico, los pedidos ni la contabilidad del motor agregado. Por tanto todavía NO existe un único motor operacional/económico y no se suman sus métricas. La recuperación de capacidad de la campaña principal tampoco modifica aún el motor SKU. Se añadieron `tests/integrated.test.mjs` y ocho comprobaciones de interfaz simulada; ejecución de Node y QA visual Android pendientes.
+
+## v10.4 · Opciones de recuperación después de la sorpresa
+
+Nuevo `src/recovery.js` con cuatro intervenciones: **esperar**, **reforzar capacidad** (+80 pedidos/día), **compra urgente por SKU** y **compra urgente + refuerzo**. La compra inicial sigue congelada; la compra extraordinaria se calcula solo tras la demanda real y llega al **día 1** (supuesto didáctico de proveedor urgente). `src/events.js` acepta recepciones extraordinarias validadas y mantiene conservación física por SKU.
+
+El panel posterior a revelar la sorpresa compara pedidos completos, backlog, unidades urgentes y **flujo de caja incremental simplificado**: ingresos brutos incrementales menos desembolso urgente, recargo 30 % y costo de refuerzo CLP 70.000 por jornada de todo el horizonte. Esto **no es margen neto ni contabilidad financiera completa**: no incluye costo de inventario inicial ya comprometido, impuestos, transporte, empaque, penalidades de atraso ni costo de oportunidad. El costo de refuerzo se paga incluso si no resuelve la restricción de stock, para hacer visible el riesgo de intervenir el cuello de botella equivocado.
+
+Ejemplo (plan 200, real 260, política protección): esperar → 200 completos y 60 pendientes; solo refuerzo → también 200, con CLP 910.000 de gasto extra; solo compra urgente → 260 completos y 0 pendientes con CLP 217.620 de desembolso extra y CLP 322.380 de flujo incremental simplificado. El plazo urgente es ilustrativo y debe reemplazarse por proveedor real en una fase posterior. El laboratorio SKU sigue separado del motor económico agregado principal.
+
+Pruebas `tests/recovery.test.mjs` para compras posteriores a la sorpresa, capacidad insuficiente, conservación de unidades y conciliación incremental. Ocho verificaciones de UI simulada correctas. Ejecución real Node y QA visual Android pendientes.
