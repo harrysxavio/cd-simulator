@@ -1,8 +1,8 @@
 {
-  "version": "11.22",
-  "assetRevision": 131,
-  "release": "v11.22 · Flujo didáctico móvil y lectura progresiva",
+  "version": "11.23",
+  "assetRevision": 132,
+  "release": "v11.23 · Indicadores de diagnóstico físico desde cohorte SKU compartida",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "El resumen físico principal usa la campaña SKU de 12 días; el resumen agregado anterior se conserva separado."
+  "notes": "Diagnóstico y Resultados muestran pedidos completos del mismo read-model SKU. La hipótesis causal agregada de una jornada está expresamente marcada como provisional; no existe aún motor económico único."
 }
