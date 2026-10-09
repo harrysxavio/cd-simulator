@@ -23,10 +23,10 @@ export function inventoryPolicy({policy='balanced',orders=200,stock={},targetDay
   const daily=item.demand/30;
   const targetUnits=Math.ceil(daily*target);
   const reorderPoint=Math.ceil(daily*(catalog.leadDays+catalog.safetyDays));
+  // Periodic-review order-up-to policy. The reorder point is a separate continuous-review alert.
+  // Planned purchases do not arrive in the current day.
+  const orderQty=Math.max(0,targetUnits-item.onHand);
   const reorder=item.onHand<=reorderPoint;
-  // Reorder only if threshold reached. Target coverage is desired stock position,
-  // not guaranteed same-day stock.
-  const orderQty=reorder?Math.max(0,targetUnits-item.onHand):0;
   purchases[item.id]=orderQty;
   perSku.push({id:item.id,rotation:item.rotation,stock:item.onHand,dailyDemand:daily,targetDays:target,targetUnits,reorderPoint,reorder,ordered:orderQty,leadDays:catalog.leadDays,unitCost:catalog.unitCost,orderValue:orderQty*catalog.unitCost});
  }
