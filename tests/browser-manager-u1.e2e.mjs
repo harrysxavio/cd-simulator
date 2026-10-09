@@ -30,12 +30,13 @@ async function run(name,mobile,scenarioChanges,choiceChanges,expect){
   assert.match(diagnosis,expect.reason);
   const essential=await page.locator('#directorEvidence').innerText();
   assert.match(essential,/Demanda real/);
-  assert.match(essential,/Expedible hoy/);
-  assert.match(essential,/Sin cobertura hoy/);
+  assert.match(essential,/Se puede despachar/);
+  assert.match(essential,/Falta atender/);
   const buttons=await page.locator('#preliminarySection .director-cta .btn:visible').count();
   assert.ok(buttons>=1&&buttons<=2,'One clear primary and at most one optional pilot action');
   if(expect.pilot){
    assert.equal(await page.locator('#directorPilot').isVisible(),true);
+   await page.locator('.director-alternatives summary').click();
    assert.match(await page.locator('#directorOptions').innerText(),/Evaluar compra extraordinaria/);
    await page.locator('#directorPilot').click();
    assert.equal(await page.locator('#recoverySection').isVisible(),true);
