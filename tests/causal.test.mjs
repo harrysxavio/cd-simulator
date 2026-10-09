@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {flow} from '../src/flow.js';
 import {causalAudit} from '../src/causal.js';
 import {areaKpis} from '../src/kpis.js';
-import {DEFAULT_SCENARIO,finance} from '../src/scenario.js';
+import {DEFAULT_SCENARIO,finance,cleanScenario} from '../src/scenario.js';
 import {START,NODES} from '../src/engine.js';
 
 test('all eight departments expose at least two valid and distinct metrics',()=>{
@@ -42,4 +42,9 @@ test('cash and economic costs remain distinct',()=>{
  const r=flow(START,{},DEFAULT_SCENARIO),f=finance(r,DEFAULT_SCENARIO);
  assert.equal(f.total,f.costOfGoods+f.operationalExpenses);
  assert.equal(f.cashOutflow,f.purchase+f.operationalExpenses);
+});
+
+test('custom demand surprise up to 100 percent survives scenario normalization',()=>{
+ 
+ for(const pct of [0,20,80,100])assert.equal(cleanScenario({...DEFAULT_SCENARIO,demandShockPercent:pct}).demandShockPercent,pct);
 });
