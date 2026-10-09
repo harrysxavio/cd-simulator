@@ -1,4 +1,4 @@
-# Supply Chain Operations Lab · v11.7
+# Supply Chain Operations Lab · v11.8
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
@@ -274,3 +274,18 @@ El flujo visible se ordenó para facilitar la toma de decisiones en móvil: prim
 **Alcance actual de la integración:** la cohorte SKU mantiene 200 pedidos planificados e interpreta el shock como variación proporcional de pedidos; las capacidades importadas son unidades SKU/día. Calidad, pronóstico, proveedores y contabilidad todavía no están unificados en un único libro de eventos. Los resultados monetarios de ambos motores se presentan por separado para no contar compras o ventas dos veces. La simulación no representa inventario en preparación entre Picking y Transporte: cada pedido se prepara y expide como una transacción indivisible.
 
 **Fases estimadas v11.7:** F1 83 %, F2 89 %, F3 91 %, F4 84 %, F5 69 %; promedio simple **83 %**. La integración física de 3 áreas no significa que las 8 áreas y la contabilidad estén terminadas. Antes de declararla estable, GitHub Actions debe terminar en verde y corresponde hacer una revisión visual real en Android.
+
+## v11.8 · Proveedores y Calidad conectados al flujo SKU
+
+La simulación de órdenes SKU incorpora dos restricciones más de la campaña principal:
+
+1. **Compras:** el porcentaje efectivo de unidades entregadas por el proveedor según la decisión de Compras se aplica a los SKU ordinarios de la compra planificada. La parte que el proveedor no entrega se registra como faltante de proveedor, no como stock ni como recepción futura ficticia. Las compras urgentes utilizan su propio supuesto de entrega y plazo.
+2. **Calidad:** todas las unidades efectivamente recibidas pasan al estado *retenido en Calidad* y solo la fracción autorizada por el porcentaje de liberación de la campaña se vuelve disponible para Picking. El remanente se revisa en las jornadas siguientes; es espera de liberación, no rechazo ni merma. La retención de stock ahora aparece en la traza diaria y en la auditoría en unidades y CLP.
+
+**Balance de unidades por SKU**: inventario inicial + recepciones reales = unidades expedidas + stock disponible final + stock retenido en Calidad. Este invariante se comprueba con pruebas nuevas. Compras, Recepción, Calidad, Inventario, Picking y Transporte ya comparten parámetros en el libro diario de eventos del laboratorio SKU.
+
+**UX móvil:** los ejercicios teóricos de cobertura, ABC, política de inventario y fechas hipotéticas quedaron bajo una sección plegada de *modelos complementarios*, para separar con claridad cálculos ilustrativos aislados de resultados operacionales efectivos. La sección principal sigue mostrando los impactos y el registro por día.
+
+**Límites pendientes**: las decisiones agregadas de forecast/planeación aún no producen el manifiesto exacto de compras SKU. La capacidad de Inventario, disponibilidad confiable y el costo agregado tampoco provienen de un único libro transaccional; los resultados económicos del laboratorio SKU no deben sumarse a los de la campaña agregada. La simulación de Calidad es una tasa de liberación diaria, no una tasa de defectos.
+
+**Estado estimado v11.8:** motor operacional/económico 85 %, demanda/recuperación 89 %, SKU/compras/inventario 93 %, UX y aprendizaje 86 %, QA/documentación 72 %. Promedio simple **85 %**, orientativo y pendiente de validación de interfaz en Android.
