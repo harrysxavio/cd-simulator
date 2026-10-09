@@ -51,7 +51,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const backlogDays=r=>r.ledger.slice(0,-1).reduce((n,day)=>n+day.backlog,0);
  const penaltyBase=backlogDays(base.actual)*latePenaltyPerOrderDay;
  const penaltyRecovered=backlogDays(recovered)*latePenaltyPerOrderDay;
- const stockDays=r=>r.ledger.reduce((n,day)=>n+SKU_CATALOG.reduce((v,p)=>v+(day.stock[p.id]+(day.heldQuality?.[p.id]||0))*p.unitCost,0),0);
+ const stockDays=r=>r.ledger.reduce((n,day)=>n+SKU_CATALOG.reduce((v,p)=>v+(day.stock[p.id]+(day.reserveStock?.[p.id]||0)+(day.heldQuality?.[p.id]||0))*p.unitCost,0),0);
  const holdingBase=stockDays(base.actual)*holdingRatePerDay;
  const holdingRecovered=stockDays(recovered)*holdingRatePerDay;
  const penaltySaved=penaltyBase-penaltyRecovered;
