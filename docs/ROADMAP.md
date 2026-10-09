@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante la auditoría de navegación v11.14 (2026-10-09).
+> Documento de ejecución. Revisado durante la auditoría de navegación v11.15 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -67,6 +67,9 @@ sin stock negativo, entregas anticipadas, pedidos duplicados ni compras
 retroactivas. Pruebas con demanda 0/alta, múltiples BOM y recepciones parciales.
 
 ### M3. Operación integrada de ocho áreas (P0, depende de M2)
+
+**Incremento v11.15:** la decisión de exactitud en Inventario ahora determina el stock SKU verificable para picking, sin destruir ni duplicar unidades. La auditoría separa stock físico, verificable, no verificable y retenido en Calidad. Sigue pendiente vincular la acción de stock de reserva, definir el stock inicial común y reemplazar los indicadores agregados por proyecciones del mismo libro de eventos. M3 no se declara completado.
+
 
 Convertir el motor SKU diario en fuente de verdad para ingresos, liberaciones
 y despachos y adaptar `flow` como proyección/lectura, no motor paralelo.

@@ -1,20 +1,20 @@
-import {supplyBridge} from './supply-bridge.js?v=124';
-import {campaignSkuContract} from './campaign-contract.js?v=124';
-import {laborAudit} from './labor.js?v=124';
-import {skuAudit} from './audit.js?v=124';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=124';
-import {integratedDemand} from './integrated.js?v=124';
-import {eventSimulation} from './events.js?v=124';
-import {deliveryTimeline} from './timeline.js?v=124';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=124';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=124';
-import {demandJourney} from './journey.js?v=124';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=124';
-import {flow,diagnose,ACTIONS} from './flow.js?v=124';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=124';
-import {areaKpis} from './kpis.js?v=124';
-import {causalAudit} from './causal.js?v=124';
-import {attentionSignals} from './attention.js?v=124';
+import {supplyBridge} from './supply-bridge.js?v=125';
+import {campaignSkuContract} from './campaign-contract.js?v=125';
+import {laborAudit} from './labor.js?v=125';
+import {skuAudit} from './audit.js?v=125';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=125';
+import {integratedDemand} from './integrated.js?v=125';
+import {eventSimulation} from './events.js?v=125';
+import {deliveryTimeline} from './timeline.js?v=125';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=125';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=125';
+import {demandJourney} from './journey.js?v=125';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=125';
+import {flow,diagnose,ACTIONS} from './flow.js?v=125';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=125';
+import {areaKpis} from './kpis.js?v=125';
+import {causalAudit} from './causal.js?v=125';
+import {attentionSignals} from './attention.js?v=125';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -292,7 +292,9 @@ function renderSkuLab(){
   if(chain.receiving.waitingReceiving)add(trace,'small','','⚠ Quedan '+fmt(chain.receiving.waitingReceiving)+' unidades por ingresar al término del horizonte por restricciones de recepción.');
   add(trace,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
   add(trace,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' no ingresadas al corte');
-  add(trace,'small','','Inventario: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
+  add(trace,'small','','Inventario físico después de Calidad: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
+  add(trace,'small','','Exactitud de Inventario '+fmt(chain.inventory.accuracyPercent)+' % → stock verificable para picking: '+Object.entries(chain.inventory.pickable).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'.');
+  add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
   add(trace,'small','','Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
   const canonical=chain.campaign;
@@ -310,7 +312,7 @@ function renderSkuLab(){
    const line=add(commitmentDetail,'div','supply-trace-day');
    add(line,'strong','','SKU '+item.id+' · pedido original '+fmt(item.originalOrdered)+' · urgente '+fmt(item.urgentOrdered));
    add(line,'small','','Proveedor incumple '+fmt(item.originalSupplierShortfall)+' · aún por arribar '+fmt(item.originalInTransit+item.urgentInTransit)+' · cola Recepción '+fmt(item.waitingReceiving));
-   add(line,'small','','Recibido CD '+fmt(item.inventory.received)+' · retenido Calidad '+fmt(item.inventory.held)+' · disponible '+fmt(item.inventory.available)+(item.balanced?' ✓':' ⚠'));
+   add(line,'small','','Recibido CD '+fmt(item.inventory.received)+' · retenido Calidad '+fmt(item.inventory.held)+' · físico en almacén '+fmt(item.inventory.available)+' = verificable '+fmt(item.inventory.pickable)+' + no verificable '+fmt(item.inventory.unverified)+(item.balanced?' ✓':' ⚠'));
   }
   const verdict=add(trace,'div','supply-verdict '+chain.decision.quality);
   add(verdict,'strong','',chain.decision.quality==='effective'?'Compra con impacto operativo':chain.decision.quality==='late'?'Atención: reposición fuera de plazo':chain.decision.quality==='no-gain'?'Compra sin mejora de servicio':chain.decision.quality==='receiving-blocked'?'Recepción bloquea la compra':chain.decision.quality==='no-order'?'Sin reposición extraordinaria':'No es necesaria una compra adicional');
@@ -323,6 +325,7 @@ function renderSkuLab(){
    const row=add(table,'div','supply-trace-day');
    add(row,'strong','','Día '+day.day+' · '+fmt(day.shipped)+' pedidos · '+fmt(day.shippedUnits)+' unidades SKU');
    add(row,'small','','Recepción: '+Object.entries(day.received).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+(day.waitingReceiving?' · espera de recepción '+fmt(day.waitingReceiving):''));
+   add(row,'small','','Verificable para picking: '+Object.entries(day.pickableStock).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+' · no verificable '+fmt(Object.values(day.unverifiedStock).reduce((sum,v)=>sum+v,0))+' unidades.');
    add(row,'small','','Liberado por Calidad: '+Object.entries(day.released).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+(day.waitingQuality?' · retenido '+fmt(day.waitingQuality):''));
    add(row,'small','','Stock final: '+Object.entries(day.stock).map(([id,qty])=>id+' '+fmt(qty)).join(' · '));
    add(row,'small','','Completados acumulados: '+fmt(day.completed)+' · pendientes: '+fmt(day.pending));

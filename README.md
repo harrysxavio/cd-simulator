@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.14
+# Supply Chain Operations Lab · v11.15
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=124) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=125) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -126,7 +126,7 @@ node --experimental-default-type=module --test tests/*.test.mjs
 
 Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **La integración anterior v11.9 verificó GitHub Actions y 118 pruebas de regresión en el PR #5; v11.10 requiere validación propia.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
-## Roadmap activo · v11.14
+## Roadmap activo · v11.15
 
 **[Consultar plan completo de cierre (hitos M1–M8)](docs/ROADMAP.md)**. Los valores mostrados son estimaciones de las funciones existentes, no porcentajes de esfuerzo restante.
 
@@ -190,6 +190,14 @@ La consolidación económica entre motores necesita primero unificar horizonte t
 - Los campos numéricos de planificación y recuperación ahora incluyen etiquetas accesibles.
 - La batería de auditoría incorpora combinaciones de escenarios económicos, campañas SKU, restricciones físicas, controles y recuperación de sesiones anteriores. El detalle y las limitaciones están en **[docs/AUDIT-V11.14.md](docs/AUDIT-V11.14.md)**.
 - Se mantiene la distinción entre el simulador agregado de una jornada y la cohorte SKU; sus contabilidades siguen separadas.
+
+## v11.15 · Exactitud de Inventario con conservación física SKU (M3 incremental)
+
+- El valor de **exactitud de Inventario** seleccionado en las ocho áreas ahora limita realmente las unidades que el laboratorio SKU puede prometer a Picking (`inventoryAccuracyPercent`).
+- El motor mantiene separadas **unidades físicas en almacén**, **unidades verificables para picking** y **unidades no verificables**, además de **unidades retenidas por Calidad**. La falta de confiabilidad nunca elimina stock físico, no es merma y mantiene su valor estándar.
+- La cantidad verificable se calcula sobre existencias libres tras la liberación de Calidad al inicio de cada día. Al preparar un pedido se descuenta de la cantidad verificable y del stock físico; las existencias no verificables se recalculan diariamente, **sin suponer que hubo un conteo o un ajuste real de stock**.
+- Trazabilidad, reabastecimiento, recuperación, auditoría financiera SKU y snapshot inmutable usan los mismos saldos; se prueba la identidad `físico = verificable + no verificable`.
+- **Límite explícito:** la acción "Habilitar stock de reserva" del motor agregado no suma unidades al catálogo SKU. Aún no existe un modelo físico único de stock inicial ni libro contable global. Los motores no deben sumarse.
 
 ## Autoría y propósito
 

@@ -5,9 +5,9 @@ import {skuProcurementReconciliation} from './sku-procurement.js';
 /** Single-source audit of the SKU event ledger. Does NOT merge the aggregate engine.
  * Every receipt, unit consumed, completed order and cost derives from one replay.
  */
-export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},supplierFill={},dailyCapacity=200,days=12,urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,comparisonResult=null}={}){
+export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},supplierFill={},dailyCapacity=200,days=12,urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,plannedForecastPercent=100,planningCoveragePercent=100,comparisonResult=null}={}){
  if(comparisonResult&&(comparisonResult.option!==option||comparisonResult.recovered?.orders!==actualOrders||comparisonResult.urgentArrivalDay!==urgentArrivalDay||comparisonResult.purchaseCoveragePercent!==purchaseCoveragePercent))throw new Error('Comparación SKU no coincide con la auditoría');
- const comparison=comparisonResult??recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,supplierFill,dailyCapacity,days,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
+ const comparison=comparisonResult??recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,supplierFill,dailyCapacity,days,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,inventoryAccuracyPercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
  // Reconcile commitments and receipts from this same completed event simulation.
  const procurement=skuProcurementReconciliation(comparison);
  const r=comparison.recovered;
@@ -21,11 +21,12 @@ export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,op
  const shippedFromLedger=r.ledger.reduce((sum,day)=>sum+day.shipped,0);
  const orderUnits=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,r.types.reduce((sum,t)=>sum+t.fulfilled*(t.lines[p.id]||0),0)]));
  const inventoryBalanced=bySku.every(p=>p.balanced&&p.shipped===orderUnits[p.id]);
+ const accuracyBalanced=r.ledger.every(day=>SKU_CATALOG.every(p=>day.pickableStock[p.id]+day.unverifiedStock[p.id]===day.stock[p.id]&&day.pickableStock[p.id]>=0&&day.unverifiedStock[p.id]>=0))&&SKU_CATALOG.every(p=>r.endingStock[p.id]===r.endingPickableStock[p.id]+r.endingUnverifiedStock[p.id]);
  const ordersBalanced=orderCount===actualOrders&&completedByType===r.completed&&shippedFromLedger===r.completed&&r.completed+r.pending===actualOrders;
  const total=(key)=>bySku.reduce((sum,p)=>sum+p[key],0);
  const stockValue={opening:total('openingValue'),received:total('receivedValue'),shipped:total('shippedValue'),closing:total('closingValue'),held:total('heldValue')};
  const stockValueBalanced=stockValue.opening+stockValue.received===stockValue.shipped+stockValue.closing+stockValue.held;
  const cashBalanced=Math.abs(comparison.netCashDelta-(comparison.incrementalRevenue-comparison.incrementalExpense))<0.000001;
  const proxyBalanced=Math.abs(comparison.economicProxyDelta-(comparison.netCashDelta+comparison.penaltySaved-comparison.holdingDelta))<0.000001;
- return {bySku,stockValue,procurement,orders:{requested:orderCount,completed:r.completed,pending:r.pending,onTime:r.onTime,late:r.late},checks:{inventoryBalanced,ordersBalanced,stockValueBalanced,cashBalanced,proxyBalanced,procurementBalanced:procurement.passed},passed:inventoryBalanced&&ordersBalanced&&stockValueBalanced&&cashBalanced&&proxyBalanced&&procurement.passed,recovery:comparison,assumptions:'Auditoría física de inventario por SKU (disponible y retenido en Calidad) y valor de stock, basada en un único registro de eventos. No consolida ni sustituye el motor agregado; el valor de unidades despachadas es costo de mercancía ilustrativo, no utilidad ni caja.'};
+ return {bySku,stockValue,procurement,orders:{requested:orderCount,completed:r.completed,pending:r.pending,onTime:r.onTime,late:r.late},checks:{inventoryBalanced,ordersBalanced,stockValueBalanced,cashBalanced,proxyBalanced,procurementBalanced:procurement.passed,accuracyBalanced},passed:inventoryBalanced&&accuracyBalanced&&ordersBalanced&&stockValueBalanced&&cashBalanced&&proxyBalanced&&procurement.passed,recovery:comparison,assumptions:'Auditoría física de inventario por SKU (stock físico, fracción verificable para picking y retenido en Calidad) y valor de stock, basada en un único registro de eventos. No consolida ni sustituye el motor agregado; el valor de unidades despachadas es costo de mercancía ilustrativo, no utilidad ni caja.'};
 }

@@ -33,6 +33,10 @@ export function campaignSkuContract({
   planningCoveragePercent:planningCoverage,
   supplierFill:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,supplierRate])),
   qualityReleasePercent:Math.max(0,Math.min(100,numericValue('quality',decisions)+(area.actions.quality||0))),
+  // The inventory choice gates which PHYSICAL on-hand units may be promised.
+  // Inventory recovery reserve action remains aggregate-only until SKU reserve
+  // is physically sourced and audited: never manufacture SKU stock from it.
+  inventoryAccuracyPercent:Math.max(0,Math.min(100,numericValue('inventory',decisions))),
   receivingUnitCapacity:area.receivingCapacity,
   pickingUnitCapacity:area.pickingCapacity,
   transportUnitCapacity:area.stages[7].capacity
@@ -46,8 +50,8 @@ export function campaignSkuContract({
   skuUnit:'unidades SKU por día',orderUnit:'pedidos completos',plannedCampaignUnits:area.plannedDemand,
   actualCampaignUnits:area.demand,plannedSampleOrders,actualSampleOrders,
   sampleRatio:area.demand/area.plannedDemand,
-  stockFromCatalog:true,inventoryAccuracyNotYetLinked:true,
-  note:'Muestra de pedidos SKU derivada de la proporción de demanda de la campaña agregada. No representa la totalidad de sus unidades ni de su inventario. Los motores todavía no comparten valorización económica.'
+  stockFromCatalog:true,inventoryAccuracyLinked:true,inventoryReserveActionNotLinked:true,
+  note:'Muestra de pedidos SKU derivada de la proporción de demanda de la campaña agregada. No representa la totalidad de sus unidades ni de su inventario. La exactitud de Inventario condiciona el picking SKU sin destruir existencias. La reserva de Inventario agregado y los costos todavía no son intercambiables.'
  };
  // Freeze nested arrays/objects to prevent one UI view from mutating the plan
  // used by recovery, procurement reconciliation and SKU audit.

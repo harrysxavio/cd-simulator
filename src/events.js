@@ -5,7 +5,7 @@ import {deliveryTimeline} from './timeline.js';
  * Day 0 demand is allocated by largest remainder; pending orders persist.
  * Supplier receipts become usable on arrival day, never earlier.
  */
-export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,fixedPurchases=null,extraDeliveries=[]}={}){
+export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,fixedPurchases=null,extraDeliveries=[]}={}){
  if(!Number.isInteger(days)||days<0||days>365||!Number.isInteger(dailyCapacity)||dailyCapacity<0||dailyCapacity>100000)throw new Error('Horizonte o capacidad inválidos');
  for(const [key,cap] of Object.entries({receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity})){
   if(cap!==null&&(!Number.isSafeInteger(cap)||cap<0||cap>100000))throw new Error('Capacidad física por área inválida: '+key);
@@ -13,6 +13,7 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
  const timeline=deliveryTimeline({policy,orders,stock,delayDays,supplierFill,fixedPurchases,checkpoints:[0]});
  const available={...timeline.initial},initial={...available};
  if(!Number.isFinite(qualityReleasePercent)||qualityReleasePercent<0||qualityReleasePercent>100)throw new Error('Porcentaje de liberación de Calidad inválido');
+ if(!Number.isFinite(inventoryAccuracyPercent)||inventoryAccuracyPercent<0||inventoryAccuracyPercent>100)throw new Error('Exactitud de inventario inválida');
  if(!Array.isArray(extraDeliveries)||extraDeliveries.some(d=>!SKU_CATALOG.some(p=>p.id===d.id)||!Number.isSafeInteger(d.qty)||d.qty<0||!Number.isInteger(d.day)||d.day<1||d.day>365))throw new Error('Recepción extraordinaria inválida');
  const types=ORDER_TEMPLATES.map(t=>({id:t.id,name:t.name,share:t.share,lines:t.lines,requested:0,fulfilled:0}));
  const share=types.reduce((n,t)=>n+t.share,0),n=Math.floor(Number(orders));
@@ -70,6 +71,10 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
    releaseEvents.push({lotId:lot.lotId,skuId:lot.id,qty,day});
   }
   const waitingQuality=qualityQueue.reduce((sum,x)=>sum+x.remaining,0);
+  // Physical on-hand stock NEVER disappears due to an accuracy decision.
+  // A separate, daily promiseable balance limits picking; its complement
+  // remains physically in the warehouse, not written off or held by Quality.
+  const pickable=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,Math.floor(available[p.id]*inventoryAccuracyPercent/100)]));
   let shipped=0,shippedUnits=0;
   for(const order of queue){
    if(shipped>=dailyCapacity)break;
@@ -78,18 +83,19 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
    const kitUnits=Object.values(lines).reduce((sum,qty)=>sum+qty,0);
    if(shippedUnits+kitUnits>(pickingUnitCapacity===null?Infinity:pickingUnitCapacity))continue;
    if(shippedUnits+kitUnits>(transportUnitCapacity===null?Infinity:transportUnitCapacity))continue;
-   if(!Object.entries(lines).every(([id,qty])=>available[id]>=qty))continue;
-   for(const [id,qty] of Object.entries(lines))available[id]-=qty;
+   if(!Object.entries(lines).every(([id,qty])=>pickable[id]>=qty))continue;
+   for(const [id,qty] of Object.entries(lines)){available[id]-=qty;pickable[id]-=qty;}
    order.fulfilledDay=day;types[order.type].fulfilled++;shipped++;shippedUnits+=kitUnits;
    shipmentEvents.push({orderId:order.id,templateId:types[order.type].id,day,lines:{...lines},units:kitUnits});
   }
+  const unverifiedStock=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,available[p.id]-pickable[p.id]]));
   const completed=queue.filter(o=>o.fulfilledDay!==null).length;
   const backlog=n-completed;
-  ledger.push({day,receiptEvents,releaseEvents,shipmentEvents,received,released,receivedUrgent,waitingReceiving,waitingQuality,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(lot=>lot.id===p.id).reduce((n,x)=>n+x.remaining,0)])),shipped,shippedUnits,completed,backlog,stock:{...available},onTime:queue.filter(o=>o.fulfilledDay===0).length});
+  ledger.push({day,receiptEvents,releaseEvents,shipmentEvents,received,released,receivedUrgent,waitingReceiving,waitingQuality,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(lot=>lot.id===p.id).reduce((n,x)=>n+x.remaining,0)])),shipped,shippedUnits,completed,backlog,stock:{...available},pickableStock:{...pickable},unverifiedStock,onTime:queue.filter(o=>o.fulfilledDay===0).length});
  }
  const completed=queue.filter(o=>o.fulfilledDay!==null).length;
  const consumed=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,initial[p.id]+ledger.reduce((total,entry)=>total+entry.received[p.id],0)-available[p.id]-qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)]));
  const late=queue.filter(o=>o.fulfilledDay!==null&&o.fulfilledDay>0);
  const backlogAgeDays=queue.filter(o=>o.fulfilledDay===null).length*(days+1);
- return {orders:n,ordersDetail:queue.map(o=>({id:o.id,templateId:types[o.type].id,lines:{...types[o.type].lines},fulfilledDay:o.fulfilledDay})),policy,days,dailyCapacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,ledger,types,initial,endingStock:available,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)])),consumed,deliveries:timeline.deliveries,extraDeliveries,waitingReceiving:ledger.at(-1).waitingReceiving,waitingQuality:ledger.at(-1).waitingQuality,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Las entregas esperan capacidad de Recepción, y las unidades recibidas permanecen retenidas hasta su liberación por Calidad. La tasa de liberación es diaria sobre el stock en control (no defectos ni rechazos). Picking y Transporte comparten el despacho por pedido completo y tienen límites diarios de unidades SKU, sin inventario de trabajo en proceso. Sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
+ return {orders:n,ordersDetail:queue.map(o=>({id:o.id,templateId:types[o.type].id,lines:{...types[o.type].lines},fulfilledDay:o.fulfilledDay})),policy,days,dailyCapacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,ledger,types,initial,endingStock:available,endingPickableStock:{...ledger.at(-1).pickableStock},endingUnverifiedStock:{...ledger.at(-1).unverifiedStock},heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)])),consumed,deliveries:timeline.deliveries,extraDeliveries,waitingReceiving:ledger.at(-1).waitingReceiving,waitingQuality:ledger.at(-1).waitingQuality,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Las entregas esperan capacidad de Recepción, y las unidades recibidas permanecen retenidas hasta su liberación por Calidad. La tasa de liberación es diaria sobre el stock en control (no defectos ni rechazos). Inventario conserva la totalidad del stock físico y separa la fracción confiable para picking de la fracción no verificable, reestimada diariamente; no equivale a merma, pérdida ni cuarentena de Calidad. Picking y Transporte comparten el despacho por pedido completo y tienen límites diarios de unidades SKU, sin inventario de trabajo en proceso. Sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
 }

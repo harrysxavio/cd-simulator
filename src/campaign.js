@@ -63,10 +63,10 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   for(const item of day.shipmentEvents??[])for(const [id,qty] of Object.entries(item.lines)){const c=counters[id];c.dispatched+=qty;c.available-=qty;}
   for(const id of ids){
    const c=counters[id];
-   if(c.held<0||c.available<0||day.stock[id]!==c.available||(day.heldQuality?.[id]??0)!==c.held)physicalDailyValid=false;
+   if(c.held<0||c.available<0||day.stock[id]!==c.available||(day.heldQuality?.[id]??0)!==c.held||day.pickableStock?.[id]<0||day.unverifiedStock?.[id]<0||day.pickableStock?.[id]+day.unverifiedStock?.[id]!==c.available)physicalDailyValid=false;
   }
  }
- const bySku=ids.map(id=>({skuId:id,...counters[id],closingQuality:replay.heldQuality[id],closingAvailable:replay.endingStock[id]}));
+ const bySku=ids.map(id=>({skuId:id,...counters[id],closingQuality:replay.heldQuality[id],closingAvailable:replay.endingStock[id],closingPickable:replay.endingPickableStock[id],closingUnverified:replay.endingUnverifiedStock[id]}));
  const receivedByPO=new Map(purchaseOrders.map(x=>[x.id,0]));
  for(const item of receipts)receivedByPO.set(item.purchaseOrderId,receivedByPO.get(item.purchaseOrderId)+item.qty);
  const orderIds=new Set(orders.map(o=>o.id)),shipmentIds=new Set(shipments.map(s=>s.orderId));
@@ -85,7 +85,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   qualityLots:qualityLots.every(l=>l.heldQty>=0)&&qualityLots.reduce((n,l)=>n+l.heldQty,0)===replay.waitingQuality,
   physicalDaily:physicalDailyValid,
   skuBalance:bySku.every(x=>x.opening+x.received===x.dispatched+x.held+x.available
-   &&x.dispatched===replay.consumed[x.skuId]&&x.held===x.closingQuality&&x.available===x.closingAvailable),
+   &&x.dispatched===replay.consumed[x.skuId]&&x.held===x.closingQuality&&x.available===x.closingAvailable&&x.available===x.closingPickable+x.closingUnverified),
   eventRollups:replay.ledger.every(day=>
    day.receiptEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.received).reduce((n,v)=>n+v,0)
    &&day.releaseEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.released).reduce((n,v)=>n+v,0)
@@ -98,7 +98,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase},
   demand:{actualOrders:replay.orders,revealed:true},
   purchaseOrders,orders,receipts,qualityLots,qualityReleases,shipments,inventoryMovements,dailyEvents,
-  inventory:{bySku,initial:{...opening},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality}},
+  inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:{...opening},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones.'
  };
