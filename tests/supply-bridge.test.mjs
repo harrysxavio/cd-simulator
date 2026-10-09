@@ -4,13 +4,18 @@ import {supplyBridge} from '../src/supply-bridge.js';
 
 test('urgent purchasing enters inventory only on receipt date',()=>{
  const r=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:5});
+ const baseline=supplyBridge({actualOrders:260,option:'wait'});
  assert.ok(r.purchasing.extraUnits>0);
  assert.equal(r.receiving.receivedExtraUnits,r.purchasing.extraUnits);
  assert.equal(r.receiving.outsideHorizonUnits,0);
  assert.equal(r.receipts[0].received.A>=0,true);
  for(const sku of r.purchasing.orders){
   assert.equal(r.receiving.arrivals[sku.id],5);
-  for(const day of r.receipts.filter(x=>x.day<5))assert.equal(day.received[sku.id]>=0,true);
+  for(const day of r.receipts.filter(x=>x.day<5)){
+   const original=baseline.receipts.find(x=>x.day===day.day);
+   assert.equal(day.received[sku.id],original.received[sku.id],`SKU ${sku.id} received urgent units prematurely on day ${day.day}`);
+   assert.deepEqual(day.stock,original.stock,`SKU stock changed before urgent receipt on day ${day.day}`);
+  }
   const day5=r.receipts.find(x=>x.day===5);
   assert.ok(day5.received[sku.id]>=sku.qty);
  }
