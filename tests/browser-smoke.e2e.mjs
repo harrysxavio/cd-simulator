@@ -25,13 +25,17 @@ async function verifyExperience(mode){
   assert.equal(await page.locator('#operationsSection').isVisible(),true,'La campaña inicial debe mostrarse');
   assert.match(await page.locator('#missionTitle').innerText(),/Comercial/,'La misión debe renderizarse');
   assert.ok(await page.locator('#choices .choice').count()>=3,'Faltan decisiones del área inicial');
-  assert.ok((await page.locator('#nodeResult').innerText()).includes('Entrada:'),'Faltan consecuencias operativas');
+  assert.match(await page.locator('#choices .compact-flow').innerText(),/Llegan.*siguen/s,'Falta consecuencia visible de la elección');
+  assert.equal(await page.locator('.mission-impact-details').getAttribute('open'),null,'Detalle técnico debe iniciar plegado');
+  await page.locator('.mission-impact-details summary').click();
+  assert.match(await page.locator('#nodeResult').innerText(),/Antes de esta área/,'Consecuencia técnica debe seguir disponible');
 
   // Complete all eight planning areas using the actual navigation controls.
   for(let step=0;step<8;step++)await page.locator('#next').click();
   assert.equal(await page.locator('#preliminarySection').isVisible(),true,'El diagnóstico debe aparecer');
   assert.match(await page.locator('#directorBriefing').innerText(),/El escenario cambió|Señal|demanda/,'Falta misión de gerencia');
-  assert.ok((await page.locator('#directorEvidence').innerText()).includes('Sin cobertura hoy'));
+  assert.ok((await page.locator('#directorEvidence').innerText()).includes('Falta atender'));
+  assert.equal(await page.locator('#directorEvidence .director-stat').count(),3,'Diagnóstico debe mostrar solo las tres cifras esenciales');
   assert.equal(await page.locator('#diagnosisTechnical').getAttribute('open'),null,'El detalle técnico debe iniciar cerrado');
   await page.locator('#diagnosisTechnical summary').click();
   assert.ok((await page.locator('#demandComparison').innerText()).trim().length>20,'Falta diagnóstico técnico');
