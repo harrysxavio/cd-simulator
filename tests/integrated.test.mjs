@@ -29,3 +29,29 @@ test('supplier delay affects delivery timing but not fixed purchase value',()=>{
 test('invalid order demand rejected',()=>{
  assert.throws(()=>integratedDemand({actualOrders:0}),/inválida/);
 });
+
+
+test('Comercial forecast and Planning coverage determine a frozen SKU procurement manifest',()=>{
+ const base=integratedDemand({policy:'service',plannedOrders:200,actualOrders:260});
+ const conservative=integratedDemand({policy:'service',plannedOrders:200,actualOrders:260,plannedForecastPercent:80,planningCoveragePercent:60});
+ const protective=integratedDemand({policy:'service',plannedOrders:200,actualOrders:260,plannedForecastPercent:110,planningCoveragePercent:120});
+ assert.equal(base.committedPurchaseValue,530900);
+ assert.equal(base.forecastOrders,200);
+ assert.equal(conservative.forecastOrders,160);
+ assert.equal(protective.forecastOrders,220);
+ assert.ok(conservative.committedPurchaseValue<base.committedPurchaseValue);
+ assert.ok(protective.committedPurchaseValue>base.committedPurchaseValue);
+ assert.deepEqual(base.purchase,{A:160,B:17,C:29});
+});
+test('the same planned campaign cannot repurchase retroactively after demand surprise',()=>{
+ const config={policy:'service',plannedOrders:200,plannedForecastPercent:85,planningCoveragePercent:75};
+ const low=integratedDemand({...config,actualOrders:140});
+ const high=integratedDemand({...config,actualOrders:300});
+ assert.deepEqual(low.purchase,high.purchase);
+ assert.equal(low.committedPurchaseValue,high.committedPurchaseValue);
+ assert.equal(low.forecastOrders,high.forecastOrders);
+ assert.ok(high.actual.pending>=low.actual.pending);
+ for(const extra of [{plannedForecastPercent:0},{plannedForecastPercent:201},{planningCoveragePercent:-1},{planningCoveragePercent:151}]){
+  assert.throws(()=>integratedDemand({...config,...extra}),/inválid/);
+ }
+});
