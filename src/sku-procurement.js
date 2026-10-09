@@ -34,7 +34,7 @@ export function skuProcurementReconciliation(comparison){
    originalReceived,originalWaitingReceiving,originalInTransit,urgentOrdered,urgentReceived,urgentWaitingReceiving,urgentInTransit,
    waitingReceiving:originalWaitingReceiving+urgentWaitingReceiving,inventory,openingValue:inventory.opening*sku.unitCost,
    receivedValue:received*sku.unitCost,shippedValue:inventory.shipped*sku.unitCost,heldValue:inventory.held*sku.unitCost,
-   availableValue:inventory.available*sku.unitCost,balanced};
+   availableValue:inventory.available*sku.unitCost,reservedValue:inventory.reserved*sku.unitCost,balanced};
  });
  const sum=key=>bySku.reduce((acc,row)=>acc+row[key],0);
  const totals={
@@ -45,7 +45,7 @@ export function skuProcurementReconciliation(comparison){
   urgentWaitingReceiving:sum('urgentWaitingReceiving'),urgentInTransit:sum('urgentInTransit'),
   waitingReceiving:sum('waitingReceiving'),
   openingValue:sum('openingValue'),receivedValue:sum('receivedValue'),
-  shippedValue:sum('shippedValue'),heldValue:sum('heldValue'),availableValue:sum('availableValue')
+  shippedValue:sum('shippedValue'),heldValue:sum('heldValue'),availableValue:sum('availableValue'),reservedValue:sum('reservedValue')
  };
  const originalCommitment=operation.deliveries.reduce((sum,d)=>sum+d.ordered*d.unitCost,0);
  const urgentCommitment=comparison.urgentBase;
@@ -57,7 +57,7 @@ export function skuProcurementReconciliation(comparison){
   urgentCommitment:Math.abs(urgentCommitment-comparison.urgent.reduce((sum,d)=>sum+d.qty*d.unitCost,0))<1e-7,
   receivingQueue:totals.waitingReceiving===operation.waitingReceiving,
   accuracyPartition:bySku.every(row=>row.inventory.pickable>=0&&row.inventory.unverified>=0&&row.inventory.pickable+row.inventory.unverified===row.inventory.available),
-  stockValuation:totals.openingValue+totals.receivedValue===totals.shippedValue+totals.heldValue+totals.availableValue,
+  stockValuation:totals.openingValue+totals.receivedValue===totals.shippedValue+totals.heldValue+totals.availableValue+totals.reservedValue,
   perSku:bySku.every(row=>row.balanced)
  };
  return {horizon,bySku,totals,obligations,checks,passed:Object.values(checks).every(Boolean),
