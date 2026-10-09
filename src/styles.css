@@ -267,3 +267,11 @@ html,body{max-width:100%;overflow-x:clip}
 }
 
 .result-next{display:flex;justify-content:flex-end;margin:10px 0 14px}.result-next .btn{min-height:48px}@media(max-width:760px){.result-next{display:block}.result-next .btn{width:100%}}
+
+/* v11.1 · actionable improvement cards on narrow screens */
+.improvement-decision{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;margin-top:14px;padding:12px;border:1px solid #39687a;border-radius:12px;background:#153448}
+.improvement-preview{min-width:0;display:grid;gap:5px}
+.improvement-preview strong{color:#b4f9e9;line-height:1.35}
+.improvement-preview small{line-height:1.5}
+.improvement-decision button{min-height:46px;max-width:240px;white-space:normal}
+@media(max-width:760px){.improvement-decision{grid-template-columns:minmax(0,1fr)}.improvement-decision button{width:100%;max-width:none}}
