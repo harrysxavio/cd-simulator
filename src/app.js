@@ -1,17 +1,18 @@
-import {skuAudit} from './audit.js?v=106';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=106';
-import {integratedDemand} from './integrated.js?v=106';
-import {eventSimulation} from './events.js?v=106';
-import {deliveryTimeline} from './timeline.js?v=106';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=106';
-import {skuOrderLab} from './sku.js?v=106';
-import {demandJourney} from './journey.js?v=106';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=106';
-import {flow,diagnose,ACTIONS} from './flow.js?v=106';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=106';
-import {areaKpis} from './kpis.js?v=106';
-import {causalAudit} from './causal.js?v=106';
-import {attentionSignals} from './attention.js?v=106';
+import {laborAudit} from './labor.js?v=107';
+import {skuAudit} from './audit.js?v=107';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=107';
+import {integratedDemand} from './integrated.js?v=107';
+import {eventSimulation} from './events.js?v=107';
+import {deliveryTimeline} from './timeline.js?v=107';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=107';
+import {skuOrderLab} from './sku.js?v=107';
+import {demandJourney} from './journey.js?v=107';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=107';
+import {flow,diagnose,ACTIONS} from './flow.js?v=107';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=107';
+import {areaKpis} from './kpis.js?v=107';
+import {causalAudit} from './causal.js?v=107';
+import {attentionSignals} from './attention.js?v=107';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait';
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -298,7 +299,7 @@ function renderAttention(){
  const report=attentionSignals(decisions,actions,effectiveScenario());
  for(const m of report.messages){
   const card=add(root,'div','attention-item '+m.level);
-  add(card,'strong','',m.level==='danger'?'🔴 ':m.level==='warning'?'🟠 ':'🟢 '+m.title);
+  add(card,'strong','',(m.level==='danger'?'🔴 ':m.level==='warning'?'🟠 ':'🟢 ')+m.title);
   if(m.level!=='good')card.children[0].textContent=(m.level==='danger'?'🔴 ':'🟠 ')+m.title;
   add(card,'p','',m.description);
  }
