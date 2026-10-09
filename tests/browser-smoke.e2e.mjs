@@ -57,6 +57,9 @@ async function verifyExperience(mode){
   await page.locator('#skuLab .supply-trace summary').filter({hasText:'Ver conciliación de compras por SKU'}).click();
   assert.match(await page.locator('#skuLab .supply-trace').innerText(),/Proveedor incumple/);
 
+  // Campaign identity is persistent, and is independent from its SKU control settings.
+  const originalCampaignId=await page.evaluate(()=>JSON.parse(localStorage.getItem('supply-lab-v90')).campaignId);
+  assert.match(originalCampaignId,/^CD-[a-zA-Z0-9_-]+$/);
   // A change in urgent-purchase controls must survive a real reload.
   const coverage=page.locator('#skuLab select[aria-label="Cobertura de compra urgente sobre faltante SKU"]');
   await coverage.selectOption('50');
@@ -66,6 +69,7 @@ async function verifyExperience(mode){
   assert.equal(await date.inputValue(),'13');
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('#preliminarySection').isVisible(),true,'No se restauró demanda revelada');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('supply-lab-v90')).campaignId),originalCampaignId,'Cambió el ID al recargar');
   await page.locator('#dashboardTab').click();
   await page.locator('#resultTabs [data-result-target="inventory"]').click();
   assert.equal(await page.locator('#skuLab select[aria-label="Cobertura de compra urgente sobre faltante SKU"]').inputValue(),'50','La cobertura no persistió');
@@ -94,6 +98,7 @@ async function verifyExperience(mode){
   assert.equal(await page.locator('#operationsSection').isVisible(),true,'Reinicio no vuelve a operación');
   assert.equal(await page.locator('#preliminarySection').isVisible(),false,'Reinicio conserva la demanda revelada');
   assert.match(await page.locator('#missionTitle').innerText(),/Comercial/);
+  assert.notEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('supply-lab-v90')).campaignId),originalCampaignId,'Reinicio reutilizó el ID de la campaña anterior');
   assert.deepEqual(errors,[],'Excepciones, errores de consola o recursos rotos en '+mode);
  }catch(error){
   // Keep a screenshot of the failed real browser session for GitHub Actions.
