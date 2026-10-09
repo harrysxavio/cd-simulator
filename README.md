@@ -185,3 +185,11 @@ Las capturas de la ejecución **Model regression tests #77** muestran **82 prueb
 - En el laboratorio SKU se puede seleccionar **día de recepción urgente 1, 2, 5, 10 o 13**. El día 13 cae fuera del horizonte de 12 días y permite observar el riesgo de comprar sin recibir a tiempo. La compra extraordinaria cubre el faltante físico calculado contra inventario inicial y compras ya comprometidas; nunca se recibe antes del plazo elegido. Se muestra el volumen de unidades extraordinarias y su impacto en pedidos completados, con advertencia cuando no mejora el servicio.
 - Este control es **una simulación de recuperación SKU paralela**. Todavía no reemplaza el motor agregado de ocho áreas ni constituye una decisión de compras totalmente integrada. La siguiente fase debe conectar esa lógica con Compras, Inventario, recepción, picking y costos de la campaña principal.
 - Se verificaron **8 de 8** comprobaciones de navegación y cálculo en DOM simulado. No equivale a certificación de GitHub Actions ni a prueba física en Android.
+
+## v11.0 · Experiencia de resultados por vistas
+
+- El informe final deja de ser una sola página extensa: ahora ofrece cinco vistas con pestañas horizontales adaptadas a teléfonos: **Resumen, Áreas, Inventario, Costos y Mejoras**. La vista activa se conserva al volver al informe durante la sesión.
+- Cada pantalla presenta solo su contenido; los componentes anteriores mantienen sus identificadores y cálculo. La navegación accesible indica la pestaña seleccionada.
+- Se añaden botones para avanzar entre vistas y un acceso desde Mejoras a la fase de recuperación para ensayar decisiones y revisar de nuevo sus consecuencias.
+- Los detalles operativos y económicos siguen siendo desplegables. Las vistas de teléfonos apilan métricas, controles y tarjetas para evitar columnas estrechas.
+- Prueba funcional de navegación con DOM simulado: **9 de 9** verificaciones aprobadas. Pendiente inspección visual real en Android y comprobación de GitHub Actions.
