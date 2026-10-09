@@ -23,12 +23,17 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  ];
  const purchaseById=new Map(purchaseOrders.map(p=>[p.id,p]));
  const originalPurchase=Object.fromEntries(replay.deliveries.map(d=>[d.id,d.ordered]));
- const receipts=[],qualityReleases=[],shipments=[],dailyEvents=[],inventoryMovements=[];
+ const receipts=[],qualityReleases=[],reserveTransfers=[],shipments=[],dailyEvents=[],inventoryMovements=[];
  let sequence=0;
  const newId=()=>campaignId+'-EVT-'+String(++sequence).padStart(7,'0');
  // Stock on day -1 is the baseline, not a supplier receipt.
  for(const id of ids)inventoryMovements.push({id:campaignId+'-OPEN-'+id,day:-1,type:'opening',skuId:id,qty:opening[id]});
  for(const day of replay.ledger){
+  for(const item of day.reserveEvents??[]){
+   const row={...item,id:newId(),type:'reserve_transfer'};
+   reserveTransfers.push(row);dailyEvents.push(row);
+   inventoryMovements.push({id:row.id,day:row.day,type:'reserve_to_pickface',skuId:row.skuId,qty:row.qty,from:row.from,to:row.to});
+  }
   for(const item of day.receiptEvents??[]){
    const po=purchaseById.get(item.purchaseOrderId);
    const row={id:newId(),day:day.day,type:'warehouse_receipt',lotId:item.lotId,purchaseOrderId:item.purchaseOrderId,skuId:item.skuId,qty:item.qty};
@@ -55,18 +60,19 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   const released=qualityReleases.filter(x=>x.lotId===r.lotId).reduce((sum,x)=>sum+x.qty,0);
   return {id:r.lotId,skuId:r.skuId,receivedDay:r.day,receivedQty:r.qty,releasedQty:released,heldQty:r.qty-released,receiptId:r.id};
  });
- const counters=Object.fromEntries(ids.map(id=>[id,{opening:opening[id],received:0,released:0,dispatched:0,held:0,available:opening[id]}]));
+ const counters=Object.fromEntries(ids.map(id=>[id,{opening:opening[id],received:0,released:0,dispatched:0,held:0,available:opening[id]-(replay.openingReserve?.[id]??0),reserved:replay.openingReserve?.[id]??0}]));
  let physicalDailyValid=true;
  for(const day of replay.ledger){
+  for(const item of day.reserveEvents??[]){const c=counters[item.skuId];c.reserved-=item.qty;c.available+=item.qty;}
   for(const item of day.receiptEvents??[]){const c=counters[item.skuId];c.received+=item.qty;c.held+=item.qty;}
   for(const item of day.releaseEvents??[]){const c=counters[item.skuId];c.released+=item.qty;c.held-=item.qty;c.available+=item.qty;}
   for(const item of day.shipmentEvents??[])for(const [id,qty] of Object.entries(item.lines)){const c=counters[id];c.dispatched+=qty;c.available-=qty;}
   for(const id of ids){
    const c=counters[id];
-   if(c.held<0||c.available<0||day.stock[id]!==c.available||(day.heldQuality?.[id]??0)!==c.held||day.pickableStock?.[id]<0||day.unverifiedStock?.[id]<0||day.pickableStock?.[id]+day.unverifiedStock?.[id]!==c.available)physicalDailyValid=false;
+   if(c.held<0||c.reserved<0||c.available<0||day.reserveStock[id]!==c.reserved||day.stock[id]!==c.available||(day.heldQuality?.[id]??0)!==c.held||day.pickableStock?.[id]<0||day.unverifiedStock?.[id]<0||day.pickableStock?.[id]+day.unverifiedStock?.[id]!==c.available)physicalDailyValid=false;
   }
  }
- const bySku=ids.map(id=>({skuId:id,...counters[id],closingQuality:replay.heldQuality[id],closingAvailable:replay.endingStock[id],closingPickable:replay.endingPickableStock[id],closingUnverified:replay.endingUnverifiedStock[id]}));
+ const bySku=ids.map(id=>({skuId:id,...counters[id],closingQuality:replay.heldQuality[id],closingReserved:replay.endingReserveStock[id],closingAvailable:replay.endingStock[id],closingPickable:replay.endingPickableStock[id],closingUnverified:replay.endingUnverifiedStock[id]}));
  const receivedByPO=new Map(purchaseOrders.map(x=>[x.id,0]));
  for(const item of receipts)receivedByPO.set(item.purchaseOrderId,receivedByPO.get(item.purchaseOrderId)+item.qty);
  const orderIds=new Set(orders.map(o=>o.id)),shipmentIds=new Set(shipments.map(s=>s.orderId));
@@ -84,11 +90,12 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
       shippedById.get(o.id)?.day===o.shippedDay),
   qualityLots:qualityLots.every(l=>l.heldQty>=0)&&qualityLots.reduce((n,l)=>n+l.heldQty,0)===replay.waitingQuality,
   physicalDaily:physicalDailyValid,
-  skuBalance:bySku.every(x=>x.opening+x.received===x.dispatched+x.held+x.available
-   &&x.dispatched===replay.consumed[x.skuId]&&x.held===x.closingQuality&&x.available===x.closingAvailable&&x.available===x.closingPickable+x.closingUnverified),
+  skuBalance:bySku.every(x=>x.opening+x.received===x.dispatched+x.held+x.reserved+x.available
+   &&x.dispatched===replay.consumed[x.skuId]&&x.held===x.closingQuality&&x.available===x.closingAvailable&&x.reserved===x.closingReserved&&x.available===x.closingPickable+x.closingUnverified),
   eventRollups:replay.ledger.every(day=>
    day.receiptEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.received).reduce((n,v)=>n+v,0)
    &&day.releaseEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.released).reduce((n,v)=>n+v,0)
+   &&day.reserveEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.movedReserve).reduce((n,v)=>n+v,0)
    &&day.shipmentEvents.length===day.shipped
    &&day.shipmentEvents.reduce((n,r)=>n+r.units,0)===day.shippedUnits)
  };
@@ -97,10 +104,10 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   catalog,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase},
   demand:{actualOrders:replay.orders,revealed:true},
-  purchaseOrders,orders,receipts,qualityLots,qualityReleases,shipments,inventoryMovements,dailyEvents,
-  inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:{...opening},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
+  purchaseOrders,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
+  inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:{...opening},openingReserve:{...replay.openingReserve},closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
-  assumptions:'Lectura canónica y determinista de la cohorte SKU. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones.'
+  assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones.'
  };
  // Avoid accidentally rewriting the original plan or event records in callers.
  const freezeDeep=value=>{

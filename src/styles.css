@@ -468,3 +468,19 @@ html,body{max-width:100%;overflow-x:clip}
  .manager-preview-stat:last-child{grid-column:1/-1}
  .manager-purchase-settings{padding:12px}
 }
+
+/* v11.19 / U2b: physically-located reserve and chronological shipment learning. */
+.manager-shipment-timeline{display:grid;gap:7px;margin:9px 0 12px}
+.manager-shipment-day{display:grid;gap:5px;background:#183c4d;border:1px solid #355b70;border-radius:10px;padding:11px;min-width:0}
+.manager-shipment-day strong{font-size:.94rem;line-height:1.45;overflow-wrap:anywhere}
+.manager-shipment-day small{font-size:.85rem;line-height:1.5}
+#skuRecoveryDecision .manager-po-detail{min-width:0}
+#skuRecoveryDecision .manager-po-detail summary{font-size:1rem;line-height:1.5}
+#skuRecoveryDecision .manager-stock-item small{overflow-wrap:anywhere}
+#skuRecoveryDecision .manager-option-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:850px){#skuRecoveryDecision .manager-option-grid{grid-template-columns:1fr}}
+@media(max-width:600px){
+ .manager-shipment-day{padding:10px}
+ #skuRecoveryDecision .manager-purchase-settings select{font-size:1rem;width:100%}
+ #skuRecoveryDecision .manager-option-btn{min-height:86px}
+}

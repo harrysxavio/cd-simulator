@@ -24,17 +24,17 @@ export function skuProcurementReconciliation(comparison){
   const urgentWaitingReceiving=urgentDue-urgentReceived;
   const originalInTransit=original.received-originalDue;
   const urgentInTransit=urgentOrdered-urgentDue;
-  const inventory={opening:operation.initial[sku.id],received,shipped:operation.consumed[sku.id],held:operation.heldQuality[sku.id],available:operation.endingStock[sku.id],pickable:operation.endingPickableStock[sku.id],unverified:operation.endingUnverifiedStock[sku.id]};
+  const inventory={opening:operation.initial[sku.id],received,shipped:operation.consumed[sku.id],held:operation.heldQuality[sku.id],available:operation.endingStock[sku.id],pickable:operation.endingPickableStock[sku.id],unverified:operation.endingUnverifiedStock[sku.id],reserved:operation.endingReserveStock[sku.id]};
   const balanced=original.ordered===original.received+original.unreceived
    && original.received===originalReceived+originalWaitingReceiving+originalInTransit
    && urgentOrdered===urgentReceived+urgentWaitingReceiving+urgentInTransit
-   && inventory.opening+inventory.received===inventory.shipped+inventory.held+inventory.available
+   && inventory.opening+inventory.received===inventory.shipped+inventory.held+inventory.available+inventory.reserved
    && inventory.pickable+inventory.unverified===inventory.available;
   return {id:sku.id,unitCost:sku.unitCost,originalOrdered:original.ordered,originalSupplierFulfilled:original.received,originalSupplierShortfall:original.unreceived,
    originalReceived,originalWaitingReceiving,originalInTransit,urgentOrdered,urgentReceived,urgentWaitingReceiving,urgentInTransit,
    waitingReceiving:originalWaitingReceiving+urgentWaitingReceiving,inventory,openingValue:inventory.opening*sku.unitCost,
    receivedValue:received*sku.unitCost,shippedValue:inventory.shipped*sku.unitCost,heldValue:inventory.held*sku.unitCost,
-   availableValue:inventory.available*sku.unitCost,balanced};
+   availableValue:inventory.available*sku.unitCost,reservedValue:inventory.reserved*sku.unitCost,balanced};
  });
  const sum=key=>bySku.reduce((acc,row)=>acc+row[key],0);
  const totals={
@@ -45,7 +45,7 @@ export function skuProcurementReconciliation(comparison){
   urgentWaitingReceiving:sum('urgentWaitingReceiving'),urgentInTransit:sum('urgentInTransit'),
   waitingReceiving:sum('waitingReceiving'),
   openingValue:sum('openingValue'),receivedValue:sum('receivedValue'),
-  shippedValue:sum('shippedValue'),heldValue:sum('heldValue'),availableValue:sum('availableValue')
+  shippedValue:sum('shippedValue'),heldValue:sum('heldValue'),availableValue:sum('availableValue'),reservedValue:sum('reservedValue')
  };
  const originalCommitment=operation.deliveries.reduce((sum,d)=>sum+d.ordered*d.unitCost,0);
  const urgentCommitment=comparison.urgentBase;
@@ -57,9 +57,9 @@ export function skuProcurementReconciliation(comparison){
   urgentCommitment:Math.abs(urgentCommitment-comparison.urgent.reduce((sum,d)=>sum+d.qty*d.unitCost,0))<1e-7,
   receivingQueue:totals.waitingReceiving===operation.waitingReceiving,
   accuracyPartition:bySku.every(row=>row.inventory.pickable>=0&&row.inventory.unverified>=0&&row.inventory.pickable+row.inventory.unverified===row.inventory.available),
-  stockValuation:totals.openingValue+totals.receivedValue===totals.shippedValue+totals.heldValue+totals.availableValue,
+  stockValuation:totals.openingValue+totals.receivedValue===totals.shippedValue+totals.heldValue+totals.availableValue+totals.reservedValue,
   perSku:bySku.every(row=>row.balanced)
  };
  return {horizon,bySku,totals,obligations,checks,passed:Object.values(checks).every(Boolean),
-  assumptions:'Órdenes comprometidas no equivalen a pagos realizados. Unidades pendientes de proveedor, en tránsito y en cola de Recepción no están disponibles. El stock no verificable para picking permanece físicamente en el CD y forma parte de la valoración; no es merma. Valor a costo estándar ficticio; el recargo urgente no se capitaliza y el costo de unidades despachadas no es margen ni flujo de caja. Solo cohorte SKU; no sumar al motor agregado.'};
+  assumptions:'Órdenes comprometidas no equivalen a pagos realizados. La reserva interna es una zona física del stock inicial: no se suma a ingresos ni a compras, y se valora por separado. Unidades pendientes de proveedor, en tránsito y en cola de Recepción no están disponibles. El stock no verificable para picking permanece físicamente en el CD y forma parte de la valoración; no es merma. Valor a costo estándar ficticio; el recargo urgente no se capitaliza y el costo de unidades despachadas no es margen ni flujo de caja. Solo cohorte SKU; no sumar al motor agregado.'};
 }

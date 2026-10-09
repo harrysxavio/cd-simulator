@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante U2a de decisión SKU y trazabilidad v11.18 (2026-10-09).
+> Documento de ejecución. Revisado durante U2b de reserva ubicada y calendario SKU v11.19 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -161,6 +161,8 @@ La prueba de referencia fija 1.000 unidades previstas, forecast al 80 %, reposic
 **U1 · Implementado en v11.17:** se introduce briefing gerencial contextual con misión 2/4, unidades reales vs expedibles vs pendientes, causa operativa prioritaria, tres alternativas investigables y paneles desplegables para los ocho KPI/causas y el cambio manual de demanda. El diagnóstico distingue escasez de SKU, Recepción, Calidad, Inventario, Picking, Transporte y sorpresa de menor demanda; el análisis de compras urgentes sigue marcado **solo laboratorio SKU**, no acción confirmada de la jornada agregada. La heurística evita atribuir a Calidad una retención marginal cuando predomina la falta de abastecimiento. Se amplían pruebas de reglas y E2E móvil. Pendiente validación cualitativa en Android físico; U2–U5 siguen pendientes.
 
 **U2a · Implementado en v11.18 (parcial):** Misión 3/4: inspección de inventario físico inicial SKU, dos alternativas de espera o nueva compra, elección explícita de cantidad/cobertura, fecha supuesta y costo; vista previa sin mutación, confirmación persistente de una PO extraordinaria con su ID, fuente y trazabilidad de recepción/calidad/expedición; resultados SKU inmovilizados para ese escenario tras la confirmación. Se verifican casos de sobredemanda y compra día 1 vs día 13, recarga e imposibilidad de duplicar una orden confirmada. El motor agregado de una jornada sigue independiente. **U2b pendiente:** inventario de reserva físicamente ubicable, validación por lote/ubicación y plan de entrega de pendientes; compras a proveedor confirmado y coherencia de la economía compartida. U3 pendiente: alternativa de reprogramación y comparador general.
+
+**U2b · Incremento v11.19:** zona de reserva `RESERVA-CD` proveniente del stock inicial ya existente, habilitación mediante evento de traslado `RESERVA-CD → PICK-FACE` por SKU y día, balances y valores auditados, comparación contra baseline con la misma partición física. Incluye confirmación persistente y resumen diario de pedidos expedidos del CD con pendientes sin fecha confirmada. **No modela aún bin/lote WMS, costo/capacidad de traslado, promesa SLA ni inventario agregado unido; U2 sigue parcial.** Se agrega [matriz del estado actual de fases](STATUS-V11.19.md).
 
 ### Secuencia de entregas UX incorporada (U0–U5)
 
