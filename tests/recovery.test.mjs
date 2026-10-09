@@ -31,3 +31,17 @@ test('cash arithmetic and invalid option',()=>{
  assert.equal(r.incrementalExpense,r.urgentBase+r.urgentSurcharge+r.extraLabor);
  assert.throws(()=>recoveryComparison({option:'other'}),/desconocida/);
 });
+
+test('backlog penalty and stock holding proxies reconcile',()=>{
+ const wait=recoveryComparison({option:'wait'});
+ const urgent=recoveryComparison({option:'emergency'});
+ assert.equal(wait.economicProxyDelta,0);
+ assert.ok(urgent.penaltySaved>0);
+ assert.equal(urgent.economicProxyDelta,urgent.netCashDelta+urgent.penaltySaved-urgent.holdingDelta);
+ assert.ok(Number.isFinite(urgent.holdingDelta));
+});
+test('zero penalty and holding rates collapse proxy to cash delta',()=>{
+ const r=recoveryComparison({option:'emergency',latePenaltyPerOrderDay:0,holdingRatePerDay:0});
+ assert.equal(r.economicProxyDelta,r.netCashDelta);
+ assert.throws(()=>recoveryComparison({latePenaltyPerOrderDay:-1}),/inválidos/);
+});
