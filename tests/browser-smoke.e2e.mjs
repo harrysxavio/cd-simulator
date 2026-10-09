@@ -30,7 +30,12 @@ async function verifyExperience(mode){
   // Complete all eight planning areas using the actual navigation controls.
   for(let step=0;step<8;step++)await page.locator('#next').click();
   assert.equal(await page.locator('#preliminarySection').isVisible(),true,'El diagnóstico debe aparecer');
-  assert.ok((await page.locator('#demandComparison').innerText()).trim().length>20,'Falta diagnóstico preliminar');
+  assert.match(await page.locator('#directorBriefing').innerText(),/El escenario cambió|Señal|demanda/,'Falta misión de gerencia');
+  assert.ok((await page.locator('#directorEvidence').innerText()).includes('Sin cobertura hoy'));
+  assert.equal(await page.locator('#diagnosisTechnical').getAttribute('open'),null,'El detalle técnico debe iniciar cerrado');
+  await page.locator('#diagnosisTechnical summary').click();
+  assert.ok((await page.locator('#demandComparison').innerText()).trim().length>20,'Falta diagnóstico técnico');
+  await page.locator('#diagnosisOverride summary').click();
   assert.equal(await page.locator('#surpriseOverride').isVisible(),true,'Faltan controles de demanda sorpresa');
 
   await page.locator('#startRecovery').click();
