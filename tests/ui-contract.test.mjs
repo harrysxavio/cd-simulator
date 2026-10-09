@@ -15,9 +15,9 @@ test('all navigation and control entrypoints remain wired',()=>{
  }
 });
 test('UI entrypoint cache version matches imported module versions',()=>{
- const version=html.match(/src\\/app\\.js\\?v=(\\d+)/)?.[1];
+ const version=html.match(/app[.]js[?]v=([0-9]+)/)?.[1];
  assert.ok(version,'versioned app module missing');
- const versions=[...app.matchAll(/from ['"][^'"]+\\?v=(\\d+)['"]/g)].map(x=>x[1]);
+ const versions=[...app.matchAll(/from ['"][^'"]+[?]v=([0-9]+)['"]/g)].map(x=>x[1]);
  assert.ok(versions.length>=10);
  assert.ok(versions.every(x=>x===version),'stale imported module cache version');
 });
