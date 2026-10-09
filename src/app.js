@@ -737,7 +737,7 @@ $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
 $('revealDemand').onclick=()=>{revealSurprise();showSection('preliminary');$('directorBriefing').scrollIntoView({behavior:'smooth',block:'start'})};
 $('startRecovery').onclick=()=>{const signal=managerDiagnosis({decisions,scenario:effectiveScenario(),revealed});active=NODES.findIndex(n=>n.id===signal.area);if(active<0)active=5;showSection('recovery')};
-$('directorPilot').onclick=()=>{showSection('dashboard');showResultView('inventory',true)};
+$('directorPilot').onclick=()=>{skuRecovery='emergency';showSection('recovery');$('skuRecoveryMission').scrollIntoView({behavior:'smooth',block:'start'})};
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
