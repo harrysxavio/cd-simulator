@@ -61,16 +61,16 @@ test('SKU decisions persist across reload and restart resets them',()=>{
  }
  assert.match(app,/skuUrgentArrival=\[1,2,5,10,13\]\.includes\(s\.skuUrgentArrival\)/);
  assert.match(app,/skuRecovery=Object\.hasOwn\(RECOVERY_OPTIONS,s\.skuRecovery\)/);
- assert.match(app,/skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;save\(\)/);
+ assert.ok(app.includes("skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuDecisions=[];save()"));
 });
 
 test('the percentage of urgent SKU purchases persists, drives the comparison and resets',()=>{
  assert.match(app,/skuPurchaseCoverage=100/);
- assert.match(app,/skuRecovery,skuUrgentArrival,skuPurchaseCoverage\}\)/);
+ assert.ok(app.includes('skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuDecisions}'));
  assert.match(app,/skuPurchaseCoverage=\[0,25,50,75,100\]\.includes\(s\.skuPurchaseCoverage\)/);
  assert.match(app,/purchaseCoveragePercent:skuPurchaseCoverage/);
  assert.match(app,/coverInput\.onchange=\(\)=>\{skuPurchaseCoverage=Number\(coverInput\.value\);save\(\);renderSkuLab\(\)\}/);
- assert.match(app,/skuPurchaseCoverage=100;save\(\);showSection\('operations'\)/);
+ assert.ok(app.includes("skuPurchaseCoverage=100;skuDecisions=[];save();showSection('operations')"));
 });
 
 
@@ -132,4 +132,17 @@ test('returning to operation after revealing surprise is read-only and cannot re
  assert.ok(app.includes("input.disabled=planFrozen"));
  assert.ok(app.includes("if(planFrozen)return;"));
  assert.ok(app.includes("if(!revealed&&!decisions[NODES[active].id])"));
+});
+
+test('U2 recovery mission has distinct preview and confirmation with auditable SKU decision persistence',()=>{
+ const source=readFileSync(new URL('../src/sku-decision.js',import.meta.url),'utf8');
+ for(const id of ['skuRecoveryMission','skuRecoveryDecision','skuRecoveryHeading'])assert.ok(html.includes('id="'+id+'"'));
+ assert.ok(app.includes('renderSkuRecoveryMission();'));
+ assert.ok(app.includes("skuDecisions=[...skuDecisions,record].slice(-25)"));
+ assert.ok(app.includes('const record=createSkuRecoveryDecision('));
+ assert.ok(app.includes("confirm('¿Registrar esta decisión en la campaña SKU?"));
+ assert.ok(app.includes('const currentSkuDecision=activeSkuDecision(contract)'));
+ assert.ok(app.includes('coverInput.disabled=skuLocked'));
+ assert.ok(app.includes('arrivalInput.disabled=skuLocked'));
+ assert.ok(source.includes('campaignSnapshot({comparison,campaignId,plannedOrders:skuInputs.plannedOrders})'));
 });
