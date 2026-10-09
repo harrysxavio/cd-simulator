@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.11
+# Supply Chain Operations Lab · v11.12
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=121) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=122) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -126,7 +126,7 @@ node --experimental-default-type=module --test tests/*.test.mjs
 
 Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **La integración anterior v11.9 verificó GitHub Actions y 118 pruebas de regresión en el PR #5; v11.10 requiere validación propia.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
-## Roadmap activo · v11.11
+## Roadmap activo · v11.12
 
 **[Consultar plan completo de cierre (hitos M1–M8)](docs/ROADMAP.md)**. Los valores mostrados son estimaciones de las funciones existentes, no porcentajes de esfuerzo restante.
 
@@ -161,6 +161,16 @@ El nuevo libro de compras SKU distingue órdenes comprometidas (que **no son pag
 La trazabilidad de Recepción y Compras se calcula desde los mismos eventos diarios que generan el despacho; la auditoría valida identidades por SKU y valor, incluyendo compras tardías, cumplimiento parcial, restricciones de capacidad y retención de Calidad. **Estos movimientos corresponden exclusivamente al laboratorio SKU**; el motor agregado sigue mostrando una campaña hipotética distinta y todavía no se deben sumar ambas contabilidades.
 
 La consolidación económica entre motores necesita primero unificar horizonte temporal, cantidades físicas, precios unitarios y costos. Un reporte que simplemente sumase los dos motores sería incorrecto.
+
+## v11.12 · Registro canónico de campaña SKU (primer incremento M2)
+
+- Los pedidos simulados tienen identificador estable y referencias a la lista de materiales de su tipo.
+- Cada movimiento de recepción enlaza la orden de compra original o urgente, la fecha física de ingreso y el lote de Calidad.
+- La liberación de Calidad y el despacho registran eventos individuales, sin alterar los totales diarios del modelo.
+- `src/campaign.js` construye una instantánea inmutable de **una sola ejecución** con `campaignId`, `orders`, `purchaseOrders`, `receipts`, `qualityLots`, `qualityReleases`, `inventoryMovements`, `shipments` y `dailyEvents`. Audita identidades de pedidos, compras y existencias.
+- La vista de trazabilidad SKU incorpora un resumen de órdenes y eventos identificables.
+
+**Alcance declarado:** la nueva estructura es una proyección canónica del motor SKU, no la unificación completa de los dos motores. M2 sigue parcialmente abierto: faltan contrato de escenario único, migración de decisiones persistidas y soporte ampliado de eventos/demandas de la campaña agregada. M3–M4 permanecen pendientes. La regresión Node y Chromium se verifican por PR.
 
 ## Autoría y propósito
 
