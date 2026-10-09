@@ -11,9 +11,10 @@ export const RECOVERY_OPTIONS={
 /** Incremental, illustrative recovery comparison. Extra purchases arrive day 1.
  * Cash and economic contribution are distinct; sunk planned procurement is unchanged.
  */
-export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},dailyCapacity=200,days=12,option='wait',unitRevenue=9000,emergencySurchargeRate=0.3,extraCapacityDailyCost=70000,latePenaltyPerOrderDay=150,holdingRatePerDay=0.0005}={}){
+export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},dailyCapacity=200,days=12,option='wait',unitRevenue=9000,emergencySurchargeRate=0.3,extraCapacityDailyCost=70000,latePenaltyPerOrderDay=150,holdingRatePerDay=0.0005,urgentArrivalDay=1}={}){
  const choice=RECOVERY_OPTIONS[option];
  if(!choice)throw new Error('Recuperación desconocida');
+ if(!Number.isInteger(urgentArrivalDay)||urgentArrivalDay<1||urgentArrivalDay>365)throw new Error('Plazo de reposición urgente inválido');
  if(!Number.isFinite(unitRevenue)||unitRevenue<0||!Number.isFinite(emergencySurchargeRate)||emergencySurchargeRate<0||!Number.isFinite(extraCapacityDailyCost)||extraCapacityDailyCost<0||!Number.isFinite(latePenaltyPerOrderDay)||latePenaltyPerOrderDay<0||!Number.isFinite(holdingRatePerDay)||holdingRatePerDay<0)throw new Error('Costos de recuperación inválidos');
  const base=integratedDemand({policy,plannedOrders,actualOrders,delayDays,dailyCapacity,days});
  const urgent=[];
@@ -27,7 +28,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
   for(const p of SKU_CATALOG){
    const supply=base.actual.initial[p.id]+base.purchase[p.id];
    const shortage=Math.max(0,demand[p.id]-supply);
-   if(shortage)urgent.push({id:p.id,qty:shortage,day:1,unitCost:p.unitCost});
+   if(shortage)urgent.push({id:p.id,qty:shortage,day:urgentArrivalDay,unitCost:p.unitCost});
   }
  }
  const capacity=dailyCapacity+choice.extraCapacity;
@@ -47,6 +48,6 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const holdingDelta=holdingRecovered-holdingBase;
  const economicProxyDelta=incrementalRevenue-incrementalExpense+penaltySaved-holdingDelta;
  const netCashDelta=incrementalRevenue-incrementalExpense;
- return {option,label:choice.label,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,
-  assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Se paga refuerzo por todas las jornadas, aun si queda ocioso. Compra urgente llega día 1 y no mejora cumplimiento del día 0. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. No hay devoluciones, IVA ni costos de transporte.'};
+ return {option,label:choice.label,urgentArrivalDay,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,
+  assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Se paga refuerzo por todas las jornadas, aun si queda ocioso. Compra urgente llega el día configurado y no mejora cumplimiento anterior a la recepción. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. No hay devoluciones, IVA ni costos de transporte.'};
 }
