@@ -89,3 +89,26 @@ test('Quality-held stock remains financially held inventory, not pickable sales'
  assert.equal(r.economicProxyDelta,r.netCashDelta+r.penaltySaved-r.holdingDelta);
  assert.equal(r.recovered.completed+r.recovered.pending,260);
 });
+
+
+test('urgent procurement fills real delivered supplier shortages, not phantom purchase orders',()=>{
+ const full=recoveryComparison({policy:'service',actualOrders:260,option:'emergency',supplierFill:{A:100,B:100,C:100}});
+ const short=recoveryComparison({policy:'service',actualOrders:260,option:'emergency',supplierFill:{A:0,B:0,C:0}});
+ const units=r=>r.urgent.reduce((n,p)=>n+p.qty,0);
+ assert.ok(units(short)>units(full));
+ assert.deepEqual(short.originalPurchase,full.originalPurchase);
+ assert.equal(short.base.deliveries.every(d=>d.received===0),true);
+ assert.equal(short.recovered.completed+short.recovered.pending,260);
+});
+test('urgency comparison uses one frozen planned manifest across all recovery choices',()=>{
+ const args={policy:'service',plannedOrders:200,actualOrders:260,plannedForecastPercent:80,planningCoveragePercent:70};
+ const runs=['wait','overtime','emergency','combined'].map(option=>recoveryComparison({...args,option}));
+ for(const run of runs){
+  assert.equal(run.forecastOrders,160);
+  assert.equal(run.plannedForecastPercent,80);
+  assert.equal(run.planningCoveragePercent,70);
+  assert.deepEqual(run.originalPurchase,runs[0].originalPurchase);
+  assert.equal(run.committedPurchaseValue,runs[0].committedPurchaseValue);
+  assert.equal(run.recovered.completed+run.recovered.pending,260);
+ }
+});

@@ -92,3 +92,13 @@ test('Supplier and Quality constraints from main campaign drive SKU ledger',()=>
  const css=readFileSync(new URL('../src/styles.css',import.meta.url),'utf8');
  assert.match(css,/\.sku-supplementary summary/);
 });
+
+
+test('Commercial forecast and Planning decisions feed the SKU purchase manifest',()=>{
+ assert.match(app,/plannedForecastPercent:commercialForecast/);
+ assert.match(app,/planningCoveragePercent:planningCoverage/);
+ assert.match(app,/const commercialForecast=area\.plannedDemand>0/);
+ assert.match(app,/const planningCoverage=Math\.max\(0,Math\.min\(150,numericValue\('planning',decisions\)/);
+ assert.match(app,/Manifiesto SKU comprometido/);
+ assert.match(app,/Object\.values\(e\.receivedUrgent\)/);
+});
