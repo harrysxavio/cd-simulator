@@ -21,7 +21,7 @@ test('release protocol: HTML, manifest, JS module and styling all advertise same
 });
 test('release check recognizes newer, older and invalid manifests rather than assuming deployment success',()=>{
  assert.equal(compareRelease(manifest),'current');
- assert.equal(compareRelease({version:'11.22',assetRevision:131}),'newer');
+ assert.equal(compareRelease({version:'11.23',assetRevision:132}),'newer');
  assert.equal(compareRelease({version:'11.20',assetRevision:129}),'older-server');
  for(const v of [{},{version:'x.y',assetRevision:2},{version:'11.22',assetRevision:'131'},null])
   assert.equal(compareRelease(v),'invalid');
