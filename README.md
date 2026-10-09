@@ -157,3 +157,13 @@ Se añadieron `tests/audit.test.mjs` y se comprobaron 36 combinaciones de polít
 Proyecto conceptualizado y dirigido desde la experiencia de negocio en Supply Chain, operaciones, productividad, procesos y mejora continua, con desarrollo iterativo asistido por IA. Su propósito es facilitar aprendizaje práctico mediante decisiones transparentes, restricciones verificables y discusión de supuestos.
 
 Los escenarios, precios, productividades, plazos y costos son ficticios y se utilizan exclusivamente con fines educativos.
+
+## v10.7 · Corrección crítica de interfaz y controles (Android)
+
+Un reporte con captura de pantalla de Android detectó que, aunque la navegación inicial se mostraba, los indicadores de diagnóstico y controles aparecían incompletos. **Causa confirmada en código:** `src/app.js` llamaba a `laborAudit(...)` durante `render()` pero no importaba la función desde `src/labor.js`. El navegador producía un `ReferenceError` y abandonaba el render antes de completar el diagnóstico, las tarjetas y los enlaces de botones. Se restauró la importación, se corrigió el título de alertas de estado positivo y se incrementó la versión de caché de módulos a `v=107`.
+
+Se agregaron `tests/ui-contract.test.mjs` para detectar dependencias críticas omitidas, comprobar que los botones de navegación estén presentes y conectados y verificar consistencia de versión entre HTML e imports ES. **Prueba de integración con DOM simulado: 15/15 comprobaciones**, incluyendo KPI preliminares, personal, 4 controles SKU, 8 áreas, 3 estrategias, parámetros de escenario, diagnóstico, revelación de demanda, recuperación, navegación siguiente/anterior, resultado final y reinicio.
+
+**Limitación de QA:** la ejecución anterior se realizó con un DOM simulado, no con Chrome real. El entorno de ejecución no pudo conectarse al sitio público para ejecutar una sesión automatizada de Android/Chromium. Por tanto, la corrección está confirmada por inspección de código y pruebas funcionales simuladas, pero **no se afirma que se haya verificado visualmente en el teléfono**. Si hay una versión anterior en caché, abrir el enlace con `?v=107` o actualizar la pestaña.
+
+**Pendiente prioritario:** automatizar una prueba E2E real de navegador en GitHub Actions (por ejemplo, Playwright con Chromium móvil) que recorra planificación → diagnóstico → sorpresa → recuperación → resultado y falle si hay excepciones de JavaScript o elementos vacíos.
