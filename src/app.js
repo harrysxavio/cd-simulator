@@ -276,6 +276,16 @@ function renderSkuLab(){
   add(trace,'small','','Inventario: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
   add(trace,'small','','Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
+  const detail=add(trace,'details','supply-trace-detail');
+  add(detail,'summary','','Ver recepción, stock y pedidos por día');
+  const table=add(detail,'div','supply-trace-days');
+  for(const day of chain.receipts){
+   const row=add(table,'div','supply-trace-day');
+   add(row,'strong','','Día '+day.day+' · '+fmt(day.shipped)+' despachos');
+   add(row,'small','','Recepción: '+Object.entries(day.received).map(([id,qty])=>id+' '+fmt(qty)).join(' · '));
+   add(row,'small','','Stock final: '+Object.entries(day.stock).map(([id,qty])=>id+' '+fmt(qty)).join(' · '));
+   add(row,'small','','Completados acumulados: '+fmt(day.completed)+' · pendientes: '+fmt(day.pending));
+  }
   add(trace,'small','muted',chain.assumptions);
   const bridge=add(root,'div','area-kpi-tile');
   add(bridge,'strong','','Demanda sorpresa aplicada al laboratorio SKU · compras congeladas');
