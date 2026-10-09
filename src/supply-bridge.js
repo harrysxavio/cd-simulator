@@ -5,11 +5,12 @@ import {campaignSnapshot} from './campaign.js';
 /** Trace a single SKU intervention through purchasing, receiving, inventory and picking.
  * The aggregate eight-area campaign is intentionally not altered by this pilot.
  */
-export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=200,delayDays={},supplierFill={},option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,plannedForecastPercent=100,planningCoveragePercent=100}={}){
- const result=recoveryComparison({policy,plannedOrders,actualOrders,delayDays,supplierFill,option,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
+export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=200,delayDays={},supplierFill={},option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,campaignId='SKU-LAB',comparisonResult=null}={}){
+ if(comparisonResult&&(comparisonResult.option!==option||comparisonResult.recovered?.orders!==actualOrders||comparisonResult.urgentArrivalDay!==urgentArrivalDay||comparisonResult.purchaseCoveragePercent!==purchaseCoveragePercent))throw new Error('Comparación SKU no coincide con el escenario');
+ const result=comparisonResult??recoveryComparison({policy,plannedOrders,actualOrders,delayDays,supplierFill,option,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
  const arrival=Object.fromEntries(result.urgent.map(x=>[x.id,x.day]));
  const procurementLedger=skuProcurementReconciliation(result);
- const campaign=campaignSnapshot({comparison:result,campaignId:'SKU-LAB',plannedOrders});
+ const campaign=campaignSnapshot({comparison:result,campaignId,plannedOrders});
  const receipts=result.recovered.ledger.map(day=>({
   day:day.day,received:{...day.received},released:{...day.released},waitingQuality:day.waitingQuality,receivedUrgent:{...day.receivedUrgent},waitingReceiving:day.waitingReceiving,shipped:day.shipped,shippedUnits:day.shippedUnits,
   completed:day.completed,pending:day.backlog,stock:{...day.stock}

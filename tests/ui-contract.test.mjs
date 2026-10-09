@@ -74,31 +74,42 @@ test('the percentage of urgent SKU purchases persists, drives the comparison and
 });
 
 
-test('SKU ledger uses Receiving, Picking and Transport constraints from the campaign',()=>{
- assert.match(app,/receivingUnitCapacity:area\.receivingCapacity/);
- assert.match(app,/pickingUnitCapacity:area\.pickingCapacity/);
- assert.match(app,/transportUnitCapacity:area\.stages\[7\]\.capacity/);
- assert.match(app,/const chain=supplyBridge\([^\n]*\.\.\.skuAreaCapacity\}\)/);
- assert.match(app,/const audit=skuAudit\([^\n]*\.\.\.skuAreaCapacity\}\)/);
+test('single campaign contract supplies physical SKU capacities and limits',()=>{
+ const adapter=readFileSync(new URL('../src/campaign-contract.js',import.meta.url),'utf8');
+ assert.ok(app.includes("import {campaignSkuContract} from './campaign-contract.js?v="));
+ assert.ok(app.includes('const contract=campaignSkuContract('));
+ for(const key of ['receivingUnitCapacity:area.receivingCapacity','pickingUnitCapacity:area.pickingCapacity','transportUnitCapacity:area.stages[7].capacity']){
+  assert.ok(adapter.includes(key),'Missing SKU capacity: '+key);
+ }
+ assert.ok(app.includes('const chain=supplyBridge({...contract.skuInputs'));
+ assert.ok(app.includes('const audit=skuAudit({...contract.skuInputs'));
+ assert.ok(app.includes('comparisonResult:recovery'));
 });
 
-test('Supplier and Quality constraints from main campaign drive SKU ledger',()=>{
- assert.match(app,/supplierRate=area\.ordered>0\?/);
- assert.match(app,/supplierFill:Object\.fromEntries\(SKU_CATALOG\.map/);
- assert.match(app,/qualityReleasePercent:Math\.max\(0,Math\.min\(100,numericValue\('quality',decisions\)/);
- assert.match(app,/Object\.entries\(day\.released\)/);
- assert.match(app,/const audit=skuAudit\([^\n]*\.\.\.skuAreaCapacity\}\)/);
- assert.match(app,/sku-supplementary/);
+test('supplier and quality constraints in campaign adapter drive SKU reports',()=>{
+ const adapter=readFileSync(new URL('../src/campaign-contract.js',import.meta.url),'utf8');
+ for(const key of ["supplierRate=area.ordered>0?","supplierFill:Object.fromEntries(SKU_CATALOG.map","qualityReleasePercent:Math.max(0,Math.min(100,numericValue('quality',decisions)"]){
+  assert.ok(adapter.includes(key),'Missing sourcing constraint: '+key);
+ }
+ assert.ok(app.includes('Object.entries(day.released)'));
+ assert.ok(app.includes('sku-supplementary'));
  const css=readFileSync(new URL('../src/styles.css',import.meta.url),'utf8');
- assert.match(css,/\.sku-supplementary summary/);
+ assert.ok(css.includes('.sku-supplementary summary'));
 });
 
+test('commercial and planning decisions feed frozen SKU purchases through adapter',()=>{
+ const adapter=readFileSync(new URL('../src/campaign-contract.js',import.meta.url),'utf8');
+ for(const key of ['plannedForecastPercent:commercialForecast','planningCoveragePercent:planningCoverage',
+  'commercialForecast=area.plannedDemand>0',"planningCoverage=Math.max(0,Math.min(150,numericValue('planning',decisions)"]){
+  assert.ok(adapter.includes(key),'Missing upstream constraint: '+key);
+ }
+ assert.ok(app.includes('Manifiesto SKU comprometido'));
+ assert.ok(app.includes('Object.values(e.receivedUrgent)'));
+ assert.ok(app.includes('const integrated=recovery.integrated'));
+});
 
-test('Commercial forecast and Planning decisions feed the SKU purchase manifest',()=>{
- assert.match(app,/plannedForecastPercent:commercialForecast/);
- assert.match(app,/planningCoveragePercent:planningCoverage/);
- assert.match(app,/const commercialForecast=area\.plannedDemand>0/);
- assert.match(app,/const planningCoverage=Math\.max\(0,Math\.min\(150,numericValue\('planning',decisions\)/);
- assert.match(app,/Manifiesto SKU comprometido/);
- assert.match(app,/Object\.values\(e\.receivedUrgent\)/);
+test('campaign ID persists and restarting creates a new campaign',()=>{
+ assert.ok(app.includes('schemaVersion:1,campaignId,decisions'));
+ assert.ok(app.includes('campaignId=createCampaignId();decisions='));
+ assert.ok(app.includes('campaignId=typeof s.campaignId'));
 });
