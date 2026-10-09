@@ -27,7 +27,8 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
     : 'La reposición llega a tiempo y recupera '+improvement+' pedidos completos. Contrasta su costo incremental con el beneficio obtenido.';
  const decisionQuality=extraUnits===0?'no-shortage':!firstUrgentReceiptDay?'late':!serviceGain?'no-gain':'effective';
  return {
-  option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,\n  decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent},
+  option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,
+  decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent},
   purchasing:{committedValue:result.committedPurchaseValue,extraUnits:result.urgent.reduce((sum,x)=>sum+x.qty,0),extraCost:result.urgentBase+result.urgentSurcharge,orders:result.urgent.map(x=>({...x}))},
   receiving:{arrivals:arrival,receivedExtraUnits:urgentInHorizon.reduce((sum,x)=>sum+x.qty,0),outsideHorizonUnits:lateUrgent.reduce((sum,x)=>sum+x.qty,0)},
   inventory:{initial:{...result.recovered.initial},ending:{...result.recovered.endingStock},consumed:{...result.recovered.consumed}},
