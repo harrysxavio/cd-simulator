@@ -5,8 +5,9 @@ import {skuProcurementReconciliation} from './sku-procurement.js';
 /** Single-source audit of the SKU event ledger. Does NOT merge the aggregate engine.
  * Every receipt, unit consumed, completed order and cost derives from one replay.
  */
-export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},supplierFill={},dailyCapacity=200,days=12,urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,plannedForecastPercent=100,planningCoveragePercent=100}={}){
- const comparison=recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,supplierFill,dailyCapacity,days,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
+export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},supplierFill={},dailyCapacity=200,days=12,urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,comparisonResult=null}={}){
+ if(comparisonResult&&(comparisonResult.option!==option||comparisonResult.recovered?.orders!==actualOrders||comparisonResult.urgentArrivalDay!==urgentArrivalDay||comparisonResult.purchaseCoveragePercent!==purchaseCoveragePercent))throw new Error('Comparación SKU no coincide con la auditoría');
+ const comparison=comparisonResult??recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,supplierFill,dailyCapacity,days,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
  // Reconcile commitments and receipts from this same completed event simulation.
  const procurement=skuProcurementReconciliation(comparison);
  const r=comparison.recovered;
