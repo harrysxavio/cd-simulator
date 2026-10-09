@@ -58,7 +58,7 @@ async function mobileCheck(stage){
    assert.equal(await page.locator('select[aria-label="Porcentaje del stock inicial ubicado en RESERVA-CD"]').count(),0,'Do not show irrelevant advanced reserve setting');
    await page.locator('.manager-option-btn').filter({hasText:'Habilitar reserva ubicada en el CD'}).click();
    assert.equal(await page.locator('select[aria-label="Porcentaje del stock inicial ubicado en RESERVA-CD"]').count(),1);
-   assert.equal((await page.locator('.manager-option-btn.chosen')).count() instanceof Promise,false);
+   assert.equal(await page.locator('.manager-option-btn.chosen').count(),1);
    const before=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).skuDecisions.length,KEY);
    assert.equal(before,0,'Preview must not commit any change');
    const date=page.getByLabel('Día de habilitación de la reserva ubicada');
