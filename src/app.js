@@ -345,6 +345,7 @@ function renderSkuLab(){
   if(chain.receiving.waitingReceiving)add(trace,'small','','⚠ Quedan '+fmt(chain.receiving.waitingReceiving)+' unidades por ingresar al término del horizonte por restricciones de recepción.');
   add(trace,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
   add(trace,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' no ingresadas al corte');
+  add(trace,'small','','Reserva interna sin habilitar: '+Object.entries(chain.inventory.reserved).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. Es stock inicial separado, no una compra.');
   add(trace,'small','','Inventario físico después de Calidad: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
   add(trace,'small','','Exactitud de Inventario '+fmt(chain.inventory.accuracyPercent)+' % → stock verificable para picking: '+Object.entries(chain.inventory.pickable).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'.');
   add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
@@ -388,6 +389,7 @@ function renderSkuLab(){
   add(bridge,'strong','','Demanda sorpresa aplicada al laboratorio SKU · compras congeladas');
   add(bridge,'small','','Plan original: 200 pedidos · pronóstico de compra: '+fmt(integrated.forecastOrders)+' pedidos · demanda real revelada: '+fmt(actualOrders)+' pedidos · compra comprometida CLP '+fmt(integrated.committedPurchaseValue));
   add(bridge,'small','','Plan al día 12: '+fmt(integrated.planned.completed)+' completos / '+fmt(integrated.planned.pending)+' pendientes · real al día 12: '+fmt(integrated.actual.completed)+' completos / '+fmt(integrated.actual.pending)+' pendientes');
+  if(recovery.recovered.ledger.some(day=>day.reserveEvents.length))add(bridge,'small','','Traslados internos de RESERVA-CD: '+fmt(recovery.recovered.ledger.reduce((n,day)=>n+day.reserveEvents.reduce((t,e)=>t+e.qty,0),0))+' unidades; sin nuevas compras.');
   add(bridge,'small','','Diferencia en pendientes: '+(integrated.impact.pending>=0?'+':'')+fmt(integrated.impact.pending)+' pedidos. La sorpresa no recalcula las compras originales.');
   add(bridge,'small','',integrated.assumptions);
   const recoveryControls=add(bridge,'div','buttons');
@@ -425,7 +427,7 @@ function renderSkuLab(){
   const recommended=[...candidates].sort((a,b)=>b.economicProxyDelta-a.economicProxyDelta||b.recovered.completed-a.recovered.completed)[0]||null;
   const advisor=add(bridge,'div','sku-advisor');
   add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
-  add(advisor,'p','muted','Las cuatro alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
+  add(advisor,'p','muted','Las alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
   for(const trial of comparisons){
    const optionCard=add(advisor,'div','sku-advisor-option'+(trial.option===skuRecovery?' current':''));
    const headline=add(optionCard,'div','sku-advisor-head');
@@ -439,6 +441,7 @@ function renderSkuLab(){
   add(advisor,'p','sku-advisor-insight',recommended?'Mayor resultado económico proxy entre opciones que mejoran servicio: '+recommended.label+' · CLP '+fmt(recommended.economicProxyDelta)+'. Revisa también la caja y el plazo antes de decidir.':'Ninguna intervención mejora pedidos completados dentro del horizonte. Evita comprometer compras solo por aumentar stock.');
   add(bridge,'strong','','Recuperación: '+recovery.label);
   add(bridge,'small','','Pedidos finales '+fmt(recovery.recovered.completed)+' / '+fmt(actualOrders)+' · pendientes '+fmt(recovery.recovered.pending)+' · mejora '+fmt(recovery.recovered.completed-recovery.base.completed));
+  if(skuRecovery==='reserve')add(bridge,'small','','Reserva ubicada: '+fmt(Object.values(recovery.reserveStock).reduce((n,x)=>n+x,0))+' unidades del stock inicial · traslado en día '+skuUrgentArrival+'.');
   add(bridge,'small','','Compra urgente '+recovery.urgent.map(p=>p.id+': '+fmt(p.qty)).join(', ')+(recovery.urgent.length?'':' ninguna')+' · desembolso incremental CLP '+fmt(recovery.incrementalExpense));
   add(bridge,'small','','Flujo de caja incremental simplificado CLP '+fmt(recovery.netCashDelta)+' · NO es margen neto');
   add(bridge,'small','','Días-pedido de atraso evitados: '+fmt(recovery.backlogDaysBase-recovery.backlogDaysRecovered)+' · penalidad ilustrativa evitada CLP '+fmt(recovery.penaltySaved)+' · variación costo de tenencia CLP '+fmt(recovery.holdingDelta));
@@ -449,8 +452,8 @@ function renderSkuLab(){
   add(auditCard,'strong','',audit.passed?'✓ Conciliación física y económica SKU correcta':'⚠ Inconsistencia en conciliación SKU');
   add(auditCard,'small','','Auditoría de productos disponibles y pendientes en Calidad, por SKU.');
   if(audit.orders.completed!==chain.picking.completed)add(auditCard,'small','','⚠ Auditoría y traza operativa no coinciden.');
-  for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' − retenido en calidad '+fmt(p.held)+' = disponible final '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
-  add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' − stock retenido CLP '+fmt(audit.stockValue.held)+' = disponible final CLP '+fmt(audit.stockValue.closing));
+  for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' − retenido en Calidad '+fmt(p.held)+' − reserva ubicada '+fmt(p.reserved)+' = disponible final '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
+  add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' − stock retenido CLP '+fmt(audit.stockValue.held)+' − reserva CLP '+fmt(audit.stockValue.reserved)+' = disponible final CLP '+fmt(audit.stockValue.closing));
   add(auditCard,'small','','Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(audit.orders.completed)+' completos + '+fmt(audit.orders.pending)+' pendientes');
   add(auditCard,'small','',audit.procurement.passed?'✓ Compras, proveedor, tránsito, recepción y stock reconciliados':'⚠ Descuadre entre compromisos y movimientos de inventario');
   add(auditCard,'small','',audit.assumptions);
@@ -606,6 +609,16 @@ function renderSkuRecoveryMission(){
  }
  if(['emergency','reserve'].includes(selected)&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta compra no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
  if(selected==='wait')add(previewCard,'p','manager-warning','Esperar mantiene los pedidos pendientes; no equivale a cancelarlos ni a prometer una fecha de entrega.');
+ const timeline=add(previewCard,'details','manager-po-detail');
+ add(timeline,'summary','','📅 Ver salidas por día y los pedidos aún pendientes');
+ const daily=add(timeline,'div','manager-shipment-timeline');
+ for(const day of preview.recovered.ledger){
+  const entry=add(daily,'div','manager-shipment-day');
+  add(entry,'strong','','Día '+day.day+' · '+fmt(day.shipped)+' pedidos expedidos del CD');
+  add(entry,'small','','Acumulados '+fmt(day.completed)+' / '+fmt(preview.recovered.orders)+' · pendientes '+fmt(day.backlog)+(day.reserveEvents.length?' · reserva habilitada '+fmt(day.reserveEvents.reduce((n,x)=>n+x.qty,0))+' SKU':''));
+ }
+ add(timeline,'p','manager-warning','Al corte del día '+preview.recovered.days+' quedan '+fmt(preview.recovered.pending)+' pedidos sin fecha de entrega confirmada. Un despacho desde el CD no garantiza recepción del cliente.');
+
  const confirmBtn=add(root,'button','btn manager-primary','Confirmar decisión en simulación →');
  confirmBtn.type='button';confirmBtn.id='confirmSkuDecision';
  confirmBtn.disabled=(selected==='emergency'&&!preview.urgent.length)||(selected==='reserve'&&skuReservePercent===0);
