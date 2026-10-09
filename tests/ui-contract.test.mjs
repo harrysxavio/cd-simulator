@@ -26,3 +26,11 @@ test('render invokes all critical sections',()=>{
   assert.ok(app.includes(call),'Missing render path: '+call);
  }
 });
+
+test('preliminary diagnosis reveals surprise before recovery',()=>{
+ assert.match(app,/if\(name==='preliminary'&&!revealed\)revealSurprise\(\)/);
+ assert.match(app,/function applyDemandOverride\(sign,percent\)/);
+ assert.match(app,/scenario\.demandShockPercent=v;shockDirection=sign;revealed=true;actions=\{\}/);
+ assert.match(html,/id="surpriseOverride"/);
+ assert.match(app,/if\(!Number\.isFinite\(v\)\|\|!Number\.isInteger\(v\)\|\|v<0\|\|v>100\)/);
+});
