@@ -1,27 +1,30 @@
-import {supplyBridge} from './supply-bridge.js?v=131';
-import {campaignSkuContract} from './campaign-contract.js?v=131';
-import {campaignAreaReadModel} from './area-ledger.js?v=131';
-import {laborAudit} from './labor.js?v=131';
-import {skuAudit} from './audit.js?v=131';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=131';
-import {integratedDemand} from './integrated.js?v=131';
-import {eventSimulation} from './events.js?v=131';
-import {deliveryTimeline} from './timeline.js?v=131';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=131';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=131';
-import {demandJourney} from './journey.js?v=131';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=131';
-import {flow,diagnose,ACTIONS} from './flow.js?v=131';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=131';
-import {areaKpis} from './kpis.js?v=131';
-import {causalAudit} from './causal.js?v=131';
-import {managerDiagnosis} from './diagnosis-guide.js?v=131';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=131';
-import {attentionSignals} from './attention.js?v=131';
+import {supplyBridge} from './supply-bridge.js?v=132';
+import {campaignSkuContract} from './campaign-contract.js?v=132';
+import {campaignAreaReadModel} from './area-ledger.js?v=132';
+import {laborAudit} from './labor.js?v=132';
+import {skuAudit} from './audit.js?v=132';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=132';
+import {integratedDemand} from './integrated.js?v=132';
+import {eventSimulation} from './events.js?v=132';
+import {deliveryTimeline} from './timeline.js?v=132';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=132';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=132';
+import {demandJourney} from './journey.js?v=132';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=132';
+import {flow,diagnose,ACTIONS} from './flow.js?v=132';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=132';
+import {areaKpis} from './kpis.js?v=132';
+import {causalAudit} from './causal.js?v=132';
+import {managerDiagnosis} from './diagnosis-guide.js?v=132';
+import {skuServiceBrief} from './sku-service.js?v=132';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=132';
+import {attentionSignals} from './attention.js?v=132';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuReservePercent=0,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
+// Shared SKU read-model: one render, one physical order service.
+let currentSkuAreaModel=null;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 const skuContractInputs=contract=>skuReservePercent>0?{...contract.skuInputs,reservePercent:skuReservePercent}:contract.skuInputs;
@@ -125,27 +128,37 @@ function dashboard(r){
 }
 function renderManagerBriefing(){
  const view=managerDiagnosis({decisions,scenario:effectiveScenario(),revealed});
+ const service=revealed&&currentSkuAreaModel?skuServiceBrief(currentSkuAreaModel):null;
  const briefing=$('directorBriefing'),evidence=$('directorEvidence'),reason=$('directorReason'),options=$('directorOptions');
  briefing.replaceChildren();evidence.replaceChildren();reason.replaceChildren();options.replaceChildren();
- briefing.className='director-briefing '+view.severity;
+ briefing.className='director-briefing '+(service?service.severity:view.severity);
  add(briefing,'span','director-alert',view.scenarioLabel);
  add(briefing,'h3','director-story',revealed?'El escenario cambió. Tu misión es proteger el servicio.':'Primero observa el plan, después descubre la demanda.');
  add(briefing,'p','',''+view.context);
- const essential=[
+ if(service)add(briefing,'p','director-preview','Campaña SKU · '+service.horizonDays+' días · '+service.reading);
+ const essential=service?[
+  ['Demanda real',service.actualOrders],
+  ['Salieron del CD',service.shippedOrders],
+  ['Falta atender',service.pendingOrders]
+ ]:[
   [revealed?'Demanda real':'Demanda prevista',view.actualDemand],
   ['Se puede despachar',view.dispatched],
   ['Falta atender',view.pending]
  ];
+ evidence.dataset.scope=service?'sku-cohort':'aggregate-day';
+ evidence.setAttribute('aria-label',service?'Pedidos completos SKU en '+service.horizonDays+' días':'Unidades equivalentes de una jornada');
  for(const [title,value] of essential){
   const card=add(evidence,'div','director-stat');
   add(card,'span','',title);add(card,'strong','',fmt(value));
  }
- add(reason,'span','director-reason-eyebrow',view.pending>0?'SEÑAL OPERACIONAL PRIORITARIA':'LECTURA OPERACIONAL');
+ // Root-cause heuristic is still one-shift and MUST be marked provisional.
+ add(reason,'span','director-reason-eyebrow',service?'HIPÓTESIS DE RESTRICCIÓN · JORNADA AGREGADA':view.pending>0?'SEÑAL OPERACIONAL PRIORITARIA':'LECTURA OPERACIONAL');
  add(reason,'h3','',view.title);
  add(reason,'p','director-next','Tu siguiente paso: '+view.next);
  const cause=add(reason,'details','director-why');
  add(cause,'summary','','¿Por qué sucede?');
  add(cause,'p','',view.why);
+ if(service)add(cause,'p','','Esta hipótesis usa unidades equivalentes de una jornada; no demuestra la causa de los pedidos pendientes SKU. Revisa los eventos de las ocho áreas.');
  $('directorOptions').parentElement.hidden=!revealed;
  if(revealed){
   add(options,'h3','','Otras posibilidades');
@@ -160,7 +173,7 @@ function renderManagerBriefing(){
  }else{
   add(options,'p','director-preview','Las alternativas aparecen después de descubrir la demanda. La sorpresa no modifica retroactivamente tus decisiones.');
  }
- $('directorScope').textContent=view.note+' · Indicadores en '+view.unit+'. Señales del modelo didáctico, no diagnóstico profesional verificado.';
+ $('directorScope').textContent=(service?service.boundary+' La causa provisional y las medidas de recuperación por área aún usan el motor agregado. ':'')+view.note+' · Modelo didáctico, no diagnóstico profesional verificado.';
  $('directorPilot').hidden=!(revealed&&view.category==='supply');
  // Keep the progressive-disclosure panel expanded if the user opened it:
  // all dynamic children re-render in-place; <details> itself is untouched.
@@ -387,6 +400,7 @@ function renderSkuLab(){
  const input=skuContractInputs(contract);
  if(currentSkuDecision){skuRecovery=currentSkuDecision.option;skuUrgentArrival=currentSkuDecision.urgentArrivalDay;skuPurchaseCoverage=currentSkuDecision.purchaseCoveragePercent;skuReservePercent=currentSkuDecision.reservePercent??0}
  let plannedSkuRun=null;
+ currentSkuAreaModel=null;
  const root=$('skuLab');root.replaceChildren();
  if(currentSkuDecision){const stamp=add(root,'div','sku-decision-stamp');add(stamp,'strong','','✓ Decisión SKU confirmada en simulación');add(stamp,'p','',(currentSkuDecision.option==='emergency'?'Compra extraordinaria de '+fmt(currentSkuDecision.orderedExtraUnits)+' unidades SKU.':currentSkuDecision.option==='reserve'?'Traslado interno de '+fmt(currentSkuDecision.releasedReserveUnits)+' unidades desde RESERVA-CD.':'Sin compra adicional.')+' Recuperación: '+fmt(currentSkuDecision.recoveredOrders)+' pedidos completos adicionales al día '+fmt(currentSkuDecision.horizonDays)+'. Consulta su trazabilidad en Recuperación.');}
  const controls=$('skuPolicyControls');controls.replaceChildren();
@@ -407,6 +421,8 @@ function renderSkuLab(){
   plannedSkuRun=integrated.planned;
   const chain=supplyBridge({...input,option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:recovery,campaignId});
   const physicalAreas=renderCanonicalAreasFromSku(chain,contract,recovery);
+  // Reuse one immutable SKU projection for preliminary and final screens.
+  currentSkuAreaModel=physicalAreas;
   renderPrimarySkuSummary(physicalAreas);
   const trace=add(root,'div','area-kpi-tile supply-trace');
   add(trace,'strong','','🔗 Cómo se conectan las áreas');

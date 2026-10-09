@@ -30,7 +30,10 @@ async function caseUnderforecast(mobile){
   await page.locator('#surpriseOverride button').filter({hasText:'Aplicar escenario'}).click();
   const briefing=await page.locator('#directorReason').innerText();
   assert.match(briefing,/disponibilidad es insuficiente/);
-  assert.match(await page.locator('#directorEvidence').innerText(),/834/);
+  // Main diagnosis and Results must use the same SKU order cohort.
+  assert.equal(await page.locator('#directorEvidence').getAttribute('data-scope'),'sku-cohort');
+  assert.match(await page.locator('#directorEvidence').innerText(),/280/);
+  const earlySkuFigures=await page.locator('#directorEvidence .director-stat strong').allTextContents();
   assert.equal(await page.locator('#diagnosisTechnical').getAttribute('open'),null,'El detalle técnico debe iniciar plegado');
   await page.locator('#diagnosisTechnical summary').click();
   const details=await page.locator('#demandComparison').innerText();
@@ -44,6 +47,7 @@ async function caseUnderforecast(mobile){
   assert.equal(await page.locator('#primarySkuSummary').isVisible(),true,'Canonical SKU summary must be the primary result');
   assert.equal(await page.locator('#legacyAggregateDetails').getAttribute('open'),null,'One-shift legacy result must start folded');
   assert.match(await page.locator('#primarySkuMetrics').innerText(),/280/,'SKU cohort must be distinguished from aggregate-day units');
+  assert.deepEqual(await page.locator('#primarySkuMetrics .canonical-area-stat strong').allTextContents(),earlySkuFigures,'Diagnosis and final Results must reflect identical SKU orders');
   await page.locator('#legacyAggregateDetails summary').click();
   assert.equal((await page.locator('#completed').innerText()).trim(),'566');
   assert.equal((await page.locator('#pending').innerText()).trim(),'834');

@@ -47,7 +47,7 @@ async function mobileCheck(stage){
    assert.equal(await page.locator('.director-why').getAttribute('open'),null);
    assert.match(await page.locator('#directorReason').innerText(),/Tu siguiente paso/);
    await page.locator('.director-why summary').click();
-   assert.equal(await page.locator('.director-why p').isVisible(),true);
+   assert.equal(await page.locator('.director-why p').first().isVisible(),true);
    await page.locator('#startRecovery').click();
    assert.equal(await page.locator('#recoverySection').isVisible(),true);
    const intro=await page.locator('.manager-recovery-intro').innerText();
