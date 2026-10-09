@@ -1,18 +1,18 @@
-import {laborAudit} from './labor.js?v=107';
-import {skuAudit} from './audit.js?v=107';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=107';
-import {integratedDemand} from './integrated.js?v=107';
-import {eventSimulation} from './events.js?v=107';
-import {deliveryTimeline} from './timeline.js?v=107';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=107';
-import {skuOrderLab} from './sku.js?v=107';
-import {demandJourney} from './journey.js?v=107';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=107';
-import {flow,diagnose,ACTIONS} from './flow.js?v=107';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=107';
-import {areaKpis} from './kpis.js?v=107';
-import {causalAudit} from './causal.js?v=107';
-import {attentionSignals} from './attention.js?v=107';
+import {laborAudit} from './labor.js?v=108';
+import {skuAudit} from './audit.js?v=108';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=108';
+import {integratedDemand} from './integrated.js?v=108';
+import {eventSimulation} from './events.js?v=108';
+import {deliveryTimeline} from './timeline.js?v=108';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=108';
+import {skuOrderLab} from './sku.js?v=108';
+import {demandJourney} from './journey.js?v=108';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=108';
+import {flow,diagnose,ACTIONS} from './flow.js?v=108';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=108';
+import {areaKpis} from './kpis.js?v=108';
+import {causalAudit} from './causal.js?v=108';
+import {attentionSignals} from './attention.js?v=108';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait';
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -21,9 +21,21 @@ function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls
 function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed,shockDirection}))}catch{}}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;shockDirection=s.shockDirection===-1?-1:1}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
+function revealSurprise(){
+ if(revealed)return;
+ shockDirection=Math.random()<0.5?-1:1;
+ revealed=true;actions={};phase='plan';save();
+}
+function applyDemandOverride(sign,percent){
+ const v=Number(percent);
+ if(!Number.isFinite(v)||!Number.isInteger(v)||v<0||v>100){alert('Ingresa un porcentaje entero entre 0 y 100.');return false}
+ if(![-1,1].includes(sign)){alert('Selecciona aumento o disminución.');return false}
+ scenario.demandShockPercent=v;shockDirection=sign;revealed=true;actions={};phase='plan';save();showSection('preliminary');return true;
+}
 function showSection(name){
 if((name==='recovery'||name==='dashboard')&&!revealed){name='preliminary'}
 if(name==='operations'&&revealed){name='preliminary'}
+if(name==='preliminary'&&!revealed)revealSurprise();
 for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
 if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
 if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
@@ -89,6 +101,19 @@ function dashboard(r){
  $('financialInsight').textContent=r.dispatched===0?'No hay expedición posible: no se calcula costo unitario. Los gastos y desembolsos pueden mantenerse.':over?'El costo por unidad supera la meta. La comparación se hace contra el costo total, no contra presupuestos arbitrarios por área.':'El costo por unidad está dentro de la meta global. Revisa también el resultado operacional y los desembolsos.';
 }
 function renderDiagnosis(current){
+ const surpriseConfig=$('surpriseOverride');surpriseConfig.replaceChildren();
+ if(revealed){
+  add(surpriseConfig,'strong','','Escenario revelado: '+(shockDirection===-1?'disminución':'aumento')+' del '+scenario.demandShockPercent+' %');
+  add(surpriseConfig,'p','muted','Opcional: reproduce un caso real modificando el signo y el porcentaje. Se conservan las decisiones y compras planificadas; se descartan acciones de recuperación previas.');
+  const line=add(surpriseConfig,'div','surprise-controls');
+  const direction=add(line,'select','numeric-input');direction.setAttribute('aria-label','Signo de variación de demanda');
+  for(const [value,label] of [['1','Aumento (+)'],['-1','Disminución (−)']]){const opt=add(direction,'option','',label);opt.value=value;opt.selected=Number(value)===shockDirection;}
+  direction.value=String(shockDirection);
+  const pct=add(line,'input','numeric-input');pct.type='number';pct.min=0;pct.max=100;pct.step=1;pct.value=scenario.demandShockPercent;pct.setAttribute('aria-label','Porcentaje de variación de demanda');
+  const apply=add(line,'button','btn secondary','Aplicar escenario');apply.type='button';apply.onclick=()=>applyDemandOverride(Number(direction.value),pct.value);
+  add(surpriseConfig,'small','','Variación permitida: 0 a 100 %. La demanda mínima del motor es una unidad.');
+ }
+
  const planScenario={...scenario,actualDemand:scenario.demand,lockUpstream:false};
  const initialPlan=flow(decisions,{},planScenario);
  const initial=flow(decisions,{},effectiveScenario());
@@ -418,7 +443,7 @@ $('export').onclick=()=>{const r=flow(decisions,actions,effectiveScenario()),row
 $('setupTab').onclick=()=>showSection('setup');
 $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
-$('revealDemand').onclick=()=>{if(revealed)return;shockDirection=Math.random()<0.5?-1:1;revealed=true;actions={};save();render();$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
+$('revealDemand').onclick=()=>{revealSurprise();showSection('preliminary');$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
 $('startRecovery').onclick=()=>showSection('recovery');
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
