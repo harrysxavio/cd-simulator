@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v10.5
+# Supply Chain Operations Lab · v10.6
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=105) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=106) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -103,6 +103,7 @@ Aplicación web estática, JavaScript ES modules, sin framework ni backend.
 | `src/events.js` | Eventos diarios, backlog y conservación física |
 | `src/integrated.js` | Sorpresa de demanda con compras congeladas |
 | `src/recovery.js` | Recuperación y comparación económica incremental |
+| `src/audit.js` | Conciliación de existencias, pedidos y valoración desde un solo registro SKU |
 | `tests/*.test.mjs` | Pruebas de regresión del modelo |
 
 El navegador guarda decisiones y escenarios del motor principal en almacenamiento local. Los controles experimentales SKU no necesariamente se conservan al recargar.
@@ -125,17 +126,31 @@ node --experimental-default-type=module --test tests/*.test.mjs
 
 Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **No se ha confirmado aquí el estado real del CI ni la ejecución completa de Node.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
-## Roadmap y estado estimado · v10.5
+## Roadmap y estado estimado · v10.6
 
 | Fase | Avance aproximado | Pendientes principales |
 |---|---:|---|
 | 1. Motor operacional y económico | 80 % | Auditoría y conciliación de casos extremos |
 | 2. Demanda sorpresa y recuperación | 85 % | Escenarios reproducibles y cierre de validación |
-| 3. SKU, inventario y abastecimiento | 78 % | Unificación física y económica con el motor principal |
+| 3. SKU, inventario y abastecimiento | 82 % | Unificación física y económica con el motor principal |
 | 4. UX y aprendizaje guiado | 50 % | Ejercicios progresivos, móvil y accesibilidad |
-| 5. QA, documentación y portafolio | 50 % | CI verificado, regresiones reales y revisión visual |
+| 5. QA, documentación y portafolio | 55 % | CI verificado, regresiones reales y revisión visual |
 
 **Próxima prioridad:** consolidar el inventario, la capacidad y la contabilidad de ambos motores, evitando doble conteo de existencias, compras, ingresos y costos. Después, ejecutar y corregir la suite Node y validar Android.
+
+## v10.6 · Auditoría trazable del laboratorio SKU
+
+Se incorporó `src/audit.js` y una sección de conciliación visible después de revelar la sorpresa de demanda. Para cada SKU se verifica:
+
+```text
+Stock inicial + unidades recibidas = unidades despachadas + stock final
+```
+
+El costo valorizado de las existencias se concilia con la misma identidad, usando el costo ilustrativo de cada SKU. También se verifica que los pedidos solicitados sean iguales a los completados más los pendientes, que el total de despachos diarios concuerde con los pedidos completos y que los cálculos económicos incrementales reconcilien aritméticamente. La auditoría utiliza el mismo resultado de eventos diarios que genera la operación SKU: **no se suman resultados de motores independientes**.
+
+Se añadieron `tests/audit.test.mjs` y se comprobaron 36 combinaciones de política de inventario, intervención y sorpresa mediante evaluación JavaScript del modelo; las 36 conciliaron. Esta comprobación **no equivale a ejecutar la suite completa Node ni a QA de navegador real**.
+
+**Límite relevante:** es una auditoría interna del motor SKU y sus supuestos, **no la unificación con el motor agregado principal**. La consolidación operacional y financiera sigue pendiente, así como validar CI y Android.
 
 ## Autoría y propósito
 
