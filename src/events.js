@@ -79,7 +79,7 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   }
   const completed=queue.filter(o=>o.fulfilledDay!==null).length;
   const backlog=n-completed;
-  ledger.push({day,received,released,receivedUrgent,waitingReceiving,waitingQuality,shipped,shippedUnits,completed,backlog,stock:{...available},onTime:queue.filter(o=>o.fulfilledDay===0).length});
+  ledger.push({day,received,released,receivedUrgent,waitingReceiving,waitingQuality,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(lot=>lot.id===p.id).reduce((n,x)=>n+x.remaining,0)])),shipped,shippedUnits,completed,backlog,stock:{...available},onTime:queue.filter(o=>o.fulfilledDay===0).length});
  }
  const completed=queue.filter(o=>o.fulfilledDay!==null).length;
  const consumed=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,initial[p.id]+ledger.reduce((total,entry)=>total+entry.received[p.id],0)-available[p.id]-qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)]));
