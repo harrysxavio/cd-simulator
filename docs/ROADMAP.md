@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante el incremento v11.13 (2026-10-09).
+> Documento de ejecución. Revisado durante la auditoría de navegación v11.14 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -119,6 +119,8 @@ correlación, restricción física y causa raíz verificada.
 
 **Aceptación:** cada recomendación explica decisión, contrafactual,
 impacto físico/costo y limitaciones; ninguna suma impactos no aditivos.
+
+**Corrección transversal v11.14:** navegación recuperable desde cualquier etapa, reinicio permanente y confirmado, lectura no editable del plan cerrado, restauración de pantalla guardada y casos E2E de sesión antigua. [Auditoría y límites de versión](AUDIT-V11.14.md). No equivale a M7 finalizado.
 
 ### M7. UX didáctica accesible (P1, puede iterarse tras M1)
 
