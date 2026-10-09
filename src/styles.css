@@ -292,3 +292,21 @@ html,body{max-width:100%;overflow-x:clip}
 .supply-trace-days{display:grid;gap:8px;margin-top:10px}
 .supply-trace-day{display:grid;gap:5px;min-width:0;padding:11px;border:1px solid #355c70;border-radius:10px;background:#183749}
 .supply-trace-day small{overflow-wrap:anywhere;line-height:1.5}
+
+/* v11.6: visual feedback for urgent purchasing trade-offs */
+.purchase-coverage-control{display:grid;gap:7px;min-width:0;padding:12px;border:1px solid #3a7082;border-radius:12px;background:#102f43}
+.purchase-coverage-control label{font-weight:750;color:#bdf8eb}
+.purchase-coverage-control select{min-height:48px;width:100%;min-width:0;padding:10px;font:inherit;max-width:100%}
+.purchase-coverage-control small{line-height:1.5}
+.supply-verdict{border-left:4px solid #86c5da;background:#1c3b4e;border-radius:9px;margin:12px 0;padding:12px;display:grid;gap:6px}
+.supply-verdict strong{line-height:1.35}
+.supply-verdict p{margin:0;line-height:1.5}
+.supply-verdict.effective{border-color:#36d7b7;background:#12453f}
+.supply-verdict.late,.supply-verdict.no-gain{border-color:#f2b84a;background:#463928}
+.supply-verdict.no-order,.supply-verdict.no-shortage{border-color:#70a5bb}
+@media(max-width:760px){
+ .purchase-coverage-control{padding:11px}
+ .supply-verdict{padding:11px}
+ .sku-purchase-decision{gap:12px}
+ .supply-trace{overflow-wrap:break-word;min-width:0}
+}
