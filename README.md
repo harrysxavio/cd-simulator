@@ -177,3 +177,11 @@ La interfaz móvil incorpora controles adaptables. Se comprobaron **11 de 11** i
 ### Incidencia abierta de GitHub Actions
 
 Las capturas de la ejecución **Model regression tests #77** muestran **82 pruebas aprobadas y 1 fallida, de 83**. El entorno Node y la descarga del código funcionaron. No se ve el nombre de la prueba fallida en las capturas, por lo que todavía no se puede afirmar que el CI esté reparado. Es necesario identificar el primer `not ok` del registro completo, corregirlo y comprobar una ejecución verde. No se recomienda desactivar las alertas mientras haya fallos reales.
+
+## v10.9 · Lectura móvil y Compras ↔ Inventario
+
+- En pantallas de hasta 760 px, el laboratorio SKU usa **una columna** de tarjetas de ancho completo, y los botones se adaptan a teléfonos angostos. Evita los bloques de texto de dos columnas que dificultaban la lectura en Android.
+- En **Resultado final** hay un botón **Nueva campaña desde cero**. Pide confirmación y restablece demanda, decisiones, acciones correctivas, política SKU y retrasos. Se conserva la función de reinicio anterior en Operación.
+- En el laboratorio SKU se puede seleccionar **día de recepción urgente 1, 2, 5, 10 o 13**. El día 13 cae fuera del horizonte de 12 días y permite observar el riesgo de comprar sin recibir a tiempo. La compra extraordinaria cubre el faltante físico calculado contra inventario inicial y compras ya comprometidas; nunca se recibe antes del plazo elegido. Se muestra el volumen de unidades extraordinarias y su impacto en pedidos completados, con advertencia cuando no mejora el servicio.
+- Este control es **una simulación de recuperación SKU paralela**. Todavía no reemplaza el motor agregado de ocho áreas ni constituye una decisión de compras totalmente integrada. La siguiente fase debe conectar esa lógica con Compras, Inventario, recepción, picking y costos de la campaña principal.
+- Se verificaron **8 de 8** comprobaciones de navegación y cálculo en DOM simulado. No equivale a certificación de GitHub Actions ni a prueba física en Android.
