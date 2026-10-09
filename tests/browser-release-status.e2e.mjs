@@ -14,8 +14,8 @@ async function verify(mode){
   await page.goto(BASE+'/?release=11.22-r131&test='+mode,{waitUntil:'networkidle'});
   assert.equal(await page.locator('#releaseCurrentVersion').innerText(),'V11.22');
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
-  assert.match(await page.locator('#releaseStatus').innerText(),/v11\.21 verificada en servidor/);
-  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/release=11\.21-r131/);
+  assert.match(await page.locator('#releaseStatus').innerText(),/v11\.22 verificada en servidor/);
+  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/release=11\.22-r131/);
   await page.locator('#checkRelease').click();
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
   await page.evaluate(()=>{
@@ -69,9 +69,9 @@ test('browser warns when public manifest is newer than cached HTML', {timeout:90
  const page=await browser.newPage();
  try{
   await page.goto(BASE+'/?release-check=newer',{waitUntil:'networkidle'});
-  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:'11.22',assetRevision:131})}));
+  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:'11.23',assetRevision:132})}));
   await page.locator('#checkRelease').click();
   await page.waitForFunction(()=>document.getElementById('releaseStatus').textContent.includes('versión nueva'));
-  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/11\.22-r131/);
+  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/11\.23-r132/);
  }finally{await browser.close()}
 });
