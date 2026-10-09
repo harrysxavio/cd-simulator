@@ -12,13 +12,13 @@ export const RECOVERY_OPTIONS={
  * A user-selected fraction of physical SKU shortages is bought, not the full gross demand.
  * Cash and economic contribution are distinct; sunk planned procurement is unchanged.
  */
-export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,option='wait',unitRevenue=9000,emergencySurchargeRate=0.3,extraCapacityDailyCost=70000,latePenaltyPerOrderDay=150,holdingRatePerDay=0.0005,urgentArrivalDay=1,purchaseCoveragePercent=100}={}){
+export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,option='wait',unitRevenue=9000,emergencySurchargeRate=0.3,extraCapacityDailyCost=70000,latePenaltyPerOrderDay=150,holdingRatePerDay=0.0005,urgentArrivalDay=1,purchaseCoveragePercent=100}={}){
  const choice=RECOVERY_OPTIONS[option];
  if(!choice)throw new Error('Recuperación desconocida');
  if(!Number.isInteger(urgentArrivalDay)||urgentArrivalDay<1||urgentArrivalDay>365)throw new Error('Plazo de reposición urgente inválido');
  if(!Number.isInteger(purchaseCoveragePercent)||purchaseCoveragePercent<0||purchaseCoveragePercent>100)throw new Error('Cobertura de compra urgente inválida');
  if(!Number.isFinite(unitRevenue)||unitRevenue<0||!Number.isFinite(emergencySurchargeRate)||emergencySurchargeRate<0||!Number.isFinite(extraCapacityDailyCost)||extraCapacityDailyCost<0||!Number.isFinite(latePenaltyPerOrderDay)||latePenaltyPerOrderDay<0||!Number.isFinite(holdingRatePerDay)||holdingRatePerDay<0)throw new Error('Costos de recuperación inválidos');
- const base=integratedDemand({policy,plannedOrders,actualOrders,delayDays,dailyCapacity,days,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity});
+ const base=integratedDemand({policy,plannedOrders,actualOrders,delayDays,supplierFill,dailyCapacity,days,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity});
  const urgent=[];
  if(choice.urgent){
   // Calculate unmet BOM demand from actual orders minus stock and original purchases.
@@ -35,7 +35,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
   }
  }
  const capacity=dailyCapacity+choice.extraCapacity;
- const recovered=eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent});
+ const recovered=eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent});
  const urgentBase=urgent.reduce((n,d)=>n+d.qty*d.unitCost,0);
  const urgentSurcharge=urgentBase*emergencySurchargeRate;
  const extraLabor=choice.extraCapacity?extraCapacityDailyCost*(days+1):0;
