@@ -387,28 +387,30 @@ function renderSkuLab(){
  add(eventCard,'small','','Demora media de pedidos tardíos: '+events.averageDelayDays.toFixed(1)+' días');
  for(const e of events.ledger.filter(x=>x.day===0||x.shipped>0||[2,5,10,12].includes(x.day)))add(eventCard,'small','','Día '+e.day+' · despachados hoy '+fmt(e.shipped)+' · acumulados '+fmt(e.completed)+' · pendientes '+fmt(e.backlog)+' · retenidos en Calidad '+fmt(e.waitingQuality));
  add(eventCard,'small','',events.assumptions);
+ const supplementary=add(root,'details','sku-supplementary');
+ add(supplementary,'summary','','Explorar modelos teóricos complementarios (sin capacidades físicas)');
  const timeline=deliveryTimeline({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
- const timelineCard=add(root,'div','area-kpi-tile');
- add(timelineCard,'strong','','¿Cuándo estará realmente disponible la reposición?');
+ const timelineCard=add(supplementary,'div','area-kpi-tile');
+ add(timelineCard,'strong','','Fechas teóricas de recepción sin restricciones de Calidad o capacidad');
  for(const snap of timeline.snapshots)add(timelineCard,'small','','Día '+snap.day+' · pedidos completos posibles '+fmt(snap.complete)+' / '+fmt(timeline.orders)+' · recibidos A '+fmt(snap.receipts.A)+', B '+fmt(snap.receipts.B)+', C '+fmt(snap.receipts.C));
  add(timelineCard,'small','',timeline.assumptions);
  const policy=inventoryPolicy({policy:skuPolicy});
- const policySummary=add(root,'div','area-kpi-tile');
+ const policySummary=add(supplementary,'div','area-kpi-tile');
  add(policySummary,'strong','','Política '+policy.label+' · pedidos futuros de reposición');
  add(policySummary,'small','','Compra planificada CLP '+fmt(policy.orderValue)+' · cumplimiento con recepción futura hipotética '+policy.eventual.fulfillment.toFixed(1)+' % (base '+policy.baseline.fulfillment.toFixed(1)+' %)');
  add(policySummary,'small','','Costo mensual de mantener stock remanente, ilustrativo: CLP '+fmt(policy.eventual.holdingCost)+' · ventas brutas incrementales hipotéticas CLP '+fmt(policy.delta.revenue));
  for(const p of policy.perSku)add(policySummary,'small','','SKU '+p.id+' ('+p.rotation+'): objetivo '+p.targetDays+' días · compra '+fmt(p.ordered)+' unid. · plazo '+p.leadDays+' días · '+(p.reorder?'alerta punto de pedido':'sin alerta por punto de pedido'));
  add(policySummary,'small','',policy.assumptions);
  const report=skuOrderLab();
- const summary=add(root,'div','area-kpi-tile');
+ const summary=add(supplementary,'div','area-kpi-tile');
  add(summary,'strong','','Pedidos completos: '+fmt(report.complete)+' / '+fmt(report.orders)+' · '+report.fulfillment.toFixed(1)+' %');
  add(summary,'small','','Pendientes '+fmt(report.pending)+' · bloqueo por stock '+fmt(report.blockedByStock)+' · por capacidad '+fmt(report.blockedByCapacity));
  for(const p of report.rows){
-  const card=add(root,'div','area-kpi-tile');
+  const card=add(supplementary,'div','area-kpi-tile');
   add(card,'strong','',p.name);
   add(card,'small','','Pedidos '+fmt(p.requested)+' · completos '+fmt(p.complete)+' · pendientes '+fmt(p.unfulfilled));
  }
- const stock=add(root,'div','area-kpi-tile');
+ const stock=add(supplementary,'div','area-kpi-tile');
  add(stock,'strong','','Stock por SKU al cierre del ejercicio piloto');
  for(const p of report.skuMetrics){
   add(stock,'strong','',p.name+' · rotación '+p.rotation+' · ABC por valor '+p.abc);
@@ -416,7 +418,7 @@ function renderSkuLab(){
   add(stock,'small','','Cobertura '+(p.daysCover===null?'N/D':p.daysCover.toFixed(1)+' días')+' · punto de pedido '+fmt(p.reorderPoint)+' unid. · plazo proveedor '+p.leadDays+' días + seguridad '+p.safetyDays+' días');
   add(stock,'small','',p.reorderSuggested?'🟠 Stock en o bajo punto de reposición':'🟢 Stock sobre punto de reposición');
  }
- add(root,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Este laboratorio aún no está conectado a las compras ni al inventario de la campaña principal.');
+ add(supplementary,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Estos ejercicios de referencia son hipótesis aisladas; no usan las capacidades compartidas ni forman parte de la conciliación principal de la campaña SKU.');
 }
 function renderAttention(){
  const root=$('attentionSummary'),costs=$('areaCostCards');root.replaceChildren();costs.replaceChildren();
