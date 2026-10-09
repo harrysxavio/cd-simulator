@@ -584,8 +584,10 @@ function renderSkuRecoveryMission(){
   const success=add(root,'div','manager-po-confirmed');
   add(success,'strong','','✓ Decisión confirmada para esta cohorte SKU');
   add(success,'p','',confirmed.action==='extraordinary-purchase'?'Nueva orden de compra extraordinaria, separada de la orden original.':confirmed.action==='release-on-site-reserve'?'Se autorizó el traslado de stock ubicado en RESERVA-CD. No es una compra.':'Se ha decidido continuar sin compra extraordinaria.');
-  add(success,'p','','Pedidos completos antes: '+fmt(confirmed.completedBefore)+' → después: '+fmt(confirmed.completedAfter)+' · pendientes '+fmt(confirmed.pendingAfter)+' · rescate +'+fmt(confirmed.recoveredOrders)+' al día '+confirmed.horizonDays+'.');
-  add(success,'p','','Compromiso adicional modelado CLP '+fmt(confirmed.urgentOrderCommitmentCLP)+' (no es pago real). Unidades ordenadas '+fmt(confirmed.orderedExtraUnits)+'; recibidas en el horizonte '+fmt(confirmed.receivedExtraUnits)+'.');
+  add(success,'p','manager-confirmed-impact','Pedidos que salen del CD: '+fmt(confirmed.completedBefore)+' → '+fmt(confirmed.completedAfter)+' · siguen pendientes '+fmt(confirmed.pendingAfter)+'.');
+  const commitDetails=add(success,'details','manager-po-detail');
+  add(commitDetails,'summary','','Ver costos y cantidades confirmadas en el simulador');
+  add(commitDetails,'p','','Compra prevista: CLP '+fmt(confirmed.urgentOrderCommitmentCLP)+' (sin pago real). Cantidad comprada: '+fmt(confirmed.orderedExtraUnits)+' productos; recibidos durante el ejercicio: '+fmt(confirmed.receivedExtraUnits)+'.');
   if(confirmed.action==='release-on-site-reserve'){
    add(success,'p','','Traslado interno de '+fmt(confirmed.releasedReserveUnits)+' unidades SKU desde el día '+(confirmed.firstReserveTransferDay??'no realizado')+'. Reserva pendiente al corte '+fmt(Object.values(confirmed.closingReserve).reduce((a,b)=>a+b,0))+'.');
    const moveDetail=add(success,'details','manager-po-detail');add(moveDetail,'summary','','Ver movimientos internos identificados por SKU');
@@ -599,7 +601,7 @@ function renderSkuRecoveryMission(){
     add(item,'p','','Costo estándar CLP '+fmt(po.orderCommitmentCLP)+' · llegada supuesta día '+po.expectedArrivalDay+'. '+po.supplier);
    }
   }
-  add(success,'p','manager-warning','Confirmada solamente en el simulador: no se emitió orden comercial ni se transfirió dinero. La compra original permanece congelada. Para ensayar un plan alternativo, inicia una nueva campaña; no se pueden duplicar compras confirmadas.');
+  add(success,'p','manager-fineprint','Decisión guardada para esta campaña de práctica. La compra original no cambia. Para ensayar otra alternativa, inicia una nueva campaña.');
   const resultBtn=add(root,'button','btn manager-primary','Ver resultado y trazabilidad SKU →');
   resultBtn.type='button';resultBtn.onclick=()=>{showSection('dashboard');showResultView('inventory',true)};
   return;
@@ -675,29 +677,35 @@ function renderSkuRecoveryMission(){
  add(previewCard,'p','manager-pending-summary','Quedarían '+fmt(preview.recovered.pending)+' pedidos pendientes de '+fmt(preview.recovered.orders)+'. La entrega al cliente todavía no está confirmada.');
  if(selected==='reserve'){
   const moves=preview.recovered.ledger.flatMap(x=>x.reserveEvents);
-  const block=add(previewCard,'div','manager-purchase-lines');add(block,'strong','','RESERVA-CD → PICK-FACE · traslado interno, sin recepción de proveedor');
-  for(const p of SKU_CATALOG)add(block,'p','','SKU '+p.id+' · '+fmt(preview.reserveStock[p.id])+' unidades originalmente ubicadas en reserva'+(moves.some(x=>x.skuId===p.id)?' · traslado día '+skuUrgentArrival:' · sin trasladar'));
-  add(previewCard,'p','','Unidades transferidas '+fmt(moves.reduce((n,x)=>n+x.qty,0))+' · compras adicionales CLP 0. Costo de movimiento interno aún no modelado.');
+  const block=add(previewCard,'div','manager-purchase-lines');add(block,'strong','','Productos que moverías desde la reserva:');
+  for(const p of SKU_CATALOG)add(block,'p','','SKU '+p.id+': '+fmt(preview.reserveStock[p.id])+' unidades'+(moves.some(x=>x.skuId===p.id)?' · día '+skuUrgentArrival:' · no salen aún'));
+  add(previewCard,'p','','Se moverían '+fmt(moves.reduce((n,x)=>n+x.qty,0))+' productos. No se realiza una compra.');
   if(skuUrgentArrival>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ El traslado llega fuera del horizonte: no recupera pedidos durante la campaña.');
  }
  if(preview.urgent.length){
   const items=add(previewCard,'div','manager-purchase-lines');
   add(items,'strong','','Nueva orden propuesta, separada del manifiesto inicial:');
   for(const po of preview.urgent)add(items,'p','','SKU '+po.id+' · '+fmt(po.qty)+' unidades · llegada teórica día '+po.day+' · valor CLP '+fmt(po.qty*po.unitCost));
-  add(previewCard,'p','','Compromiso extraordinario supuesto CLP '+fmt(preview.urgentBase+preview.urgentSurcharge)+' (valor y recargo; no equivale a pago).');
+  add(previewCard,'p','','Costo previsto de la compra: CLP '+fmt(preview.urgentBase+preview.urgentSurcharge)+' (sin pago real).');
   if(preview.urgentArrivalDay>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ La nueva compra llega después del corte: genera compromiso, pero no recupera pedidos dentro de los 12 días.');
  }
  if(['emergency','reserve'].includes(selected)&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta intervención no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
  if(selected==='wait')add(previewCard,'p','manager-warning','Esperar mantiene los pedidos pendientes; no equivale a cancelarlos ni a prometer una fecha de entrega.');
  const timeline=add(previewCard,'details','manager-po-detail');
- add(timeline,'summary','','📅 Ver salidas por día y los pedidos aún pendientes');
+ add(timeline,'summary','','¿Cuándo podrían salir los pedidos?');
+ add(timeline,'p','manager-timeline-explain','Este calendario ayuda a ver cuándo avanza el trabajo y cuándo quedan pedidos esperando. No confirma su entrega al cliente.');
  const daily=add(timeline,'div','manager-shipment-timeline');
+ const inactive=add(timeline,'details','manager-zero-days');
+ add(inactive,'summary','','Ver también días sin despachos · detalle completo');
+ const quiet=add(inactive,'div','manager-shipment-timeline');
  for(const day of preview.recovered.ledger){
-  const entry=add(daily,'div','manager-shipment-day');
-  add(entry,'strong','','Día '+day.day+' · '+fmt(day.shipped)+' pedidos expedidos del CD');
-  add(entry,'small','','Acumulados '+fmt(day.completed)+' / '+fmt(preview.recovered.orders)+' · pendientes '+fmt(day.backlog)+(day.reserveEvents.length?' · reserva habilitada '+fmt(day.reserveEvents.reduce((n,x)=>n+x.qty,0))+' SKU':''));
+  const parent=(day.shipped>0||day.reserveEvents.length>0)?daily:quiet;
+  const entry=add(parent,'div','manager-shipment-day');
+  add(entry,'strong','','Día '+day.day+' · '+fmt(day.shipped)+' pedidos expedidos');
+  add(entry,'small','','Pendientes al terminar: '+fmt(day.backlog)+(day.reserveEvents.length?' · reserva movida: '+fmt(day.reserveEvents.reduce((n,x)=>n+x.qty,0))+' productos':''));
  }
- add(timeline,'p','manager-warning','Al corte del día '+preview.recovered.days+' quedan '+fmt(preview.recovered.pending)+' pedidos sin fecha de entrega confirmada. Un despacho desde el CD no garantiza recepción del cliente.');
+ if(!daily.children.length)add(daily,'p','manager-fineprint','No se expiden pedidos en los días de esta campaña.');
+ add(timeline,'p','manager-warning','Al final quedan '+fmt(preview.recovered.pending)+' pedidos sin fecha de entrega confirmada.');
 
  const confirmBtn=add(root,'button','btn manager-primary','Confirmar decisión en simulación →');
  confirmBtn.type='button';confirmBtn.id='confirmSkuDecision';
@@ -710,7 +718,9 @@ function renderSkuRecoveryMission(){
   skuDecisions=[...skuDecisions,record].slice(-25);
   skuRecovery=selected;save();render();
  };
- add(root,'p','manager-fineprint','Esta misión reutiliza el mismo registro de pedidos y movimientos SKU auditado en el laboratorio. RESERVA-CD es una ubicación lógica hipotética; no se han verificado ubicaciones o lotes de una bodega real. No modifica la expedición agregada ni crea un proveedor real. Una compra comprometida no es un pago, ni una recepción es liberación de Calidad.');
+ const limits=add(root,'details','manager-scope-detail');
+ add(limits,'summary','','Qué supone este ejercicio · detalles técnicos');
+ add(limits,'p','','La reserva es una ubicación de ejemplo, no un conteo real. Las compras no se envían a proveedores. Una compra comprometida no es un pago. El resultado es para pedidos de 12 días y no se suma al modelo agregado de una jornada.');
 }
 
 function renderAttention(){
