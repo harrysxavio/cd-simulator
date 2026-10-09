@@ -5,10 +5,10 @@ import {inventoryPolicy} from './policy.js';
  * Each cutoff reruns the SAME order cohort from the initial stock plus receipts
  * arrived by that day; snapshots are alternatives, not cumulative shipments.
  */
-export function deliveryTimeline({policy='service',orders=200,stock={},checkpoints=[0,2,5,10],delayDays={},supplierFill={}}={}){
+export function deliveryTimeline({policy='service',orders=200,stock={},checkpoints=[0,2,5,10],delayDays={},supplierFill={},fixedPurchases=null}={}){
  const plan=inventoryPolicy({policy,orders,stock});
  const initial=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,Math.max(0,Math.floor(Number(stock[p.id]??p.initial)||0))]));
- const purchase=Object.fromEntries(plan.perSku.map(p=>[p.id,p.ordered]));
+ const purchase=fixedPurchases===null?Object.fromEntries(plan.perSku.map(p=>[p.id,p.ordered])):Object.fromEntries(SKU_CATALOG.map(p=>{const v=Number(fixedPurchases[p.id]??0);if(!Number.isSafeInteger(v)||v<0)throw new Error('Compra fija inválida');return [p.id,v]}));
  const deliveries=SKU_CATALOG.map(p=>{
   const delay=Number(delayDays[p.id]??0),fill=Number(supplierFill[p.id]??100);
   if(!Number.isInteger(delay)||delay<0||delay>365||!Number.isFinite(fill)||fill<0||fill>100)throw new Error('Supuestos de proveedor inválidos');
@@ -25,5 +25,5 @@ export function deliveryTimeline({policy='service',orders=200,stock={},checkpoin
   const pendingReceipts=deliveries.reduce((n,d)=>n+d.ordered-receipts[d.id],0);
   return {day,receipts,usableStock,complete:result.complete,pending:result.pending,fulfillment:result.fulfillment,receivedValue,pendingReceipts,stockRemaining:result.stockRemaining};
  });
- return {policy,orders,initial,deliveries,purchaseValue:plan.orderValue,snapshots,assumptions:'Los cortes son escenarios alternativos de una misma cohorte de pedidos, no despachos acumulados. Recepción y liberación de calidad instantáneas al arribo, sin restricción de capacidad. Los faltantes de proveedor no llegan luego en este horizonte.'};
+ return {policy,orders,initial,deliveries,purchaseValue:deliveries.reduce((n,d)=>n+d.committedCash,0),snapshots,assumptions:'Los cortes son escenarios alternativos de una misma cohorte de pedidos, no despachos acumulados. Recepción y liberación de calidad instantáneas al arribo, sin restricción de capacidad. Los faltantes de proveedor no llegan luego en este horizonte.'};
 }
