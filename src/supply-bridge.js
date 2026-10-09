@@ -3,11 +3,11 @@ import {recoveryComparison} from './recovery.js';
 /** Trace a single SKU intervention through purchasing, receiving, inventory and picking.
  * The aggregate eight-area campaign is intentionally not altered by this pilot.
  */
-export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=200,delayDays={},option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null}={}){
- const result=recoveryComparison({policy,plannedOrders,actualOrders,delayDays,option,urgentArrivalDay,purchaseCoveragePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity});
+export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=200,delayDays={},supplierFill={},option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100}={}){
+ const result=recoveryComparison({policy,plannedOrders,actualOrders,delayDays,supplierFill,option,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity});
  const arrival=Object.fromEntries(result.urgent.map(x=>[x.id,x.day]));
  const receipts=result.recovered.ledger.map(day=>({
-  day:day.day,received:{...day.received},receivedUrgent:{...day.receivedUrgent},waitingReceiving:day.waitingReceiving,shipped:day.shipped,shippedUnits:day.shippedUnits,
+  day:day.day,received:{...day.received},released:{...day.released},waitingQuality:day.waitingQuality,receivedUrgent:{...day.receivedUrgent},waitingReceiving:day.waitingReceiving,shipped:day.shipped,shippedUnits:day.shippedUnits,
   completed:day.completed,pending:day.backlog,stock:{...day.stock}
  }));
  const actuallyReceivedExtra=result.recovered.ledger.reduce((total,day)=>total+Object.values(day.receivedUrgent).reduce((n,qty)=>n+qty,0),0);
@@ -29,11 +29,12 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
  return {
   option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,purchaseCoveragePercent,
   decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent,purchaseCoveragePercent},
-  purchasing:{committedValue:result.committedPurchaseValue,extraUnits:result.urgent.reduce((sum,x)=>sum+x.qty,0),extraCost:result.urgentBase+result.urgentSurcharge,orders:result.urgent.map(x=>({...x}))},
+  purchasing:{supplierFill,originalOrdered:result.recovered.deliveries.reduce((n,x)=>n+x.ordered,0),originalDelivered:result.recovered.deliveries.reduce((n,x)=>n+x.received,0),originalUnfilled:result.recovered.deliveries.reduce((n,x)=>n+x.unreceived,0),committedValue:result.committedPurchaseValue,extraUnits:result.urgent.reduce((sum,x)=>sum+x.qty,0),extraCost:result.urgentBase+result.urgentSurcharge,orders:result.urgent.map(x=>({...x}))},
   receiving:{arrivals:arrival,receivedExtraUnits:actuallyReceivedExtra,outsideHorizonUnits:unreceivedExtra,waitingReceiving:result.recovered.waitingReceiving,unitCapacity:receivingUnitCapacity},
+  quality:{releasePercent:qualityReleasePercent,waiting:result.recovered.waitingQuality,heldBySku:{...result.recovered.heldQuality}},
   inventory:{initial:{...result.recovered.initial},ending:{...result.recovered.endingStock},consumed:{...result.recovered.consumed}},
   picking:{completed:result.recovered.completed,pending:result.recovered.pending,improvement,unitCapacity:pickingUnitCapacity,transportUnitCapacity},
   finance:{incrementalExpense:result.incrementalExpense,incrementalCash:result.netCashDelta,economicProxy:result.economicProxyDelta},
-  receipts,assumptions:'Trazabilidad SKU didáctica: compras → recepción limitada por capacidad → stock disponible → picking y transporte limitados por unidades SKU. Las capacidades diarias pueden provenir del motor agregado, pero los costos siguen separados.'
+  receipts,assumptions:'Trazabilidad SKU didáctica: compras → recepción limitada por capacidad → liberación gradual de Calidad → stock disponible → picking y transporte limitados por unidades SKU. Las capacidades diarias pueden provenir del motor agregado, pero los costos siguen separados.'
  };
 }

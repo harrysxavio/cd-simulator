@@ -1,19 +1,19 @@
-import {supplyBridge} from './supply-bridge.js?v=117';
-import {laborAudit} from './labor.js?v=117';
-import {skuAudit} from './audit.js?v=117';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=117';
-import {integratedDemand} from './integrated.js?v=117';
-import {eventSimulation} from './events.js?v=117';
-import {deliveryTimeline} from './timeline.js?v=117';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=117';
-import {skuOrderLab} from './sku.js?v=117';
-import {demandJourney} from './journey.js?v=117';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=117';
-import {flow,diagnose,ACTIONS} from './flow.js?v=117';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=117';
-import {areaKpis} from './kpis.js?v=117';
-import {causalAudit} from './causal.js?v=117';
-import {attentionSignals} from './attention.js?v=117';
+import {supplyBridge} from './supply-bridge.js?v=118';
+import {laborAudit} from './labor.js?v=118';
+import {skuAudit} from './audit.js?v=118';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=118';
+import {integratedDemand} from './integrated.js?v=118';
+import {eventSimulation} from './events.js?v=118';
+import {deliveryTimeline} from './timeline.js?v=118';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=118';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=118';
+import {demandJourney} from './journey.js?v=118';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=118';
+import {flow,diagnose,ACTIONS} from './flow.js?v=118';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=118';
+import {areaKpis} from './kpis.js?v=118';
+import {causalAudit} from './causal.js?v=118';
+import {attentionSignals} from './attention.js?v=118';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -258,7 +258,10 @@ function renderSkuLab(){
  // The SKU order ledger now respects the operational capacities chosen in the
  // eight-area campaign. These capacities are SKU units per day, not order counts.
  const area=flow(decisions,actions,effectiveScenario());
+ const supplierRate=area.ordered>0?Math.max(0,Math.min(100,100*area.delivered/area.ordered)):numericValue('purchasing',decisions);
  const skuAreaCapacity={
+  supplierFill:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,supplierRate])),
+  qualityReleasePercent:Math.max(0,Math.min(100,numericValue('quality',decisions)+(area.actions.quality||0))),
   receivingUnitCapacity:area.receivingCapacity,
   pickingUnitCapacity:area.pickingCapacity,
   transportUnitCapacity:area.stages[7].capacity
@@ -279,10 +282,12 @@ function renderSkuLab(){
   const chain=supplyBridge({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,...skuAreaCapacity});
   const trace=add(root,'div','area-kpi-tile supply-trace');
   add(trace,'strong','','🔗 Cómo se conectan las áreas');
+  add(trace,'small','','Compras: proveedor cumple '+supplierRate.toFixed(1)+' % de las unidades de compra ordinaria. Solicitadas SKU '+fmt(chain.purchasing.originalOrdered)+' · entregadas '+fmt(chain.purchasing.originalDelivered)+' · faltantes definitivos '+fmt(chain.purchasing.originalUnfilled)+'.');
+  add(trace,'small','','Calidad: libera '+fmt(chain.quality.releasePercent)+' % diario del stock retenido · quedan '+fmt(chain.quality.waiting)+' unidades pendientes de liberar.');
   add(trace,'small','','Capacidad diaria compartida desde la campaña: Recepción '+fmt(area.receivingCapacity)+' unidades SKU · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'.');
   if(chain.receiving.waitingReceiving)add(trace,'small','','⚠ Quedan '+fmt(chain.receiving.waitingReceiving)+' unidades por ingresar al término del horizonte por restricciones de recepción.');
   add(trace,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
-  add(trace,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' llegan después');
+  add(trace,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' no ingresadas al corte');
   add(trace,'small','','Inventario: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
   add(trace,'small','','Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
@@ -297,6 +302,7 @@ function renderSkuLab(){
    const row=add(table,'div','supply-trace-day');
    add(row,'strong','','Día '+day.day+' · '+fmt(day.shipped)+' pedidos · '+fmt(day.shippedUnits)+' unidades SKU');
    add(row,'small','','Recepción: '+Object.entries(day.received).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+(day.waitingReceiving?' · espera de recepción '+fmt(day.waitingReceiving):''));
+   add(row,'small','','Liberado por Calidad: '+Object.entries(day.released).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+(day.waitingQuality?' · retenido '+fmt(day.waitingQuality):''));
    add(row,'small','','Stock final: '+Object.entries(day.stock).map(([id,qty])=>id+' '+fmt(qty)).join(' · '));
    add(row,'small','','Completados acumulados: '+fmt(day.completed)+' · pendientes: '+fmt(day.pending));
   }
@@ -364,43 +370,47 @@ function renderSkuLab(){
   const audit=skuAudit({policy:skuPolicy,plannedOrders:200,actualOrders,option:skuRecovery,delayDays:skuSupplierDelay?{A:8}:{},urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,...skuAreaCapacity});
   const auditCard=add(bridge,'div','area-kpi-tile');
   add(auditCard,'strong','',audit.passed?'✓ Conciliación física y económica SKU correcta':'⚠ Inconsistencia en conciliación SKU');
+  add(auditCard,'small','','Auditoría de productos disponibles y pendientes en Calidad, por SKU.');
   if(audit.orders.completed!==chain.picking.completed)add(auditCard,'small','','⚠ Auditoría y traza operativa no coinciden.');
-  for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' = final '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
-  add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' = stock final CLP '+fmt(audit.stockValue.closing));
+  for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' − retenido en calidad '+fmt(p.held)+' = disponible final '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
+  add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' − stock retenido CLP '+fmt(audit.stockValue.held)+' = disponible final CLP '+fmt(audit.stockValue.closing));
   add(auditCard,'small','','Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(audit.orders.completed)+' completos + '+fmt(audit.orders.pending)+' pendientes');
   add(auditCard,'small','',audit.assumptions);
   // Put cross-area explanation after the user selects recovery inputs.
   root.append(trace);
  }
- const events=eventSimulation({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
+ const events=eventSimulation({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{},...skuAreaCapacity});
  const eventCard=add(root,'div','area-kpi-tile');
- add(eventCard,'strong','','Operación cronológica: pedidos pendientes que esperan reposición');
+ add(eventCard,'strong','','Escenario base de 200 pedidos · operación cronológica');
+ add(eventCard,'small','','La referencia usa la misma entrega de proveedor, liberación de Calidad y capacidades de las áreas; no corresponde a los pedidos adicionales del shock.');
  add(eventCard,'small','','En plazo (día 0): '+fmt(events.onTime)+' · entregados tarde: '+fmt(events.late)+' · pendientes al día '+events.days+': '+fmt(events.pending));
  add(eventCard,'small','','Demora media de pedidos tardíos: '+events.averageDelayDays.toFixed(1)+' días');
- for(const e of events.ledger.filter(x=>x.day===0||x.shipped>0||[2,5,10,12].includes(x.day)))add(eventCard,'small','','Día '+e.day+' · despachados hoy '+fmt(e.shipped)+' · despachados acumulados '+fmt(e.completed)+' · pendientes '+fmt(e.backlog));
+ for(const e of events.ledger.filter(x=>x.day===0||x.shipped>0||[2,5,10,12].includes(x.day)))add(eventCard,'small','','Día '+e.day+' · despachados hoy '+fmt(e.shipped)+' · acumulados '+fmt(e.completed)+' · pendientes '+fmt(e.backlog)+' · retenidos en Calidad '+fmt(e.waitingQuality));
  add(eventCard,'small','',events.assumptions);
+ const supplementary=add(root,'details','sku-supplementary');
+ add(supplementary,'summary','','Explorar modelos teóricos complementarios (sin capacidades físicas)');
  const timeline=deliveryTimeline({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
- const timelineCard=add(root,'div','area-kpi-tile');
- add(timelineCard,'strong','','¿Cuándo estará realmente disponible la reposición?');
+ const timelineCard=add(supplementary,'div','area-kpi-tile');
+ add(timelineCard,'strong','','Fechas teóricas de recepción sin restricciones de Calidad o capacidad');
  for(const snap of timeline.snapshots)add(timelineCard,'small','','Día '+snap.day+' · pedidos completos posibles '+fmt(snap.complete)+' / '+fmt(timeline.orders)+' · recibidos A '+fmt(snap.receipts.A)+', B '+fmt(snap.receipts.B)+', C '+fmt(snap.receipts.C));
  add(timelineCard,'small','',timeline.assumptions);
  const policy=inventoryPolicy({policy:skuPolicy});
- const policySummary=add(root,'div','area-kpi-tile');
+ const policySummary=add(supplementary,'div','area-kpi-tile');
  add(policySummary,'strong','','Política '+policy.label+' · pedidos futuros de reposición');
  add(policySummary,'small','','Compra planificada CLP '+fmt(policy.orderValue)+' · cumplimiento con recepción futura hipotética '+policy.eventual.fulfillment.toFixed(1)+' % (base '+policy.baseline.fulfillment.toFixed(1)+' %)');
  add(policySummary,'small','','Costo mensual de mantener stock remanente, ilustrativo: CLP '+fmt(policy.eventual.holdingCost)+' · ventas brutas incrementales hipotéticas CLP '+fmt(policy.delta.revenue));
  for(const p of policy.perSku)add(policySummary,'small','','SKU '+p.id+' ('+p.rotation+'): objetivo '+p.targetDays+' días · compra '+fmt(p.ordered)+' unid. · plazo '+p.leadDays+' días · '+(p.reorder?'alerta punto de pedido':'sin alerta por punto de pedido'));
  add(policySummary,'small','',policy.assumptions);
  const report=skuOrderLab();
- const summary=add(root,'div','area-kpi-tile');
+ const summary=add(supplementary,'div','area-kpi-tile');
  add(summary,'strong','','Pedidos completos: '+fmt(report.complete)+' / '+fmt(report.orders)+' · '+report.fulfillment.toFixed(1)+' %');
  add(summary,'small','','Pendientes '+fmt(report.pending)+' · bloqueo por stock '+fmt(report.blockedByStock)+' · por capacidad '+fmt(report.blockedByCapacity));
  for(const p of report.rows){
-  const card=add(root,'div','area-kpi-tile');
+  const card=add(supplementary,'div','area-kpi-tile');
   add(card,'strong','',p.name);
   add(card,'small','','Pedidos '+fmt(p.requested)+' · completos '+fmt(p.complete)+' · pendientes '+fmt(p.unfulfilled));
  }
- const stock=add(root,'div','area-kpi-tile');
+ const stock=add(supplementary,'div','area-kpi-tile');
  add(stock,'strong','','Stock por SKU al cierre del ejercicio piloto');
  for(const p of report.skuMetrics){
   add(stock,'strong','',p.name+' · rotación '+p.rotation+' · ABC por valor '+p.abc);
@@ -408,7 +418,7 @@ function renderSkuLab(){
   add(stock,'small','','Cobertura '+(p.daysCover===null?'N/D':p.daysCover.toFixed(1)+' días')+' · punto de pedido '+fmt(p.reorderPoint)+' unid. · plazo proveedor '+p.leadDays+' días + seguridad '+p.safetyDays+' días');
   add(stock,'small','',p.reorderSuggested?'🟠 Stock en o bajo punto de reposición':'🟢 Stock sobre punto de reposición');
  }
- add(root,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Este laboratorio aún no está conectado a las compras ni al inventario de la campaña principal.');
+ add(supplementary,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Estos ejercicios de referencia son hipótesis aisladas; no usan las capacidades compartidas ni forman parte de la conciliación principal de la campaña SKU.');
 }
 function renderAttention(){
  const root=$('attentionSummary'),costs=$('areaCostCards');root.replaceChildren();costs.replaceChildren();

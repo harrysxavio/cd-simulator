@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {supplyBridge} from '../src/supply-bridge.js';
+import {skuAudit} from '../src/audit.js';
 
 test('urgent purchasing enters inventory only on receipt date',()=>{
  const r=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:5});
@@ -94,4 +95,28 @@ test('shared picking and transport constraints propagate to complete orders',()=
  const limited=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:1,pickingUnitCapacity:4,transportUnitCapacity:3});
  assert.ok(limited.receipts.every(d=>d.shippedUnits<=3));
  assert.ok(limited.picking.completed<base.picking.completed);
+});
+
+
+test('Purchasing and Quality constraints jointly control supplier units and dispatch service',()=>{
+ const opts={policy:'service',plannedOrders:200,actualOrders:260,option:'wait'};
+ const normal=supplyBridge({...opts});
+ const partial=supplyBridge({...opts,supplierFill:{A:75,B:75,C:75},qualityReleasePercent:75});
+ assert.equal(partial.purchasing.originalOrdered,normal.purchasing.originalOrdered);
+ assert.ok(partial.purchasing.originalDelivered<normal.purchasing.originalDelivered);
+ assert.equal(partial.purchasing.originalDelivered+partial.purchasing.originalUnfilled,partial.purchasing.originalOrdered);
+ assert.equal(partial.quality.releasePercent,75);
+ assert.ok(partial.receipts.every(d=>Object.values(d.released).reduce((n,q)=>n+q,0)>=0));
+ assert.ok(partial.picking.completed<=normal.picking.completed);
+});
+test('Quality stock held at horizon is excluded from inventory and auditable',()=>{
+ const opts={policy:'service',plannedOrders:200,actualOrders:260,option:'emergency',urgentArrivalDay:12,qualityReleasePercent:0};
+ const held=supplyBridge(opts);
+ assert.ok(held.quality.waiting>0);
+ assert.ok(Object.values(held.quality.heldBySku).some(n=>n>0));
+ const audit=skuAudit(opts);
+ assert.equal(audit.passed,true);
+ for(const r of audit.bySku)assert.equal(r.opening+r.received,r.shipped+r.held+r.closing);
+ assert.equal(audit.stockValue.opening+audit.stockValue.received,audit.stockValue.shipped+audit.stockValue.held+audit.stockValue.closing);
+ assert.equal(audit.orders.completed,held.picking.completed);
 });

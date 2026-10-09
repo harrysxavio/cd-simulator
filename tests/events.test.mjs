@@ -72,3 +72,42 @@ test('picking and transport are capped by physical SKU units, not order counts',
   assert.throws(()=>eventSimulation({[name]:1.5}),/Capacidad física por área inválida/);
  }
 });
+
+
+test('supplier fill from purchasing reduces actual arrivals but never changes committed order',()=>{
+ const all=eventSimulation({policy:'service',supplierFill:{A:100,B:100,C:100}});
+ const short=eventSimulation({policy:'service',supplierFill:{A:50,B:50,C:50}});
+ for(const d of short.deliveries){
+  const original=all.deliveries.find(x=>x.id===d.id);
+  assert.equal(d.ordered,original.ordered);
+  assert.equal(d.received,Math.floor(d.ordered*0.5));
+  assert.equal(d.received+d.unreceived,d.ordered);
+ }
+ assert.ok(short.completed<=all.completed);
+ assert.ok(short.ledger.every(d=>d.waitingReceiving>=0));
+});
+test('Quality holds receipts in quarantine before they can become pickable',()=>{
+ const opts={policy:'service',orders:100,days:2,stock:{A:0,B:0,C:0},fixedPurchases:{A:100,B:0,C:0}};
+ const half=eventSimulation({...opts,qualityReleasePercent:50});
+ const full=eventSimulation({...opts,qualityReleasePercent:100});
+ assert.equal(half.ledger[2].received.A,100);
+ assert.equal(half.ledger[2].released.A,50);
+ assert.equal(half.ledger[2].waitingQuality,50);
+ assert.equal(half.heldQuality.A,50);
+ assert.ok(half.completed<full.completed);
+ for(const [id,opening] of Object.entries(half.initial)){
+  const received=half.ledger.reduce((n,d)=>n+d.received[id],0);
+  assert.equal(opening+received,half.consumed[id]+half.endingStock[id]+half.heldQuality[id]);
+ }
+});
+test('Quality backlog releases progressively, never manufactures stock or ignores zero release',()=>{
+ const opts={orders:100,days:6,stock:{A:0,B:0,C:0},fixedPurchases:{A:100,B:0,C:0}};
+ const slow=eventSimulation({...opts,qualityReleasePercent:50});
+ assert.ok(slow.ledger[3].released.A>0);
+ assert.ok(slow.ledger[3].waitingQuality<slow.ledger[2].waitingQuality);
+ const blocked=eventSimulation({...opts,qualityReleasePercent:0});
+ assert.equal(blocked.ledger.reduce((n,d)=>n+d.shipped,0),0);
+ assert.equal(blocked.heldQuality.A,100);
+ assert.equal(blocked.endingStock.A,0);
+ for(const pct of [-1,101,NaN])assert.throws(()=>eventSimulation({...opts,qualityReleasePercent:pct}),/Calidad inválido/);
+});
