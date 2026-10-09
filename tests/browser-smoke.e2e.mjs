@@ -43,7 +43,12 @@ async function verifyExperience(mode){
   for(const view of VIEWS){
    await page.locator('#resultTabs [data-result-target="'+view+'"]').click();
    assert.equal(await page.locator('#dashboardSection').getAttribute('data-result-view'),view);
-   assert.equal(await page.locator('[data-result-page="'+view+'"]').isVisible(),true,'Vista oculta: '+view);
+   // Some result views intentionally contain more than one content panel.
+   const contentPanels=page.locator('[data-result-page="'+view+'"]');
+   assert.ok(await contentPanels.count()>0,'Vista sin paneles: '+view);
+   for(let index=0;index<await contentPanels.count();index++){
+    assert.equal(await contentPanels.nth(index).isVisible(),true,'Panel oculto: '+view+' #'+index);
+   }
   }
   await page.locator('#resultTabs [data-result-target="inventory"]').click();
   assert.ok(await page.locator('#skuLab .supply-trace').count()>0,'No aparece trazabilidad SKU');
