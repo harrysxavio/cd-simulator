@@ -37,3 +37,38 @@ test('zero capacity retains backlog and invalid horizons fail',()=>{
  assert.equal(r.pending,200);
  assert.throws(()=>eventSimulation({days:-1}),/inválidos/);
 });
+
+
+test('receiving capacity queues arrivals without fabricating usable stock',()=>{
+ const unlimited=eventSimulation({policy:'service'});
+ const zero=eventSimulation({policy:'service',receivingUnitCapacity:0});
+ assert.equal(zero.ledger.reduce((n,d)=>n+Object.values(d.received).reduce((a,x)=>a+x,0),0),0);
+ assert.equal(zero.ledger[0].shipped,unlimited.ledger[0].shipped);
+ assert.equal(zero.ledger[2].shipped,0);
+ assert.ok(zero.waitingReceiving>0);
+ const restricted=eventSimulation({policy:'service',receivingUnitCapacity:15});
+ for(const d of restricted.ledger)assert.ok(Object.values(d.received).reduce((n,x)=>n+x,0)<=15);
+ assert.ok(restricted.ledger[2].waitingReceiving>0);
+ for(const [id,n] of Object.entries(restricted.initial)){
+  const total=restricted.ledger.reduce((acc,d)=>acc+d.received[id],0);
+  assert.equal(n+total,restricted.endingStock[id]+restricted.consumed[id]);
+ }
+});
+test('picking and transport are capped by physical SKU units, not order counts',()=>{
+ const pickZero=eventSimulation({pickingUnitCapacity:0});
+ const transportZero=eventSimulation({transportUnitCapacity:0});
+ assert.equal(pickZero.completed,0);
+ assert.equal(transportZero.completed,0);
+ const limited=eventSimulation({policy:'service',pickingUnitCapacity:3,transportUnitCapacity:2});
+ assert.ok(limited.ledger.every(d=>d.shippedUnits<=2));
+ assert.ok(limited.ledger.every(d=>d.shipped<=1));
+ assert.equal(limited.ledger.reduce((sum,d)=>sum+d.shipped,0),limited.completed);
+ for(const [id,n] of Object.entries(limited.initial)){
+  const incoming=limited.ledger.reduce((sum,d)=>sum+d.received[id],0);
+  assert.equal(n+incoming,limited.endingStock[id]+limited.consumed[id]);
+ }
+ for(const name of ['receivingUnitCapacity','pickingUnitCapacity','transportUnitCapacity']){
+  assert.throws(()=>eventSimulation({[name]:-1}),/Capacidad física por área inválida/);
+  assert.throws(()=>eventSimulation({[name]:1.5}),/Capacidad física por área inválida/);
+ }
+});
