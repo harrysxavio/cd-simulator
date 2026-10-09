@@ -47,6 +47,6 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const holdingDelta=holdingRecovered-holdingBase;
  const economicProxyDelta=incrementalRevenue-incrementalExpense+penaltySaved-holdingDelta;
  const netCashDelta=incrementalRevenue-incrementalExpense;
- return {option,label:choice.label,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,
+ return {option,label:choice.label,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,
   assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Se paga refuerzo por todas las jornadas, aun si queda ocioso. Compra urgente llega día 1 y no mejora cumplimiento del día 0. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. No hay devoluciones, IVA ni costos de transporte.'};
 }
