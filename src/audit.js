@@ -1,5 +1,6 @@
 import {SKU_CATALOG,ORDER_TEMPLATES} from './sku.js';
 import {recoveryComparison} from './recovery.js';
+import {skuProcurementReconciliation} from './sku-procurement.js';
 
 /** Single-source audit of the SKU event ledger. Does NOT merge the aggregate engine.
  * Every receipt, unit consumed, completed order and cost derives from one replay.
@@ -23,5 +24,5 @@ export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,op
  const stockValueBalanced=stockValue.opening+stockValue.received===stockValue.shipped+stockValue.closing+stockValue.held;
  const cashBalanced=Math.abs(comparison.netCashDelta-(comparison.incrementalRevenue-comparison.incrementalExpense))<0.000001;
  const proxyBalanced=Math.abs(comparison.economicProxyDelta-(comparison.netCashDelta+comparison.penaltySaved-comparison.holdingDelta))<0.000001;
- return {bySku,stockValue,orders:{requested:orderCount,completed:r.completed,pending:r.pending,onTime:r.onTime,late:r.late},checks:{inventoryBalanced,ordersBalanced,stockValueBalanced,cashBalanced,proxyBalanced},passed:inventoryBalanced&&ordersBalanced&&stockValueBalanced&&cashBalanced&&proxyBalanced,recovery:comparison,assumptions:'Auditoría física de inventario por SKU (disponible y retenido en Calidad) y valor de stock, basada en un único registro de eventos. No consolida ni sustituye el motor agregado; el valor de unidades despachadas es costo de mercancía ilustrativo, no utilidad ni caja.'};
+ return {bySku,stockValue,orders:{requested:orderCount,completed:r.completed,pending:r.pending,onTime:r.onTime,late:r.late},checks:{inventoryBalanced,ordersBalanced,stockValueBalanced,cashBalanced,proxyBalanced,procurementBalanced:procurement.passed},passed:inventoryBalanced&&ordersBalanced&&stockValueBalanced&&cashBalanced&&proxyBalanced&&procurement.passed,recovery:comparison,assumptions:'Auditoría física de inventario por SKU (disponible y retenido en Calidad) y valor de stock, basada en un único registro de eventos. No consolida ni sustituye el motor agregado; el valor de unidades despachadas es costo de mercancía ilustrativo, no utilidad ni caja.'};
 }
