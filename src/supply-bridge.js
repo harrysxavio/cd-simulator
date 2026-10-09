@@ -23,17 +23,20 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
  const extraUnits=result.urgent.reduce((sum,x)=>sum+x.qty,0);
  const urgentSpent=result.urgentBase+result.urgentSurcharge;
  const serviceGain=improvement>0;
- const advice=extraUnits===0
+ const movedReserve=result.recovered.ledger.reduce((n,d)=>n+d.reserveEvents.reduce((x,e)=>x+e.qty,0),0);
+ const advice=option==='reserve'
+  ? (movedReserve===0?'No hubo traslado dentro del horizonte; la reserva queda ubicada en RESERVA-CD.':improvement>0?'El traslado de '+movedReserve+' unidades ya existentes recupera '+improvement+' pedidos completos; no hubo compras nuevas.':'La reserva fue habilitada, pero otro cuello de botella impide recuperar pedidos completos.')
+  :extraUnits===0
   ? (['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'No hay compra urgente solicitada. Para evaluar reposición, selecciona compra urgente y una cobertura superior a 0 %.':'El inventario disponible y las compras comprometidas cubren el faltante calculado: no se requiere compra urgente.'
   : !firstUrgentReceiptDay
    ? (urgentArrivalDay>result.recovered.days?'La compra llega después del horizonte: compromete caja sin recuperar pedidos dentro de los 12 días.':'La compra llega al proveedor/CD, pero la capacidad de Recepción no permite ingresar el stock a tiempo: no se recuperan pedidos.')
    : !serviceGain
     ? 'La compra llega dentro del horizonte, pero no recupera pedidos: revisa capacidad de picking, mezcla de SKU y otras restricciones.'
     : 'La reposición llega a tiempo y recupera '+improvement+' pedidos completos. Contrasta su costo incremental con el beneficio obtenido.';
- const decisionQuality=extraUnits===0?((['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'no-order':'no-shortage'):!firstUrgentReceiptDay?(urgentArrivalDay>result.recovered.days?'late':'receiving-blocked'):!serviceGain?'no-gain':'effective';
+ const decisionQuality=option==='reserve'?(movedReserve===0?'late':improvement>0?'effective':'no-gain'):extraUnits===0?((['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'no-order':'no-shortage'):!firstUrgentReceiptDay?(urgentArrivalDay>result.recovered.days?'late':'receiving-blocked'):!serviceGain?'no-gain':'effective';
  return {
   option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,purchaseCoveragePercent,
-  decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent,purchaseCoveragePercent},
+  decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent,purchaseCoveragePercent,locatedReserve:result.reserveStock,movedReserve},
   purchasing:{plannedForecastPercent,planningCoveragePercent,forecastOrders:result.forecastOrders,originalPurchase:{...result.originalPurchase},supplierFill,originalOrdered:result.recovered.deliveries.reduce((n,x)=>n+x.ordered,0),originalDelivered:result.recovered.deliveries.reduce((n,x)=>n+x.received,0),originalUnfilled:result.recovered.deliveries.reduce((n,x)=>n+x.unreceived,0),committedValue:result.committedPurchaseValue,extraUnits:result.urgent.reduce((sum,x)=>sum+x.qty,0),extraCost:result.urgentBase+result.urgentSurcharge,orders:result.urgent.map(x=>({...x}))},
   receiving:{arrivals:arrival,receivedExtraUnits:actuallyReceivedExtra,outsideHorizonUnits:unreceivedExtra,waitingReceiving:result.recovered.waitingReceiving,unitCapacity:receivingUnitCapacity},
   quality:{releasePercent:qualityReleasePercent,waiting:result.recovered.waitingQuality,heldBySku:{...result.recovered.heldQuality}},
