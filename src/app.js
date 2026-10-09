@@ -1,20 +1,21 @@
-import {supplyBridge} from './supply-bridge.js?v=125';
-import {campaignSkuContract} from './campaign-contract.js?v=125';
-import {laborAudit} from './labor.js?v=125';
-import {skuAudit} from './audit.js?v=125';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=125';
-import {integratedDemand} from './integrated.js?v=125';
-import {eventSimulation} from './events.js?v=125';
-import {deliveryTimeline} from './timeline.js?v=125';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=125';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=125';
-import {demandJourney} from './journey.js?v=125';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=125';
-import {flow,diagnose,ACTIONS} from './flow.js?v=125';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=125';
-import {areaKpis} from './kpis.js?v=125';
-import {causalAudit} from './causal.js?v=125';
-import {attentionSignals} from './attention.js?v=125';
+import {supplyBridge} from './supply-bridge.js?v=126';
+import {campaignSkuContract} from './campaign-contract.js?v=126';
+import {laborAudit} from './labor.js?v=126';
+import {skuAudit} from './audit.js?v=126';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=126';
+import {integratedDemand} from './integrated.js?v=126';
+import {eventSimulation} from './events.js?v=126';
+import {deliveryTimeline} from './timeline.js?v=126';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=126';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=126';
+import {demandJourney} from './journey.js?v=126';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=126';
+import {flow,diagnose,ACTIONS} from './flow.js?v=126';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=126';
+import {areaKpis} from './kpis.js?v=126';
+import {causalAudit} from './causal.js?v=126';
+import {managerDiagnosis} from './diagnosis-guide.js?v=126';
+import {attentionSignals} from './attention.js?v=126';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -118,7 +119,47 @@ function dashboard(r){
  }
  $('financialInsight').textContent=r.dispatched===0?'No hay expedición posible: no se calcula costo unitario. Los gastos y desembolsos pueden mantenerse.':over?'El costo por unidad supera la meta. La comparación se hace contra el costo total, no contra presupuestos arbitrarios por área.':'El costo por unidad está dentro de la meta global. Revisa también el resultado operacional y los desembolsos.';
 }
+function renderManagerBriefing(){
+ const view=managerDiagnosis({decisions,scenario:effectiveScenario(),revealed});
+ const briefing=$('directorBriefing'),evidence=$('directorEvidence'),reason=$('directorReason'),options=$('directorOptions');
+ briefing.replaceChildren();evidence.replaceChildren();reason.replaceChildren();options.replaceChildren();
+ briefing.className='director-briefing '+view.severity;
+ add(briefing,'span','director-alert',view.scenarioLabel);
+ add(briefing,'h3','director-story',revealed?'El escenario cambió. Tu misión es proteger el servicio.':'Primero observa el plan, después descubre la demanda.');
+ add(briefing,'p','',''+view.context);
+ const essential=[
+  [revealed?'Demanda real':'Demanda planificada',view.actualDemand,'unidades'],
+  ['Expedible hoy',view.dispatched,'unidades, no entregas'],
+  ['Sin cobertura hoy',view.pending,'unidades pendientes']
+ ];
+ for(const [title,value,unit] of essential){
+  const card=add(evidence,'div','director-stat');
+  add(card,'span','',title);add(card,'strong','',fmt(value));add(card,'small','',unit);
+ }
+ add(reason,'span','director-reason-eyebrow',view.pending>0?'SEÑAL OPERACIONAL PRIORITARIA':'LECTURA OPERACIONAL');
+ add(reason,'h3','',view.title);
+ add(reason,'p','',view.why);
+ add(reason,'p','director-next','Como gerente: '+view.next);
+ if(revealed){
+  add(options,'h3','','¿Qué alternativas vale la pena investigar?');
+  for(const option of view.options){
+   const card=add(options,'div','director-option');
+   const top=add(card,'div','director-option-top');
+   add(top,'strong','',option.title);
+   if(option.type==='pilot')add(top,'span','director-option-status','Laboratorio SKU');
+   if(option.type==='future')add(top,'span','director-option-status','Próxima fase');
+   add(card,'p','',option.reason);
+  }
+ }else{
+  add(options,'p','director-preview','Las alternativas aparecen después de descubrir la demanda. La sorpresa no modifica retroactivamente tus decisiones.');
+ }
+ $('directorScope').textContent=view.note+' · Indicadores en '+view.unit+'. Señales del modelo didáctico, no diagnóstico profesional verificado.';
+ $('directorPilot').hidden=!(revealed&&view.category==='supply');
+ // Keep the progressive-disclosure panel expanded if the user opened it:
+ // all dynamic children re-render in-place; <details> itself is untouched.
+}
 function renderDiagnosis(current){
+ renderManagerBriefing();
  const surpriseConfig=$('surpriseOverride');surpriseConfig.replaceChildren();
  if(revealed){
   add(surpriseConfig,'strong','','Escenario revelado: '+(shockDirection===-1?'disminución':'aumento')+' del '+scenario.demandShockPercent+' %');
@@ -192,7 +233,12 @@ function renderDiagnosis(current){
  }
  add(box,'p','muted',f.id==='commercial'||f.id==='planning'?'Indicadores de planificación; no son utilización de capacidad física.':'Entrada '+fmt(st.input)+' · salida '+fmt(st.output)+' · capacidad '+fmt(st.capacity)+' · utilización '+util+'.');
  if(f.inherited&&['receiving','picking','transport'].includes(f.id))add(box,'p','diagnosis-note','Esta área dispone de más capacidad que unidades recibidas. Reforzarla sin corregir las restricciones anteriores puede aumentar costos sin mejorar el despacho.');
- const button=add(box,'button','mini','Evaluar recuperación');button.onclick=()=>{active=NODES.findIndex(n=>n.id===f.id);showSection('recovery')};
+ if(['commercial','planning','purchasing'].includes(f.id)){
+  add(box,'p','diagnosis-note','Decisión de planificación histórica. Después de revelar demanda no puedes modificar aquí el pronóstico ni la compra original. La alternativa de compra nueva se estudia en el laboratorio SKU; su integración completa está pendiente.');
+ }else{
+  const button=add(box,'button','mini','Investigar intervención en '+f.title);
+  button.onclick=()=>{active=NODES.findIndex(n=>n.id===f.id);showSection('recovery')};
+ }
  }
  const final=$('finalComparison');final.replaceChildren();
  const extra=current.dispatched-initial.dispatched,cost=newCost.total-oldCost.total;
@@ -584,8 +630,9 @@ $('export').onclick=()=>{const r=flow(decisions,actions,effectiveScenario()),row
 $('setupTab').onclick=()=>showSection('setup');
 $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
-$('revealDemand').onclick=()=>{revealSurprise();showSection('preliminary');$('demandComparison').scrollIntoView({behavior:'smooth',block:'start'})};
-$('startRecovery').onclick=()=>showSection('recovery');
+$('revealDemand').onclick=()=>{revealSurprise();showSection('preliminary');$('directorBriefing').scrollIntoView({behavior:'smooth',block:'start'})};
+$('startRecovery').onclick=()=>{const signal=managerDiagnosis({decisions,scenario:effectiveScenario(),revealed});active=NODES.findIndex(n=>n.id===signal.area);if(active<0)active=5;showSection('recovery')};
+$('directorPilot').onclick=()=>{showSection('dashboard');showResultView('inventory',true)};
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
