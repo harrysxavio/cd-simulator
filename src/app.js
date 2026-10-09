@@ -1,22 +1,23 @@
-import {supplyBridge} from './supply-bridge.js?v=128';
-import {campaignSkuContract} from './campaign-contract.js?v=128';
-import {laborAudit} from './labor.js?v=128';
-import {skuAudit} from './audit.js?v=128';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=128';
-import {integratedDemand} from './integrated.js?v=128';
-import {eventSimulation} from './events.js?v=128';
-import {deliveryTimeline} from './timeline.js?v=128';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=128';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=128';
-import {demandJourney} from './journey.js?v=128';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=128';
-import {flow,diagnose,ACTIONS} from './flow.js?v=128';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=128';
-import {areaKpis} from './kpis.js?v=128';
-import {causalAudit} from './causal.js?v=128';
-import {managerDiagnosis} from './diagnosis-guide.js?v=128';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=128';
-import {attentionSignals} from './attention.js?v=128';
+import {supplyBridge} from './supply-bridge.js?v=129';
+import {campaignSkuContract} from './campaign-contract.js?v=129';
+import {campaignAreaReadModel} from './area-ledger.js?v=129';
+import {laborAudit} from './labor.js?v=129';
+import {skuAudit} from './audit.js?v=129';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=129';
+import {integratedDemand} from './integrated.js?v=129';
+import {eventSimulation} from './events.js?v=129';
+import {deliveryTimeline} from './timeline.js?v=129';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=129';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=129';
+import {demandJourney} from './journey.js?v=129';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=129';
+import {flow,diagnose,ACTIONS} from './flow.js?v=129';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=129';
+import {areaKpis} from './kpis.js?v=129';
+import {causalAudit} from './causal.js?v=129';
+import {managerDiagnosis} from './diagnosis-guide.js?v=129';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=129';
+import {attentionSignals} from './attention.js?v=129';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -306,6 +307,53 @@ function renderLabor(){
   add(card,'small','','Dotación teórica para el flujo: '+a.staffRequired+' · exposición indicativa por capacidad no requerida: CLP '+fmt(a.idleCostIndicator));
  }
 }
+function renderCanonicalAreasFromSku(chain,contract,comparison){
+ const host=$('canonicalAreaView');host.replaceChildren();
+ const model=campaignAreaReadModel({comparison,campaign:chain.campaign,campaignId,plannedOrders:contract.plannedSampleOrders});
+ const intro=add(host,'div','canonical-area-heading');
+ add(intro,'span','canonical-kicker','MISIÓN 4 DE 4 · ENTENDER EL IMPACTO');
+ add(intro,'h2','','🔗 Cómo operaron las ocho áreas');
+ add(intro,'p','','Una misma campaña SKU, con '+fmt(model.metrics.actualOrders)+' pedidos y '+model.horizonDays+' días. Cada área explica su papel usando los mismos pedidos, compras, recepciones, lotes e inventario; no son ocho simulaciones diferentes.');
+ const numbers=add(host,'div','canonical-area-numbers');
+ for(const [name,value,unit] of [
+  ['Pedidos reales',model.metrics.actualOrders,'pedidos'],
+  ['Salieron del CD',model.metrics.shippedOrders,'pedidos completos'],
+  ['Pendientes al cierre',model.metrics.pendingOrders,'pedidos sin fecha confirmada']
+ ]){
+  const tile=add(numbers,'div','canonical-area-stat');
+  add(tile,'span','',name);add(tile,'strong','',fmt(value));add(tile,'small','',unit);
+ }
+ const info=add(host,'p','canonical-boundary','Esta vista pertenece al libro físico SKU de '+model.horizonDays+' días. Las unidades SKU, pedidos completos y CLP no se suman a los indicadores agregados de una jornada. Tampoco acredita entrega al cliente.');
+ add(host,'h3','canonical-list-title','Recorrido entre áreas');
+ const grid=add(host,'div','canonical-area-stages');
+ for(const [index,stage] of model.stages.entries()){
+  const details=add(grid,'details','canonical-area-step '+(stage.signal==='warning'?'attention':''));
+  details.setAttribute('data-area-id',stage.id);
+  const summary=add(details,'summary','canonical-area-summary');
+  const code=add(summary,'span','canonical-area-index',String(index+1).padStart(2,'0'));
+  const heading=add(summary,'span','canonical-area-text');
+  add(heading,'strong','',stage.title);
+  add(heading,'small','',stage.headline);
+  const marker=add(summary,'span','canonical-area-marker',stage.signal==='warning'?'Revisar':'Observado');
+  marker.setAttribute('aria-label',stage.signal==='warning'?'Señal de revisión del escenario':'Dato observado en el modelo');
+  const expanded=add(details,'div','canonical-area-expand');
+  add(expanded,'p','',stage.detail);
+  add(expanded,'p','canonical-area-cause','Por qué importa: '+stage.causal);
+  add(expanded,'small','canonical-area-evidence','Trazabilidad: '+stage.evidence.join(' · ')+'. Unidad: '+stage.unit+'.');
+ }
+ const timeline=add(host,'details','canonical-day-detail');
+ add(timeline,'summary','','📆 Ver los movimientos diarios que explican el resultado');
+ add(timeline,'p','','Son salidas del CD y movimientos internos de la misma cohorte; los pendientes no tienen entrega prometida.');
+ const days=add(timeline,'div','canonical-day-grid');
+ for(const day of model.days){
+  const card=add(days,'div','canonical-day-row');
+  add(card,'strong','','Día '+day.day+' · '+fmt(day.shippedOrders)+' pedidos expedidos · '+fmt(day.remainingOrders)+' pendientes');
+  add(card,'small','','Recibido '+fmt(day.receivedSkuUnits)+' SKU · liberado por Calidad '+fmt(day.releasedSkuUnits)+' SKU · reserva trasladada '+fmt(day.movedReserveSkuUnits)+' SKU');
+  add(card,'small','','Stock libre en PICK-FACE '+fmt(day.closingPickFaceSkuUnits)+' SKU · RESERVA-CD '+fmt(day.closingReserveSkuUnits)+' SKU');
+ }
+ add(host,'p','canonical-boundary','Nota de realismo: el modelo actual confirma Picking y Transporte en un mismo evento de despacho. Todavía no simula staging, carga en camión ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
+}
+
 function renderSkuLab(){
  // The SKU order ledger now respects the operational capacities chosen in the
  // eight-area campaign. These capacities are SKU units per day, not order counts.
@@ -327,6 +375,7 @@ function renderSkuLab(){
  const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
  delayButton.type='button';delayButton.disabled=skuLocked;delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
  delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;save();renderSkuLab()};
+ if(!revealed)$('canonicalAreaView').replaceChildren();
  if(revealed){
   const actualOrders=contract.actualSampleOrders;
   // The selected comparison is shared between the operational trace and SKU audit.
@@ -334,6 +383,7 @@ function renderSkuLab(){
   const integrated=recovery.integrated;
   plannedSkuRun=integrated.planned;
   const chain=supplyBridge({...input,option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:recovery,campaignId});
+  renderCanonicalAreasFromSku(chain,contract,recovery);
   const trace=add(root,'div','area-kpi-tile supply-trace');
   add(trace,'strong','','🔗 Cómo se conectan las áreas');
   add(trace,'small','','Comercial → Planeación: pronóstico '+commercialForecast.toFixed(1)+' % de 200 pedidos · cobertura planificada '+planningCoverage.toFixed(1)+' %. La orden de compra SKU original queda congelada y la demanda sorpresa no la recalcula.');

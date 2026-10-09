@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.19
+# Supply Chain Operations Lab · v11.20
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=128) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=129) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -51,6 +51,17 @@ La tercera misión de gerencia permite asignar una **porción real del stock ini
 - Tests del traslado, imposibilidad de crear más stock del catálogo, restricciones y recuperación tardía; E2E móvil/escritorio y continuidad con versiones guardadas.
 
 **Estado completo de fases y siguientes prioridades:** [M1–M8 y U0–U5](docs/STATUS-V11.19.md).
+
+## v11.20 · M2/M3: las ocho áreas leen el mismo libro SKU
+
+En **Resultados → Áreas** hay una nueva vista didáctica de la campaña de 12 días. Presenta primero **pedidos reales / expedidos del CD / pendientes** y luego ocho tarjetas profesionales y plegables para **Comercial, Planificación, Compras, Recepción, Calidad, Inventario, Picking y Transporte**. Cada cifra de estas tarjetas proviene de **una sola simulación de eventos SKU previamente conciliada**, no de ocho cálculos independientes.
+
+- Las tarjetas detallan el pronóstico y compra original congelados, ingresos reales a Recepción, liberaciones por lote, movimientos de reserva, inventario verificable y pedidos completos.
+- Se conserva la identidad de unidades: **SKU físico ≠ pedido completo ≠ unidad equivalente del motor agregado**. La vista SKU no se suma a la jornada agregada ni se atribuyen falsamente entregas al cliente.
+- **Picking y Transporte siguen compartiendo un evento de expedición**; sin cola de preparado/cargado por separado. Es deuda M3, no una operación fingida.
+- Los eventos día a día quedan bajo «Ver los movimientos diarios» y el detalle técnico de cada área permanece disponible a petición.
+
+El código valida pedidos, stocks, transferencias y envíos contra el snapshot compartido y no muestra lecturas inconciliables. [Estado de M1–M8 y U0–U5](docs/STATUS-V11.20.md) · [Roadmap](docs/ROADMAP.md).
 
 ## Cómo utilizarlo
 
