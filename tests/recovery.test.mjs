@@ -45,3 +45,14 @@ test('zero penalty and holding rates collapse proxy to cash delta',()=>{
  assert.equal(r.economicProxyDelta,r.netCashDelta);
  assert.throws(()=>recoveryComparison({latePenaltyPerOrderDay:-1}),/inválidos/);
 });
+
+test('same baseline for all recovery alternatives and no retroactive urgent receipt',()=>{
+ const opts=['wait','overtime','emergency','combined'];
+ const trials=opts.map(option=>recoveryComparison({option,policy:'balanced',actualOrders:260,urgentArrivalDay:13}));
+ for(const r of trials){
+  assert.equal(r.base.completed,trials[0].base.completed);
+  assert.equal(r.recovered.ledger[0].shipped,r.base.ledger[0].shipped);
+  assert.equal(r.recovered.completed,r.base.completed);
+ }
+ assert.equal(trials[2].urgent.every(x=>x.day===13),true);
+});
