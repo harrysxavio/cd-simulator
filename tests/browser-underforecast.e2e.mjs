@@ -41,6 +41,10 @@ async function caseUnderforecast(mobile){
   // The main model correctly knows the other operations have enough capacity;
   // its recovery UI still cannot issue a NEW post-shock PO. SKU pilots can.
   await page.locator('#dashboardTab').click();
+  assert.equal(await page.locator('#primarySkuSummary').isVisible(),true,'Canonical SKU summary must be the primary result');
+  assert.equal(await page.locator('#legacyAggregateDetails').getAttribute('open'),null,'One-shift legacy result must start folded');
+  assert.match(await page.locator('#primarySkuMetrics').innerText(),/280/,'SKU cohort must be distinguished from aggregate-day units');
+  await page.locator('#legacyAggregateDetails summary').click();
   assert.equal((await page.locator('#completed').innerText()).trim(),'566');
   assert.equal((await page.locator('#pending').innerText()).trim(),'834');
   await page.locator('#resultTabs button[data-result-target="inventory"]').click();
