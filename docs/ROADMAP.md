@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante la validación de escenarios y plan didáctico v11.16 (2026-10-09).
+> Documento de ejecución. Revisado durante el incremento U1 de diagnóstico gerencial v11.17 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -157,6 +157,8 @@ presentación. Pendientes conocidos explícitos, no ocultos.
 La prueba de referencia fija 1.000 unidades previstas, forecast al 80 %, reposición inicial al 70 %, proveedor confiable y sobredemanda +40 %, con las demás áreas normales. Compara esperar, compra posterior al shock, refuerzo inútil con stock faltante, compra fuera de plazo y restricciones en Recepción, Calidad, Picking y Transporte. Además comprueba sobrecompra con demanda menor.
 
 **Invariantes de negocio:** compra inicial congelada; nueva PO explícita; no rescatar antes del arribo físico; no confundir unidades agregadas de una jornada con pedidos SKU de doce días; no recomendar sobrecapacidad cuando la restricción es stock; no confundir costo económico proxy con pagos reales.
+
+**U1 · Implementado en v11.17:** se introduce briefing gerencial contextual con misión 2/4, unidades reales vs expedibles vs pendientes, causa operativa prioritaria, tres alternativas investigables y paneles desplegables para los ocho KPI/causas y el cambio manual de demanda. El diagnóstico distingue escasez de SKU, Recepción, Calidad, Inventario, Picking, Transporte y sorpresa de menor demanda; el análisis de compras urgentes sigue marcado **solo laboratorio SKU**, no acción confirmada de la jornada agregada. La heurística evita atribuir a Calidad una retención marginal cuando predomina la falta de abastecimiento. Se amplían pruebas de reglas y E2E móvil. Pendiente validación cualitativa en Android físico; U2–U5 siguen pendientes.
 
 ### Secuencia de entregas UX incorporada (U0–U5)
 
