@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.3
+# Supply Chain Operations Lab · v11.6
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=113) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=116) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -247,3 +247,15 @@ Se añadió `src/supply-bridge.js`, una interfaz de auditoría del mismo motor d
 - Continúa pendiente conectar los resultados SKU al motor agregado de ocho áreas, sin sumar dos veces ventas o compras.
 
 **Estado estimado v11.5:** F1 80 %, F2 89 %, F3 88 %, F4 81 %, F5 64 %. Promedio simple **80 %**. No equivale a QA certificada; GitHub Actions y pruebas en Android requieren verificación.
+
+## v11.6 · Decide cuánto comprar para evitar sobrestock
+
+La pantalla **Resultado final → Inventario** permite seleccionar **0, 25, 50, 75 o 100 % del faltante físico de cada SKU** para una compra urgente. El cálculo descuenta el inventario inicial y las compras originales, conserva el plazo de llegada y no anticipa ingresos en inventario. Los cuatro planes de recuperación se recalculan con el mismo porcentaje y muestran el intercambio entre stock, pedidos completos y desembolso incremental.
+
+El flujo visible se ordenó para facilitar la toma de decisiones en móvil: primero configuración y alternativas, después resultado de Compras → Recepción → Inventario → Picking, con una explicación contextual **compra útil, tardía, innecesaria o sin mejora de servicio**. La traza por día sigue plegada por defecto. Se distingue la opción sin compra de una inexistencia real de faltante.
+
+**Persistencia:** el porcentaje seleccionado se guarda en el navegador; al iniciar una campaña desde cero vuelve a 100 %. Una compra que llega fuera de los 12 días no debe mejorar los pedidos completos de la campaña.
+
+**Límite importante:** el cálculo sigue siendo del laboratorio SKU de pedidos, mientras el motor principal de ocho áreas permanece agregado y no comparte aún un libro de eventos único. Sus ingresos y gastos **no deben sumarse**. La decisión reduce el riesgo de sobredimensionar compras, pero no equivale a un recomendador óptimo de reposición ni constituye una operación financiera real.
+
+**Estado estimado v11.6:** F1 80 %, F2 89 %, F3 89 %, F4 83 %, F5 66 %. Promedio simple **81 %**. Los porcentajes son orientativos; el CI, las pruebas en Android y la integración de ambos motores deben verificarse independientemente.

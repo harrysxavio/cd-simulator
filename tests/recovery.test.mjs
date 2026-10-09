@@ -56,3 +56,24 @@ test('same baseline for all recovery alternatives and no retroactive urgent rece
  }
  assert.equal(trials[2].urgent.every(x=>x.day===13),true);
 });
+
+test('urgent purchase coverage scales actual shortages and never exceeds them',()=>{
+ const options=[0,25,50,75,100].map(purchaseCoveragePercent=>recoveryComparison({
+  option:'emergency',actualOrders:260,urgentArrivalDay:2,purchaseCoveragePercent
+ }));
+ const quantities=options.map(r=>r.urgent.reduce((a,p)=>a+p.qty,0));
+ assert.equal(quantities[0],0);
+ assert.ok(quantities[4]>0);
+ for(let i=1;i<quantities.length;i++)assert.ok(quantities[i]>=quantities[i-1]);
+ assert.ok(options.every((r,i)=>r.purchaseCoveragePercent===i*25));
+ assert.ok(options.every(r=>r.recovered.ledger[0].shipped===r.base.ledger[0].shipped));
+ assert.ok(options.every(r=>r.recovered.completed+r.recovered.pending===260));
+ assert.equal(options[0].urgentBase,0);
+ assert.equal(options[0].incrementalExpense,0);
+ const less=options[2],full=options[4];
+ assert.ok(less.urgentBase<=full.urgentBase);
+ assert.ok(less.recovered.completed<=full.recovered.completed);
+ assert.throws(()=>recoveryComparison({purchaseCoveragePercent:101}),/Cobertura de compra urgente inválida/);
+ assert.throws(()=>recoveryComparison({purchaseCoveragePercent:-1}),/Cobertura de compra urgente inválida/);
+ assert.throws(()=>recoveryComparison({purchaseCoveragePercent:12.5}),/Cobertura de compra urgente inválida/);
+});

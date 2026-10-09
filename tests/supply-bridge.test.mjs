@@ -49,6 +49,24 @@ test('procurement verdict distinguishes late purchases from effective arrivals',
  assert.equal(timely.decision.serviceGain,timely.picking.improvement>0);
  assert.equal(timely.decision.quality,timely.picking.improvement>0?'effective':'no-gain');
  const noPurchase=supplyBridge({actualOrders:260,option:'wait'});
- assert.equal(noPurchase.decision.quality,'no-shortage');
+ assert.equal(noPurchase.decision.quality,'no-order');
  assert.equal(noPurchase.decision.extraUnits,0);
+});
+
+test('partial purchases preserve the causal stock and cash trade-off',()=>{
+ const original=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:2,purchaseCoveragePercent:100});
+ const partial=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:2,purchaseCoveragePercent:50});
+ const none=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:2,purchaseCoveragePercent:0});
+ assert.ok(original.purchasing.extraUnits>partial.purchasing.extraUnits);
+ assert.ok(partial.purchasing.extraUnits>none.purchasing.extraUnits);
+ assert.equal(none.decision.quality,'no-order');
+ assert.equal(none.decision.extraUnits,0);
+ assert.ok(partial.purchasing.extraCost<original.purchasing.extraCost);
+ assert.equal(partial.purchaseCoveragePercent,50);
+ assert.ok(partial.picking.completed<=original.picking.completed);
+ assert.equal(partial.receipts[0].completed,original.receipts[0].completed);
+ for(const [id,initial] of Object.entries(partial.inventory.initial)){
+  const received=partial.receipts.reduce((n,day)=>n+day.received[id],0);
+  assert.equal(initial+received-partial.inventory.consumed[id],partial.inventory.ending[id]);
+ }
 });
