@@ -6,11 +6,12 @@ import {areaKpis} from '../src/kpis.js';
 import {DEFAULT_SCENARIO,finance} from '../src/scenario.js';
 import {START,NODES} from '../src/engine.js';
 
-test('all eight departments expose two meaningful metrics',()=>{
+test('all eight departments expose at least two valid and distinct metrics',()=>{
  const r=flow(START,{},DEFAULT_SCENARIO),kpis=areaKpis(r,DEFAULT_SCENARIO);
  assert.equal(Object.keys(kpis).length,8);
  for(const n of NODES){
-  assert.equal(kpis[n.id].length,2,n.id);
+  assert.ok(kpis[n.id].length>=2,n.id+' needs at least two metrics');
+  assert.equal(new Set(kpis[n.id].map(k=>k.label)).size,kpis[n.id].length,n.id+' has duplicated metric labels');
   for(const k of kpis[n.id]){
    assert.ok(k.label&&k.formula&&k.meaning,n.id);
    assert.ok(!String(k.value).includes('NaN'),n.id);
