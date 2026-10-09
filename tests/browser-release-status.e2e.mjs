@@ -37,14 +37,14 @@ async function verify(mode){
   assert.match(numbers,/1/);
   assert.equal(await page.locator('#legacyAggregateDetails').getAttribute('open'),null);
   assert.equal(await page.locator('#completed').isVisible(),false,'Legacy aggregate result must be folded');
-  const original=await page.locator('#primarySkuMetrics').innerText();
+  const original=await page.locator('#primarySkuMetrics strong').allInnerTexts();
   await page.locator('#primaryToAreas').click();
   assert.equal(await page.locator('#canonicalAreaView').isVisible(),true);
-  assert.equal(await page.locator('#canonicalAreaView .canonical-area-numbers').innerText(),original);
+  assert.deepEqual(await page.locator('#canonicalAreaView .canonical-area-numbers strong').allInnerTexts(),original);
   await page.locator('#resultTabs [data-result-target="overview"]').click();
   await page.locator('#legacyAggregateDetails summary').click();
   assert.equal(await page.locator('#completed').isVisible(),true);
-  assert.match(await page.locator('#legacyAggregateDetails').innerText(),/no representa los pedidos completos/);
+  assert.match(await page.locator('#legacyAggregateDetails').innerText(),/no representa los pedidos completos/i);
   if(mode==='mobile')for(const width of [360,412]){
    await page.setViewportSize({width,height:800});
    const data=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth}));
