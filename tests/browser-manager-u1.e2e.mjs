@@ -38,8 +38,9 @@ async function run(name,mobile,scenarioChanges,choiceChanges,expect){
    assert.equal(await page.locator('#directorPilot').isVisible(),true);
    assert.match(await page.locator('#directorOptions').innerText(),/Evaluar compra extraordinaria/);
    await page.locator('#directorPilot').click();
-   assert.equal(await page.locator('#dashboardSection').getAttribute('data-result-view'),'inventory');
-   assert.match(await page.locator('#skuLab').innerText(),/Manifiesto SKU comprometido/);
+   assert.equal(await page.locator('#recoverySection').isVisible(),true);
+   assert.match(await page.locator('#skuRecoveryDecision').innerText(),/Compra original comprometida/);
+   assert.match(await page.locator('#skuRecoveryDecision').innerText(),/Solicitar reposición extraordinaria/);
    await page.locator('#preliminaryTab').click();
   }else assert.equal(await page.locator('#directorPilot').isVisible(),false,'Irrelevant emergency PO suggestion was displayed');
   await page.locator('#diagnosisTechnical summary').click();
