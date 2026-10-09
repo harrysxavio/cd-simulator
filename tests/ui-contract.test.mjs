@@ -78,6 +78,6 @@ test('SKU ledger uses Receiving, Picking and Transport constraints from the camp
  assert.match(app,/receivingUnitCapacity:area\.receivingCapacity/);
  assert.match(app,/pickingUnitCapacity:area\.pickingCapacity/);
  assert.match(app,/transportUnitCapacity:area\.stages\[7\]\.capacity/);
- assert.match(app,/const chain=supplyBridge\(\{[^}]*\.\.\.skuAreaCapacity\}\)/);
- assert.match(app,/const audit=skuAudit\(\{[^}]*\.\.\.skuAreaCapacity\}\)/);
+ assert.match(app,/const chain=supplyBridge\([^\n]*\.\.\.skuAreaCapacity\}\)/);
+ assert.match(app,/const audit=skuAudit\([^\n]*\.\.\.skuAreaCapacity\}\)/);
 });
