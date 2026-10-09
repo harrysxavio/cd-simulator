@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.2
+# Supply Chain Operations Lab · v11.3
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=112) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=113) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -213,3 +213,21 @@ En **Resultado final → Mejoras → Restricciones observadas**, cada área pres
 ## Corrección de regresión CI · 2026-10-09
 
 La ejecución [37917786027](https://github.com/harrysxavio/cd-simulator/actions/runs/37917786027) registró **89/90 pruebas correctas**. El único fallo estaba en `tests/causal.test.mjs`: exigía exactamente dos KPI por departamento, pero Comercial ya ofrece tres y otras áreas incluyen más indicadores. Se actualizó el contrato para exigir **al menos dos KPI**, etiquetas únicas y campos descriptivos válidos, conservando los indicadores adicionales. Esta es una corrección del test, no una eliminación de KPI. **Pendiente:** confirmar el resultado del siguiente GitHub Actions sobre el commit de corrección; no se declara verde sin esa evidencia.
+
+## v11.3 · Persistencia de decisiones SKU
+
+- El navegador conserva ahora la política de inventario SKU, el retraso simulado de proveedor, la estrategia de recuperación y el día elegido para la compra urgente. Anteriormente, estos controles se perdían al actualizar la página aunque el resto de la campaña siguiera guardado.
+- Al cargar se validan las opciones permitidas; valores corruptos o desactualizados vuelven a opciones seguras. **Nueva campaña desde cero** restablece también estos cuatro parámetros.
+- Se añadió un test de contrato para verificar persistencia, validación y reinicio. **No se declara CI verde sin confirmar la nueva ejecución.**
+
+### Estado de fases al cierre de v11.3 (estimación)
+
+| Fase | Avance estimado | Pendiente principal |
+|---|---:|---|
+| 1. Motor operacional y económico | 80 % | Modelo agregado y eventos unificados |
+| 2. Demanda sorpresa y recuperación | 89 % | Escenarios reproducibles y pruebas completas |
+| 3. SKU, compras e inventario | 85 % | Conectar el laboratorio SKU al flujo principal |
+| 4. UX y aprendizaje interactivo | 78 % | Pruebas móviles reales y simplificación de pantallas |
+| 5. QA, documentación y portafolio | 60 % | GitHub Actions verde y E2E en navegador |
+
+**Global aproximado: 78 %**, promedio simple de las cinco estimaciones, no porcentaje certificado de tareas. La integración del motor SKU es la dependencia crítica.
