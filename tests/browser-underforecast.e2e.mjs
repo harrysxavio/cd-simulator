@@ -22,11 +22,17 @@ async function caseUnderforecast(mobile){
   await page.locator('#choices .choice').filter({hasText:'Proveedor confiable'}).click();
   for(let i=0;i<6;i++)await page.locator('#next').click();
   assert.equal(await page.locator('#preliminarySection').isVisible(),true);
+  await page.locator('#diagnosisOverride summary').click();
   const sign=page.getByLabel('Signo de variación de demanda');
   await sign.selectOption('1');
   const percent=page.getByLabel('Porcentaje de variación de demanda');
   await percent.fill('40');
   await page.locator('#surpriseOverride button').filter({hasText:'Aplicar escenario'}).click();
+  const briefing=await page.locator('#directorReason').innerText();
+  assert.match(briefing,/disponibilidad es insuficiente/);
+  assert.match(await page.locator('#directorEvidence').innerText(),/834/);
+  assert.equal(await page.locator('#diagnosisTechnical').getAttribute('open'),null,'El detalle técnico debe iniciar plegado');
+  await page.locator('#diagnosisTechnical summary').click();
   const details=await page.locator('#demandComparison').innerText();
   assert.match(details,/1\.400/,'Demand should be 1400 after reveal');
   assert.match(details,/800/,'Forecast should remain 800');
