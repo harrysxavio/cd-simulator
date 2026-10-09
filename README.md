@@ -239,3 +239,11 @@ Se añadió `src/supply-bridge.js`, una interfaz de auditoría del mismo motor d
 **Límite de arquitectura:** el puente explica y calcula la interacción entre áreas en el laboratorio SKU, pero todavía no inyecta sus resultados al motor agregado principal de ocho áreas. No deben sumarse sus cifras a las del informe financiero agregado. Queda pendiente un único motor transaccional para evitar dobles conteos.
 
 **Fases estimadas v11.4:** F1 80 %, F2 89 %, F3 87 %, F4 79 %, F5 61 %; promedio simple **79 %**. El CI y las pruebas reales de Android requieren comprobación independiente.
+
+## v11.5 · Cronología SKU desplegable y control temporal
+
+- En **Resultado final → Inventario → Cómo se conectan las áreas**, el usuario puede desplegar **Ver recepción, stock y pedidos por día**. Cada jornada muestra recepciones por SKU, inventario final, pedidos despachados, completos acumulados y pendientes. La cronología permanece plegada por defecto para reducir el desplazamiento en teléfonos.
+- La prueba de abastecimiento urgente ahora compara **stock y recepciones completos contra la línea base** durante todos los días anteriores a la llegada de la compra. Antes solo comprobaba que las recepciones no fueran negativas, lo cual no detectaba recepciones anticipadas.
+- Continúa pendiente conectar los resultados SKU al motor agregado de ocho áreas, sin sumar dos veces ventas o compras.
+
+**Estado estimado v11.5:** F1 80 %, F2 89 %, F3 88 %, F4 81 %, F5 64 %. Promedio simple **80 %**. No equivale a QA certificada; GitHub Actions y pruebas en Android requieren verificación.
