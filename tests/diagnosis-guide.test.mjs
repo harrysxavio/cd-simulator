@@ -47,7 +47,7 @@ test('U1 manager: receiving throughput bottleneck is not presented as missing su
 });
 
 test('U1 manager: Quality release delay remains separate from Purchasing',()=>{
- const brief=state({quality:'slow',values:{quality:50}},{initialStock:0});
+ const brief=state({quality:'slow',values:{quality:50}},{initialStock:250});
  assert.equal(brief.category,'quality');
  assert.match(brief.next,/sin saltar controles/);
 });
