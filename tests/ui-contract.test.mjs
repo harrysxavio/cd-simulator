@@ -86,7 +86,7 @@ test('Supplier and Quality constraints from main campaign drive SKU ledger',()=>
  assert.match(app,/supplierRate=area\.ordered>0\?/);
  assert.match(app,/supplierFill:Object\.fromEntries\(SKU_CATALOG\.map/);
  assert.match(app,/qualityReleasePercent:Math\.max\(0,Math\.min\(100,numericValue\('quality',decisions\)/);
- assert.match(app,/released:day\.released/);
+ assert.match(app,/Object\.entries\(day\.released\)/);
  assert.match(app,/const audit=skuAudit\([^\n]*\.\.\.skuAreaCapacity\}\)/);
  assert.match(app,/sku-supplementary/);
  const css=readFileSync(new URL('../src/styles.css',import.meta.url),'utf8');
