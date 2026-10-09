@@ -35,7 +35,7 @@ jobs:
             sleep 1
           done
           curl --silent --show-error --fail http://127.0.0.1:8000/ > /dev/null
-          node --experimental-default-type=module --test tests/browser-smoke.e2e.mjs
+          node --experimental-default-type=module --test --test-concurrency=1 tests/*.e2e.mjs
       - name: Attach failed-browser screenshot
         if: failure()
         uses: actions/upload-artifact@v4
