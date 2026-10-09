@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.9
+# Supply Chain Operations Lab · v11.10
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=117) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=120) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -54,7 +54,7 @@ Tres productos ficticios con perfiles diferentes:
 - Comparación de demanda planificada versus demanda sorpresa con **compras originales congeladas**.
 - Recuperación con espera, refuerzo de capacidad, compra urgente o combinación de ambas.
 
-**Límites:** cohorte fija de pedidos generada el día 0; no hay pedidos nuevos diarios, cancelaciones ni reservas por cliente. Los pedidos bloqueados pueden saltarse. La recepción y calidad de las compras SKU se suponen instantáneas al llegar, sin consumo de capacidad. La compra urgente se supone disponible el día 1. Son hipótesis pedagógicas, no compromisos de proveedores reales.
+**Límites:** cohorte fija de pedidos generada el día 0; no hay pedidos nuevos diarios, cancelaciones ni reservas por cliente. Los pedidos bloqueados pueden saltarse. La llegada al centro no equivale a recepción: el ingreso está limitado por capacidad y Calidad puede retener unidades. El día de llegada urgente es configurable, y puede quedar fuera del horizonte. Son hipótesis pedagógicas, no compromisos de proveedores reales.
 
 ## Economía: interpretar correctamente los números
 
@@ -124,7 +124,7 @@ Pruebas automatizadas con **Node.js 22**:
 node --experimental-default-type=module --test tests/*.test.mjs
 ```
 
-Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **No se ha confirmado aquí el estado real del CI ni la ejecución completa de Node.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
+Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **La integración anterior v11.9 verificó GitHub Actions y 118 pruebas de regresión en el PR #5; v11.10 requiere validación propia.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
 ## Roadmap y estado estimado · v11.1
 
@@ -151,6 +151,14 @@ El costo valorizado de las existencias se concilia con la misma identidad, usand
 Se añadieron `tests/audit.test.mjs` y se comprobaron 36 combinaciones de política de inventario, intervención y sorpresa mediante evaluación JavaScript del modelo; las 36 conciliaron. Esta comprobación **no equivale a ejecutar la suite completa Node ni a QA de navegador real**.
 
 **Límite relevante:** es una auditoría interna del motor SKU y sus supuestos, **no la unificación con el motor agregado principal**. La consolidación operacional y financiera sigue pendiente, así como validar CI y Android.
+
+## v11.10 · Conciliación de compras y recepción SKU
+
+El nuevo libro de compras SKU distingue órdenes comprometidas (que **no son pagos**), cumplimiento efectivo del proveedor, compras que todavía no llegan, unidades arribadas pero retenidas en cola de Recepción, unidades pendientes de Calidad, costo de inventario disponible y costo estándar de mercancía despachada. No inventa inventario en tránsito ni capitaliza el recargo urgente.
+
+La trazabilidad de Recepción y Compras se calcula desde los mismos eventos diarios que generan el despacho; la auditoría valida identidades por SKU y valor, incluyendo compras tardías, cumplimiento parcial, restricciones de capacidad y retención de Calidad. **Estos movimientos corresponden exclusivamente al laboratorio SKU**; el motor agregado sigue mostrando una campaña hipotética distinta y todavía no se deben sumar ambas contabilidades.
+
+La consolidación económica entre motores necesita primero unificar horizonte temporal, cantidades físicas, precios unitarios y costos. Un reporte que simplemente sumase los dos motores sería incorrecto.
 
 ## Autoría y propósito
 
