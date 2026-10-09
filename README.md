@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v10.6
+# Supply Chain Operations Lab · v11.2
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=106) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=112) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -209,3 +209,7 @@ En **Resultado final → Mejoras → Restricciones observadas**, cada área pres
 - **Límites:** este comparador continúa siendo un laboratorio SKU paralelo al motor agregado de ocho áreas. La nueva prueba está añadida al repositorio, pero **su ejecución en GitHub Actions todavía no está verificada**.
 
 **Estado de fases (estimación):** F1 80 %, F2 89 %, F3 84 %, F4 76 %, F5 59 %. Global aproximado **78 %** como promedio simple, sujeto a pruebas reales y consolidación de motores.
+
+## Corrección de regresión CI · 2026-10-09
+
+La ejecución [37917786027](https://github.com/harrysxavio/cd-simulator/actions/runs/37917786027) registró **89/90 pruebas correctas**. El único fallo estaba en `tests/causal.test.mjs`: exigía exactamente dos KPI por departamento, pero Comercial ya ofrece tres y otras áreas incluyen más indicadores. Se actualizó el contrato para exigir **al menos dos KPI**, etiquetas únicas y campos descriptivos válidos, conservando los indicadores adicionales. Esta es una corrección del test, no una eliminación de KPI. **Pendiente:** confirmar el resultado del siguiente GitHub Actions sobre el commit de corrección; no se declara verde sin esa evidencia.
