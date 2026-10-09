@@ -126,15 +126,15 @@ node --experimental-default-type=module --test tests/*.test.mjs
 
 Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **No se ha confirmado aquí el estado real del CI ni la ejecución completa de Node.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
-## Roadmap y estado estimado · v10.6
+## Roadmap y estado estimado · v11.1
 
 | Fase | Avance aproximado | Pendientes principales |
 |---|---:|---|
 | 1. Motor operacional y económico | 80 % | Auditoría y conciliación de casos extremos |
-| 2. Demanda sorpresa y recuperación | 85 % | Escenarios reproducibles y cierre de validación |
+| 2. Demanda sorpresa y recuperación | 88 % | Escenarios reproducibles y cierre de validación |
 | 3. SKU, inventario y abastecimiento | 82 % | Unificación física y económica con el motor principal |
-| 4. UX y aprendizaje guiado | 50 % | Ejercicios progresivos, móvil y accesibilidad |
-| 5. QA, documentación y portafolio | 55 % | CI verificado, regresiones reales y revisión visual |
+| 4. UX y aprendizaje guiado | 72 % | Ejercicios progresivos, móvil y accesibilidad |
+| 5. QA, documentación y portafolio | 58 % | CI verificado, regresiones reales y revisión visual |
 
 **Próxima prioridad:** consolidar el inventario, la capacidad y la contabilidad de ambos motores, evitando doble conteo de existencias, compras, ingresos y costos. Después, ejecutar y corregir la suite Node y validar Android.
 
@@ -193,3 +193,9 @@ Las capturas de la ejecución **Model regression tests #77** muestran **82 prueb
 - Se añaden botones para avanzar entre vistas y un acceso desde Mejoras a la fase de recuperación para ensayar decisiones y revisar de nuevo sus consecuencias.
 - Los detalles operativos y económicos siguen siendo desplegables. Las vistas de teléfonos apilan métricas, controles y tarjetas para evitar columnas estrechas.
 - Prueba funcional de navegación con DOM simulado: **9 de 9** verificaciones aprobadas. Pendiente inspección visual real en Android y comprobación de GitHub Actions.
+
+## v11.1 · Mejoras accionables por área
+
+En **Resultado final → Mejoras → Restricciones observadas**, cada área presenta ahora una vista previa del potencial de expedición (o advierte que la mejora aislada no aporta), junto a **Explorar intervención**. El botón abre directamente la configuración de recuperación de esa misma área, sin obligar a recorrer todas las pantallas. La tarjeta es de una columna en móviles y utiliza etiquetas accesibles.
+
+**Estado estimado de las cinco fases:** motor operacional/económico 80 %, demanda y recuperación 88 %, SKU e inventario 82 %, UX/aprendizaje 72 %, QA/documentación 58 %. **Avance global aproximado: 76 %**, calculado como promedio simple, no como auditoría de producción. Los pendientes principales siguen siendo la unificación del motor SKU con las ocho áreas, la ejecución verde de CI y las pruebas reales en navegador móvil.
