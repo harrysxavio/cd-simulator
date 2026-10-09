@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante la auditoría de navegación v11.15 (2026-10-09).
+> Documento de ejecución. Revisado durante la validación de escenarios y plan didáctico v11.16 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -145,6 +145,34 @@ funcionales. Testear campañas de ejemplo y guardar resultados esperados.
 **Aceptación:** las pruebas automáticas y la revisión manual se documentan,
 el CI queda verde, se despliega Pages sin errores y se etiqueta la versión de
 presentación. Pendientes conocidos explícitos, no ocultos.
+
+
+## v11.16 · Puerta de validación de escenarios y rediseño móvil (transversal a M2–M8)
+
+**Prioridad:** P0 para la validación de negocio y claridad de la recuperación; P1 para refinamiento visual progresivo. Esta etapa **no cambia aún el motor ni la UI**: crea criterios ejecutables y aprueba el plan antes de realizar cambios de mayor impacto.
+
+**Documento de aceptación de operaciones:** [SCENARIO-BUSINESS-ACCEPTANCE.md](SCENARIO-BUSINESS-ACCEPTANCE.md).
+**Documento de experiencia móvil y didáctica:** [UX-MOBILE-DIDACTIC-PLAN.md](UX-MOBILE-DIDACTIC-PLAN.md).
+
+La prueba de referencia fija 1.000 unidades previstas, forecast al 80 %, reposición inicial al 70 %, proveedor confiable y sobredemanda +40 %, con las demás áreas normales. Compara esperar, compra posterior al shock, refuerzo inútil con stock faltante, compra fuera de plazo y restricciones en Recepción, Calidad, Picking y Transporte. Además comprueba sobrecompra con demanda menor.
+
+**Invariantes de negocio:** compra inicial congelada; nueva PO explícita; no rescatar antes del arribo físico; no confundir unidades agregadas de una jornada con pedidos SKU de doce días; no recomendar sobrecapacidad cuando la restricción es stock; no confundir costo económico proxy con pagos reales.
+
+### Secuencia de entregas UX incorporada (U0–U5)
+
+| Paso | Hitos originales | Objetivo y criterio |
+| --- | --- | --- |
+| **U0** · pruebas y especificación | M2, M3, M5, M8 | Ejecutar escenarios reproducibles y E2E en móvil/escritorio, registrar resultados; documentar hallazgos |
+| **U1** · diagnóstico narrativo | M6, M7 | Una pantalla con problema, evidencia, restricción principal y CTA; resto de KPI plegados; no alterar modelo |
+| **U2** · acciones correctivas físicas | M2, M3, M5 | Compra extraordinaria con SKU, lead time e ID propios, uso de stock físicamente ubicable; no inventar ni borrar stock |
+| **U3** · comparación antes de aplicar | M5, M6, M7 | Hasta tres decisiones relevantes; explicar impacto, fecha y costo; permitir simular sin modificar campaña |
+| **U4** · resultados explicables | M4, M6, M7 | Comparación antes/después y semáforos causales contra un mismo libro físico/económico |
+| **U5** · accesibilidad y refinamiento | M7, M8 | 360/412 px, foco, botones táctiles, lectura sin desbordes, Android real y prueba de comprensión con usuarios |
+
+**Orden recomendado:** después de U0, implementar **U1** para resolver el problema de lectura antes de construir más funcionalidades. U2–U3 requieren la integración física de M2/M3; U4 necesita el libro económico de M4. U5 es un ciclo de consolidación, aunque se mantienen requisitos de accesibilidad desde U1.
+
+**No actualizar porcentajes históricos por tener documentación o tests nuevos:** las deudas de M2/M3/M4/M5/M6/M7 permanecen, especialmente la diferencia entre el motor agregado y el motor SKU.
+
 
 ## Arquitectura deseada
 
