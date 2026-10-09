@@ -506,9 +506,14 @@ function renderSkuRecoveryMission(){
  if(confirmed){
   const success=add(root,'div','manager-po-confirmed');
   add(success,'strong','','✓ Decisión confirmada para esta cohorte SKU');
-  add(success,'p','',confirmed.action==='extraordinary-purchase'?'Nueva orden de compra extraordinaria, separada de la orden original.':'Se ha decidido continuar sin compra extraordinaria.');
+  add(success,'p','',confirmed.action==='extraordinary-purchase'?'Nueva orden de compra extraordinaria, separada de la orden original.':confirmed.action==='release-on-site-reserve'?'Se autorizó el traslado de stock ubicado en RESERVA-CD. No es una compra.':'Se ha decidido continuar sin compra extraordinaria.');
   add(success,'p','','Pedidos completos antes: '+fmt(confirmed.completedBefore)+' → después: '+fmt(confirmed.completedAfter)+' · pendientes '+fmt(confirmed.pendingAfter)+' · rescate +'+fmt(confirmed.recoveredOrders)+' al día '+confirmed.horizonDays+'.');
   add(success,'p','','Compromiso adicional modelado CLP '+fmt(confirmed.urgentOrderCommitmentCLP)+' (no es pago real). Unidades ordenadas '+fmt(confirmed.orderedExtraUnits)+'; recibidas en el horizonte '+fmt(confirmed.receivedExtraUnits)+'.');
+  if(confirmed.action==='release-on-site-reserve'){
+   add(success,'p','','Traslado interno de '+fmt(confirmed.releasedReserveUnits)+' unidades SKU desde el día '+(confirmed.firstReserveTransferDay??'no realizado')+'. Reserva pendiente al corte '+fmt(Object.values(confirmed.closingReserve).reduce((a,b)=>a+b,0))+'.');
+   const moveDetail=add(success,'details','manager-po-detail');add(moveDetail,'summary','','Ver movimientos internos identificados por SKU');
+   for(const mv of confirmed.reserveTransfers)add(moveDetail,'div','manager-po-line',mv.id+' · SKU '+mv.skuId+' · '+fmt(mv.qty)+' unidades · día '+mv.day+' · '+mv.from+' → '+mv.to);
+  }
   if(confirmed.urgentPurchaseOrders.length){
    const details=add(success,'details','manager-po-detail');add(details,'summary','','Ver identificadores, cantidades, origen y plazos de la nueva orden');
    for(const po of confirmed.urgentPurchaseOrders){
@@ -534,8 +539,15 @@ function renderSkuRecoveryMission(){
   const item=add(stockGrid,'div','manager-stock-item');
   add(item,'strong','','SKU '+p.id+' · '+fmt(initial[p.id])+' unidades');
   add(item,'small','',p.rotation+' rotación · costo estándar CLP '+fmt(p.unitCost));
+  if(preview.reserveStock[p.id]>0)add(item,'small','',fmt(preview.reserveStock[p.id])+' en RESERVA-CD · '+fmt(initial[p.id]-preview.reserveStock[p.id])+' en PICK-FACE al inicio. Es el mismo inventario físico, no unidades extra.');
  }
  const original=add(stockBox,'p','manager-stock-commitment','Compra original comprometida: '+SKU_CATALOG.map(p=>'SKU '+p.id+' '+fmt(preview.originalPurchase[p.id])).join(' · ')+'. No cambia después de la sorpresa.');
+ const reserveRow=add(stockBox,'div','manager-purchase-settings');
+ add(reserveRow,'label','','Stock inicial ubicado en RESERVA-CD (se separa, no se crea)');
+ const reserveControl=add(reserveRow,'select','numeric-input');reserveControl.setAttribute('aria-label','Porcentaje del stock inicial ubicado en RESERVA-CD');
+ for(const n of [0,10,20,30]){const op=add(reserveControl,'option','',n===0?'0 % · sin reserva interna':'Reservar '+n+' % por SKU en RESERVA-CD');op.value=String(n)}
+ reserveControl.value=String(skuReservePercent);reserveControl.onchange=()=>{skuReservePercent=Number(reserveControl.value);if(skuReservePercent===0&&skuRecovery==='reserve')skuRecovery='wait';save();render()};
+ add(stockBox,'p','manager-fineprint','Esta ubicación es una hipótesis explícita del ejercicio, no un stock adicional: las unidades se descuentan del stock inicial disponible para Picking hasta su traslado. Compara la misma reserva retenida vs. habilitada.');
  add(stockBox,'p','manager-fineprint','El inventario no verificable y el retenido por Calidad NO están disponibles para preparar pedidos. Verificar stock no crea unidades nuevas. Las cantidades SKU corresponden a una cohorte de 12 días, no a las unidades agregadas de una jornada.');
 
  const decide=add(root,'section','manager-purchase-options');
@@ -544,22 +556,25 @@ function renderSkuRecoveryMission(){
  const cards=add(decide,'div','manager-option-grid');
  for(const [option,title,note] of [
   ['wait','Mantener compras originales','Sin un nuevo compromiso; los pendientes esperan o requieren reprogramación.'],
-  ['emergency','Solicitar reposición extraordinaria','Añade una nueva compra por SKU; solo se podrá utilizar después de su recepción y liberación.']
+  ['emergency','Solicitar reposición extraordinaria','Añade una nueva compra por SKU; solo se podrá utilizar después de su recepción y liberación.'],
+  ['reserve','Habilitar reserva ubicada en el CD','Traslado interno desde RESERVA-CD a PICK-FACE. No crea inventario ni compra nueva.']
  ]){
   const button=add(cards,'button','manager-option-btn'+(selected===option?' chosen':''));
   button.type='button';button.setAttribute('aria-pressed',String(selected===option));
   add(button,'strong','',title);add(button,'span','',note);
-  button.onclick=()=>{skuRecovery=option;save();render()};
+  button.onclick=()=>{skuRecovery=option;if(option==='reserve'&&skuReservePercent===0)skuReservePercent=20;save();render()};
  }
- if(selected==='emergency'){
+ if(selected==='emergency'||selected==='reserve'){
   const row=add(decide,'div','manager-purchase-settings');
+  if(selected==='emergency'){
   const qty=add(row,'label','','¿Qué fracción del faltante físico comprar?');
   const coverage=add(row,'select','numeric-input');coverage.setAttribute('aria-label','Porcentaje de reposición extraordinaria en Recuperación');
   for(const n of [0,25,50,75,100]){const op=add(coverage,'option','',n+' % del faltante por SKU');op.value=String(n)}
   coverage.value=String(skuPurchaseCoverage);
   coverage.onchange=()=>{skuPurchaseCoverage=Number(coverage.value);save();render()};
-  const date=add(row,'label','','¿Cuándo llegará al CD? (supuesto, no confirmación del proveedor)');
-  const arrival=add(row,'select','numeric-input');arrival.setAttribute('aria-label','Día previsto de compra extraordinaria en Recuperación');
+  }
+  const date=add(row,'label','',selected==='reserve'?'¿En qué día se habilitará físicamente la reserva?':'¿Cuándo llegará al CD? (supuesto, no confirmación del proveedor)');
+  const arrival=add(row,'select','numeric-input');arrival.setAttribute('aria-label',selected==='reserve'?'Día de habilitación de la reserva ubicada':'Día previsto de compra extraordinaria en Recuperación');
   for(const d of [1,2,5,10,13]){const op=add(arrival,'option','',d===13?'Día 13 · fuera del horizonte':'Día '+d);op.value=String(d)}
   arrival.value=String(skuUrgentArrival);
   arrival.onchange=()=>{skuUrgentArrival=Number(arrival.value);save();render()};
@@ -568,13 +583,20 @@ function renderSkuRecoveryMission(){
  add(previewCard,'h3','','3 · Resultado de esta alternativa (vista previa)');
  const numbers=add(previewCard,'div','manager-preview-stats');
  for(const [label,value,sub] of [
-  ['Sin compra nueva',preview.base.completed,'pedidos completos al día '+preview.recovered.days],
+  ['Sin la intervención',preview.base.completed,'pedidos completos al día '+preview.recovered.days],
   ['Con la decisión',preview.recovered.completed,'pedidos completos al día '+preview.recovered.days],
   ['Recuperación',preview.recovered.completed-preview.base.completed,'pedidos adicionales']
  ]){
   const stat=add(numbers,'div','manager-preview-stat');add(stat,'small','',label);add(stat,'strong','',fmt(value));add(stat,'small','',sub);
  }
  add(previewCard,'p','','Pendientes después de la decisión: '+fmt(preview.recovered.pending)+' de '+fmt(preview.recovered.orders)+' pedidos. Stock ordinario inicial más ingresos validados; no se promete salida antes de su recepción, Calidad, Picking y Transporte.');
+ if(selected==='reserve'){
+  const moves=preview.recovered.ledger.flatMap(x=>x.reserveEvents);
+  const block=add(previewCard,'div','manager-purchase-lines');add(block,'strong','','RESERVA-CD → PICK-FACE · traslado interno, sin recepción de proveedor');
+  for(const p of SKU_CATALOG)add(block,'p','','SKU '+p.id+' · '+fmt(preview.reserveStock[p.id])+' unidades originalmente ubicadas en reserva'+(moves.some(x=>x.skuId===p.id)?' · traslado día '+skuUrgentArrival:' · sin trasladar'));
+  add(previewCard,'p','','Unidades transferidas '+fmt(moves.reduce((n,x)=>n+x.qty,0))+' · compras adicionales CLP 0. Costo de movimiento interno aún no modelado.');
+  if(skuUrgentArrival>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ El traslado llega fuera del horizonte: no recupera pedidos durante la campaña.');
+ }
  if(preview.urgent.length){
   const items=add(previewCard,'div','manager-purchase-lines');
   add(items,'strong','','Nueva orden propuesta, separada del manifiesto inicial:');
@@ -582,14 +604,14 @@ function renderSkuRecoveryMission(){
   add(previewCard,'p','','Compromiso extraordinario supuesto CLP '+fmt(preview.urgentBase+preview.urgentSurcharge)+' (valor y recargo; no equivale a pago).');
   if(preview.urgentArrivalDay>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ La nueva compra llega después del corte: genera compromiso, pero no recupera pedidos dentro de los 12 días.');
  }
- if(selected==='emergency'&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta compra no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
+ if(['emergency','reserve'].includes(selected)&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta compra no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
  if(selected==='wait')add(previewCard,'p','manager-warning','Esperar mantiene los pedidos pendientes; no equivale a cancelarlos ni a prometer una fecha de entrega.');
  const confirmBtn=add(root,'button','btn manager-primary','Confirmar decisión en simulación →');
  confirmBtn.type='button';confirmBtn.id='confirmSkuDecision';
- confirmBtn.disabled=selected==='emergency'&&!preview.urgent.length;
+ confirmBtn.disabled=(selected==='emergency'&&!preview.urgent.length)||(selected==='reserve'&&skuReservePercent===0);
  confirmBtn.onclick=()=>{
   if(activeSkuDecision(contract))return;
-  const extra=selected==='emergency'&&preview.recovered.completed<=preview.base.completed?' ATENCIÓN: esta compra tiene costo y no recupera pedidos dentro del período.':'';
+  const extra=selected==='emergency'&&preview.recovered.completed<=preview.base.completed?' ATENCIÓN: esta compra tiene costo y no recupera pedidos dentro del período.':selected==='reserve'&&preview.recovered.completed<=preview.base.completed?' ATENCIÓN: este traslado no recupera pedidos dentro del período.':'';
   if(!confirm('¿Registrar esta decisión en la campaña SKU? La orden original no cambiará y la acción quedará confirmada en esta simulación.'+extra))return;
   const record=createSkuRecoveryDecision({campaignId,skuInputs:input,option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:preview});
   skuDecisions=[...skuDecisions,record].slice(-25);
