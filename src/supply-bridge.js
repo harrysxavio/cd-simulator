@@ -1,4 +1,5 @@
 import {recoveryComparison} from './recovery.js';
+import {skuProcurementReconciliation} from './sku-procurement.js';
 
 /** Trace a single SKU intervention through purchasing, receiving, inventory and picking.
  * The aggregate eight-area campaign is intentionally not altered by this pilot.
@@ -6,6 +7,7 @@ import {recoveryComparison} from './recovery.js';
 export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=200,delayDays={},supplierFill={},option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,plannedForecastPercent=100,planningCoveragePercent=100}={}){
  const result=recoveryComparison({policy,plannedOrders,actualOrders,delayDays,supplierFill,option,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
  const arrival=Object.fromEntries(result.urgent.map(x=>[x.id,x.day]));
+ const procurementLedger=skuProcurementReconciliation(result);
  const receipts=result.recovered.ledger.map(day=>({
   day:day.day,received:{...day.received},released:{...day.released},waitingQuality:day.waitingQuality,receivedUrgent:{...day.receivedUrgent},waitingReceiving:day.waitingReceiving,shipped:day.shipped,shippedUnits:day.shippedUnits,
   completed:day.completed,pending:day.backlog,stock:{...day.stock}
@@ -35,6 +37,6 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
   inventory:{initial:{...result.recovered.initial},ending:{...result.recovered.endingStock},consumed:{...result.recovered.consumed}},
   picking:{completed:result.recovered.completed,pending:result.recovered.pending,improvement,unitCapacity:pickingUnitCapacity,transportUnitCapacity},
   finance:{incrementalExpense:result.incrementalExpense,incrementalCash:result.netCashDelta,economicProxy:result.economicProxyDelta},
-  receipts,assumptions:'Trazabilidad SKU didáctica: compras → recepción limitada por capacidad → liberación gradual de Calidad → stock disponible → picking y transporte limitados por unidades SKU. Las capacidades diarias pueden provenir del motor agregado, pero los costos siguen separados.'
+  receipts,procurementLedger,assumptions:'Trazabilidad SKU didáctica: compras → recepción limitada por capacidad → liberación gradual de Calidad → stock disponible → picking y transporte limitados por unidades SKU. Las capacidades diarias pueden provenir del motor agregado, pero los costos siguen separados.'
  };
 }
