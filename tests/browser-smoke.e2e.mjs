@@ -25,7 +25,10 @@ async function verifyExperience(mode){
   assert.equal(await page.locator('#operationsSection').isVisible(),true,'La campaña inicial debe mostrarse');
   assert.match(await page.locator('#missionTitle').innerText(),/Comercial/,'La misión debe renderizarse');
   assert.ok(await page.locator('#choices .choice').count()>=3,'Faltan decisiones del área inicial');
-  assert.ok((await page.locator('#nodeResult').innerText()).includes('Entrada:'),'Faltan consecuencias operativas');
+  assert.match(await page.locator('#choices .compact-flow').innerText(),/Llegan.*siguen/s,'Falta consecuencia visible de la elección');
+  assert.equal(await page.locator('.mission-impact-details').getAttribute('open'),null,'Detalle técnico debe iniciar plegado');
+  await page.locator('.mission-impact-details summary').click();
+  assert.match(await page.locator('#nodeResult').innerText(),/Antes de esta área/,'Consecuencia técnica debe seguir disponible');
 
   // Complete all eight planning areas using the actual navigation controls.
   for(let step=0;step<8;step++)await page.locator('#next').click();
