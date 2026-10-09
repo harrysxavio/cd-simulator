@@ -555,7 +555,7 @@ function renderSkuRecoveryMission(){
 
  const decide=add(root,'section','manager-purchase-options');
  add(decide,'h3','','2 · Elige una acción para estudiar');
- add(decide,'p','','Puedes esperar las compras comprometidas o ensayar una reposición adicional. Ninguna selección emite todavía una orden.');
+ add(decide,'p','','Puedes esperar, habilitar una reserva que ya existe en el CD o ensayar una nueva compra. Ninguna selección emite todavía una orden.');
  const cards=add(decide,'div','manager-option-grid');
  for(const [option,title,note] of [
   ['wait','Mantener compras originales','Sin un nuevo compromiso; los pendientes esperan o requieren reprogramación.'],
@@ -607,7 +607,7 @@ function renderSkuRecoveryMission(){
   add(previewCard,'p','','Compromiso extraordinario supuesto CLP '+fmt(preview.urgentBase+preview.urgentSurcharge)+' (valor y recargo; no equivale a pago).');
   if(preview.urgentArrivalDay>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ La nueva compra llega después del corte: genera compromiso, pero no recupera pedidos dentro de los 12 días.');
  }
- if(['emergency','reserve'].includes(selected)&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta compra no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
+ if(['emergency','reserve'].includes(selected)&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta intervención no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
  if(selected==='wait')add(previewCard,'p','manager-warning','Esperar mantiene los pedidos pendientes; no equivale a cancelarlos ni a prometer una fecha de entrega.');
  const timeline=add(previewCard,'details','manager-po-detail');
  add(timeline,'summary','','📅 Ver salidas por día y los pedidos aún pendientes');
@@ -630,7 +630,7 @@ function renderSkuRecoveryMission(){
   skuDecisions=[...skuDecisions,record].slice(-25);
   skuRecovery=selected;save();render();
  };
- add(root,'p','manager-fineprint','Esta misión reutiliza el mismo registro de pedidos y movimientos SKU auditado en el laboratorio. No modifica la expedición agregada ni crea un proveedor real. Una compra comprometida no es un pago, ni una recepción es liberación de Calidad.');
+ add(root,'p','manager-fineprint','Esta misión reutiliza el mismo registro de pedidos y movimientos SKU auditado en el laboratorio. RESERVA-CD es una ubicación lógica hipotética; no se han verificado ubicaciones o lotes de una bodega real. No modifica la expedición agregada ni crea un proveedor real. Una compra comprometida no es un pago, ni una recepción es liberación de Calidad.');
 }
 
 function renderAttention(){
