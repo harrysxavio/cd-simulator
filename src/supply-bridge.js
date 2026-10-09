@@ -13,8 +13,21 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
  const urgentInHorizon=result.urgent.filter(x=>x.day<=result.recovered.days);
  const lateUrgent=result.urgent.filter(x=>x.day>result.recovered.days);
  const improvement=result.recovered.completed-result.base.completed;
+ const effectiveReceiptDays=urgentInHorizon.map(x=>x.day);
+ const firstUrgentReceiptDay=effectiveReceiptDays.length?Math.min(...effectiveReceiptDays):null;
+ const extraUnits=result.urgent.reduce((sum,x)=>sum+x.qty,0);
+ const urgentSpent=result.urgentBase+result.urgentSurcharge;
+ const serviceGain=improvement>0;
+ const advice=extraUnits===0
+  ? 'No hay faltante adicional que justifique una compra urgente de SKU.'
+  : !firstUrgentReceiptDay
+   ? 'La compra llega después del horizonte: compromete caja sin recuperar pedidos dentro de los 12 días.'
+   : !serviceGain
+    ? 'La compra llega dentro del horizonte, pero no recupera pedidos: revisa capacidad de picking, mezcla de SKU y otras restricciones.'
+    : 'La reposición llega a tiempo y recupera '+improvement+' pedidos completos. Contrasta su costo incremental con el beneficio obtenido.';
+ const decisionQuality=extraUnits===0?'no-shortage':!firstUrgentReceiptDay?'late':!serviceGain?'no-gain':'effective';
  return {
-  option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,
+  option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,\n  decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent},
   purchasing:{committedValue:result.committedPurchaseValue,extraUnits:result.urgent.reduce((sum,x)=>sum+x.qty,0),extraCost:result.urgentBase+result.urgentSurcharge,orders:result.urgent.map(x=>({...x}))},
   receiving:{arrivals:arrival,receivedExtraUnits:urgentInHorizon.reduce((sum,x)=>sum+x.qty,0),outsideHorizonUnits:lateUrgent.reduce((sum,x)=>sum+x.qty,0)},
   inventory:{initial:{...result.recovered.initial},ending:{...result.recovered.endingStock},consumed:{...result.recovered.consumed}},
