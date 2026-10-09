@@ -1,19 +1,19 @@
-import {supplyBridge} from './supply-bridge.js?v=118';
-import {laborAudit} from './labor.js?v=118';
-import {skuAudit} from './audit.js?v=118';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=118';
-import {integratedDemand} from './integrated.js?v=118';
-import {eventSimulation} from './events.js?v=118';
-import {deliveryTimeline} from './timeline.js?v=118';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=118';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=118';
-import {demandJourney} from './journey.js?v=118';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=118';
-import {flow,diagnose,ACTIONS} from './flow.js?v=118';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=118';
-import {areaKpis} from './kpis.js?v=118';
-import {causalAudit} from './causal.js?v=118';
-import {attentionSignals} from './attention.js?v=118';
+import {supplyBridge} from './supply-bridge.js?v=119';
+import {laborAudit} from './labor.js?v=119';
+import {skuAudit} from './audit.js?v=119';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=119';
+import {integratedDemand} from './integrated.js?v=119';
+import {eventSimulation} from './events.js?v=119';
+import {deliveryTimeline} from './timeline.js?v=119';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=119';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=119';
+import {demandJourney} from './journey.js?v=119';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=119';
+import {flow,diagnose,ACTIONS} from './flow.js?v=119';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=119';
+import {areaKpis} from './kpis.js?v=119';
+import {causalAudit} from './causal.js?v=119';
+import {attentionSignals} from './attention.js?v=119';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -258,8 +258,12 @@ function renderSkuLab(){
  // The SKU order ledger now respects the operational capacities chosen in the
  // eight-area campaign. These capacities are SKU units per day, not order counts.
  const area=flow(decisions,actions,effectiveScenario());
+ const commercialForecast=area.plannedDemand>0?Math.max(1,Math.min(200,100*area.estimated/area.plannedDemand)):100;
+ const planningCoverage=Math.max(0,Math.min(150,numericValue('planning',decisions)+(area.actions.planning||0)));
  const supplierRate=area.ordered>0?Math.max(0,Math.min(100,100*area.delivered/area.ordered)):numericValue('purchasing',decisions);
  const skuAreaCapacity={
+  plannedForecastPercent:commercialForecast,
+  planningCoveragePercent:planningCoverage,
   supplierFill:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,supplierRate])),
   qualityReleasePercent:Math.max(0,Math.min(100,numericValue('quality',decisions)+(area.actions.quality||0))),
   receivingUnitCapacity:area.receivingCapacity,
@@ -282,6 +286,8 @@ function renderSkuLab(){
   const chain=supplyBridge({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,...skuAreaCapacity});
   const trace=add(root,'div','area-kpi-tile supply-trace');
   add(trace,'strong','','🔗 Cómo se conectan las áreas');
+  add(trace,'small','','Comercial → Planeación: pronóstico '+commercialForecast.toFixed(1)+' % de 200 pedidos · cobertura planificada '+planningCoverage.toFixed(1)+' %. La orden de compra SKU original queda congelada y la demanda sorpresa no la recalcula.');
+  add(trace,'small','','Manifiesto SKU comprometido: '+Object.entries(chain.purchasing.originalPurchase).map(([id,qty])=>'SKU '+id+' '+fmt(qty)).join(' · ')+'.');
   add(trace,'small','','Compras: proveedor cumple '+supplierRate.toFixed(1)+' % de las unidades de compra ordinaria. Solicitadas SKU '+fmt(chain.purchasing.originalOrdered)+' · entregadas '+fmt(chain.purchasing.originalDelivered)+' · faltantes definitivos '+fmt(chain.purchasing.originalUnfilled)+'.');
   add(trace,'small','','Calidad: libera '+fmt(chain.quality.releasePercent)+' % diario del stock retenido · quedan '+fmt(chain.quality.waiting)+' unidades pendientes de liberar.');
   add(trace,'small','','Capacidad diaria compartida desde la campaña: Recepción '+fmt(area.receivingCapacity)+' unidades SKU · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'.');
@@ -309,7 +315,7 @@ function renderSkuLab(){
   add(trace,'small','muted',chain.assumptions);
   const bridge=add(root,'div','area-kpi-tile');
   add(bridge,'strong','','Demanda sorpresa aplicada al laboratorio SKU · compras congeladas');
-  add(bridge,'small','','Plan: 200 pedidos · demanda revelada: '+fmt(actualOrders)+' pedidos · compra comprometida CLP '+fmt(integrated.committedPurchaseValue));
+  add(bridge,'small','','Plan original: 200 pedidos · pronóstico de compra: '+fmt(integrated.forecastOrders)+' pedidos · demanda real revelada: '+fmt(actualOrders)+' pedidos · compra comprometida CLP '+fmt(integrated.committedPurchaseValue));
   add(bridge,'small','','Plan al día 12: '+fmt(integrated.planned.completed)+' completos / '+fmt(integrated.planned.pending)+' pendientes · real al día 12: '+fmt(integrated.actual.completed)+' completos / '+fmt(integrated.actual.pending)+' pendientes');
   add(bridge,'small','','Diferencia en pendientes: '+(integrated.impact.pending>=0?'+':'')+fmt(integrated.impact.pending)+' pedidos. La sorpresa no recalcula las compras originales.');
   add(bridge,'small','',integrated.assumptions);
@@ -339,7 +345,7 @@ function renderSkuLab(){
   add(arrivalRow,'small','',skuUrgentArrival>12?'⚠ La compra llega después del horizonte de 12 días: genera desembolso comprometido, pero no resuelve pedidos dentro del período.':'La compra llega el día '+skuUrgentArrival+'. No puede resolver pedidos anteriores; inventario y picking solo disponen de ella desde la recepción.');
   if(recovery.urgent.length){
     const purchased=recovery.urgent.reduce((n,p)=>n+p.qty,0);
-    const received=recovery.recovered.ledger.reduce((n,e)=>n+recovery.urgent.reduce((a,p)=>a+(p.day===e.day?p.qty:0),0),0);
+    const received=recovery.recovered.ledger.reduce((n,e)=>n+Object.values(e.receivedUrgent).reduce((a,qty)=>a+qty,0),0);
     add(arrivalRow,'small','','Reposición extraordinaria '+fmt(purchased)+' unidades SKU · recibidas dentro del horizonte '+fmt(received)+' · pedidos adicionales completos '+fmt(recovery.recovered.completed-recovery.base.completed)+'.');
     if(recovery.recovered.completed===recovery.base.completed)add(arrivalRow,'small','','⚠ La compra no mejora los pedidos completos dentro del horizonte. Revisa plazo de llegada, capacidad de picking y stock remanente antes de comprometer el gasto.');
   }
