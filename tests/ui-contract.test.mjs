@@ -72,3 +72,12 @@ test('the percentage of urgent SKU purchases persists, drives the comparison and
  assert.match(app,/coverInput\.onchange=\(\)=>\{skuPurchaseCoverage=Number\(coverInput\.value\);save\(\);renderSkuLab\(\)\}/);
  assert.match(app,/skuPurchaseCoverage=100;save\(\);showSection\('operations'\)/);
 });
+
+
+test('SKU ledger uses Receiving, Picking and Transport constraints from the campaign',()=>{
+ assert.match(app,/receivingUnitCapacity:area\.receivingCapacity/);
+ assert.match(app,/pickingUnitCapacity:area\.pickingCapacity/);
+ assert.match(app,/transportUnitCapacity:area\.stages\[7\]\.capacity/);
+ assert.match(app,/const chain=supplyBridge\(\{[^}]*\.\.\.skuAreaCapacity\}\)/);
+ assert.match(app,/const audit=skuAudit\(\{[^}]*\.\.\.skuAreaCapacity\}\)/);
+});
