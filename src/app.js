@@ -1,16 +1,16 @@
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=104';
-import {integratedDemand} from './integrated.js?v=104';
-import {eventSimulation} from './events.js?v=104';
-import {deliveryTimeline} from './timeline.js?v=104';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=104';
-import {skuOrderLab} from './sku.js?v=104';
-import {demandJourney} from './journey.js?v=104';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=104';
-import {flow,diagnose,ACTIONS} from './flow.js?v=104';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=104';
-import {areaKpis} from './kpis.js?v=104';
-import {causalAudit} from './causal.js?v=104';
-import {attentionSignals} from './attention.js?v=104';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=105';
+import {integratedDemand} from './integrated.js?v=105';
+import {eventSimulation} from './events.js?v=105';
+import {deliveryTimeline} from './timeline.js?v=105';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=105';
+import {skuOrderLab} from './sku.js?v=105';
+import {demandJourney} from './journey.js?v=105';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=105';
+import {flow,diagnose,ACTIONS} from './flow.js?v=105';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=105';
+import {areaKpis} from './kpis.js?v=105';
+import {causalAudit} from './causal.js?v=105';
+import {attentionSignals} from './attention.js?v=105';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait';
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -243,6 +243,8 @@ function renderSkuLab(){
   add(bridge,'small','','Pedidos finales '+fmt(recovery.recovered.completed)+' / '+fmt(actualOrders)+' · pendientes '+fmt(recovery.recovered.pending)+' · mejora '+fmt(recovery.recovered.completed-recovery.base.completed));
   add(bridge,'small','','Compra urgente '+recovery.urgent.map(p=>p.id+': '+fmt(p.qty)).join(', ')+(recovery.urgent.length?'':' ninguna')+' · desembolso incremental CLP '+fmt(recovery.incrementalExpense));
   add(bridge,'small','','Flujo de caja incremental simplificado CLP '+fmt(recovery.netCashDelta)+' · NO es margen neto');
+  add(bridge,'small','','Días-pedido de atraso evitados: '+fmt(recovery.penaltySaved/150)+' · penalidad ilustrativa evitada CLP '+fmt(recovery.penaltySaved)+' · variación costo de tenencia CLP '+fmt(recovery.holdingDelta));
+  add(bridge,'strong','','Resultado económico proxy incremental CLP '+fmt(recovery.economicProxyDelta));
   add(bridge,'small','',recovery.assumptions);
  }
  const events=eventSimulation({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
