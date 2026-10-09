@@ -1,22 +1,22 @@
-# Supply Chain Operations Lab · v11.18
+# Supply Chain Operations Lab · v11.19
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=127) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=128) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
 **Estado:** prototipo funcional en desarrollo, con datos sintéticos y modelos deterministas. **No es un WMS, ERP ni un optimizador listo para producción.** No requiere cuenta, backend ni instalación: funciona como aplicación estática en GitHub Pages.
 
-## Validación de negocio y rediseño didáctico en preparación (v11.16)
+## Base de escenarios de negocio y rediseño didáctico (histórico v11.16)
 
-Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcompra, compras extraordinarias a distintas fechas, restricciones físicas y sorpresa de demanda menor. **La versión pública de la interfaz sigue siendo v11.15; este incremento de pruebas y diseño aún no rediseña pantallas.**
+Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcompra, compras extraordinarias a distintas fechas, restricciones físicas y sorpresa de demanda menor. **Esta sección describe el hito histórico de v11.16; la interfaz se modernizó en U1 (v11.17) y Recuperación (v11.18–v11.19).**
 
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - [Roadmap integrado M1–M8 con entregas U0–U5](docs/ROADMAP.md).
 
-**Prioridad siguiente:** mejorar la claridad de Diagnóstico y la explicación del cuello de botella (U1) antes de agregar más paneles. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
+**Prioridad tras v11.19:** converger ambos motores y añadir decisiones de reprogramación con fechas/SLA, no seguir agregando resultados separados. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
 
 ## v11.17 · U1 misión de Diagnóstico para gerente de CD
 
@@ -39,6 +39,18 @@ Se implementa el primer segmento operativo de U2: desde **Recuperación / misió
 - Si la compra no ayuda o llega después del corte de 12 días, se advierte antes de confirmar. Confirmar no equivale a pagar ni a obtener compromiso de un proveedor real.
 - La vista de Resultados SKU respeta la decisión confirmada, bloquea cambios que la reescribirían y conserva la conciliación física. Cambiar de escenario deja las decisiones anteriores como registro histórico; el botón global **Nueva campaña** elimina las decisiones de la campaña anterior tras confirmación.
 - **Alcance explícito:** U2a opera dentro del laboratorio SKU de 12 días. No cambia la expedición agregada de una jornada ni integra aún la reserva de stock ni la planificación completa de promesas al cliente. U2b y U3 siguen abiertos.
+
+## v11.19 · U2b: reserva ubicada y plan de salida por día
+
+La tercera misión de gerencia permite asignar una **porción real del stock inicial** de los SKU a la ubicación lógica `RESERVA-CD`. Esa cantidad se descuenta de lo disponible para Picking, y solo puede habilitarse mediante un traslado trazado en el día seleccionado (`RESERVA-CD → PICK-FACE`). **No se crean unidades, ni compras, ni recepciones ficticias.**
+
+- Tres decisiones: **esperar**, **compra extraordinaria** y **habilitar la reserva interna**. Se muestran el stock inicial, el stock localizado en reserva, el día de traslado, los pedidos recuperados y el saldo pendiente.
+- Confirmación segura de traslado y conservación por SKU, valor estándar y cada etapa del circuito Recepción/Calidad/Inventario/Picking/Transporte; compras originales congeladas.
+- **Proyección diaria de despachos completos y pendientes**, sin llamar a esas fechas una promesa comercial ni una entrega real al cliente.
+- La reserva está localizada en una **zona hipotética del modelo**, todavía no en una ubicación WMS/lote verificada; el movimiento no tiene costo adicional de mano de obra modelado. No fusiona los 12 días SKU con el motor agregado de una jornada.
+- Tests del traslado, imposibilidad de crear más stock del catálogo, restricciones y recuperación tardía; E2E móvil/escritorio y continuidad con versiones guardadas.
+
+**Estado completo de fases y siguientes prioridades:** [M1–M8 y U0–U5](docs/STATUS-V11.19.md).
 
 ## Cómo utilizarlo
 
