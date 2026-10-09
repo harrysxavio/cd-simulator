@@ -4,8 +4,8 @@ import {recoveryComparison} from './recovery.js';
 /** Single-source audit of the SKU event ledger. Does NOT merge the aggregate engine.
  * Every receipt, unit consumed, completed order and cost derives from one replay.
  */
-export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},supplierFill={},dailyCapacity=200,days=12,urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100}={}){
- const comparison=recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,supplierFill,dailyCapacity,days,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity});
+export function skuAudit({policy='service',plannedOrders=200,actualOrders=260,option='wait',delayDays={},supplierFill={},dailyCapacity=200,days=12,urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,plannedForecastPercent=100,planningCoveragePercent=100}={}){
+ const comparison=recoveryComparison({policy,plannedOrders,actualOrders,option,delayDays,supplierFill,dailyCapacity,days,urgentArrivalDay,purchaseCoveragePercent,qualityReleasePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,plannedForecastPercent,planningCoveragePercent});
  const r=comparison.recovered;
  const receipts=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,r.ledger.reduce((sum,day)=>sum+day.received[p.id],0)]));
  const bySku=SKU_CATALOG.map(p=>{
