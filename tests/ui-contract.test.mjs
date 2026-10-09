@@ -17,9 +17,12 @@ test('all navigation and control entrypoints remain wired',()=>{
 test('UI entrypoint cache version matches imported module versions',()=>{
  const version=html.match(/app[.]js[?]v=([0-9]+)/)?.[1];
  assert.ok(version,'versioned app module missing');
- const versions=[...app.matchAll(/from ['"][^'"]+[?]v=([0-9]+)['"]/g)].map(x=>x[1]);
- assert.ok(versions.length>=10);
- assert.ok(versions.every(x=>x===version),'stale imported module cache version');
+ const imports=[...app.matchAll(/from ['"]([^'"]+)[?]v=([0-9]+)['"]/g)].map(x=>({module:x[1],version:x[2]}));
+ assert.ok(imports.length>=10,'expected versioned imports');
+ const stale=imports.filter(x=>x.version!==version);
+ assert.deepEqual(stale,[],'outdated imports relative to app.js?v='+version);
+ const css=html.match(/styles[.]css[?]v=([0-9]+)/)?.[1];
+ assert.equal(css,version,'stylesheet and app entrypoint must share release version');
 });
 test('render invokes all critical sections',()=>{
  for(const call of ['setup();','dashboard(r);','renderKpiLesson(r);','renderAttention();','renderLabor();','renderSkuLab();','renderDiagnosis(r);']){
