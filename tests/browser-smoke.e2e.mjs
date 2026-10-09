@@ -9,7 +9,7 @@ const BASE_URL=process.env.E2E_BASE_URL||'http://127.0.0.1:8000';
 const VIEWS=['overview','areas','inventory','economics','improvement'];
 
 async function verifyExperience(mode){
- const browser=await chromium.launch({headless:true});
+ const browser=await chromium.launch({headless:true,executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
  const context=await browser.newContext(mode==='mobile'
   ? {...devices['Pixel 7'],acceptDownloads:true}
   : {viewport:{width:1366,height:850},acceptDownloads:true});
