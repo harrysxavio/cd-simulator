@@ -77,3 +77,15 @@ test('urgent purchase coverage scales actual shortages and never exceeds them',(
  assert.throws(()=>recoveryComparison({purchaseCoveragePercent:-1}),/Cobertura de compra urgente inválida/);
  assert.throws(()=>recoveryComparison({purchaseCoveragePercent:12.5}),/Cobertura de compra urgente inválida/);
 });
+
+
+test('Quality-held stock remains financially held inventory, not pickable sales',()=>{
+ const r=recoveryComparison({option:'emergency',actualOrders:260,urgentArrivalDay:12,qualityReleasePercent:0});
+ const last=r.recovered.ledger.at(-1);
+ assert.ok(last.waitingQuality>0);
+ const heldValue=Object.entries(last.heldQuality).reduce((sum,[id,qty])=>sum+qty*({A:1800,B:3200,C:6500}[id]),0);
+ assert.ok(heldValue>0);
+ assert.ok(r.holdingRecovered>0);
+ assert.equal(r.economicProxyDelta,r.netCashDelta+r.penaltySaved-r.holdingDelta);
+ assert.equal(r.recovered.completed+r.recovered.pending,260);
+});
