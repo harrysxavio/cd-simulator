@@ -265,3 +265,5 @@ html,body{max-width:100%;overflow-x:clip}
  #dashboardSection .result-view .split{display:block}
  #dashboardSection .result-view .split>.panel{margin:0 0 12px}
 }
+
+.result-next{display:flex;justify-content:flex-end;margin:10px 0 14px}.result-next .btn{min-height:48px}@media(max-width:760px){.result-next{display:block}.result-next .btn{width:100%}}
