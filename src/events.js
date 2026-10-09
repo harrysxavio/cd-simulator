@@ -5,9 +5,9 @@ import {deliveryTimeline} from './timeline.js';
  * Day 0 demand is allocated by largest remainder; pending orders persist.
  * Supplier receipts become usable on arrival day, never earlier.
  */
-export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200}={}){
+export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200,fixedPurchases=null}={}){
  if(!Number.isInteger(days)||days<0||days>365||!Number.isInteger(dailyCapacity)||dailyCapacity<0||dailyCapacity>100000)throw new Error('Horizonte o capacidad inválidos');
- const timeline=deliveryTimeline({policy,orders,stock,delayDays,supplierFill,checkpoints:[0]});
+ const timeline=deliveryTimeline({policy,orders,stock,delayDays,supplierFill,fixedPurchases,checkpoints:[0]});
  const available={...timeline.initial},initial={...available};
  const types=ORDER_TEMPLATES.map(t=>({id:t.id,name:t.name,share:t.share,lines:t.lines,requested:0,fulfilled:0}));
  const share=types.reduce((n,t)=>n+t.share,0),n=Math.floor(Number(orders));
