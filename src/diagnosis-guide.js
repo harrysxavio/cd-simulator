@@ -44,7 +44,7 @@ export function managerDiagnosis({decisions={},scenario={},revealed=true}={}){
   category='receiving';area='receiving';title='Recepción está frenando el ingreso al CD';
   why='Los proveedores entregan '+units(delivered)+' unidades, pero hoy Recepción procesa '+units(received)+'.';
   next='Evalúa turnos o capacidad de descarga y evita prometer stock aún no recepcionado.';
- }else if(pending>0&&released<received&&Math.floor((stock+received)*numericValue('inventory',decisions)/100)>available){
+ }else if(pending>0&&received>0&&released<received&&received-released>=Math.max(1,Math.ceil(pending*.3))&&Math.floor((stock+received)*numericValue('inventory',decisions)/100)>available){
   category='quality';area='quality';title='Calidad retiene unidades necesarias';
   why='Se recepcionaron '+units(received)+' unidades, pero Calidad liberó '+units(released)+' para el flujo.';
   next='Prioriza inspecciones válidas sin saltar controles; no prometas unidades retenidas.';
