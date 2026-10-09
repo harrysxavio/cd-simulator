@@ -11,10 +11,10 @@ export const RECOVERY_OPTIONS={
 /** Incremental, illustrative recovery comparison. Extra purchases arrive day 1.
  * Cash and economic contribution are distinct; sunk planned procurement is unchanged.
  */
-export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},dailyCapacity=200,days=12,option='wait',unitRevenue=9000,emergencySurchargeRate=0.3,extraCapacityDailyCost=70000}={}){
+export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},dailyCapacity=200,days=12,option='wait',unitRevenue=9000,emergencySurchargeRate=0.3,extraCapacityDailyCost=70000,latePenaltyPerOrderDay=150,holdingRatePerDay=0.0005}={}){
  const choice=RECOVERY_OPTIONS[option];
  if(!choice)throw new Error('Recuperación desconocida');
- if(!Number.isFinite(unitRevenue)||unitRevenue<0||!Number.isFinite(emergencySurchargeRate)||emergencySurchargeRate<0||!Number.isFinite(extraCapacityDailyCost)||extraCapacityDailyCost<0)throw new Error('Costos de recuperación inválidos');
+ if(!Number.isFinite(unitRevenue)||unitRevenue<0||!Number.isFinite(emergencySurchargeRate)||emergencySurchargeRate<0||!Number.isFinite(extraCapacityDailyCost)||extraCapacityDailyCost<0||!Number.isFinite(latePenaltyPerOrderDay)||latePenaltyPerOrderDay<0||!Number.isFinite(holdingRatePerDay)||holdingRatePerDay<0)throw new Error('Costos de recuperación inválidos');
  const base=integratedDemand({policy,plannedOrders,actualOrders,delayDays,dailyCapacity,days});
  const urgent=[];
  if(choice.urgent){
@@ -37,7 +37,16 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const extraLabor=choice.extraCapacity?extraCapacityDailyCost*(days+1):0;
  const incrementalRevenue=(recovered.completed-base.actual.completed)*unitRevenue;
  const incrementalExpense=urgentBase+urgentSurcharge+extraLabor;
+ const backlogDays=r=>r.ledger.slice(0,-1).reduce((n,day)=>n+day.backlog,0);
+ const penaltyBase=backlogDays(base.actual)*latePenaltyPerOrderDay;
+ const penaltyRecovered=backlogDays(recovered)*latePenaltyPerOrderDay;
+ const stockDays=r=>r.ledger.reduce((n,day)=>n+SKU_CATALOG.reduce((v,p)=>v+day.stock[p.id]*p.unitCost,0),0);
+ const holdingBase=stockDays(base.actual)*holdingRatePerDay;
+ const holdingRecovered=stockDays(recovered)*holdingRatePerDay;
+ const penaltySaved=penaltyBase-penaltyRecovered;
+ const holdingDelta=holdingRecovered-holdingBase;
+ const economicProxyDelta=incrementalRevenue-incrementalExpense+penaltySaved-holdingDelta;
  const netCashDelta=incrementalRevenue-incrementalExpense;
- return {option,label:choice.label,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,committedPurchaseValue:base.committedPurchaseValue,
-  assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Se paga refuerzo por todas las jornadas, aun si queda ocioso. Compra urgente llega día 1 y no mejora cumplimiento del día 0. No hay devoluciones, IVA, costos de transporte ni penalidades de atraso.'};
+ return {option,label:choice.label,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,
+  assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Se paga refuerzo por todas las jornadas, aun si queda ocioso. Compra urgente llega día 1 y no mejora cumplimiento del día 0. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. No hay devoluciones, IVA ni costos de transporte.'};
 }
