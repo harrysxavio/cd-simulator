@@ -61,7 +61,7 @@ test('SKU decisions persist across reload and restart resets them',()=>{
  }
  assert.match(app,/skuUrgentArrival=\[1,2,5,10,13\]\.includes\(s\.skuUrgentArrival\)/);
  assert.match(app,/skuRecovery=Object\.hasOwn\(RECOVERY_OPTIONS,s\.skuRecovery\)/);
- assert.match(app,/skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;save\(\)/);
+ assert.match(app,/skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;save\(\)/);
 });
 
 test('the percentage of urgent SKU purchases persists, drives the comparison and resets',()=>{
