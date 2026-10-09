@@ -1,13 +1,14 @@
-import {skuOrderLab} from './sku.js?v=99';
-import {demandJourney} from './journey.js?v=99';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=99';
-import {flow,diagnose,ACTIONS} from './flow.js?v=99';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=99';
-import {areaKpis} from './kpis.js?v=99';
-import {causalAudit} from './causal.js?v=99';
-import {attentionSignals} from './attention.js?v=99';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=100';
+import {skuOrderLab} from './sku.js?v=100';
+import {demandJourney} from './journey.js?v=100';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=100';
+import {flow,diagnose,ACTIONS} from './flow.js?v=100';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=100';
+import {areaKpis} from './kpis.js?v=100';
+import {causalAudit} from './causal.js?v=100';
+import {attentionSignals} from './attention.js?v=100';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null;
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced';
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
@@ -209,6 +210,19 @@ function renderLabor(){
 }
 function renderSkuLab(){
  const root=$('skuLab');root.replaceChildren();
+ const controls=$('skuPolicyControls');controls.replaceChildren();
+ for(const [id,p] of Object.entries(POLICY_PRESETS)){
+  const button=add(controls,'button',id===skuPolicy?'btn':'btn secondary',p.label);
+  button.type='button';button.setAttribute('aria-pressed',String(id===skuPolicy));
+  button.onclick=()=>{skuPolicy=id;renderSkuLab()};
+ }
+ const policy=inventoryPolicy({policy:skuPolicy});
+ const policySummary=add(root,'div','area-kpi-tile');
+ add(policySummary,'strong','','Política '+policy.label+' · pedidos futuros de reposición');
+ add(policySummary,'small','','Compra planificada CLP '+fmt(policy.orderValue)+' · cumplimiento con recepción futura hipotética '+policy.eventual.fulfillment.toFixed(1)+' % (base '+policy.baseline.fulfillment.toFixed(1)+' %)');
+ add(policySummary,'small','','Costo mensual de mantener stock remanente, ilustrativo: CLP '+fmt(policy.eventual.holdingCost)+' · ventas brutas incrementales hipotéticas CLP '+fmt(policy.delta.revenue));
+ for(const p of policy.perSku)add(policySummary,'small','','SKU '+p.id+' ('+p.rotation+'): objetivo '+p.targetDays+' días · compra '+fmt(p.ordered)+' unid. · plazo '+p.leadDays+' días · '+(p.reorder?'alerta punto de pedido':'sin alerta por punto de pedido'));
+ add(policySummary,'small','',policy.assumptions);
  const report=skuOrderLab();
  const summary=add(root,'div','area-kpi-tile');
  add(summary,'strong','','Pedidos completos: '+fmt(report.complete)+' / '+fmt(report.orders)+' · '+report.fulfillment.toFixed(1)+' %');
