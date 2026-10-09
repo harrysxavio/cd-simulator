@@ -196,3 +196,11 @@ Nuevo `src/events.js`: genera una cohorte fija de 200 pedidos completos de tres 
 **Alcance y supuestos:** los 200 pedidos existen en día 0; se permite saltar pedidos bloqueados por stock y atender otros. No hay pedidos nuevos diarios, cancelaciones, prioridad contractual, recepción/calidad por capacidad, tiempos intradía, costos por atraso ni integración con el motor financiero agregado. El laboratorio es cronológico para recepciones y despachos, pero todavía es una sub-simulación independiente, no el motor principal unificado. Los KPI de campaña principal no cambian.
 
 Se añadieron pruebas `tests/events.test.mjs` para backlog, retrasos, límite de capacidad, conservación física y parámetros inválidos. Ocho comprobaciones funcionales de interfaz simulada correctas; CI Node y QA visual Android sin verificar.
+
+## v10.3 · Primera conexión entre sorpresa de demanda y pedidos SKU
+
+Nuevo `src/integrated.js`: calcula una compra por SKU desde la **demanda planificada** de la cohorte y la política elegida; congela ese manifiesto y ejecuta dos simulaciones de eventos con idénticas compras: plan original y demanda realmente revelada. Se comparan pedidos completos, atrasados, pendientes y cumplimiento en día 0. `src/timeline.js` y `src/events.js` aceptan compras fijas validadas; no se generan compras retroactivas al revelar la sorpresa.
+
+En el tablero, al revelar la demanda de la campaña principal, se aplica su variación porcentual a la muestra ilustrativa de 200 pedidos y aparece un panel separado con la comparación SKU. Ejemplo: plan 200, demanda real 260, política de protección: 200 pedidos completos y 60 pendientes al día 12 con compras de CLP 530.900, suponiendo proveedores puntuales y capacidad suficiente.
+
+**Importante:** se comparte la señal porcentual de sorpresa, **no** el inventario físico, los pedidos ni la contabilidad del motor agregado. Por tanto todavía NO existe un único motor operacional/económico y no se suman sus métricas. La recuperación de capacidad de la campaña principal tampoco modifica aún el motor SKU. Se añadieron `tests/integrated.test.mjs` y ocho comprobaciones de interfaz simulada; ejecución de Node y QA visual Android pendientes.
