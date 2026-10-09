@@ -188,3 +188,11 @@ Se incorporó `src/timeline.js`, que transforma compras de la política SKU en r
 **Límite esencial:** cada corte recalcula la capacidad de cumplir la **misma cohorte original de 200 pedidos**, desde el inventario inicial más las recepciones disponibles hasta ese día. Los resultados no son despachos acumulados ni un flujo cronológico de backorders. La recepción y liberación son instantáneas al arribo y no consumen capacidad de CD en este piloto. Se modelan porcentajes de entrega de proveedor por SKU, pero no se asume que las unidades incumplidas lleguen luego. El laboratorio continúa independiente de la campaña principal, cuyo motor económico y operativo permanece sin cambios.
 
 Pruebas `tests/timeline.test.mjs` para fechas de llegada, retrasos, fill rate, validación y ausencia de stock anticipado. Ocho verificaciones de interfaz simulada correctas. Suite completa Node y QA visual Android pendientes.
+
+## v10.2 · Motor piloto de eventos diarios y backlog
+
+Nuevo `src/events.js`: genera una cohorte fija de 200 pedidos completos de tres SKU; mantiene pedidos pendientes entre jornadas; recibe compras por SKU según fecha de llegada; consume inventario exclusivamente al despachar pedidos completos; limita despachos por capacidad diaria; registra ledger de días 0 a 12 con unidades recibidas, despachos del día, acumulado, backlog y stock final. Se puede simular atraso del proveedor del SKU A de alta rotación y observar los días reales de despacho. Reporta pedidos atendidos en día 0, atrasados y pendientes, además de retraso medio de los tardíos.
+
+**Alcance y supuestos:** los 200 pedidos existen en día 0; se permite saltar pedidos bloqueados por stock y atender otros. No hay pedidos nuevos diarios, cancelaciones, prioridad contractual, recepción/calidad por capacidad, tiempos intradía, costos por atraso ni integración con el motor financiero agregado. El laboratorio es cronológico para recepciones y despachos, pero todavía es una sub-simulación independiente, no el motor principal unificado. Los KPI de campaña principal no cambian.
+
+Se añadieron pruebas `tests/events.test.mjs` para backlog, retrasos, límite de capacidad, conservación física y parámetros inválidos. Ocho comprobaciones funcionales de interfaz simulada correctas; CI Node y QA visual Android sin verificar.
