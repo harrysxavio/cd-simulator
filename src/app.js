@@ -307,9 +307,9 @@ function renderLabor(){
   add(card,'small','','Dotación teórica para el flujo: '+a.staffRequired+' · exposición indicativa por capacidad no requerida: CLP '+fmt(a.idleCostIndicator));
  }
 }
-function renderCanonicalAreasFromSku(chain,contract){
+function renderCanonicalAreasFromSku(chain,contract,comparison){
  const host=$('canonicalAreaView');host.replaceChildren();
- const model=campaignAreaReadModel({comparison:chain.procurementLedger.recovery??null,campaign:chain.campaign,campaignId,plannedOrders:contract.plannedSampleOrders});
+ const model=campaignAreaReadModel({comparison,campaign:chain.campaign,campaignId,plannedOrders:contract.plannedSampleOrders});
  const intro=add(host,'div','canonical-area-heading');
  add(intro,'span','canonical-kicker','MISIÓN 4 DE 4 · ENTENDER EL IMPACTO');
  add(intro,'h2','','🔗 Cómo operaron las ocho áreas');
@@ -383,7 +383,7 @@ function renderSkuLab(){
   const integrated=recovery.integrated;
   plannedSkuRun=integrated.planned;
   const chain=supplyBridge({...input,option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:recovery,campaignId});
-  renderCanonicalAreasFromSku(chain,contract);
+  renderCanonicalAreasFromSku(chain,contract,recovery);
   const trace=add(root,'div','area-kpi-tile supply-trace');
   add(trace,'strong','','🔗 Cómo se conectan las áreas');
   add(trace,'small','','Comercial → Planeación: pronóstico '+commercialForecast.toFixed(1)+' % de 200 pedidos · cobertura planificada '+planningCoverage.toFixed(1)+' %. La orden de compra SKU original queda congelada y la demanda sorpresa no la recalcula.');
