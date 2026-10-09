@@ -199,3 +199,13 @@ Las capturas de la ejecución **Model regression tests #77** muestran **82 prueb
 En **Resultado final → Mejoras → Restricciones observadas**, cada área presenta ahora una vista previa del potencial de expedición (o advierte que la mejora aislada no aporta), junto a **Explorar intervención**. El botón abre directamente la configuración de recuperación de esa misma área, sin obligar a recorrer todas las pantallas. La tarjeta es de una columna en móviles y utiliza etiquetas accesibles.
 
 **Estado estimado de las cinco fases:** motor operacional/económico 80 %, demanda y recuperación 88 %, SKU e inventario 82 %, UX/aprendizaje 72 %, QA/documentación 58 %. **Avance global aproximado: 76 %**, calculado como promedio simple, no como auditoría de producción. Los pendientes principales siguen siendo la unificación del motor SKU con las ocho áreas, la ejecución verde de CI y las pruebas reales en navegador móvil.
+
+## v11.2 · Comparador interactivo de recuperación SKU
+
+- En **Resultado final → Inventario**, tras revelar la sorpresa de demanda, el laboratorio compara simultáneamente **Aceptar espera**, **Refuerzo operativo**, **Compra urgente SKU** y **Compra urgente + refuerzo** con idéntica demanda, política y plazo de llegada.
+- Cada alternativa muestra pedidos completos, pendientes, mejora frente a no intervenir, desembolso incremental, caja incremental y un resultado económico **proxy**. Es posible seleccionar la alternativa directamente desde su tarjeta; en móvil se muestran una debajo de otra.
+- Una indicación contextual identifica la opción con mayor proxy económico **entre las que mejoran el servicio**, sin confundirla con margen contable. Si ninguna mejora los pedidos dentro del horizonte, advierte que una compra tardía puede inmovilizar dinero sin recuperar pedidos.
+- Se agregó una prueba de regresión para garantizar la misma línea base en las cuatro alternativas y que una recepción en día 13 no se anticipe dentro del horizonte de 12 días.
+- **Límites:** este comparador continúa siendo un laboratorio SKU paralelo al motor agregado de ocho áreas. La nueva prueba está añadida al repositorio, pero **su ejecución en GitHub Actions todavía no está verificada**.
+
+**Estado de fases (estimación):** F1 80 %, F2 89 %, F3 84 %, F4 76 %, F5 59 %. Global aproximado **78 %** como promedio simple, sujeto a pruebas reales y consolidación de motores.
