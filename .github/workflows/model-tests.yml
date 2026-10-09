@@ -4,6 +4,9 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+concurrency:
+  group: model-regression-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -12,5 +15,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check release asset versions
+        run: |
+          node --input-type=module -e 'import {readFileSync} from "node:fs"; const html=readFileSync("index.html","utf8"),app=readFileSync("src/app.js","utf8"); const version=html.match(/app[.]js[?]v=([0-9]+)/)?.[1]; if(!version)throw Error("Missing versioned app.js entrypoint"); const imports=[...app.matchAll(/from [\x27\x22]([^\x27\x22]+)[?]v=([0-9]+)[\x27\x22]/g)]; const stale=imports.filter(x=>x[2]!==version).map(x=>x[1]+" v"+x[2]); const css=html.match(/styles[.]css[?]v=([0-9]+)/)?.[1]; if(css!==version)stale.push("styles.css v"+css); if(stale.length)throw Error("Release v"+version+" mismatched assets: "+stale.join(", ")); console.log("Release assets aligned at v"+version);'
       - name: Run deterministic model regression suite
         run: node --experimental-default-type=module --test tests/*.test.mjs
