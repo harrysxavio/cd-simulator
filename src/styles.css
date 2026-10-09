@@ -285,3 +285,10 @@ html,body{max-width:100%;overflow-x:clip}
 .sku-advisor-option button{min-height:44px;white-space:normal}
 .sku-advisor-insight{padding:11px;border-left:3px solid #56d9be;background:#1b3a49;border-radius:6px;line-height:1.5}
 @media(max-width:760px){.sku-advisor{padding:11px}.sku-advisor-option{padding:11px}.sku-advisor-option button{width:100%}.sku-advisor-head{display:grid}}
+
+/* v11.5 · mobile-first expandable SKU timeline */
+.supply-trace-detail{margin-top:12px;min-width:0}
+.supply-trace-detail summary{cursor:pointer;min-height:44px;padding:12px;border:1px solid #47778b;border-radius:10px;font-weight:700;line-height:1.5}
+.supply-trace-days{display:grid;gap:8px;margin-top:10px}
+.supply-trace-day{display:grid;gap:5px;min-width:0;padding:11px;border:1px solid #355c70;border-radius:10px;background:#183749}
+.supply-trace-day small{overflow-wrap:anywhere;line-height:1.5}
