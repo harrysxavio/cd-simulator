@@ -1,30 +1,32 @@
-import {supplyBridge} from './supply-bridge.js?v=126';
-import {campaignSkuContract} from './campaign-contract.js?v=126';
-import {laborAudit} from './labor.js?v=126';
-import {skuAudit} from './audit.js?v=126';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=126';
-import {integratedDemand} from './integrated.js?v=126';
-import {eventSimulation} from './events.js?v=126';
-import {deliveryTimeline} from './timeline.js?v=126';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=126';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=126';
-import {demandJourney} from './journey.js?v=126';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=126';
-import {flow,diagnose,ACTIONS} from './flow.js?v=126';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=126';
-import {areaKpis} from './kpis.js?v=126';
-import {causalAudit} from './causal.js?v=126';
-import {managerDiagnosis} from './diagnosis-guide.js?v=126';
-import {attentionSignals} from './attention.js?v=126';
+import {supplyBridge} from './supply-bridge.js?v=127';
+import {campaignSkuContract} from './campaign-contract.js?v=127';
+import {laborAudit} from './labor.js?v=127';
+import {skuAudit} from './audit.js?v=127';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=127';
+import {integratedDemand} from './integrated.js?v=127';
+import {eventSimulation} from './events.js?v=127';
+import {deliveryTimeline} from './timeline.js?v=127';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=127';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=127';
+import {demandJourney} from './journey.js?v=127';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=127';
+import {flow,diagnose,ACTIONS} from './flow.js?v=127';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=127';
+import {areaKpis} from './kpis.js?v=127';
+import {causalAudit} from './causal.js?v=127';
+import {managerDiagnosis} from './diagnosis-guide.js?v=127';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=127';
+import {attentionSignals} from './attention.js?v=127';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,campaignId=createCampaignId(),currentSection='operations';
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
+const activeSkuDecision=contract=>skuDecisions.findLast(d=>skuDecisionStatus({decision:d,contract})==='current')||null;
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({schemaVersion:2,campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage}))}catch{}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;campaignId=typeof s.campaignId==='string'&&/^CD-[a-zA-Z0-9_-]{1,60}$/.test(s.campaignId)?s.campaignId:campaignId;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;currentSection=['setup','operations','preliminary','recovery','dashboard'].includes(s.currentSection)?s.currentSection:(revealed?'preliminary':'operations');if(!revealed&&!['setup','operations'].includes(currentSection))currentSection='operations';shockDirection=s.shockDirection===-1?-1:1;skuPolicy=['lean','balanced','service'].includes(s.skuPolicy)?s.skuPolicy:'balanced';skuSupplierDelay=s.skuSupplierDelay===true;skuRecovery=Object.hasOwn(RECOVERY_OPTIONS,s.skuRecovery)?s.skuRecovery:'wait';skuUrgentArrival=[1,2,5,10,13].includes(s.skuUrgentArrival)?s.skuUrgentArrival:1;skuPurchaseCoverage=[0,25,50,75,100].includes(s.skuPurchaseCoverage)?s.skuPurchaseCoverage:100}catch{}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({schemaVersion:2,campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuDecisions}))}catch{}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;campaignId=typeof s.campaignId==='string'&&/^CD-[a-zA-Z0-9_-]{1,60}$/.test(s.campaignId)?s.campaignId:campaignId;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;currentSection=['setup','operations','preliminary','recovery','dashboard'].includes(s.currentSection)?s.currentSection:(revealed?'preliminary':'operations');if(!revealed&&!['setup','operations'].includes(currentSection))currentSection='operations';shockDirection=s.shockDirection===-1?-1:1;skuPolicy=['lean','balanced','service'].includes(s.skuPolicy)?s.skuPolicy:'balanced';skuSupplierDelay=s.skuSupplierDelay===true;skuRecovery=Object.hasOwn(RECOVERY_OPTIONS,s.skuRecovery)?s.skuRecovery:'wait';skuUrgentArrival=[1,2,5,10,13].includes(s.skuUrgentArrival)?s.skuUrgentArrival:1;skuPurchaseCoverage=[0,25,50,75,100].includes(s.skuPurchaseCoverage)?s.skuPurchaseCoverage:100;skuDecisions=Array.isArray(s.skuDecisions)?s.skuDecisions.filter(d=>d&&d.version===1&&d.campaignId===campaignId&&d.status==='confirmed-in-simulator').slice(-25):[]}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function revealSurprise(){
  if(revealed)return;
@@ -309,16 +311,19 @@ function renderSkuLab(){
  // Central interpretation of the eight-area decisions. The SKU cohort is a sample.
  const contract=campaignSkuContract({decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,supplierDelay:skuSupplierDelay,campaignId});
  const {area,commercialForecast,planningCoverage,supplierRate,skuAreaCapacity}=contract;
+ const currentSkuDecision=activeSkuDecision(contract),skuLocked=!!currentSkuDecision;
+ if(currentSkuDecision){skuRecovery=currentSkuDecision.option;skuUrgentArrival=currentSkuDecision.urgentArrivalDay;skuPurchaseCoverage=currentSkuDecision.purchaseCoveragePercent}
  let plannedSkuRun=null;
  const root=$('skuLab');root.replaceChildren();
+ if(currentSkuDecision){const stamp=add(root,'div','sku-decision-stamp');add(stamp,'strong','','✓ Decisión SKU confirmada en simulación');add(stamp,'p','',(currentSkuDecision.option==='emergency'?'Compra extraordinaria de '+fmt(currentSkuDecision.orderedExtraUnits)+' unidades SKU.':'Sin compra adicional.')+' Recuperación: '+fmt(currentSkuDecision.recoveredOrders)+' pedidos completos adicionales al día '+fmt(currentSkuDecision.horizonDays)+'. Consulta su trazabilidad en Recuperación.');}
  const controls=$('skuPolicyControls');controls.replaceChildren();
  for(const [id,p] of Object.entries(POLICY_PRESETS)){
   const button=add(controls,'button',id===skuPolicy?'btn':'btn secondary',p.label);
-  button.type='button';button.setAttribute('aria-pressed',String(id===skuPolicy));
+  button.type='button';button.disabled=skuLocked;button.setAttribute('aria-pressed',String(id===skuPolicy));
   button.onclick=()=>{skuPolicy=id;save();renderSkuLab()};
  }
  const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
- delayButton.type='button';delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
+ delayButton.type='button';delayButton.disabled=skuLocked;delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
  delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;save();renderSkuLab()};
  if(revealed){
   const actualOrders=contract.actualSampleOrders;
@@ -386,7 +391,7 @@ function renderSkuLab(){
   const recoveryControls=add(bridge,'div','buttons');
   for(const [id,option] of Object.entries(RECOVERY_OPTIONS)){
    const button=add(recoveryControls,'button',id===skuRecovery?'btn':'btn secondary',option.label);
-   button.type='button';button.setAttribute('aria-pressed',String(id===skuRecovery));
+   button.type='button';button.disabled=skuLocked;button.setAttribute('aria-pressed',String(id===skuRecovery));
    button.onclick=()=>{skuRecovery=id;save();renderSkuLab()};
   }
   const arrivalRow=add(bridge,'div','sku-purchase-decision');
@@ -396,14 +401,14 @@ function renderSkuLab(){
   add(coverRow,'label','','¿Qué porcentaje del faltante comprar?');
   const coverInput=add(coverRow,'select','numeric-input');coverInput.setAttribute('aria-label','Cobertura de compra urgente sobre faltante SKU');
   for(const pct of [0,25,50,75,100]){const opt=add(coverInput,'option','',pct+' % del faltante');opt.value=String(pct);}
-  coverInput.value=String(skuPurchaseCoverage);
+  coverInput.value=String(skuPurchaseCoverage);coverInput.disabled=skuLocked;
   coverInput.onchange=()=>{skuPurchaseCoverage=Number(coverInput.value);save();renderSkuLab()};
   add(coverRow,'small','','0 % evita compras extraordinarias; 100 % cubre el faltante teórico por SKU. Revisa despachos y caja antes de elegir.');
   const arrivalControl=add(arrivalRow,'div','surprise-controls');
   const arrivalLabel=add(arrivalControl,'label','','Día de recepción de compra urgente');
   const arrivalInput=add(arrivalControl,'select','numeric-input');arrivalInput.setAttribute('aria-label','Día de recepción de compra urgente');
   for(const d of [1,2,5,10,13]){const opt=add(arrivalInput,'option','',d===13?'Día 13 · fuera del horizonte':'Día '+d);opt.value=String(d);}
-  arrivalInput.value=String(skuUrgentArrival);
+  arrivalInput.value=String(skuUrgentArrival);arrivalInput.disabled=skuLocked;
   arrivalInput.onchange=()=>{skuUrgentArrival=Number(arrivalInput.value);save();renderSkuLab()};
   // Do not replay the selected option: it was calculated above.
   add(arrivalRow,'small','',skuUrgentArrival>12?'⚠ La compra llega después del horizonte de 12 días: genera desembolso comprometido, pero no resuelve pedidos dentro del período.':'La compra llega el día '+skuUrgentArrival+'. No puede resolver pedidos anteriores; inventario y picking solo disponen de ella desde la recepción.');
@@ -427,7 +432,7 @@ function renderSkuLab(){
    add(optionCard,'small','','Mejora '+(trial.recovered.completed-trial.base.completed>=0?'+':'')+fmt(trial.recovered.completed-trial.base.completed)+' pedidos · desembolso adicional CLP '+fmt(trial.incrementalExpense));
    add(optionCard,'small','','Caja incremental CLP '+fmt(trial.netCashDelta)+' · resultado proxy CLP '+fmt(trial.economicProxyDelta));
    const choose=add(optionCard,'button',trial.option===skuRecovery?'btn':'btn secondary',trial.option===skuRecovery?'Alternativa actual':'Comparar esta alternativa');
-   choose.type='button';choose.disabled=trial.option===skuRecovery;choose.onclick=()=>{skuRecovery=trial.option;save();renderSkuLab()};
+   choose.type='button';choose.disabled=skuLocked||trial.option===skuRecovery;choose.onclick=()=>{skuRecovery=trial.option;save();renderSkuLab()};
   }
   add(advisor,'p','sku-advisor-insight',recommended?'Mayor resultado económico proxy entre opciones que mejoran servicio: '+recommended.label+' · CLP '+fmt(recommended.economicProxyDelta)+'. Revisa también la caja y el plazo antes de decidir.':'Ninguna intervención mejora pedidos completados dentro del horizonte. Evita comprometer compras solo por aumentar stock.');
   add(bridge,'strong','','Recuperación: '+recovery.label);
@@ -491,6 +496,106 @@ function renderSkuLab(){
  }
  add(supplementary,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Estos ejercicios de referencia son hipótesis aisladas; no usan las capacidades compartidas ni forman parte de la conciliación principal de la campaña SKU.');
 }
+function renderSkuRecoveryMission(){
+ const root=$('skuRecoveryDecision');if(!revealed||currentSection!=='recovery'){root.replaceChildren();return}
+ const contract=campaignSkuContract({decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,supplierDelay:skuSupplierDelay,campaignId});
+ const confirmed=activeSkuDecision(contract);
+ root.replaceChildren();
+ if(confirmed){
+  const success=add(root,'div','manager-po-confirmed');
+  add(success,'strong','','✓ Decisión confirmada para esta cohorte SKU');
+  add(success,'p','',confirmed.action==='extraordinary-purchase'?'Nueva orden de compra extraordinaria, separada de la orden original.':'Se ha decidido continuar sin compra extraordinaria.');
+  add(success,'p','','Pedidos completos antes: '+fmt(confirmed.completedBefore)+' → después: '+fmt(confirmed.completedAfter)+' · pendientes '+fmt(confirmed.pendingAfter)+' · rescate +'+fmt(confirmed.recoveredOrders)+' al día '+confirmed.horizonDays+'.');
+  add(success,'p','','Compromiso adicional modelado CLP '+fmt(confirmed.urgentOrderCommitmentCLP)+' (no es pago real). Unidades ordenadas '+fmt(confirmed.orderedExtraUnits)+'; recibidas en el horizonte '+fmt(confirmed.receivedExtraUnits)+'.');
+  if(confirmed.urgentPurchaseOrders.length){
+   const details=add(success,'details','manager-po-detail');add(details,'summary','','Ver identificadores, cantidades, origen y plazos de la nueva orden');
+   for(const po of confirmed.urgentPurchaseOrders){
+    const item=add(details,'div','manager-po-line');
+    add(item,'strong','',po.id+' · SKU '+po.skuId+' · '+fmt(po.quantity)+' unidades');
+    add(item,'p','','Costo estándar CLP '+fmt(po.orderCommitmentCLP)+' · llegada supuesta día '+po.expectedArrivalDay+'. '+po.supplier);
+   }
+  }
+  add(success,'p','manager-warning','Confirmada solamente en el simulador: no se emitió orden comercial ni se transfirió dinero. La compra original permanece congelada. Para ensayar un plan alternativo, inicia una nueva campaña; no se pueden duplicar compras confirmadas.');
+  const resultBtn=add(root,'button','btn manager-primary','Ver resultado y trazabilidad SKU →');
+  resultBtn.type='button';resultBtn.onclick=()=>{showSection('dashboard');showResultView('inventory',true)};
+  return;
+ }
+ if(skuDecisions.length)add(root,'p','manager-warning','Hay una decisión registrada para una configuración anterior. Se conserva como histórica, pero no se aplica a este escenario actualizado. Puedes confirmar una decisión nueva sin modificar la anterior.');
+ const selected=skuRecovery==='emergency'?'emergency':'wait';
+ const preview=recoveryComparison({...contract.skuInputs,option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
+ const initial=preview.base.initial;
+ const stockBox=add(root,'section','manager-inventory-review');
+ add(stockBox,'h3','','1 · ¿Qué stock existe de verdad?');
+ add(stockBox,'p','','Inventario físico inicial de la muestra de '+fmt(contract.actualSampleOrders)+' pedidos. Las compras originales fueron fijadas antes de revelar la demanda.');
+ const stockGrid=add(stockBox,'div','manager-stock-grid');
+ for(const p of SKU_CATALOG){
+  const item=add(stockGrid,'div','manager-stock-item');
+  add(item,'strong','','SKU '+p.id+' · '+fmt(initial[p.id])+' unidades');
+  add(item,'small','',p.rotation+' rotación · costo estándar CLP '+fmt(p.unitCost));
+ }
+ const original=add(stockBox,'p','manager-stock-commitment','Compra original comprometida: '+SKU_CATALOG.map(p=>'SKU '+p.id+' '+fmt(preview.originalPurchase[p.id])).join(' · ')+'. No cambia después de la sorpresa.');
+ add(stockBox,'p','manager-fineprint','El inventario no verificable y el retenido por Calidad NO están disponibles para preparar pedidos. Verificar stock no crea unidades nuevas. Las cantidades SKU corresponden a una cohorte de 12 días, no a las unidades agregadas de una jornada.');
+
+ const decide=add(root,'section','manager-purchase-options');
+ add(decide,'h3','','2 · Elige una acción para estudiar');
+ add(decide,'p','','Puedes esperar las compras comprometidas o ensayar una reposición adicional. Ninguna selección emite todavía una orden.');
+ const cards=add(decide,'div','manager-option-grid');
+ for(const [option,title,note] of [
+  ['wait','Mantener compras originales','Sin un nuevo compromiso; los pendientes esperan o requieren reprogramación.'],
+  ['emergency','Solicitar reposición extraordinaria','Añade una nueva compra por SKU; solo se podrá utilizar después de su recepción y liberación.']
+ ]){
+  const button=add(cards,'button','manager-option-btn'+(selected===option?' chosen':''));
+  button.type='button';button.setAttribute('aria-pressed',String(selected===option));
+  add(button,'strong','',title);add(button,'span','',note);
+  button.onclick=()=>{skuRecovery=option;save();render()};
+ }
+ if(selected==='emergency'){
+  const row=add(decide,'div','manager-purchase-settings');
+  const qty=add(row,'label','','¿Qué fracción del faltante físico comprar?');
+  const coverage=add(row,'select','numeric-input');coverage.setAttribute('aria-label','Porcentaje de reposición extraordinaria en Recuperación');
+  for(const n of [0,25,50,75,100]){const op=add(coverage,'option','',n+' % del faltante por SKU');op.value=String(n)}
+  coverage.value=String(skuPurchaseCoverage);
+  coverage.onchange=()=>{skuPurchaseCoverage=Number(coverage.value);save();render()};
+  const date=add(row,'label','','¿Cuándo llegará al CD? (supuesto, no confirmación del proveedor)');
+  const arrival=add(row,'select','numeric-input');arrival.setAttribute('aria-label','Día previsto de compra extraordinaria en Recuperación');
+  for(const d of [1,2,5,10,13]){const op=add(arrival,'option','',d===13?'Día 13 · fuera del horizonte':'Día '+d);op.value=String(d)}
+  arrival.value=String(skuUrgentArrival);
+  arrival.onchange=()=>{skuUrgentArrival=Number(arrival.value);save();render()};
+ }
+ const previewCard=add(root,'section','manager-purchase-preview');
+ add(previewCard,'h3','','3 · Resultado de esta alternativa (vista previa)');
+ const numbers=add(previewCard,'div','manager-preview-stats');
+ for(const [label,value,sub] of [
+  ['Sin compra nueva',preview.base.completed,'pedidos completos al día '+preview.recovered.days],
+  ['Con la decisión',preview.recovered.completed,'pedidos completos al día '+preview.recovered.days],
+  ['Recuperación',preview.recovered.completed-preview.base.completed,'pedidos adicionales']
+ ]){
+  const stat=add(numbers,'div','manager-preview-stat');add(stat,'small','',label);add(stat,'strong','',fmt(value));add(stat,'small','',sub);
+ }
+ add(previewCard,'p','','Pendientes después de la decisión: '+fmt(preview.recovered.pending)+' de '+fmt(preview.recovered.orders)+' pedidos. Stock ordinario inicial más ingresos validados; no se promete salida antes de su recepción, Calidad, Picking y Transporte.');
+ if(preview.urgent.length){
+  const items=add(previewCard,'div','manager-purchase-lines');
+  add(items,'strong','','Nueva orden propuesta, separada del manifiesto inicial:');
+  for(const po of preview.urgent)add(items,'p','','SKU '+po.id+' · '+fmt(po.qty)+' unidades · llegada teórica día '+po.day+' · valor CLP '+fmt(po.qty*po.unitCost));
+  add(previewCard,'p','','Compromiso extraordinario supuesto CLP '+fmt(preview.urgentBase+preview.urgentSurcharge)+' (valor y recargo; no equivale a pago).');
+  if(preview.urgentArrivalDay>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ La nueva compra llega después del corte: genera compromiso, pero no recupera pedidos dentro de los 12 días.');
+ }
+ if(selected==='emergency'&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta compra no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
+ if(selected==='wait')add(previewCard,'p','manager-warning','Esperar mantiene los pedidos pendientes; no equivale a cancelarlos ni a prometer una fecha de entrega.');
+ const confirmBtn=add(root,'button','btn manager-primary','Confirmar decisión en simulación →');
+ confirmBtn.type='button';confirmBtn.id='confirmSkuDecision';
+ confirmBtn.disabled=selected==='emergency'&&!preview.urgent.length;
+ confirmBtn.onclick=()=>{
+  if(activeSkuDecision(contract))return;
+  const extra=selected==='emergency'&&preview.recovered.completed<=preview.base.completed?' ATENCIÓN: esta compra tiene costo y no recupera pedidos dentro del período.':'';
+  if(!confirm('¿Registrar esta decisión en la campaña SKU? La orden original no cambiará y la acción quedará confirmada en esta simulación.'+extra))return;
+  const record=createSkuRecoveryDecision({campaignId,skuInputs:contract.skuInputs,option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:preview});
+  skuDecisions=[...skuDecisions,record].slice(-25);
+  skuRecovery=selected;save();render();
+ };
+ add(root,'p','manager-fineprint','Esta misión reutiliza el mismo registro de pedidos y movimientos SKU auditado en el laboratorio. No modifica la expedición agregada ni crea un proveedor real. Una compra comprometida no es un pago, ni una recepción es liberación de Calidad.');
+}
+
 function renderAttention(){
  const root=$('attentionSummary'),costs=$('areaCostCards');root.replaceChildren();costs.replaceChildren();
  const report=attentionSignals(decisions,actions,effectiveScenario());
@@ -512,7 +617,7 @@ function renderAttention(){
 function render(){
 $('sessionStatus').textContent='Campaña '+campaignId+' · '+({setup:'Configuración',operations:revealed?'Plan original':'Operación',preliminary:'Diagnóstico',recovery:'Recuperación',dashboard:'Resultados'}[currentSection]);
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
-const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab();
+const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab();renderSkuRecoveryMission();
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?(revealed?'Plan cerrado · consulta':'Planificación'):'Recuperación');
@@ -620,7 +725,7 @@ $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!revealed&&!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
-function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;campaignId=createCampaignId();decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
+function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;campaignId=createCampaignId();decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuDecisions=[];save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
 $('reset').onclick=restartCampaign;
 $('restartFinal').onclick=restartCampaign;
 $('resetAnytime').onclick=restartCampaign;
@@ -632,7 +737,7 @@ $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
 $('revealDemand').onclick=()=>{revealSurprise();showSection('preliminary');$('directorBriefing').scrollIntoView({behavior:'smooth',block:'start'})};
 $('startRecovery').onclick=()=>{const signal=managerDiagnosis({decisions,scenario:effectiveScenario(),revealed});active=NODES.findIndex(n=>n.id===signal.area);if(active<0)active=5;showSection('recovery')};
-$('directorPilot').onclick=()=>{showSection('dashboard');showResultView('inventory',true)};
+$('directorPilot').onclick=()=>{skuRecovery='emergency';showSection('recovery');$('skuRecoveryMission').scrollIntoView({behavior:'smooth',block:'start'})};
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
