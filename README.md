@@ -8,6 +8,16 @@
 
 **Estado:** prototipo funcional en desarrollo, con datos sintéticos y modelos deterministas. **No es un WMS, ERP ni un optimizador listo para producción.** No requiere cuenta, backend ni instalación: funciona como aplicación estática en GitHub Pages.
 
+## Validación de negocio y rediseño didáctico en preparación (v11.16)
+
+Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcompra, compras extraordinarias a distintas fechas, restricciones físicas y sorpresa de demanda menor. **La versión pública de la interfaz sigue siendo v11.15; este incremento de pruebas y diseño aún no rediseña pantallas.**
+
+- [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
+- [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
+- [Roadmap integrado M1–M8 con entregas U0–U5](docs/ROADMAP.md).
+
+**Prioridad siguiente:** mejorar la claridad de Diagnóstico y la explicación del cuello de botella (U1) antes de agregar más paneles. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
+
 ## Cómo utilizarlo
 
 1. **Configura el escenario.** Ajusta demanda, existencias, personal, productividad, costos y estrategia de evaluación.
