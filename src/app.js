@@ -296,6 +296,23 @@ function renderSkuLab(){
     add(arrivalRow,'small','','Reposición extraordinaria '+fmt(purchased)+' unidades SKU · recibidas dentro del horizonte '+fmt(received)+' · pedidos adicionales completos '+fmt(recovery.recovered.completed-recovery.base.completed)+'.');
     if(recovery.recovered.completed===recovery.base.completed)add(arrivalRow,'small','','⚠ La compra no mejora los pedidos completos dentro del horizonte. Revisa plazo de llegada, capacidad de picking y stock remanente antes de comprometer el gasto.');
   }
+  const comparisons=Object.keys(RECOVERY_OPTIONS).map(id=>recoveryComparison({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:id,urgentArrivalDay:skuUrgentArrival}));
+  const candidates=comparisons.filter(x=>x.recovered.completed>recovery.base.completed);
+  const recommended=[...candidates].sort((a,b)=>b.economicProxyDelta-a.economicProxyDelta||b.recovered.completed-a.recovered.completed)[0]||null;
+  const advisor=add(bridge,'div','sku-advisor');
+  add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
+  add(advisor,'p','muted','Las cuatro alternativas comparten la misma demanda, compras originales y plazo de recepción. Se comparan pedidos completos y caja incremental, no margen contable.');
+  for(const trial of comparisons){
+   const optionCard=add(advisor,'div','sku-advisor-option'+(trial.option===skuRecovery?' current':''));
+   const headline=add(optionCard,'div','sku-advisor-head');
+   add(headline,'strong','',trial.label+(trial.option===skuRecovery?' · seleccionada':''));
+   add(headline,'small','',fmt(trial.recovered.completed)+' / '+fmt(actualOrders)+' pedidos · '+fmt(trial.recovered.pending)+' pendientes');
+   add(optionCard,'small','','Mejora '+(trial.recovered.completed-trial.base.completed>=0?'+':'')+fmt(trial.recovered.completed-trial.base.completed)+' pedidos · desembolso adicional CLP '+fmt(trial.incrementalExpense));
+   add(optionCard,'small','','Caja incremental CLP '+fmt(trial.netCashDelta)+' · resultado proxy CLP '+fmt(trial.economicProxyDelta));
+   const choose=add(optionCard,'button',trial.option===skuRecovery?'btn':'btn secondary',trial.option===skuRecovery?'Alternativa actual':'Comparar esta alternativa');
+   choose.type='button';choose.disabled=trial.option===skuRecovery;choose.onclick=()=>{skuRecovery=trial.option;renderSkuLab()};
+  }
+  add(advisor,'p','sku-advisor-insight',recommended?'Mayor resultado económico proxy entre opciones que mejoran servicio: '+recommended.label+' · CLP '+fmt(recommended.economicProxyDelta)+'. Revisa también la caja y el plazo antes de decidir.':'Ninguna intervención mejora pedidos completados dentro del horizonte. Evita comprometer compras solo por aumentar stock.');
   add(bridge,'strong','','Recuperación: '+recovery.label);
   add(bridge,'small','','Pedidos finales '+fmt(recovery.recovered.completed)+' / '+fmt(actualOrders)+' · pendientes '+fmt(recovery.recovered.pending)+' · mejora '+fmt(recovery.recovered.completed-recovery.base.completed));
   add(bridge,'small','','Compra urgente '+recovery.urgent.map(p=>p.id+': '+fmt(p.qty)).join(', ')+(recovery.urgent.length?'':' ninguna')+' · desembolso incremental CLP '+fmt(recovery.incrementalExpense));
