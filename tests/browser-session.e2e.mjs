@@ -93,7 +93,7 @@ test('saved setup, operation, recovery and result screens reopen at the correct 
  assert.ok((await page.locator('#choices').innerText()).includes('Decisiones originales cerradas'));
 }));
 
-test('mobile sticky restart, corrupt previous save and real restart without horizontal overflow', {timeout:120000},()=>browserCase('mobile-recovery',true,async page=>{
+test('mobile non-overlay navigation, corrupt previous save and real restart without horizontal overflow', {timeout:120000},()=>browserCase('mobile-recovery',true,async page=>{
  await page.evaluate(key=>localStorage.setItem(key,'{malformed JSON'),KEY);
  await page.reload({waitUntil:'networkidle'});
  assert.equal(await page.locator('#operationsSection').isVisible(),true,'Corrupt saved JSON blocks operations');
@@ -104,7 +104,9 @@ test('mobile sticky restart, corrupt previous save and real restart without hori
  assert.equal(await page.locator('#preliminarySection').isVisible(),true);
  await page.evaluate(()=>window.scrollTo(0,600));
  const rect=await page.locator('.session-controls').boundingBox();
- assert.ok(rect&&rect.y>=-3&&rect.y<40,'Session controls are not sticky on mobile: '+JSON.stringify(rect));
+ const pos=await page.locator('.session-controls').evaluate(e=>getComputedStyle(e).position);
+ assert.equal(pos,'static','Phone toolbar should scroll naturally instead of covering content');
+ assert.ok(rect&&rect.y<0,'Phone toolbar must move away after scrolling, not obscure headings: '+JSON.stringify(rect));
  await page.locator('#goToOperations').click();
  assert.equal(await page.locator('#operationsSection').isVisible(),true);
  assert.equal(await page.locator('#choices .choice:not([disabled])').count(),0);
