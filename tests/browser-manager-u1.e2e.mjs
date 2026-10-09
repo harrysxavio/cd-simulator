@@ -30,7 +30,8 @@ async function run(name,mobile,scenarioChanges,choiceChanges,expect){
   assert.match(diagnosis,expect.reason);
   const essential=await page.locator('#directorEvidence').innerText();
   assert.match(essential,/Demanda real/);
-  assert.match(essential,/Se puede despachar/);
+  assert.match(essential,/Salieron del CD/);
+  assert.equal(await page.locator('#directorEvidence').getAttribute('data-scope'),'sku-cohort');
   assert.match(essential,/Falta atender/);
   const buttons=await page.locator('#preliminarySection .director-cta .btn:visible').count();
   assert.ok(buttons>=1&&buttons<=2,'One clear primary and at most one optional pilot action');
