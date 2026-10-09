@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.21
+# Supply Chain Operations Lab · v11.22
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.21-r130) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.22-r131) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -77,6 +77,18 @@ Se añadieron controles verificables:
 **M2/M3:** el Resumen de Resultados ahora prioriza **pedidos reales / pedidos completos expedidos / pedidos pendientes** desde el **mismo registro físico SKU de doce días** que alimenta las ocho áreas. El modelo anterior, de una jornada en unidades agregadas, queda dentro de un panel plegable y rotulado **no sumable**. Es un paso efectivo de migración del resultado físico, no la unificación completa de eventos y economía.
 
 **Abrir la versión sin depender de la URL antigua:** [Simulador v11.21](https://harrysxavio.github.io/cd-simulator/?release=11.21-r130). Si una pestaña antigua está abierta, usar ese enlace en una pestaña nueva y seleccionar «Verificar actualización». Un servidor o caché que responda con HTML anterior se detectará en la nueva prueba en vivo.
+
+## v11.22 · Experiencia móvil guiada, menos texto y decisiones más claras
+
+Rediseño de jerarquía **a partir de capturas reales Android**: la barra superior de reinicio y navegación deja de cubrir textos durante el desplazamiento móvil; diagnósticos y decisiones dejan de duplicar grandes tarjetas con unidades y explicaciones repetidas.
+
+- **Planificación:** objetivo de cada área, elección, resultado breve «Llegan X → siguen Y» y próximo paso. Datos de capacidad/por qué bajo detalle opcional.
+- **Diagnóstico:** tres indicadores de una sola línea, problema prioritario y acción gerencial; las causas extendidas, otras alternativas y límites técnicos pasan a capas expandibles.
+- **Recuperación:** «¿Con qué contamos?» → «¿Qué harás?» → «¿Qué cambia?». Stock por SKU y orden original siguen consultables; porcentaje de reserva aparece **solo al elegir esa acción**; las cifras Antes/Con tu opción/Recuperas ocupan una fila compacta.
+- **Plan diario:** los días en que hay despachos y movimientos físicos aparecen primero; días sin movimiento bajo «Ver también días sin despachos». El contenido explica para qué sirve el calendario. **El registro físico completo y la posibilidad de auditarlo permanecen intactos**.
+- Versión visible y verificable mediante la URL pública y manifiesto, con asset revision 131.
+
+**Sin cambios físicos o económicos en el motor.** Los órdenes originales, traslados, compras urgentes y conciliaciones permanecen deterministas. [Detalle de las observaciones, decisiones de diseño y criterios](docs/UX-GUIDED-PHONE-V11.22.md). U5 continúa parcial: aún requiere prueba de usuario real Android/TalkBack.
 
 ## Cómo utilizarlo
 
