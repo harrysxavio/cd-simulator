@@ -1,26 +1,26 @@
-import {supplyBridge} from './supply-bridge.js?v=115';
-import {laborAudit} from './labor.js?v=115';
-import {skuAudit} from './audit.js?v=115';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=115';
-import {integratedDemand} from './integrated.js?v=115';
-import {eventSimulation} from './events.js?v=115';
-import {deliveryTimeline} from './timeline.js?v=115';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=115';
-import {skuOrderLab} from './sku.js?v=115';
-import {demandJourney} from './journey.js?v=115';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=115';
-import {flow,diagnose,ACTIONS} from './flow.js?v=115';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=115';
-import {areaKpis} from './kpis.js?v=115';
-import {causalAudit} from './causal.js?v=115';
-import {attentionSignals} from './attention.js?v=115';
+import {supplyBridge} from './supply-bridge.js?v=116';
+import {laborAudit} from './labor.js?v=116';
+import {skuAudit} from './audit.js?v=116';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=116';
+import {integratedDemand} from './integrated.js?v=116';
+import {eventSimulation} from './events.js?v=116';
+import {deliveryTimeline} from './timeline.js?v=116';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=116';
+import {skuOrderLab} from './sku.js?v=116';
+import {demandJourney} from './journey.js?v=116';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=116';
+import {flow,diagnose,ACTIONS} from './flow.js?v=116';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=116';
+import {areaKpis} from './kpis.js?v=116';
+import {causalAudit} from './causal.js?v=116';
+import {attentionSignals} from './attention.js?v=116';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1;
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival}))}catch{}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;shockDirection=s.shockDirection===-1?-1:1;skuPolicy=['lean','balanced','service'].includes(s.skuPolicy)?s.skuPolicy:'balanced';skuSupplierDelay=s.skuSupplierDelay===true;skuRecovery=Object.hasOwn(RECOVERY_OPTIONS,s.skuRecovery)?s.skuRecovery:'wait';skuUrgentArrival=[1,2,5,10,13].includes(s.skuUrgentArrival)?s.skuUrgentArrival:1}catch{}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage}))}catch{}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;shockDirection=s.shockDirection===-1?-1:1;skuPolicy=['lean','balanced','service'].includes(s.skuPolicy)?s.skuPolicy:'balanced';skuSupplierDelay=s.skuSupplierDelay===true;skuRecovery=Object.hasOwn(RECOVERY_OPTIONS,s.skuRecovery)?s.skuRecovery:'wait';skuUrgentArrival=[1,2,5,10,13].includes(s.skuUrgentArrival)?s.skuUrgentArrival:1;skuPurchaseCoverage=[0,25,50,75,100].includes(s.skuPurchaseCoverage)?s.skuPurchaseCoverage:100}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function revealSurprise(){
  if(revealed)return;
@@ -268,7 +268,7 @@ function renderSkuLab(){
  if(revealed){
   const actualOrders=Math.max(1,Math.round(200*effectiveScenario().actualDemand/scenario.demand));
   const integrated=integratedDemand({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{}});
-  const chain=supplyBridge({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:skuRecovery,urgentArrivalDay:skuUrgentArrival});
+  const chain=supplyBridge({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
   const trace=add(root,'div','area-kpi-tile supply-trace');
   add(trace,'strong','','🔗 Cómo se conectan las áreas');
   add(trace,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
@@ -277,7 +277,7 @@ function renderSkuLab(){
   add(trace,'small','','Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
   const verdict=add(trace,'div','supply-verdict '+chain.decision.quality);
-  add(verdict,'strong','',chain.decision.quality==='effective'?'Compra con impacto operativo':chain.decision.quality==='late'?'Atención: reposición fuera de plazo':chain.decision.quality==='no-gain'?'Compra sin mejora de servicio':'No es necesaria una compra adicional');
+  add(verdict,'strong','',chain.decision.quality==='effective'?'Compra con impacto operativo':chain.decision.quality==='late'?'Atención: reposición fuera de plazo':chain.decision.quality==='no-gain'?'Compra sin mejora de servicio':chain.decision.quality==='no-order'?'Sin compra urgente seleccionada':'No es necesaria una compra adicional');
   add(verdict,'p','',chain.decision.advice);
 
   const detail=add(trace,'details','supply-trace-detail');
@@ -305,14 +305,21 @@ function renderSkuLab(){
   }
   const arrivalRow=add(bridge,'div','sku-purchase-decision');
   add(arrivalRow,'strong','','Compras ↔ Inventario: ¿llegará la reposición a tiempo?');
-  add(arrivalRow,'p','muted','La compra urgente se calcula sobre el faltante físico de SKU, descontando stock y órdenes ya comprometidas. Su llegada nunca se adelanta. Puedes comparar plazos antes de decidir.');
+  add(arrivalRow,'p','muted','Define cuánto del faltante físico cubrir y cuándo llega. Se descuentan el stock inicial y las compras ya comprometidas; comprar más no garantiza despachar más.');
+  const coverRow=add(arrivalRow,'div','purchase-coverage-control');
+  add(coverRow,'label','','¿Qué porcentaje del faltante comprar?');
+  const coverInput=add(coverRow,'select','numeric-input');coverInput.setAttribute('aria-label','Cobertura de compra urgente sobre faltante SKU');
+  for(const pct of [0,25,50,75,100]){const opt=add(coverInput,'option','',pct+' % del faltante');opt.value=String(pct);}
+  coverInput.value=String(skuPurchaseCoverage);
+  coverInput.onchange=()=>{skuPurchaseCoverage=Number(coverInput.value);save();renderSkuLab()};
+  add(coverRow,'small','','0 % evita compras extraordinarias; 100 % cubre el faltante teórico por SKU. Revisa despachos y caja antes de elegir.');
   const arrivalControl=add(arrivalRow,'div','surprise-controls');
   const arrivalLabel=add(arrivalControl,'label','','Día de recepción de compra urgente');
   const arrivalInput=add(arrivalControl,'select','numeric-input');arrivalInput.setAttribute('aria-label','Día de recepción de compra urgente');
   for(const d of [1,2,5,10,13]){const opt=add(arrivalInput,'option','',d===13?'Día 13 · fuera del horizonte':'Día '+d);opt.value=String(d);}
   arrivalInput.value=String(skuUrgentArrival);
   arrivalInput.onchange=()=>{skuUrgentArrival=Number(arrivalInput.value);save();renderSkuLab()};
-  const recovery=recoveryComparison({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:skuRecovery,urgentArrivalDay:skuUrgentArrival});
+  const recovery=recoveryComparison({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
   add(arrivalRow,'small','',skuUrgentArrival>12?'⚠ La compra llega después del horizonte de 12 días: genera desembolso comprometido, pero no resuelve pedidos dentro del período.':'La compra llega el día '+skuUrgentArrival+'. No puede resolver pedidos anteriores; inventario y picking solo disponen de ella desde la recepción.');
   if(recovery.urgent.length){
     const purchased=recovery.urgent.reduce((n,p)=>n+p.qty,0);
@@ -320,12 +327,12 @@ function renderSkuLab(){
     add(arrivalRow,'small','','Reposición extraordinaria '+fmt(purchased)+' unidades SKU · recibidas dentro del horizonte '+fmt(received)+' · pedidos adicionales completos '+fmt(recovery.recovered.completed-recovery.base.completed)+'.');
     if(recovery.recovered.completed===recovery.base.completed)add(arrivalRow,'small','','⚠ La compra no mejora los pedidos completos dentro del horizonte. Revisa plazo de llegada, capacidad de picking y stock remanente antes de comprometer el gasto.');
   }
-  const comparisons=Object.keys(RECOVERY_OPTIONS).map(id=>recoveryComparison({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:id,urgentArrivalDay:skuUrgentArrival}));
+  const comparisons=Object.keys(RECOVERY_OPTIONS).map(id=>recoveryComparison({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{},option:id,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage}));
   const candidates=comparisons.filter(x=>x.recovered.completed>recovery.base.completed);
   const recommended=[...candidates].sort((a,b)=>b.economicProxyDelta-a.economicProxyDelta||b.recovered.completed-a.recovered.completed)[0]||null;
   const advisor=add(bridge,'div','sku-advisor');
   add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
-  add(advisor,'p','muted','Las cuatro alternativas comparten la misma demanda, compras originales y plazo de recepción. Se comparan pedidos completos y caja incremental, no margen contable.');
+  add(advisor,'p','muted','Las cuatro alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
   for(const trial of comparisons){
    const optionCard=add(advisor,'div','sku-advisor-option'+(trial.option===skuRecovery?' current':''));
    const headline=add(optionCard,'div','sku-advisor-head');
@@ -351,6 +358,8 @@ function renderSkuLab(){
   add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' = stock final CLP '+fmt(audit.stockValue.closing));
   add(auditCard,'small','','Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(audit.orders.completed)+' completos + '+fmt(audit.orders.pending)+' pendientes');
   add(auditCard,'small','',audit.assumptions);
+  // Put cross-area explanation after the user selects recovery inputs.
+  root.append(trace);
  }
  const events=eventSimulation({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
  const eventCard=add(root,'div','area-kpi-tile');
@@ -516,7 +525,7 @@ $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
-function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
+function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
 $('reset').onclick=restartCampaign;
 $('restartFinal').onclick=restartCampaign;
 $('openReport').onclick=()=>{save();showSection('preliminary');$('preliminarySection').scrollIntoView({behavior:'smooth',block:'start'})};
