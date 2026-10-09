@@ -42,3 +42,11 @@ test('final mobile layout and purchasing lead-time control stay wired',()=>{
  assert.match(app,/\$\('restartFinal'\)\.onclick=restartCampaign/);
  assert.match(html,/id="restartFinal"/);
 });
+
+test('each diagnosis area offers an actionable improvement with accessible label',()=>{
+ assert.match(app,/const decisionRow=add\(item,'div','improvement-decision'\)/);
+ assert.match(app,/actionButton\.setAttribute\('aria-label','Explorar mejora de '\+f\.title\)/);
+ assert.match(app,/actionButton\.onclick=\(\)=>\{phase='recover';showSection\('recovery'\);nav\(NODES\.findIndex\(n=>n\.id===f\.id\)\)/);
+ const css=readFileSync(new URL('../src/styles.css',import.meta.url),'utf8');
+ assert.match(css,/@media\(max-width:760px\)\{\.improvement-decision\{grid-template-columns:minmax\(0,1fr\)/);
+});
