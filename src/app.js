@@ -1,18 +1,18 @@
-import {laborAudit} from './labor.js?v=109';
-import {skuAudit} from './audit.js?v=109';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=109';
-import {integratedDemand} from './integrated.js?v=109';
-import {eventSimulation} from './events.js?v=109';
-import {deliveryTimeline} from './timeline.js?v=109';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=109';
-import {skuOrderLab} from './sku.js?v=109';
-import {demandJourney} from './journey.js?v=109';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=109';
-import {flow,diagnose,ACTIONS} from './flow.js?v=109';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=109';
-import {areaKpis} from './kpis.js?v=109';
-import {causalAudit} from './causal.js?v=109';
-import {attentionSignals} from './attention.js?v=109';
+import {laborAudit} from './labor.js?v=110';
+import {skuAudit} from './audit.js?v=110';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=110';
+import {integratedDemand} from './integrated.js?v=110';
+import {eventSimulation} from './events.js?v=110';
+import {deliveryTimeline} from './timeline.js?v=110';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=110';
+import {skuOrderLab} from './sku.js?v=110';
+import {demandJourney} from './journey.js?v=110';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=110';
+import {flow,diagnose,ACTIONS} from './flow.js?v=110';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=110';
+import {areaKpis} from './kpis.js?v=110';
+import {causalAudit} from './causal.js?v=110';
+import {attentionSignals} from './attention.js?v=110';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -37,9 +37,23 @@ if((name==='recovery'||name==='dashboard')&&!revealed){name='preliminary'}
 if(name==='operations'&&revealed){name='preliminary'}
 if(name==='preliminary'&&!revealed)revealSurprise();
 for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
+if(name==='dashboard')showResultView($('dashboardSection').getAttribute('data-result-view')||'overview');
 if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
 if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
 save();render();
+}
+const RESULT_VIEWS={overview:'Resumen de la campaña: servicio, pendientes y principal alerta.',areas:'Recorre la cadena y descubre dónde se pierde capacidad o flujo.',inventory:'Prueba políticas de stock, tiempos de compra y recuperación de pedidos.',economics:'Examina costos, desembolsos e indicadores económicos.',improvement:'Identifica restricciones, productividad y oportunidades de mejora.'};
+function showResultView(view,scroll=false){
+ if(!RESULT_VIEWS[view])view='overview';
+ const section=$('dashboardSection');
+ section.setAttribute('data-result-view',view);
+ $('resultViewHint').textContent=RESULT_VIEWS[view];
+ for(const button of $('resultTabs').children){
+  const selected=button.getAttribute('data-result-target')===view;
+  button.setAttribute('aria-selected',String(selected));
+  button.setAttribute('aria-pressed',String(selected));
+ }
+ if(scroll&&typeof window!=='undefined')$('resultTabs').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function setup(){
  const presets=$('demandPresets');presets.replaceChildren();
@@ -466,6 +480,7 @@ $('startRecovery').onclick=()=>showSection('recovery');
 $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('dashboard')};
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
+for(const button of $('resultTabs').children)button.onclick=()=>showResultView(button.getAttribute('data-result-target'),true);
 $('beginExercise').onclick=()=>showSection('operations');
 $('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
 load();render();showSection(revealed?'preliminary':'operations');
