@@ -481,6 +481,8 @@ $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('da
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 for(const button of $('resultTabs').children)button.onclick=()=>showResultView(button.getAttribute('data-result-target'),true);
+for(const [id,view] of [['overviewToAreas','areas'],['areasToInventory','inventory'],['inventoryToEconomics','economics'],['economicsToImprovement','improvement']])$(id).onclick=()=>showResultView(view,true);
+$('improvementToRecovery').onclick=()=>{showSection('recovery');$('recoverySection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('beginExercise').onclick=()=>showSection('operations');
 $('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
 load();render();showSection(revealed?'preliminary':'operations');
