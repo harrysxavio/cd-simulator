@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.17
+# Supply Chain Operations Lab · v11.18
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=126) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=127) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -29,6 +29,16 @@ El diagnóstico ahora es una misión de gerencia **mobile-first**: primero prese
 - **Historial seguro:** se conserva el botón global de reinicio y el plan original cerrado tras revelar demanda. La pantalla técnica no se elimina.
 
 U1 **no cambia las ecuaciones del motor agregado ni la economía**. U2/U3 integrarán eventos de compras nuevas con los movimientos físicos y una decisión previa al resultado final. [Criterios funcionales](docs/SCENARIO-BUSINESS-ACCEPTANCE.md) · [Plan incremental UX](docs/UX-MOBILE-DIDACTIC-PLAN.md).
+
+## v11.18 · U2a: decisión extraordinaria con trazabilidad física SKU
+
+Se implementa el primer segmento operativo de U2: desde **Recuperación / misión 3 de 4**, el gerente revisa existencias iniciales por SKU y la compra original congelada, compara **esperar** frente a **solicitar una compra extraordinaria**, configura la cobertura de faltantes y el día supuesto de arribo, ve cuántos pedidos completos se recuperan, y **confirma** la alternativa solo después de revisar el impacto.
+
+- El botón de confirmar genera una decisión SKU persistida, asociada al ID de campaña y a la configuración exacta del escenario. Registra órdenes de compra adicionales con IDs trazables hacia el mismo libro de recepción y Calidad, SKU, unidades, costo estándar, recargo y día de arribo supuesto; no duplica la orden al recargar.
+- La compra original **no se edita ni se reemite** tras conocer la demanda. Las unidades recién compradas solo pueden entrar a Picking cuando efectivamente se recepcionan y liberan por Calidad.
+- Si la compra no ayuda o llega después del corte de 12 días, se advierte antes de confirmar. Confirmar no equivale a pagar ni a obtener compromiso de un proveedor real.
+- La vista de Resultados SKU respeta la decisión confirmada, bloquea cambios que la reescribirían y conserva la conciliación física. Cambiar de escenario deja las decisiones anteriores como registro histórico; el botón global **Nueva campaña** elimina las decisiones de la campaña anterior tras confirmación.
+- **Alcance explícito:** U2a opera dentro del laboratorio SKU de 12 días. No cambia la expedición agregada de una jornada ni integra aún la reserva de stock ni la planificación completa de promesas al cliente. U2b y U3 siguen abiertos.
 
 ## Cómo utilizarlo
 
