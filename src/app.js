@@ -1,23 +1,23 @@
-import {supplyBridge} from './supply-bridge.js?v=130';
-import {campaignSkuContract} from './campaign-contract.js?v=130';
-import {campaignAreaReadModel} from './area-ledger.js?v=130';
-import {laborAudit} from './labor.js?v=130';
-import {skuAudit} from './audit.js?v=130';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=130';
-import {integratedDemand} from './integrated.js?v=130';
-import {eventSimulation} from './events.js?v=130';
-import {deliveryTimeline} from './timeline.js?v=130';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=130';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=130';
-import {demandJourney} from './journey.js?v=130';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=130';
-import {flow,diagnose,ACTIONS} from './flow.js?v=130';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=130';
-import {areaKpis} from './kpis.js?v=130';
-import {causalAudit} from './causal.js?v=130';
-import {managerDiagnosis} from './diagnosis-guide.js?v=130';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=130';
-import {attentionSignals} from './attention.js?v=130';
+import {supplyBridge} from './supply-bridge.js?v=131';
+import {campaignSkuContract} from './campaign-contract.js?v=131';
+import {campaignAreaReadModel} from './area-ledger.js?v=131';
+import {laborAudit} from './labor.js?v=131';
+import {skuAudit} from './audit.js?v=131';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=131';
+import {integratedDemand} from './integrated.js?v=131';
+import {eventSimulation} from './events.js?v=131';
+import {deliveryTimeline} from './timeline.js?v=131';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=131';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=131';
+import {demandJourney} from './journey.js?v=131';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=131';
+import {flow,diagnose,ACTIONS} from './flow.js?v=131';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=131';
+import {areaKpis} from './kpis.js?v=131';
+import {causalAudit} from './causal.js?v=131';
+import {managerDiagnosis} from './diagnosis-guide.js?v=131';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=131';
+import {attentionSignals} from './attention.js?v=131';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -132,27 +132,30 @@ function renderManagerBriefing(){
  add(briefing,'h3','director-story',revealed?'El escenario cambió. Tu misión es proteger el servicio.':'Primero observa el plan, después descubre la demanda.');
  add(briefing,'p','',''+view.context);
  const essential=[
-  [revealed?'Demanda real':'Demanda planificada',view.actualDemand,'unidades'],
-  ['Expedible hoy',view.dispatched,'unidades, no entregas'],
-  ['Sin cobertura hoy',view.pending,'unidades pendientes']
+  [revealed?'Demanda real':'Demanda prevista',view.actualDemand],
+  ['Se puede despachar',view.dispatched],
+  ['Falta atender',view.pending]
  ];
- for(const [title,value,unit] of essential){
+ for(const [title,value] of essential){
   const card=add(evidence,'div','director-stat');
-  add(card,'span','',title);add(card,'strong','',fmt(value));add(card,'small','',unit);
+  add(card,'span','',title);add(card,'strong','',fmt(value));
  }
  add(reason,'span','director-reason-eyebrow',view.pending>0?'SEÑAL OPERACIONAL PRIORITARIA':'LECTURA OPERACIONAL');
  add(reason,'h3','',view.title);
- add(reason,'p','',view.why);
- add(reason,'p','director-next','Como gerente: '+view.next);
+ add(reason,'p','director-next','Tu siguiente paso: '+view.next);
+ const cause=add(reason,'details','director-why');
+ add(cause,'summary','','¿Por qué sucede?');
+ add(cause,'p','',view.why);
+ $('directorOptions').parentElement.hidden=!revealed;
  if(revealed){
-  add(options,'h3','','¿Qué alternativas vale la pena investigar?');
+  add(options,'h3','','Otras posibilidades');
   for(const option of view.options){
    const card=add(options,'div','director-option');
    const top=add(card,'div','director-option-top');
    add(top,'strong','',option.title);
    if(option.type==='pilot')add(top,'span','director-option-status','Laboratorio SKU');
    if(option.type==='future')add(top,'span','director-option-status','Próxima fase');
-   add(card,'p','',option.reason);
+   const note=add(card,'details','director-option-more');add(note,'summary','','¿Por qué considerarla?');add(note,'p','',option.reason);
   }
  }else{
   add(options,'p','director-preview','Las alternativas aparecen después de descubrir la demanda. La sorpresa no modifica retroactivamente tus decisiones.');
@@ -731,12 +734,19 @@ $('forecastNotice').textContent='Resultado simulado con los datos y decisiones a
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?(revealed?'Plan cerrado · consulta':'Planificación'):'Recuperación');
 $('progressFill').style.width=NODES.filter(x=>decisions[x.id]).length/8*100+'%';
 const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));add(b,'span','node-icon',x.icon);const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');add(b,'span','node-state',i===active?'●':'→');b.setAttribute('aria-current',i===active?'step':'false');b.onclick=()=>nav(i)});
-$('missionNumber').textContent=(phase==='plan'?(revealed?'PLAN ORIGINAL · SOLO LECTURA':'PLANIFICAR'):'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent=areaKpis(r,effectiveScenario())[n.id].length+' KPI del área';
+$('missionNumber').textContent=(phase==='plan'?(revealed?'PLAN ORIGINAL · SOLO LECTURA':'PLANIFICAR'):'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent='Área '+(active+1)+' de 8';
 const choices=$('choices');choices.replaceChildren();const planFrozen=phase==='plan'&&revealed;
 if(planFrozen)add(choices,'p','diagnosis-note','Decisiones originales cerradas tras conocer la demanda real. Puedes revisar todas las áreas sin modificar el plan ni sus compras. Los KPI muestran la demanda revelada y las recuperaciones que ya hayas aplicado. Para cambiar el plan, pulsa «Nueva campaña»; para intervenir, entra en Recuperación.');
 if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.disabled=planFrozen;b.onclick=()=>{if(planFrozen)return;decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
 const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.setAttribute('aria-label',p.label+' ('+p.unit.trim()+')');input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.disabled=planFrozen;input.onchange=()=>{if(planFrozen)return;const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
-}const box=add(choices,'div','flow-summary');add(box,'strong','','Relación con las otras áreas');add(box,'p','','Recibe '+fmt(st.input)+' → entrega '+fmt(st.output)+' unidades. Capacidad '+fmt(st.capacity)+'.');add(box,'small','',st.detail);
+}const box=add(choices,'div','flow-summary compact-flow');
+ add(box,'strong','',phase==='plan'?'Resultado de tu elección':'Efecto de las decisiones');
+ add(box,'p','','Llegan '+fmt(st.input)+' → siguen '+fmt(st.output)+' hacia la próxima área.');
+ const delta=Math.max(0,st.input-st.output);
+ add(box,'small','',delta?'Aquí se detienen '+fmt(delta)+' unidades equivalentes.':'Esta área no reduce el flujo que recibe.');
+ const technical=add(box,'details','flow-technical');
+ add(technical,'summary','','Ver capacidad y explicación');
+ add(technical,'p','','Capacidad modelada: '+fmt(st.capacity)+' unidades. '+st.detail);
 if(phase==='recover'&&['commercial','planning','purchasing'].includes(n.id)){
  add(choices,'h3','','Decisión de planificación cerrada');
  add(choices,'p','muted','El pronóstico, la compra y la entrega comprometida ya ocurrieron antes de revelar la demanda. No puedes reescribirlos retroactivamente. Evalúa intervenciones físicas posteriores o reinicia el ejercicio para probar otro plan.');
@@ -771,7 +781,7 @@ if(phase==='recover'&&!['commercial','planning','purchasing'].includes(n.id)){
  const contribution=before.dispatched-noAction.dispatched;
  add(control,'p','muted',selected===0?'Sin intervención: la operación mantiene sus restricciones actuales.':contribution>0?'La intervención seleccionada aporta '+fmt(contribution)+' unidades expedibles con las demás decisiones actuales.':'Esta medida todavía no aumenta la expedición global; puede haber otra restricción que debas resolver.');
 }
-$('nodeResult').textContent='Entrada: '+fmt(st.input)+' · Salida: '+fmt(st.output)+' · Capacidad: '+fmt(st.capacity)+' unidades. '+(st.input<st.capacity?'Parte de la capacidad puede estar ociosa por falta de flujo heredado.':st.output<st.input?'Esta área reduce el flujo que recibe la siguiente.':'Sin pérdida adicional en esta etapa.');
+$('nodeResult').textContent='Antes de esta área: '+fmt(st.input)+' · después: '+fmt(st.output)+' · capacidad máxima: '+fmt(st.capacity)+'. '+(st.input<st.capacity?'Puede haber capacidad sin uso porque llegaron menos productos.':st.output<st.input?'Aquí parte del flujo se detiene antes de la siguiente área.':'Aquí no se pierden unidades del flujo recibido.');
 $('prev').disabled=active===0;$('next').textContent=active===7?(phase==='plan'?'Ver diagnóstico preliminar →':'Ver resultado final →'):'Siguiente área →';
 const list=$('results');list.replaceChildren();
 r.stages.forEach((stage,i)=>{
