@@ -1,23 +1,23 @@
-import {supplyBridge} from './supply-bridge.js?v=129';
-import {campaignSkuContract} from './campaign-contract.js?v=129';
-import {campaignAreaReadModel} from './area-ledger.js?v=129';
-import {laborAudit} from './labor.js?v=129';
-import {skuAudit} from './audit.js?v=129';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=129';
-import {integratedDemand} from './integrated.js?v=129';
-import {eventSimulation} from './events.js?v=129';
-import {deliveryTimeline} from './timeline.js?v=129';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=129';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=129';
-import {demandJourney} from './journey.js?v=129';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=129';
-import {flow,diagnose,ACTIONS} from './flow.js?v=129';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=129';
-import {areaKpis} from './kpis.js?v=129';
-import {causalAudit} from './causal.js?v=129';
-import {managerDiagnosis} from './diagnosis-guide.js?v=129';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=129';
-import {attentionSignals} from './attention.js?v=129';
+import {supplyBridge} from './supply-bridge.js?v=130';
+import {campaignSkuContract} from './campaign-contract.js?v=130';
+import {campaignAreaReadModel} from './area-ledger.js?v=130';
+import {laborAudit} from './labor.js?v=130';
+import {skuAudit} from './audit.js?v=130';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=130';
+import {integratedDemand} from './integrated.js?v=130';
+import {eventSimulation} from './events.js?v=130';
+import {deliveryTimeline} from './timeline.js?v=130';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=130';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=130';
+import {demandJourney} from './journey.js?v=130';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=130';
+import {flow,diagnose,ACTIONS} from './flow.js?v=130';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=130';
+import {areaKpis} from './kpis.js?v=130';
+import {causalAudit} from './causal.js?v=130';
+import {managerDiagnosis} from './diagnosis-guide.js?v=130';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=130';
+import {attentionSignals} from './attention.js?v=130';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -352,8 +352,28 @@ function renderCanonicalAreasFromSku(chain,contract,comparison){
   add(card,'small','','Stock libre en PICK-FACE '+fmt(day.closingPickFaceSkuUnits)+' SKU · RESERVA-CD '+fmt(day.closingReserveSkuUnits)+' SKU');
  }
  add(host,'p','canonical-boundary','Nota de realismo: el modelo actual confirma Picking y Transporte en un mismo evento de despacho. Todavía no simula staging, carga en camión ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
+ return model;
 }
-
+function renderPrimarySkuSummary(model){
+ const panel=$('primarySkuSummary'),metrics=$('primarySkuMetrics'),insight=$('primarySkuInsight');
+ panel.hidden=false;metrics.replaceChildren();insight.replaceChildren();
+ const total=model.metrics.actualOrders,shipped=model.metrics.shippedOrders,pending=model.metrics.pendingOrders;
+ const percent=total?100*shipped/total:100;
+ $('primarySkuHeading').textContent=pending?'📦 Aún quedan pedidos pendientes':'📦 La cohorte de pedidos fue expedida';
+ $('primarySkuIntro').textContent='Resultado de '+fmt(total)+' pedidos completos de la cohorte SKU, observados del día 0 al '+model.horizonDays+'. La misma información alimenta las ocho áreas.';
+ for(const [title,n,unit] of [
+  ['Pedidos solicitados',total,'pedidos completos'],
+  ['Despachados desde CD',shipped,percent.toFixed(1).replace('.',',')+' % de la cohorte'],
+  ['Pendientes al corte',pending,'sin fecha de entrega confirmada']
+ ]){
+  const tile=add(metrics,'div','canonical-area-stat');
+  add(tile,'span','',title);add(tile,'strong','',fmt(n));add(tile,'small','',unit);
+ }
+ add(insight,'strong','',pending?'Prioridad de gerencia: recuperar pedidos sin inventar existencias':'Prioridad de gerencia: sostener el servicio y revisar el costo');
+ add(insight,'p','',pending
+  ? 'Se pueden investigar compras, reserva física y capacidad por área. La vista de las ocho áreas permite ver qué ingresó, qué se liberó y qué salió realmente del CD. Ninguna expedición equivale a entrega confirmada.'
+  : 'Los pedidos de esta cohorte salieron del CD dentro del horizonte simulado. El costo de la campaña y la recepción por parte del cliente todavía requieren datos adicionales.');
+}
 function renderSkuLab(){
  // The SKU order ledger now respects the operational capacities chosen in the
  // eight-area campaign. These capacities are SKU units per day, not order counts.
@@ -375,7 +395,7 @@ function renderSkuLab(){
  const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
  delayButton.type='button';delayButton.disabled=skuLocked;delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
  delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;save();renderSkuLab()};
- if(!revealed)$('canonicalAreaView').replaceChildren();
+ if(!revealed){$('canonicalAreaView').replaceChildren();$('primarySkuSummary').hidden=true}
  if(revealed){
   const actualOrders=contract.actualSampleOrders;
   // The selected comparison is shared between the operational trace and SKU audit.
@@ -383,7 +403,8 @@ function renderSkuLab(){
   const integrated=recovery.integrated;
   plannedSkuRun=integrated.planned;
   const chain=supplyBridge({...input,option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:recovery,campaignId});
-  renderCanonicalAreasFromSku(chain,contract,recovery);
+  const physicalAreas=renderCanonicalAreasFromSku(chain,contract,recovery);
+  renderPrimarySkuSummary(physicalAreas);
   const trace=add(root,'div','area-kpi-tile supply-trace');
   add(trace,'strong','','🔗 Cómo se conectan las áreas');
   add(trace,'small','','Comercial → Planeación: pronóstico '+commercialForecast.toFixed(1)+' % de 200 pedidos · cobertura planificada '+planningCoverage.toFixed(1)+' %. La orden de compra SKU original queda congelada y la demanda sorpresa no la recalcula.');
@@ -829,6 +850,7 @@ $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('da
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 for(const button of $('resultTabs').children)button.onclick=()=>showResultView(button.getAttribute('data-result-target'),true);
+$('primaryToAreas').onclick=()=>showResultView('areas',true);
 for(const [id,view] of [['overviewToAreas','areas'],['areasToInventory','inventory'],['inventoryToEconomics','economics'],['economicsToImprovement','improvement']])$(id).onclick=()=>showResultView(view,true);
 $('improvementToRecovery').onclick=()=>{showSection('recovery');$('recoverySection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('beginExercise').onclick=()=>showSection('operations');
