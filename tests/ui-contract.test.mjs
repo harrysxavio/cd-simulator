@@ -81,8 +81,8 @@ test('single campaign contract supplies physical SKU capacities and limits',()=>
  for(const key of ['receivingUnitCapacity:area.receivingCapacity','pickingUnitCapacity:area.pickingCapacity','transportUnitCapacity:area.stages[7].capacity']){
   assert.ok(adapter.includes(key),'Missing SKU capacity: '+key);
  }
- assert.ok(app.includes('const chain=supplyBridge({...contract.skuInputs'));
- assert.ok(app.includes('const audit=skuAudit({...contract.skuInputs'));
+ assert.ok(app.includes('const chain=supplyBridge({...input'));
+ assert.ok(app.includes('const audit=skuAudit({...input'));
  assert.ok(app.includes('comparisonResult:recovery'));
 });
 
