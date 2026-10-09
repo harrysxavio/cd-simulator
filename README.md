@@ -1,4 +1,4 @@
-# Supply Chain Operations Lab · v11.8
+# Supply Chain Operations Lab · v11.9
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
@@ -289,3 +289,22 @@ La simulación de órdenes SKU incorpora dos restricciones más de la campaña p
 **Límites pendientes**: las decisiones agregadas de forecast/planeación aún no producen el manifiesto exacto de compras SKU. La capacidad de Inventario, disponibilidad confiable y el costo agregado tampoco provienen de un único libro transaccional; los resultados económicos del laboratorio SKU no deben sumarse a los de la campaña agregada. La simulación de Calidad es una tasa de liberación diaria, no una tasa de defectos.
 
 **Estado estimado v11.8:** motor operacional/económico 85 %, demanda/recuperación 89 %, SKU/compras/inventario 93 %, UX y aprendizaje 86 %, QA/documentación 72 %. Promedio simple **85 %**, orientativo y pendiente de validación de interfaz en Android.
+
+## v11.9 · Comercial y Planeación fijan la compra SKU original
+
+Las decisiones tomadas en **Comercial** y **Planeación** ya modifican la compra original del laboratorio SKU. La lógica es explícita y auditable:
+
+1. Comercial determina el pronóstico SKU para la cohorte de referencia: **pedidos pronosticados = redondeo(200 × forecast %)**.
+2. La política de inventario calcula objetivos SKU usando esos pedidos pronosticados, inventario inicial y cobertura en días.
+3. Planeación solicita una fracción de cada necesidad: **compra comprometida por SKU = techo(necesidad propuesta × cobertura de Planeación %)**.
+4. El valor de la orden se calcula exclusivamente desde esas unidades comprometidas y su costo por SKU.
+5. Cuando aparece la demanda sorpresa, el manifiesto original se mantiene **congelado**; Compras determina cuánto entrega efectivamente el proveedor, Recepción aplica capacidad, Calidad libera, y Picking/Transporte respetan sus límites.
+6. Si el proveedor entrega menos que la orden comprometida, la compra urgente calcula el faltante físico respecto de las **unidades realmente entregadas**, no frente a existencias imaginarias por órdenes incumplidas.
+
+**Ejemplo verificable del laboratorio (política de servicio, 200 pedidos planificados):** con pronóstico y cobertura al 100 %, la orden inicial es A 160, B 17, C 29 unidades (CLP 530.900). Con pronóstico al 80 % y cobertura al 60 %, es A 60, B 0, C 8 (CLP 160.000). Son escenarios comparativos, no compras reales.
+
+Se amplían pruebas de regresión para detectar cambios indebidos en el manifiesto tras la sorpresa, proveedores que no entregan, compatibilidad del escenario base y conciliación con auditoría SKU.
+
+**Límites:** el plan SKU sigue usando una cohorte didáctica proporcional de 200 pedidos, no la escala directa de 1000 unidades del modelo agregado. Aún falta compartir el control de accesibilidad del inventario, reservas, y el libro contable/económico único. Los montos del laboratorio no se suman a los del reporte financiero de la campaña.
+
+**Estado orientativo:** fase 1 motor/economía 86 %, fase 2 sorpresa/recuperación 90 %, fase 3 SKU/compras 95 %, fase 4 UX móvil 87 %, fase 5 QA/documentación 74 %. Promedio simple **86 %**. Estos porcentajes son estimaciones funcionales, no verificación de producción. Validar en GitHub Actions y en un Android real.
