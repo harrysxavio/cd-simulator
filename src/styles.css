@@ -569,3 +569,134 @@ html,body{max-width:100%;overflow-x:clip}
  .canonical-overview-insight{padding:13px}
  .legacy-aggregate-details>summary{font-size:.87rem}
 }
+
+
+/* v11.22 · Learning in progressive decisions, not walls of cards.
+   Telephone readability comes from hierarchy and short copy, not giant type. */
+.mission-guide{margin:6px 0 10px;font-size:.88rem;line-height:1.45;color:#a6dbc9}
+.mission-impact-details,.flow-technical,.director-why,.director-alternatives,.director-scope-detail,.manager-stock-details,.manager-scope-detail,.manager-zero-days{
+  min-width:0;border:1px solid #34596b;border-radius:10px;overflow:hidden;
+}
+.mission-impact-details>summary,.flow-technical>summary,.director-why>summary,
+.director-alternatives>summary,.director-scope-detail>summary,.manager-stock-details>summary,
+.manager-scope-detail>summary,.manager-zero-days>summary{
+  cursor:pointer;min-height:44px;display:flex;align-items:center;padding:10px 12px;
+  font-size:.9rem;line-height:1.4;color:#b1e7d8;font-weight:650;
+}
+.mission-impact-details .impact{margin:0 10px 10px}
+.flow-technical{margin-top:4px;background:#10293a}
+.flow-technical>p{padding:0 12px 12px;margin:0}
+.director-why{margin-top:6px}
+.director-why p{padding:4px 12px 12px;margin:0!important}
+.director-alternatives{margin-top:12px}
+.director-alternatives[hidden]{display:none}
+.director-options{margin:0;padding:10px;gap:8px}
+.director-option{padding:11px 12px}
+.director-option p{margin:4px 0 0}
+.director-option-more{margin-top:7px;border-top:1px solid #3b5b70}
+.director-option-more>summary{min-height:44px;padding:9px 0;color:#a8ddcb;cursor:pointer;font-size:.83rem}
+.director-scope-detail{margin-top:9px;border-color:#2d5061}
+.director-scope{margin:0;padding:0 12px 12px;font-size:.83rem}
+.director-reason .director-next{margin:0;padding:0;border:0;font-weight:650}
+#skuRecoveryDecision{gap:11px}
+#skuRecoveryDecision .manager-inventory-review,
+#skuRecoveryDecision .manager-purchase-options,
+#skuRecoveryDecision .manager-purchase-preview{gap:10px}
+.manager-stock-details,.manager-scope-detail{background:#122d3f}
+.manager-stock-details>.manager-fineprint{padding:8px 12px 0}
+.manager-stock-details .manager-stock-grid{padding:6px 10px 10px}
+.manager-stock-details .manager-stock-item{gap:3px;padding:8px}
+.manager-stock-lead{color:#e1f1fc!important;font-weight:650}
+.manager-selected-meaning{border-left:3px solid #5cd7b9;padding:5px 0 5px 10px}
+.manager-preview-hint{margin:-3px 0 0!important}
+.manager-pending-summary{border-left:3px solid #e1b978;padding:8px 10px;background:#1b3949;border-radius:5px}
+.manager-scope-detail{margin:0}
+.manager-scope-detail>p{padding:0 12px 12px}
+.manager-timeline-explain{padding:8px 12px 4px!important;font-size:.88rem!important}
+.manager-zero-days{margin:5px 0 10px;background:#10293a}
+.manager-zero-days>summary{font-size:.84rem}
+.manager-zero-days .manager-shipment-timeline{padding:0 8px 8px}
+.manager-shipment-timeline{gap:6px;margin:7px 0}
+.manager-shipment-day{padding:9px 11px;gap:2px}
+.manager-shipment-day strong{font-size:.92rem}
+.manager-shipment-day small{font-size:.8rem}
+#skuRecoveryDecision .manager-preview-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+#skuRecoveryDecision .manager-preview-stat{padding:9px;gap:4px;min-width:0}
+#skuRecoveryDecision .manager-preview-stat span{font-size:.78rem;line-height:1.35;color:#bfdfdc}
+#skuRecoveryDecision .manager-preview-stat strong{font-size:1.32rem;line-height:1.1}
+#skuRecoveryDecision .manager-preview-stat:last-child{grid-column:auto}
+#skuRecoveryDecision .manager-option-btn{min-height:76px}
+#skuRecoveryDecision .manager-option-btn span{font-size:.81rem;line-height:1.35}
+#skuRecoveryDecision .manager-warning{font-size:.88rem;line-height:1.45}
+.guided-flow-hint{font-size:.82rem;line-height:1.5;color:#a8d9d1;margin:0 0 8px}
+.compact-flow{margin:4px 0;padding:10px 12px;gap:4px}
+.compact-flow p{font-size:.95rem;line-height:1.45}
+.compact-flow strong{font-size:.88rem}
+.compact-flow small{font-size:.82rem}
+#choices{margin:12px 0}
+.mission-decision-title{margin:12px 0 7px}
+.mission .learning-panel{margin:11px 0}
+@media(max-width:680px){
+ /* The old sticky toolbar obscured headings and entire cards while scrolling. */
+ .session-controls{position:static!important;top:auto;z-index:auto;margin:0 0 9px;padding:4px 0;background:transparent;border:0;box-shadow:none}
+ .session-buttons{gap:7px}
+ .session-buttons .btn{min-height:44px;padding:8px 7px;font-size:.81rem}
+ .result-tabs{position:static!important;top:auto!important}
+ .shell{padding:8px 10px 32px}
+ .panel{padding:12px;border-radius:13px;box-shadow:none}
+ .director-panel,.manager-recovery,.canonical-areas-panel,.canonical-overview{padding:12px}
+ .director-intro{margin:0 0 12px;font-size:.9rem;line-height:1.42}
+ .director-chapter,.manager-step{margin-bottom:7px}
+ .director-briefing{padding:12px;gap:5px;border-radius:12px}
+ .director-story{font-size:1.06rem;line-height:1.3}
+ .director-briefing p{font-size:.91rem;line-height:1.45}
+ .director-evidence{display:grid;grid-template-columns:1fr;gap:5px;margin:9px 0 0}
+ .director-stat,.director-stat:first-child{grid-column:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;min-height:48px;border-radius:10px}
+ .director-stat span{font-size:.88rem;line-height:1.3}
+ .director-stat strong{font-size:1.2rem;line-height:1.15;white-space:nowrap}
+ .director-reason{margin-top:10px;padding:12px;border-radius:11px}
+ .director-reason-eyebrow{font-size:.72rem;margin-bottom:4px}
+ .director-reason h3{font-size:1rem;margin-bottom:7px;line-height:1.35}
+ .director-reason p{font-size:.88rem!important;line-height:1.45;margin:0}
+ .director-options h3{font-size:.93rem}
+ .director-cta{gap:7px;margin:12px 0}
+ .director-cta .btn{font-size:.93rem!important;min-height:46px;padding:10px 11px}
+ #skuRecoveryDecision .manager-inventory-review,
+ #skuRecoveryDecision .manager-purchase-options,
+ #skuRecoveryDecision .manager-purchase-preview,
+ #skuRecoveryDecision .manager-po-confirmed{padding:12px;border-radius:12px;gap:9px}
+ .manager-recovery-intro{font-size:.9rem;line-height:1.42;margin:6px 0 8px}
+ #skuRecoveryDecision h3{font-size:1rem}
+ #skuRecoveryDecision p{font-size:.89rem;line-height:1.46}
+ #skuRecoveryDecision .manager-option-grid{gap:6px;grid-template-columns:1fr}
+ #skuRecoveryDecision .manager-option-btn{min-height:51px;padding:11px 12px;gap:2px;border-radius:10px}
+ #skuRecoveryDecision .manager-option-btn.chosen{padding:10px 11px}
+ #skuRecoveryDecision .manager-option-btn strong{font-size:.9rem;line-height:1.3}
+ #skuRecoveryDecision .manager-option-btn span{display:none}
+ #skuRecoveryDecision .manager-preview-stat{padding:9px 5px}
+ #skuRecoveryDecision .manager-preview-stat strong{font-size:1.18rem}
+ #skuRecoveryDecision .manager-preview-stat span{font-size:.72rem}
+ #skuRecoveryDecision .manager-purchase-settings{padding:10px;gap:6px}
+ #skuRecoveryDecision .manager-stock-commitment{font-size:.8rem!important;line-height:1.35}
+ .mission{padding:12px}
+ .mission .mission-head{gap:7px}
+ .mission .mission-head #missionNumber{font-size:.72rem}
+ .mission #missionTitle{font-size:1.15rem;margin:8px 0}
+ .mission #missionDescription{font-size:.9rem;line-height:1.45;margin:5px 0}
+ .mission .learning-panel>summary{padding:11px}
+ .mission .learning-panel>summary .detail-hint{font-size:.73rem}
+ .mission .numeric-control{padding:11px;margin:9px 0}
+ .mission .numeric-control p{font-size:.82rem;line-height:1.4;margin:6px 0}
+ .mission .numeric-input{font-size:1rem}
+ .mission .choices{gap:7px}
+ .mission .choice{min-height:51px;padding:11px 12px}
+ .mission .choice strong{font-size:.91rem}
+ .mission .choice small{font-size:.8rem;line-height:1.35}
+ .mission .flow-summary{padding:10px 12px}
+ .mission .buttons{margin-top:10px}
+ .canonical-area-numbers{gap:6px}
+ .canonical-area-stat,.canonical-overview .canonical-area-stat{padding:9px}
+ .canonical-area-stat strong{font-size:1.2rem}
+ .canonical-area-stat span{font-size:.77rem}
+ .canonical-area-stat small{font-size:.73rem}
+}
