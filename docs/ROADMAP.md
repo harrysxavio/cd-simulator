@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante el incremento v11.12 (2026-10-09).
+> Documento de ejecución. Revisado durante el incremento v11.13 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -43,6 +43,8 @@ La emulación Chromium NO sustituye validar físicamente Android TalkBack,
 teclado táctil y navegadores propios del dispositivo.
 
 ### M2. Dominio canónico de la campaña (prioridad P0, depende de M1)
+
+**Implementaciones parciales v11.12–v11.13:** v11.13 incorpora el contrato inmutable de decisiones entre las ocho áreas y la cohorte SKU, reutiliza la ejecución de recuperación entre informes y persiste un ID de campaña compatible con localStorage previo. Los motores siguen separados y el catálogo SKU aún tiene stock inicial independiente.
 
 **Implementación parcial v11.12:** órdenes individuales con ID, eventos de recepción y Calidad, movimientos de inventario, envíos y snapshot inmutable auditado por SKU. Pendiente: contrato único de escenario agregado/SKU, traspaso de decisiones y almacenamiento local, e integración como única fuente para todas las áreas. No se declara M2 finalizado.
 
