@@ -1,6 +1,6 @@
 # Estado de fases y entregables · v11.20
 
-**Corte:** 9 de octubre de 2026. Este estado distingue el avance de la **vista gerencial SKU**, que ya obtiene las ocho perspectivas desde un mismo libro físico, de la **unificación definitiva**, que sigue pendiente. Una etapa solo se considera completada si cumple toda su aceptación.
+**Corte:** 9 de octubre de 2026. Documento histórico v11.20: la priorización de Resumen y la verificación pública de GitHub Pages se extendieron en v11.21.  Este estado distingue el avance de la **vista gerencial SKU**, que ya obtiene las ocho perspectivas desde un mismo libro físico, de la **unificación definitiva**, que sigue pendiente. Una etapa solo se considera completada si cumple toda su aceptación.
 
 ## Fases técnicas M1–M8
 
