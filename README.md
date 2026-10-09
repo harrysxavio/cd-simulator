@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.12
+# Supply Chain Operations Lab · v11.13
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=122) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=123) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -126,7 +126,7 @@ node --experimental-default-type=module --test tests/*.test.mjs
 
 Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **La integración anterior v11.9 verificó GitHub Actions y 118 pruebas de regresión en el PR #5; v11.10 requiere validación propia.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
-## Roadmap activo · v11.12
+## Roadmap activo · v11.13
 
 **[Consultar plan completo de cierre (hitos M1–M8)](docs/ROADMAP.md)**. Los valores mostrados son estimaciones de las funciones existentes, no porcentajes de esfuerzo restante.
 
@@ -171,6 +171,16 @@ La consolidación económica entre motores necesita primero unificar horizonte t
 - La vista de trazabilidad SKU incorpora un resumen de órdenes y eventos identificables.
 
 **Alcance declarado:** la nueva estructura es una proyección canónica del motor SKU, no la unificación completa de los dos motores. M2 sigue parcialmente abierto: faltan contrato de escenario único, migración de decisiones persistidas y soporte ampliado de eventos/demandas de la campaña agregada. M3–M4 permanecen pendientes. La regresión Node y Chromium se verifican por PR.
+
+## v11.13 · Contrato único de decisiones y cohorte SKU (incremento M2)
+
+- `src/campaign-contract.js` transforma las decisiones de las ocho áreas en un único contrato inmutable con pronóstico comercial, cobertura de compras, porcentaje de entrega de proveedor, tasa de liberación de Calidad y capacidades de Recepción, Picking y Transporte.
+- La sorpresa de demanda modifica el tamaño de la **muestra SKU**, pero no la compra original congelada. La muestra continúa siendo de 200 pedidos planificados, representativos solo para el ejercicio; las unidades agregadas de la campaña no equivalen a pedidos o unidades SKU.
+- El identificador `campaignId` persiste en el navegador mediante el formato anterior de almacenamiento, compatible con partidas ya guardadas. Una nueva campaña genera otra identidad.
+- La vista SKU reutiliza una misma ejecución seleccionada para el informe canónico, la auditoría de inventario y el comparador. Se evita repetir cálculos redundantes.
+- Se añade una advertencia visible: el inventario del catálogo SKU aún no deriva del stock agregado configurable. Los costos de los dos motores siguen separados.
+
+**Pendiente de M2:** origen físico único de stock y pedidos para las ocho áreas, migración completa del modelo agregado y prueba de escenarios de campaña conjunta. M3 (motor común) y M4 (economía unificada) siguen sin completarse. No sumar magnitudes de motores diferentes.
 
 ## Autoría y propósito
 
