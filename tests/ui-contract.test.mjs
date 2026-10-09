@@ -61,16 +61,16 @@ test('SKU decisions persist across reload and restart resets them',()=>{
  }
  assert.match(app,/skuUrgentArrival=\[1,2,5,10,13\]\.includes\(s\.skuUrgentArrival\)/);
  assert.match(app,/skuRecovery=Object\.hasOwn\(RECOVERY_OPTIONS,s\.skuRecovery\)/);
- assert.ok(app.includes("skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuDecisions=[];save()"));
+ assert.ok(app.includes("skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save()"));
 });
 
 test('the percentage of urgent SKU purchases persists, drives the comparison and resets',()=>{
  assert.match(app,/skuPurchaseCoverage=100/);
- assert.ok(app.includes('skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuDecisions}'));
+ assert.ok(app.includes('skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions}'));
  assert.match(app,/skuPurchaseCoverage=\[0,25,50,75,100\]\.includes\(s\.skuPurchaseCoverage\)/);
  assert.match(app,/purchaseCoveragePercent:skuPurchaseCoverage/);
  assert.match(app,/coverInput\.onchange=\(\)=>\{skuPurchaseCoverage=Number\(coverInput\.value\);save\(\);renderSkuLab\(\)\}/);
- assert.ok(app.includes("skuPurchaseCoverage=100;skuDecisions=[];save();showSection('operations')"));
+ assert.ok(app.includes("skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save();showSection('operations')"));
 });
 
 
@@ -145,4 +145,17 @@ test('U2 recovery mission has distinct preview and confirmation with auditable S
  assert.ok(app.includes('coverInput.disabled=skuLocked'));
  assert.ok(app.includes('arrivalInput.disabled=skuLocked'));
  assert.ok(source.includes('campaignSnapshot({comparison,campaignId,plannedOrders:skuInputs.plannedOrders})'));
+});
+
+test('U2b reserve is a genuine physical opening-stock partition with a dated internal move',()=>{
+ const engine=readFileSync(new URL('../src/events.js',import.meta.url),'utf8');
+ const commit=readFileSync(new URL('../src/sku-decision.js',import.meta.url),'utf8');
+ assert.ok(engine.includes('reserveStock={},reserveReleaseDay=null'));
+ assert.ok(engine.includes("from:'RESERVA-CD',to:'PICK-FACE'"));
+ assert.ok(app.includes('skuReservePercent=Number(reserveControl.value)'));
+ assert.ok(app.includes("['reserve','Habilitar reserva ubicada en el CD'"));
+ assert.ok(app.includes("const input=skuContractInputs(contract)"));
+ assert.ok(app.includes('skuDecisions=[...skuDecisions,record]'));
+ assert.ok(app.includes('manager-shipment-timeline'));
+ assert.ok(commit.includes('const reserveTransfers=snapshot.reserveTransfers'));
 });
