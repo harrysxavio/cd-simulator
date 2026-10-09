@@ -172,3 +172,11 @@ Se agregaron costo unitario ilustrativo, plazo de reposición, días de segurida
 ### Ampliación del roadmap
 
 La fase 3 se divide en **3A: rotación, mezcla y pedidos completos (piloto)**, **3B: política de reposición, cobertura, seguridad y costo de mantener stock**, y **3C: integración de inventario SKU con compras, recepción, sorpresa de demanda y economía del simulador principal**. No se crea una sexta fase, porque estos componentes son dependencias naturales del modelado de inventario. Pruebas ampliadas en `tests/sku.test.mjs`; 8 comprobaciones de integración simulada correctas. Suite Node y navegador Android aún sin confirmar.
+
+## v10.0 · Fase 3B: decisiones de reposición por rotación
+
+Se incorporó `src/policy.js` con tres políticas comparables: **Ajustada**, **Equilibrada** y **Protección de servicio**. Cada una determina coberturas objetivo diferentes por SKU de alta, media y baja rotación. El cálculo es una política de **revisión periódica de nivel objetivo** (order-up-to): `compra = max(0, techo(demanda diaria × días objetivo) - stock inicial)`. Se presenta aparte la alerta del punto de pedido, que pertenece a una lógica de revisión continua. No se mezclan los criterios.
+
+El panel SKU permite cambiar de política y muestra unidades a comprar, valor de compras, cumplimiento eventual hipotético de pedidos completos, ventas brutas adicionales hipotéticas y costo ilustrativo de mantener inventario remanente. **Las compras futuras no están disponibles en la jornada actual:** el resultado eventual compara escenarios tras recepción hipotética completa y no modela tiempos de llegada ni backorders. Los costos de mantener stock se estiman sobre stock remanente al final de la muestra, no como costo promedio de almacenamiento del período; pueden bajar al mejorar ventas, por lo que no deben interpretarse como costo total de inventario. Tampoco se modelan impuestos, costo financiero, mermas ni margen real por SKU.
+
+El ejercicio SKU sigue independiente de la campaña principal hasta validar su conciliación económica y física. Nuevas pruebas `tests/policy.test.mjs` y 8 verificaciones de interfaz simulada. Pendientes: suite Node completa, QA visual Android y acoplamiento SKU con compras/recepción/demanda sorpresa.
