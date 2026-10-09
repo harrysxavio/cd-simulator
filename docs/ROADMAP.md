@@ -1,6 +1,6 @@
 # Roadmap de cierre · Supply Chain Operations Lab
 
-> Documento de ejecución. Revisado durante el incremento U1 de diagnóstico gerencial v11.17 (2026-10-09).
+> Documento de ejecución. Revisado durante U2a de decisión SKU y trazabilidad v11.18 (2026-10-09).
 > Los porcentajes son estimaciones del alcance original; no equivalen a porcentaje
 > de esfuerzo pendiente, ni certifican uso productivo.
 
@@ -159,6 +159,8 @@ La prueba de referencia fija 1.000 unidades previstas, forecast al 80 %, reposic
 **Invariantes de negocio:** compra inicial congelada; nueva PO explícita; no rescatar antes del arribo físico; no confundir unidades agregadas de una jornada con pedidos SKU de doce días; no recomendar sobrecapacidad cuando la restricción es stock; no confundir costo económico proxy con pagos reales.
 
 **U1 · Implementado en v11.17:** se introduce briefing gerencial contextual con misión 2/4, unidades reales vs expedibles vs pendientes, causa operativa prioritaria, tres alternativas investigables y paneles desplegables para los ocho KPI/causas y el cambio manual de demanda. El diagnóstico distingue escasez de SKU, Recepción, Calidad, Inventario, Picking, Transporte y sorpresa de menor demanda; el análisis de compras urgentes sigue marcado **solo laboratorio SKU**, no acción confirmada de la jornada agregada. La heurística evita atribuir a Calidad una retención marginal cuando predomina la falta de abastecimiento. Se amplían pruebas de reglas y E2E móvil. Pendiente validación cualitativa en Android físico; U2–U5 siguen pendientes.
+
+**U2a · Implementado en v11.18 (parcial):** Misión 3/4: inspección de inventario físico inicial SKU, dos alternativas de espera o nueva compra, elección explícita de cantidad/cobertura, fecha supuesta y costo; vista previa sin mutación, confirmación persistente de una PO extraordinaria con su ID, fuente y trazabilidad de recepción/calidad/expedición; resultados SKU inmovilizados para ese escenario tras la confirmación. Se verifican casos de sobredemanda y compra día 1 vs día 13, recarga e imposibilidad de duplicar una orden confirmada. El motor agregado de una jornada sigue independiente. **U2b pendiente:** inventario de reserva físicamente ubicable, validación por lote/ubicación y plan de entrega de pendientes; compras a proveedor confirmado y coherencia de la economía compartida. U3 pendiente: alternativa de reprogramación y comparador general.
 
 ### Secuencia de entregas UX incorporada (U0–U5)
 
