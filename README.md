@@ -231,3 +231,11 @@ La ejecución [37917786027](https://github.com/harrysxavio/cd-simulator/actions/
 | 5. QA, documentación y portafolio | 60 % | GitHub Actions verde y E2E en navegador |
 
 **Global aproximado: 78 %**, promedio simple de las cinco estimaciones, no porcentaje certificado de tareas. La integración del motor SKU es la dependencia crítica.
+
+## v11.4 · Trazabilidad entre áreas para compras SKU
+
+Se añadió `src/supply-bridge.js`, una interfaz de auditoría del mismo motor de eventos que sigue la secuencia **Compras → Recepción → Inventario → Picking y despacho → Caja incremental**. La pantalla Inventario presenta estas etapas juntas para que el usuario vea cómo una compra extraordinaria impacta el stock y los pedidos completos **solo después de su fecha de llegada**. El módulo devuelve recepciones y stock diario, costos de compra, pedidos completos, pendientes y la mejora respecto de no intervenir. Hay tres pruebas nuevas de plazos, recepción fuera del horizonte y conciliación física SKU.
+
+**Límite de arquitectura:** el puente explica y calcula la interacción entre áreas en el laboratorio SKU, pero todavía no inyecta sus resultados al motor agregado principal de ocho áreas. No deben sumarse sus cifras a las del informe financiero agregado. Queda pendiente un único motor transaccional para evitar dobles conteos.
+
+**Fases estimadas v11.4:** F1 80 %, F2 89 %, F3 87 %, F4 79 %, F5 61 %; promedio simple **79 %**. El CI y las pruebas reales de Android requieren comprobación independiente.
