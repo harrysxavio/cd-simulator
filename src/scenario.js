@@ -8,7 +8,7 @@ export const DEFAULT_SCENARIO={
 };
 export const FIELDS=[
 ['demand','Demanda prevista base (plan comercial)','unidades',100,100000,100],
-['demandShockPercent','Magnitud de la sorpresa (signo aleatorio al revelar)','%',0,80,5],
+['demandShockPercent','Magnitud de la sorpresa (signo aleatorio al revelar)','%',0,100,5],
 ['areaCostTolerance','Tolerancia de sobrecosto por área','%',0,100,1],
 ['initialStock','Stock inicial','unidades',0,100000,50],
 ['reserveStock','Stock de reserva elegible','unidades',0,100000,25],
