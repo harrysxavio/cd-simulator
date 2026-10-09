@@ -204,3 +204,9 @@ html,body{max-width:100%;overflow-x:clip}
  #areaCostCards .area-kpi-tile strong{font-size:.95rem}
  #demandPresets .choice{min-height:60px}
 }
+
+/* v10.8: mobile-friendly optional demand surprise override */
+.surprise-controls{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(90px,.65fr) auto;gap:10px;align-items:center;margin:12px 0}
+.surprise-controls select,.surprise-controls input{width:100%;min-width:0;min-height:46px}
+.surprise-controls button{min-height:46px;white-space:normal}
+@media(max-width:600px){.surprise-controls{grid-template-columns:minmax(0,1fr) minmax(0,.55fr)}.surprise-controls button{grid-column:1/-1;width:100%}}
