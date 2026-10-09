@@ -186,6 +186,8 @@ La prueba de referencia fija 1.000 unidades previstas, forecast al 80 %, reposic
 **No actualizar porcentajes históricos por tener documentación o tests nuevos:** las deudas de M2/M3/M4/M5/M6/M7 permanecen, especialmente la diferencia entre el motor agregado y el motor SKU.
 
 
+**M2/M3 · Incremento v11.23 (diagnóstico con servicio físico canónico):** el encabezado de tres KPI de Misión Diagnóstico ahora toma pedidos reales, expedidos y pendientes del **mismo `campaignAreaReadModel()`** que alimenta Resumen y las ocho áreas en la cohorte SKU de doce días. No se recalcula otro escenario: la instancia inmutable se comparte en el render. La clasificación de posibles restricciones y el CTA de refuerzo continúan siendo una **hipótesis basada en el agregado de una jornada**, marcada explícitamente en pantalla y aislada de los KPI SKU. Pruebas cruzadas verifican compra urgente, reserva, demora y bloqueo físico. **M2/M3 no se cierran**: faltan campaña física única, causa SKU auditada y economía única. Ver [estado v11.23](STATUS-V11.23.md).
+
 ## Arquitectura deseada
 
 ```mermaid
