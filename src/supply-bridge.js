@@ -3,17 +3,17 @@ import {recoveryComparison} from './recovery.js';
 /** Trace a single SKU intervention through purchasing, receiving, inventory and picking.
  * The aggregate eight-area campaign is intentionally not altered by this pilot.
  */
-export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=200,delayDays={},option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100}={}){
- const result=recoveryComparison({policy,plannedOrders,actualOrders,delayDays,option,urgentArrivalDay,purchaseCoveragePercent});
+export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=200,delayDays={},option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null}={}){
+ const result=recoveryComparison({policy,plannedOrders,actualOrders,delayDays,option,urgentArrivalDay,purchaseCoveragePercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity});
  const arrival=Object.fromEntries(result.urgent.map(x=>[x.id,x.day]));
  const receipts=result.recovered.ledger.map(day=>({
-  day:day.day,received:{...day.received},shipped:day.shipped,
+  day:day.day,received:{...day.received},receivedUrgent:{...day.receivedUrgent},waitingReceiving:day.waitingReceiving,shipped:day.shipped,shippedUnits:day.shippedUnits,
   completed:day.completed,pending:day.backlog,stock:{...day.stock}
  }));
- const urgentInHorizon=result.urgent.filter(x=>x.day<=result.recovered.days);
- const lateUrgent=result.urgent.filter(x=>x.day>result.recovered.days);
+ const actuallyReceivedExtra=result.recovered.ledger.reduce((total,day)=>total+Object.values(day.receivedUrgent).reduce((n,qty)=>n+qty,0),0);
+ const unreceivedExtra=result.urgent.reduce((total,x)=>total+x.qty,0)-actuallyReceivedExtra;
  const improvement=result.recovered.completed-result.base.completed;
- const effectiveReceiptDays=urgentInHorizon.map(x=>x.day);
+ const effectiveReceiptDays=result.recovered.ledger.filter(d=>Object.values(d.receivedUrgent).some(q=>q>0)).map(d=>d.day);
  const firstUrgentReceiptDay=effectiveReceiptDays.length?Math.min(...effectiveReceiptDays):null;
  const extraUnits=result.urgent.reduce((sum,x)=>sum+x.qty,0);
  const urgentSpent=result.urgentBase+result.urgentSurcharge;
@@ -21,19 +21,19 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
  const advice=extraUnits===0
   ? (['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'No hay compra urgente solicitada. Para evaluar reposición, selecciona compra urgente y una cobertura superior a 0 %.':'El inventario disponible y las compras comprometidas cubren el faltante calculado: no se requiere compra urgente.'
   : !firstUrgentReceiptDay
-   ? 'La compra llega después del horizonte: compromete caja sin recuperar pedidos dentro de los 12 días.'
+   ? (urgentArrivalDay>result.recovered.days?'La compra llega después del horizonte: compromete caja sin recuperar pedidos dentro de los 12 días.':'La compra llega al proveedor/CD, pero la capacidad de Recepción no permite ingresar el stock a tiempo: no se recuperan pedidos.')
    : !serviceGain
     ? 'La compra llega dentro del horizonte, pero no recupera pedidos: revisa capacidad de picking, mezcla de SKU y otras restricciones.'
     : 'La reposición llega a tiempo y recupera '+improvement+' pedidos completos. Contrasta su costo incremental con el beneficio obtenido.';
- const decisionQuality=extraUnits===0?((['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'no-order':'no-shortage'):!firstUrgentReceiptDay?'late':!serviceGain?'no-gain':'effective';
+ const decisionQuality=extraUnits===0?((['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'no-order':'no-shortage'):!firstUrgentReceiptDay?(urgentArrivalDay>result.recovered.days?'late':'receiving-blocked'):!serviceGain?'no-gain':'effective';
  return {
   option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,purchaseCoveragePercent,
   decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent,purchaseCoveragePercent},
   purchasing:{committedValue:result.committedPurchaseValue,extraUnits:result.urgent.reduce((sum,x)=>sum+x.qty,0),extraCost:result.urgentBase+result.urgentSurcharge,orders:result.urgent.map(x=>({...x}))},
-  receiving:{arrivals:arrival,receivedExtraUnits:urgentInHorizon.reduce((sum,x)=>sum+x.qty,0),outsideHorizonUnits:lateUrgent.reduce((sum,x)=>sum+x.qty,0)},
+  receiving:{arrivals:arrival,receivedExtraUnits:actuallyReceivedExtra,outsideHorizonUnits:unreceivedExtra,waitingReceiving:result.recovered.waitingReceiving,unitCapacity:receivingUnitCapacity},
   inventory:{initial:{...result.recovered.initial},ending:{...result.recovered.endingStock},consumed:{...result.recovered.consumed}},
-  picking:{completed:result.recovered.completed,pending:result.recovered.pending,improvement},
+  picking:{completed:result.recovered.completed,pending:result.recovered.pending,improvement,unitCapacity:pickingUnitCapacity,transportUnitCapacity},
   finance:{incrementalExpense:result.incrementalExpense,incrementalCash:result.netCashDelta,economicProxy:result.economicProxyDelta},
-  receipts,assumptions:'Trazabilidad SKU didáctica: compras → recepción en fecha → stock disponible → pedidos completos. Aún no modifica las ocho áreas del motor agregado.'
+  receipts,assumptions:'Trazabilidad SKU didáctica: compras → recepción limitada por capacidad → stock disponible → picking y transporte limitados por unidades SKU. Las capacidades diarias pueden provenir del motor agregado, pero los costos siguen separados.'
  };
 }
