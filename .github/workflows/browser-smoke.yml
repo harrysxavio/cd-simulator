@@ -1,0 +1,46 @@
+name: Browser end-to-end smoke
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: browser-smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Pin the browser automation package. No runtime dependency is deployed
+      # to GitHub Pages: this package is installed on CI runners only.
+      - name: Install Chromium test dependency
+        run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.64.0
+      # GitHub's Ubuntu 24.04 runner includes Chromium, avoiding a redundant download.
+      - name: Verify runner Chromium binary
+        run: test -x /usr/bin/chromium
+      - name: Exercise the live DOM on desktop and mobile Chromium
+        env:
+          E2E_CHROMIUM_PATH: /usr/bin/chromium
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/cd-simulator-server.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:8000/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --silent --show-error --fail http://127.0.0.1:8000/ > /dev/null
+          node --experimental-default-type=module --test tests/browser-smoke.e2e.mjs
+      - name: Attach failed-browser screenshot
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-smoke-failure
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7

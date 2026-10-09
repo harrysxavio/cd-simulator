@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.10
+# Supply Chain Operations Lab · v11.11
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=120) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=121) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -126,17 +126,19 @@ node --experimental-default-type=module --test tests/*.test.mjs
 
 Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **La integración anterior v11.9 verificó GitHub Actions y 118 pruebas de regresión en el PR #5; v11.10 requiere validación propia.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
-## Roadmap y estado estimado · v11.1
+## Roadmap activo · v11.11
 
-| Fase | Avance aproximado | Pendientes principales |
-|---|---:|---|
-| 1. Motor operacional y económico | 80 % | Auditoría y conciliación de casos extremos |
-| 2. Demanda sorpresa y recuperación | 88 % | Escenarios reproducibles y cierre de validación |
-| 3. SKU, inventario y abastecimiento | 82 % | Unificación física y económica con el motor principal |
-| 4. UX y aprendizaje guiado | 72 % | Ejercicios progresivos, móvil y accesibilidad |
-| 5. QA, documentación y portafolio | 58 % | CI verificado, regresiones reales y revisión visual |
+**[Consultar plan completo de cierre (hitos M1–M8)](docs/ROADMAP.md)**. Los valores mostrados son estimaciones de las funciones existentes, no porcentajes de esfuerzo restante.
 
-**Próxima prioridad:** consolidar el inventario, la capacidad y la contabilidad de ambos motores, evitando doble conteo de existencias, compras, ingresos y costos. Después, ejecutar y corregir la suite Node y validar Android.
+| Fase | Referencia actual | Pendiente principal |
+| --- | ---: | --- |
+| 1. Motor operacional y económico | 85 % | Unificación del libro físico y financiero |
+| 2. Demanda sorpresa y recuperación | 89 % | Recuperación desde un único evento de campaña |
+| 3. SKU, inventario y abastecimiento | 94 % del laboratorio SKU | Sustituir el motor agregado paralelo, no sumar inventarios |
+| 4. UX y aprendizaje guiado | 86 % | Tutoriales, accesibilidad y validación móvil real |
+| 5. QA, documentación y portafolio | 76 % | Prueba E2E real, accesibilidad y cierre documental |
+
+**v11.11:** Se incorpora un flujo real de Chromium E2E (escritorio y teléfono emulado) que recorre planificación, sorpresa, recuperación, resultados, SKU, persistencia, exportación y reinicio; GitHub Actions lo ejecuta como verificación independiente. Se publicarán los resultados de CI de la versión antes de declararla validada en producción. La emulación de dispositivo no reemplaza QA en Android real.
 
 ## v10.6 · Auditoría trazable del laboratorio SKU
 
