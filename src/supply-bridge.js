@@ -19,13 +19,13 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
  const urgentSpent=result.urgentBase+result.urgentSurcharge;
  const serviceGain=improvement>0;
  const advice=extraUnits===0
-  ? ['wait','overtime'].includes(option)?'No seleccionaste una compra urgente. Compara otra alternativa si el stock disponible es insuficiente.':'Con la cobertura elegida, no se requiere compra adicional de SKU.'
+  ? (['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'No hay compra urgente solicitada. Para evaluar reposición, selecciona compra urgente y una cobertura superior a 0 %.':'El inventario disponible y las compras comprometidas cubren el faltante calculado: no se requiere compra urgente.'
   : !firstUrgentReceiptDay
    ? 'La compra llega después del horizonte: compromete caja sin recuperar pedidos dentro de los 12 días.'
    : !serviceGain
     ? 'La compra llega dentro del horizonte, pero no recupera pedidos: revisa capacidad de picking, mezcla de SKU y otras restricciones.'
     : 'La reposición llega a tiempo y recupera '+improvement+' pedidos completos. Contrasta su costo incremental con el beneficio obtenido.';
- const decisionQuality=extraUnits===0?(['wait','overtime'].includes(option)?'no-order':'no-shortage'):!firstUrgentReceiptDay?'late':!serviceGain?'no-gain':'effective';
+ const decisionQuality=extraUnits===0?((['wait','overtime'].includes(option)||purchaseCoveragePercent===0)?'no-order':'no-shortage'):!firstUrgentReceiptDay?'late':!serviceGain?'no-gain':'effective';
  return {
   option,label:result.label,plannedOrders,actualOrders,urgentArrivalDay,purchaseCoveragePercent,
   decision:{quality:decisionQuality,advice,firstUrgentReceiptDay,serviceGain,extraUnits,urgentSpent,purchaseCoveragePercent},
