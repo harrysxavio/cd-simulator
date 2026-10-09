@@ -1,14 +1,15 @@
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=100';
-import {skuOrderLab} from './sku.js?v=100';
-import {demandJourney} from './journey.js?v=100';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=100';
-import {flow,diagnose,ACTIONS} from './flow.js?v=100';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=100';
-import {areaKpis} from './kpis.js?v=100';
-import {causalAudit} from './causal.js?v=100';
-import {attentionSignals} from './attention.js?v=100';
+import {deliveryTimeline} from './timeline.js?v=101';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=101';
+import {skuOrderLab} from './sku.js?v=101';
+import {demandJourney} from './journey.js?v=101';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=101';
+import {flow,diagnose,ACTIONS} from './flow.js?v=101';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=101';
+import {areaKpis} from './kpis.js?v=101';
+import {causalAudit} from './causal.js?v=101';
+import {attentionSignals} from './attention.js?v=101';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced';
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
@@ -216,6 +217,14 @@ function renderSkuLab(){
   button.type='button';button.setAttribute('aria-pressed',String(id===skuPolicy));
   button.onclick=()=>{skuPolicy=id;renderSkuLab()};
  }
+ const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
+ delayButton.type='button';delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
+ delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;renderSkuLab()};
+ const timeline=deliveryTimeline({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
+ const timelineCard=add(root,'div','area-kpi-tile');
+ add(timelineCard,'strong','','¿Cuándo estará realmente disponible la reposición?');
+ for(const snap of timeline.snapshots)add(timelineCard,'small','','Día '+snap.day+' · pedidos completos posibles '+fmt(snap.complete)+' / '+fmt(timeline.orders)+' · recibidos A '+fmt(snap.receipts.A)+', B '+fmt(snap.receipts.B)+', C '+fmt(snap.receipts.C));
+ add(timelineCard,'small','',timeline.assumptions);
  const policy=inventoryPolicy({policy:skuPolicy});
  const policySummary=add(root,'div','area-kpi-tile');
  add(policySummary,'strong','','Política '+policy.label+' · pedidos futuros de reposición');
