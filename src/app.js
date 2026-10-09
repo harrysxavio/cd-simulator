@@ -379,12 +379,13 @@ function renderSkuLab(){
   // Put cross-area explanation after the user selects recovery inputs.
   root.append(trace);
  }
- const events=eventSimulation({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
+ const events=eventSimulation({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{},...skuAreaCapacity});
  const eventCard=add(root,'div','area-kpi-tile');
- add(eventCard,'strong','','Operación cronológica: pedidos pendientes que esperan reposición');
+ add(eventCard,'strong','','Escenario base de 200 pedidos · operación cronológica');
+ add(eventCard,'small','','La referencia usa la misma entrega de proveedor, liberación de Calidad y capacidades de las áreas; no corresponde a los pedidos adicionales del shock.');
  add(eventCard,'small','','En plazo (día 0): '+fmt(events.onTime)+' · entregados tarde: '+fmt(events.late)+' · pendientes al día '+events.days+': '+fmt(events.pending));
  add(eventCard,'small','','Demora media de pedidos tardíos: '+events.averageDelayDays.toFixed(1)+' días');
- for(const e of events.ledger.filter(x=>x.day===0||x.shipped>0||[2,5,10,12].includes(x.day)))add(eventCard,'small','','Día '+e.day+' · despachados hoy '+fmt(e.shipped)+' · despachados acumulados '+fmt(e.completed)+' · pendientes '+fmt(e.backlog));
+ for(const e of events.ledger.filter(x=>x.day===0||x.shipped>0||[2,5,10,12].includes(x.day)))add(eventCard,'small','','Día '+e.day+' · despachados hoy '+fmt(e.shipped)+' · acumulados '+fmt(e.completed)+' · pendientes '+fmt(e.backlog)+' · retenidos en Calidad '+fmt(e.waitingQuality));
  add(eventCard,'small','',events.assumptions);
  const timeline=deliveryTimeline({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
  const timelineCard=add(root,'div','area-kpi-tile');
