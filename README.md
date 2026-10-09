@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.15
+# Supply Chain Operations Lab · v11.17
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=125) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=126) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -17,6 +17,18 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Roadmap integrado M1–M8 con entregas U0–U5](docs/ROADMAP.md).
 
 **Prioridad siguiente:** mejorar la claridad de Diagnóstico y la explicación del cuello de botella (U1) antes de agregar más paneles. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
+
+## v11.17 · U1 misión de Diagnóstico para gerente de CD
+
+El diagnóstico ahora es una misión de gerencia **mobile-first**: primero presenta demanda, unidades expedibles y brecha; después identifica **una señal operativa prioritaria con explicación** y ofrece alternativas razonables según el escenario. Cada elección se contextualiza sin perder el análisis técnico:
+
+- **Escenarios:** sobredemanda por faltante de abastecimiento, limitación de Recepción/Calidad/Inventario/Picking/Transporte, cobertura normal o sorpresa a la baja. Son **señales del modelo** basadas en restricciones, no causas raíz verificadas.
+- **Claridad móvil:** cifras esenciales, tarjetas breves, botones grandes; ocho áreas, fórmulas y KPI completos en «Ver indicadores y explicación técnica». Los controles para probar otro shock están en otro panel desplegable.
+- **Gamificación profesional:** misión 2 de 4, narrativa de dirección de CD, problema central y consecuencias. No se usan puntos arbitrarios ni se ocultan riesgos de negocio.
+- **Acciones existentes:** «Explorar decisiones de recuperación» enfoca el área relevante; cuando falta abastecimiento, «Explorar compra urgente en laboratorio SKU» abre **otro modelo** con horizonte de doce días y explica esa limitación. Ningún botón finge aplicar una nueva compra al motor de una jornada.
+- **Historial seguro:** se conserva el botón global de reinicio y el plan original cerrado tras revelar demanda. La pantalla técnica no se elimina.
+
+U1 **no cambia las ecuaciones del motor agregado ni la economía**. U2/U3 integrarán eventos de compras nuevas con los movimientos físicos y una decisión previa al resultado final. [Criterios funcionales](docs/SCENARIO-BUSINESS-ACCEPTANCE.md) · [Plan incremental UX](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 
 ## Cómo utilizarlo
 

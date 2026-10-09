@@ -338,3 +338,83 @@ html,body{max-width:100%;overflow-x:clip}
  .session-buttons .btn{padding:11px 5px;font-size:.78rem;white-space:normal;line-height:1.2}
 }
 @media(prefers-reduced-motion:reduce){.session-controls{scroll-behavior:auto}}
+
+
+/* v11.17 / U1: manager-of-a-CD mission, readable before the detailed dashboard. */
+.director-panel{max-width:940px;margin-inline:auto;min-width:0}
+.director-chapter{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;color:#9de7df;font-weight:800;letter-spacing:.06em;font-size:.78rem}
+.director-intro{font-size:1rem;line-height:1.6;max-width:72ch;margin:0 0 18px}
+.director-briefing{border-radius:16px;border:1px solid #476982;background:linear-gradient(110deg,#19394f,#132c46);padding:22px;display:grid;gap:9px}
+.director-briefing.critical{border-color:#b97945;background:linear-gradient(110deg,#45372e,#14283e)}
+.director-briefing.warning{border-color:#bb9860}
+.director-briefing.stable{border-color:#4c9b86;background:linear-gradient(110deg,#183b39,#142b40)}
+.director-alert{font-size:.8rem;line-height:1.45;font-weight:800;letter-spacing:.02em;color:#f8dda7}
+.director-briefing.stable .director-alert{color:#b1f2d9}
+.director-story{font-size:clamp(1.16rem,4vw,1.5rem);line-height:1.32;margin:0;color:#f4fbff}
+.director-briefing p{font-size:1rem;color:#e4eff9;line-height:1.55;margin:0}
+.director-evidence{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.director-stat{display:grid;align-content:start;gap:7px;min-width:0;border:1px solid #3a6079;border-radius:13px;padding:15px;background:#102b41}
+.director-stat span{font-size:.84rem;line-height:1.35;color:#c2d9e9}
+.director-stat strong{font-size:clamp(1.3rem,3.8vw,2rem);line-height:1.15;color:#f0f9ff;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.director-stat small{font-size:.77rem;line-height:1.35}
+.director-stat:last-child strong{color:#ffd08e}
+.director-reason{border:1px solid #41687b;border-radius:14px;margin-top:16px;padding:20px;background:#102c3e}
+.director-reason-eyebrow{display:block;margin-bottom:9px;color:#9ff0de;letter-spacing:.05em;font-weight:800;font-size:.78rem}
+.director-reason h3{font-size:1.17rem;line-height:1.4;margin:0 0 10px;color:#f5fdff}
+.director-reason p{font-size:.97rem;line-height:1.62;margin:8px 0;color:#d3e3ef}
+.director-reason .director-next{border-top:1px solid #35566a;padding-top:13px;margin-top:14px;color:#b4f0dd}
+.director-options{margin-top:18px;display:grid;gap:10px}
+.director-options h3{margin:0 0 2px}
+.director-option{border:1px solid #375a74;border-radius:13px;background:#193249;padding:15px}
+.director-option-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.director-option strong{color:#e7f6ff}
+.director-option-status{border:1px solid #577288;border-radius:99px;padding:4px 9px;font-weight:750;font-size:.75rem;color:#c7d7e9}
+.director-option p{margin:8px 0 0;color:#c4d6e6;line-height:1.55;font-size:.94rem}
+.director-preview{margin:0}
+.director-scope{font-size:.84rem;line-height:1.55;color:#aecbde;margin:14px 0}
+.director-cta{display:grid;gap:10px;margin:14px 0 20px}
+.director-cta .btn{min-height:48px;width:100%;text-align:center;line-height:1.35}
+.director-cta .btn[hidden]{display:none!important}
+.director-technical{margin-top:12px;min-width:0}
+.director-technical>summary{min-height:52px;line-height:1.5}
+.director-technical-content{padding:16px;min-width:0}
+.director-technical-content>*{max-width:100%}
+.director-technical-content .metrics{margin-top:16px}
+.director-technical-content .diagnosis-list{margin-bottom:0}
+.director-technical-content .strategy-insight{overflow-wrap:anywhere}
+.director-technical #preliminaryFindings{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px}
+.director-technical .diagnosis-card{margin:0;padding:13px}
+.director-technical .area-kpi-grid{min-width:0}
+.director-technical #surpriseOverride{width:100%}
+.director-technical #surpriseOverride .surprise-controls{max-width:100%}
+@media(max-width:650px){
+ .director-panel{padding:15px}
+ .director-chapter{font-size:.72rem;line-height:1.5}
+ .director-intro{font-size:1rem}
+ .director-briefing{padding:16px}
+ .director-evidence{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .director-stat{padding:13px 11px}
+ .director-stat:first-child{grid-column:1/-1}
+ .director-stat strong{font-size:1.55rem}
+ .director-reason{padding:15px}
+ .director-reason h3{font-size:1.1rem}
+ .director-options h3{font-size:1rem}
+ .director-option{padding:14px}
+ .director-technical>summary{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;padding:13px;font-size:.91rem}
+ .director-technical .detail-hint{width:100%;margin-left:0;font-size:.82rem}
+ .director-technical-content{padding:10px}
+ .director-technical-content .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .director-technical #preliminaryFindings{grid-template-columns:1fr}
+}
+/* Technical explanation remains optional; essential narrative is never <details>. */
+@media(prefers-reduced-motion:reduce){.director-panel,.director-briefing{scroll-behavior:auto}}
+
+
+/* Tap selection polish: full-card buttons throughout the eight managerial areas. */
+#choices .choice,.strategy-choices .choice{min-height:68px;touch-action:manipulation;line-height:1.4}
+#choices .choice strong{font-size:1rem}
+#choices .choice small{font-size:.88rem;line-height:1.55}
+#roadmap .node{min-height:60px;touch-action:manipulation}
+#preliminarySection .mini{min-height:44px;font-size:.88rem}
+#choices .numeric-control .numeric-input{min-height:46px;max-width:100%;font-size:1rem}
+@media(max-width:600px){#choices .choice{padding:15px 13px;border-radius:13px}#preliminarySection .director-cta .btn{font-size:1rem;padding:13px 12px}#preliminarySection .director-reason p{font-size:1rem}}

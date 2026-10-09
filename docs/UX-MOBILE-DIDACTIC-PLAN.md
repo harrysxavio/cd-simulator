@@ -1,6 +1,6 @@
 # Plan UX/UI móvil y didáctica · Supply Chain Operations Lab
 
-**Investigación y especificación v11.16** · Fecha 2026-10-09 · **Estado:** propuesta de implementación incremental, todavía no aplicada a la interfaz.
+**Investigación y especificación v11.16; primer incremento U1 implementado en v11.17** · Fecha 2026-10-09 · **Estado:** U1 aplicado a Diagnóstico; U2–U5 siguen como propuesta. La experiencia de las ocho áreas todavía tendrá refinamientos posteriores.
 
 Documento complementario: [pruebas reproducidas de sobredemanda y restricciones](SCENARIO-BUSINESS-ACCEPTANCE.md). Se conserva el [roadmap general](ROADMAP.md) de M1–M8: **no se crea un proyecto paralelo ni se salta la integración física.**
 
