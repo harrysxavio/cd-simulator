@@ -120,3 +120,17 @@ test('Quality stock held at horizon is excluded from inventory and auditable',()
  assert.equal(audit.stockValue.opening+audit.stockValue.received,audit.stockValue.shipped+audit.stockValue.held+audit.stockValue.closing);
  assert.equal(audit.orders.completed,held.picking.completed);
 });
+
+
+test('purchasing trace reconciles Commercial forecast, Planning coverage and supplier shortfill',()=>{
+ const args={policy:'service',plannedOrders:200,actualOrders:260,option:'emergency',plannedForecastPercent:80,planningCoveragePercent:70,supplierFill:{A:75,B:75,C:75}};
+ const b=supplyBridge(args);
+ const audit=skuAudit(args);
+ assert.equal(b.purchasing.forecastOrders,160);
+ assert.equal(b.purchasing.plannedForecastPercent,80);
+ assert.equal(b.purchasing.planningCoveragePercent,70);
+ assert.equal(b.purchasing.originalDelivered+b.purchasing.originalUnfilled,b.purchasing.originalOrdered);
+ assert.equal(Object.values(b.purchasing.originalPurchase).reduce((n,x)=>n+x,0),b.purchasing.originalOrdered);
+ assert.equal(audit.passed,true);
+ assert.equal(audit.orders.completed,b.picking.completed);
+});
