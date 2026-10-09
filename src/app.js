@@ -1,14 +1,15 @@
-import {eventSimulation} from './events.js?v=102';
-import {deliveryTimeline} from './timeline.js?v=102';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=102';
-import {skuOrderLab} from './sku.js?v=102';
-import {demandJourney} from './journey.js?v=102';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=102';
-import {flow,diagnose,ACTIONS} from './flow.js?v=102';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=102';
-import {areaKpis} from './kpis.js?v=102';
-import {causalAudit} from './causal.js?v=102';
-import {attentionSignals} from './attention.js?v=102';
+import {integratedDemand} from './integrated.js?v=103';
+import {eventSimulation} from './events.js?v=103';
+import {deliveryTimeline} from './timeline.js?v=103';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=103';
+import {skuOrderLab} from './sku.js?v=103';
+import {demandJourney} from './journey.js?v=103';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=103';
+import {flow,diagnose,ACTIONS} from './flow.js?v=103';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=103';
+import {areaKpis} from './kpis.js?v=103';
+import {causalAudit} from './causal.js?v=103';
+import {attentionSignals} from './attention.js?v=103';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
@@ -221,6 +222,16 @@ function renderSkuLab(){
  const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
  delayButton.type='button';delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
  delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;renderSkuLab()};
+ if(revealed){
+  const actualOrders=Math.max(1,Math.round(200*effectiveScenario().actualDemand/scenario.demand));
+  const integrated=integratedDemand({policy:skuPolicy,plannedOrders:200,actualOrders,delayDays:skuSupplierDelay?{A:8}:{}});
+  const bridge=add(root,'div','area-kpi-tile');
+  add(bridge,'strong','','Demanda sorpresa aplicada al laboratorio SKU · compras congeladas');
+  add(bridge,'small','','Plan: 200 pedidos · demanda revelada: '+fmt(actualOrders)+' pedidos · compra comprometida CLP '+fmt(integrated.committedPurchaseValue));
+  add(bridge,'small','','Plan al día 12: '+fmt(integrated.planned.completed)+' completos / '+fmt(integrated.planned.pending)+' pendientes · real al día 12: '+fmt(integrated.actual.completed)+' completos / '+fmt(integrated.actual.pending)+' pendientes');
+  add(bridge,'small','','Diferencia en pendientes: '+(integrated.impact.pending>=0?'+':'')+fmt(integrated.impact.pending)+' pedidos. La sorpresa no recalcula las compras originales.');
+  add(bridge,'small','',integrated.assumptions);
+ }
  const events=eventSimulation({policy:skuPolicy,delayDays:skuSupplierDelay?{A:8}:{}});
  const eventCard=add(root,'div','area-kpi-tile');
  add(eventCard,'strong','','Operación cronológica: pedidos pendientes que esperan reposición');
