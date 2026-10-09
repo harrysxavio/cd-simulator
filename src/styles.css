@@ -418,3 +418,53 @@ html,body{max-width:100%;overflow-x:clip}
 #preliminarySection .mini{min-height:44px;font-size:.88rem}
 #choices .numeric-control .numeric-input{min-height:46px;max-width:100%;font-size:1rem}
 @media(max-width:600px){#choices .choice{padding:15px 13px;border-radius:13px}#preliminarySection .director-cta .btn{font-size:1rem;padding:13px 12px}#preliminarySection .director-reason p{font-size:1rem}}
+
+
+/* U2a · physically grounded recovery decisions, first-class on mobile. */
+.manager-recovery{max-width:940px;margin:0 auto 18px;min-width:0}
+.manager-step{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;color:#a3f2e0;font-size:.77rem;font-weight:800;letter-spacing:.04em;margin-bottom:12px}
+.manager-recovery-intro{font-size:1rem;line-height:1.62}
+#skuRecoveryDecision{display:grid;gap:15px;min-width:0}
+.manager-inventory-review,.manager-purchase-options,.manager-purchase-preview,.manager-po-confirmed{background:#102d42;border:1px solid #41657c;border-radius:16px;padding:18px;display:grid;gap:12px;min-width:0}
+#skuRecoveryDecision h3{font-size:1.1rem;line-height:1.35;margin:0;color:#f0fbff}
+#skuRecoveryDecision p{font-size:.95rem;line-height:1.55;margin:0;color:#cbdceb}
+.manager-stock-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.manager-stock-item{display:grid;gap:6px;border:1px solid #3b5c70;background:#1a3a50;border-radius:12px;padding:12px;min-width:0}
+.manager-stock-item strong{font-size:.97rem;color:#e6f5ff}
+.manager-stock-item small{font-size:.82rem;line-height:1.45}
+#skuRecoveryDecision .manager-fineprint{font-size:.84rem;color:#a9bed1}
+#skuRecoveryDecision .manager-stock-commitment{color:#acf0db;font-weight:700}
+.manager-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.manager-option-btn{border:1px solid #4c6d84;border-radius:14px;background:#1c3a53;color:#e8f7ff;padding:15px;min-height:108px;display:grid;text-align:left;align-content:center;gap:8px;touch-action:manipulation}
+.manager-option-btn strong{font-size:1rem;line-height:1.4}
+.manager-option-btn span{font-size:.9rem;line-height:1.55;color:#bcd1e1}
+.manager-option-btn.chosen{border:2px solid #54e2be;background:#184b4c;padding:14px}
+.manager-option-btn.chosen strong:before{content:'✓ ';color:#aaf5d2}
+.manager-purchase-settings{display:grid;gap:9px;max-width:550px;background:#183b51;border-radius:12px;padding:14px;border:1px solid #436f86}
+.manager-purchase-settings label{font-size:.94rem;line-height:1.45;font-weight:700;color:#d3f5ed}
+.manager-purchase-settings select{min-height:48px;width:100%;max-width:100%;font-size:1rem}
+.manager-preview-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.manager-preview-stat{display:grid;gap:6px;background:#1b3b51;border-radius:12px;padding:12px}
+.manager-preview-stat strong{font-size:clamp(1.4rem,4vw,1.85rem);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.manager-preview-stat small{font-size:.82rem;line-height:1.4}
+.manager-purchase-lines{background:#153749;border-radius:10px;padding:12px;display:grid;gap:9px}
+#skuRecoveryDecision .manager-warning{background:#42372c;border-left:4px solid #e9bc6c;padding:12px;border-radius:8px;color:#ffe7bc;font-size:.9rem}
+#skuRecoveryDecision .manager-primary{width:100%;min-height:50px;font-size:1rem;line-height:1.4}
+.manager-po-confirmed{border-color:#4ca98e;background:#123c3c}
+.manager-po-detail summary{cursor:pointer;min-height:48px;padding:12px;font-size:.95rem;border:1px solid #488a7c;border-radius:10px}
+.manager-po-line{padding:12px 6px;border-bottom:1px solid #386a69;display:grid;gap:6px}
+.manager-po-line strong{overflow-wrap:anywhere;font-size:.9rem}
+.sku-decision-stamp{background:#16403c;border:1px solid #60b99f;border-radius:13px;padding:15px;grid-column:1/-1}
+.sku-decision-stamp p{margin:6px 0 0}
+@media(max-width:620px){
+ .manager-recovery{padding:15px}
+ .manager-step{font-size:.71rem}
+ .manager-inventory-review,.manager-purchase-options,.manager-purchase-preview,.manager-po-confirmed{padding:14px}
+ .manager-stock-grid{grid-template-columns:1fr}
+ .manager-stock-item{grid-template-columns:1fr;gap:3px}
+ .manager-option-grid{grid-template-columns:1fr;gap:9px}
+ .manager-option-btn{min-height:78px}
+ .manager-preview-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .manager-preview-stat:last-child{grid-column:1/-1}
+ .manager-purchase-settings{padding:12px}
+}
