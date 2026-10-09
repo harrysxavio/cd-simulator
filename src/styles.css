@@ -210,3 +210,28 @@ html,body{max-width:100%;overflow-x:clip}
 .surprise-controls select,.surprise-controls input{width:100%;min-width:0;min-height:46px}
 .surprise-controls button{min-height:46px;white-space:normal}
 @media(max-width:600px){.surprise-controls{grid-template-columns:minmax(0,1fr) minmax(0,.55fr)}.surprise-controls button{grid-column:1/-1;width:100%}}
+
+/* v10.9: readable full-width final diagnosis cards on phones */
+#report,#report .attention-panel,#skuLab,#skuLab>*{min-width:0;max-width:100%;box-sizing:border-box}
+#skuLab .area-kpi-tile{overflow-wrap:break-word;word-break:normal}
+#skuLab .area-kpi-tile>small{display:block;font-size:.9rem;line-height:1.55;margin-top:5px}
+#skuLab .area-kpi-tile>strong{display:block;font-size:1.02rem;line-height:1.38}
+#skuLab .area-kpi-tile .area-kpi-tile{background:#143448;border-color:#396c77;margin-top:12px}
+#skuLab .buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+#skuLab .buttons button{min-width:0;width:100%;white-space:normal;line-height:1.3}
+@media(max-width:760px){
+ #skuLab.area-kpi-grid{grid-template-columns:minmax(0,1fr)!important;gap:13px}
+ #skuLab>.area-kpi-tile{width:100%;padding:16px}
+ #skuPolicyControls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ #skuPolicyControls button{min-width:0;width:100%;font-size:.89rem;line-height:1.25;padding:11px 8px}
+ #report .attention-panel{padding:12px}
+ #report .attention-panel h3{line-height:1.35}
+ #report .area-kpi-tile{overflow-wrap:break-word}
+ #skuLab .buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:410px){
+ #skuLab .buttons{grid-template-columns:minmax(0,1fr)}
+ #skuLab>.area-kpi-tile{padding:14px}
+ #report .attention-panel{padding:9px}
+ #skuPolicyControls button{font-size:.82rem}
+}
