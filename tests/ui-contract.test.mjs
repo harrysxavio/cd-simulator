@@ -109,7 +109,27 @@ test('commercial and planning decisions feed frozen SKU purchases through adapte
 });
 
 test('campaign ID persists and restarting creates a new campaign',()=>{
- assert.ok(app.includes('schemaVersion:1,campaignId,decisions'));
+ assert.ok(app.includes('schemaVersion:2,campaignId,currentSection,decisions'));
  assert.ok(app.includes('campaignId=createCampaignId();decisions='));
  assert.ok(app.includes('campaignId=typeof s.campaignId'));
+});
+
+test('restart and operation review are available from every stage, including revealed sessions',()=>{
+ for(const id of ['resetAnytime','goToOperations','sessionStatus']){
+  assert.ok(html.includes('id="'+id+'"'),'Missing global control '+id);
+ }
+ assert.ok(app.includes("$('resetAnytime').onclick=restartCampaign"));
+ assert.ok(app.includes("$('goToOperations').onclick=()=>{showSection('operations')"));
+ assert.ok(!app.includes("if(name==='operations'&&revealed){name='preliminary'}"),'Revealed plan must be viewable');
+ assert.ok(app.includes("currentSection=name;"),'Current stage must persist');
+ assert.ok(app.includes("load();showSection(currentSection);"),'Resume last stage');
+ assert.ok(app.includes("revealed?'preliminary':'operations'"),'Legacy v11.13 stage fallback');
+});
+
+test('returning to operation after revealing surprise is read-only and cannot re-plan purchases',()=>{
+ assert.ok(app.includes("const planFrozen=phase==='plan'&&revealed"));
+ assert.ok(app.includes("b.disabled=planFrozen"));
+ assert.ok(app.includes("input.disabled=planFrozen"));
+ assert.ok(app.includes("if(planFrozen)return;"));
+ assert.ok(app.includes("if(!revealed&&!decisions[NODES[active].id])"));
 });
