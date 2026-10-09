@@ -5,8 +5,11 @@ import {deliveryTimeline} from './timeline.js';
  * Day 0 demand is allocated by largest remainder; pending orders persist.
  * Supplier receipts become usable on arrival day, never earlier.
  */
-export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200,fixedPurchases=null,extraDeliveries=[]}={}){
+export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,fixedPurchases=null,extraDeliveries=[]}={}){
  if(!Number.isInteger(days)||days<0||days>365||!Number.isInteger(dailyCapacity)||dailyCapacity<0||dailyCapacity>100000)throw new Error('Horizonte o capacidad inválidos');
+ for(const [key,cap] of Object.entries({receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity})){
+  if(cap!==null&&(!Number.isSafeInteger(cap)||cap<0||cap>100000))throw new Error('Capacidad física por área inválida: '+key);
+ }
  const timeline=deliveryTimeline({policy,orders,stock,delayDays,supplierFill,fixedPurchases,checkpoints:[0]});
  const available={...timeline.initial},initial={...available};
  if(!Array.isArray(extraDeliveries)||extraDeliveries.some(d=>!SKU_CATALOG.some(p=>p.id===d.id)||!Number.isSafeInteger(d.qty)||d.qty<0||!Number.isInteger(d.day)||d.day<1||d.day>365))throw new Error('Recepción extraordinaria inválida');
@@ -28,27 +31,43 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   queue.push({type:best,fulfilledDay:null});
   assigned[best]++;
  }
+ // Arrivals are queued until Receiving has actual unit capacity.
+ // Purchase arrival does not imply that inventory is automatically received or pickable.
+ const pendingReceipts=[];
  const ledger=[];
  for(let day=0;day<=days;day++){
   const received=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
-  for(const d of timeline.deliveries)if(d.arrivalDay===day){available[d.id]+=d.received;received[d.id]+=d.received}
-  for(const d of extraDeliveries)if(d.day===day){available[d.id]+=d.qty;received[d.id]+=d.qty}
-  let shipped=0;
+  const receivedUrgent=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
+  for(const d of timeline.deliveries)if(d.arrivalDay===day&&d.received>0)pendingReceipts.push({id:d.id,remaining:d.received,urgent:false});
+  for(const d of extraDeliveries)if(d.day===day&&d.qty>0)pendingReceipts.push({id:d.id,remaining:d.qty,urgent:true});
+  let receivingRemaining=receivingUnitCapacity===null?Infinity:receivingUnitCapacity;
+  for(const shipment of pendingReceipts){
+   if(receivingRemaining<=0)break;
+   const qty=Math.min(shipment.remaining,receivingRemaining);
+   shipment.remaining-=qty;receivingRemaining-=qty;
+   available[shipment.id]+=qty;received[shipment.id]+=qty;
+   if(shipment.urgent)receivedUrgent[shipment.id]+=qty;
+  }
+  const waitingReceiving=pendingReceipts.reduce((sum,x)=>sum+x.remaining,0);
+  let shipped=0,shippedUnits=0;
   for(const order of queue){
    if(shipped>=dailyCapacity)break;
    if(order.fulfilledDay!==null)continue;
    const lines=types[order.type].lines;
+   const kitUnits=Object.values(lines).reduce((sum,qty)=>sum+qty,0);
+   if(shippedUnits+kitUnits>(pickingUnitCapacity===null?Infinity:pickingUnitCapacity))continue;
+   if(shippedUnits+kitUnits>(transportUnitCapacity===null?Infinity:transportUnitCapacity))continue;
    if(!Object.entries(lines).every(([id,qty])=>available[id]>=qty))continue;
    for(const [id,qty] of Object.entries(lines))available[id]-=qty;
-   order.fulfilledDay=day;types[order.type].fulfilled++;shipped++;
+   order.fulfilledDay=day;types[order.type].fulfilled++;shipped++;shippedUnits+=kitUnits;
   }
   const completed=queue.filter(o=>o.fulfilledDay!==null).length;
   const backlog=n-completed;
-  ledger.push({day,received,shipped,completed,backlog,stock:{...available},onTime:queue.filter(o=>o.fulfilledDay===0).length});
+  ledger.push({day,received,receivedUrgent,waitingReceiving,shipped,shippedUnits,completed,backlog,stock:{...available},onTime:queue.filter(o=>o.fulfilledDay===0).length});
  }
  const completed=queue.filter(o=>o.fulfilledDay!==null).length;
- const consumed=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,initial[p.id]+timeline.deliveries.filter(d=>d.arrivalDay<=days&&d.id===p.id).reduce((a,d)=>a+d.received,0)+extraDeliveries.filter(d=>d.day<=days&&d.id===p.id).reduce((a,d)=>a+d.qty,0)-available[p.id]]));
+ const consumed=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,initial[p.id]+ledger.reduce((total,entry)=>total+entry.received[p.id],0)-available[p.id]]));
  const late=queue.filter(o=>o.fulfilledDay!==null&&o.fulfilledDay>0);
  const backlogAgeDays=queue.filter(o=>o.fulfilledDay===null).length*(days+1);
- return {orders:n,policy,days,dailyCapacity,ledger,types,initial,endingStock:available,consumed,deliveries:timeline.deliveries,extraDeliveries,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Recepción y calidad instantáneas al llegar; sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
+ return {orders:n,policy,days,dailyCapacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,ledger,types,initial,endingStock:available,consumed,deliveries:timeline.deliveries,extraDeliveries,waitingReceiving:ledger.at(-1).waitingReceiving,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Las entregas esperan capacidad de Recepción; la liberación de Calidad es instantánea tras recibir. Picking y Transporte comparten el despacho por pedido completo y tienen límites diarios de unidades SKU, sin inventario de trabajo en proceso. Sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
 }
