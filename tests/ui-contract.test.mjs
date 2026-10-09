@@ -50,3 +50,13 @@ test('each diagnosis area offers an actionable improvement with accessible label
  const css=readFileSync(new URL('../src/styles.css',import.meta.url),'utf8');
  assert.match(css,/@media\(max-width:760px\)\{\.improvement-decision\{grid-template-columns:minmax\(0,1fr\)/);
 });
+
+test('SKU decisions persist across reload and restart resets them',()=>{
+ for(const key of ['skuPolicy','skuSupplierDelay','skuRecovery','skuUrgentArrival']){
+  assert.match(app,new RegExp('JSON\\.stringify\\(\\{[^}]*'+key));
+  assert.match(app,new RegExp(key+'='));
+ }
+ assert.match(app,/skuUrgentArrival=\[1,2,5,10,13\]\.includes\(s\.skuUrgentArrival\)/);
+ assert.match(app,/skuRecovery=Object\.hasOwn\(RECOVERY_OPTIONS,s\.skuRecovery\)/);
+ assert.match(app,/skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;save\(\)/);
+});
