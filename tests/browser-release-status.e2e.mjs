@@ -11,11 +11,11 @@ async function verify(mode){
  page.on('pageerror',e=>errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
  try{
-  await page.goto(BASE+'/?release=11.21-r130&test='+mode,{waitUntil:'networkidle'});
-  assert.equal(await page.locator('#releaseCurrentVersion').innerText(),'V11.21');
+  await page.goto(BASE+'/?release=11.22-r131&test='+mode,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('#releaseCurrentVersion').innerText(),'V11.22');
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
   assert.match(await page.locator('#releaseStatus').innerText(),/v11\.21 verificada en servidor/);
-  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/release=11\.21-r130/);
+  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/release=11\.21-r131/);
   await page.locator('#checkRelease').click();
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
   await page.evaluate(()=>{
