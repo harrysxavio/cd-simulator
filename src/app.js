@@ -243,7 +243,7 @@ function renderSkuLab(){
   add(bridge,'small','','Pedidos finales '+fmt(recovery.recovered.completed)+' / '+fmt(actualOrders)+' · pendientes '+fmt(recovery.recovered.pending)+' · mejora '+fmt(recovery.recovered.completed-recovery.base.completed));
   add(bridge,'small','','Compra urgente '+recovery.urgent.map(p=>p.id+': '+fmt(p.qty)).join(', ')+(recovery.urgent.length?'':' ninguna')+' · desembolso incremental CLP '+fmt(recovery.incrementalExpense));
   add(bridge,'small','','Flujo de caja incremental simplificado CLP '+fmt(recovery.netCashDelta)+' · NO es margen neto');
-  add(bridge,'small','','Días-pedido de atraso evitados: '+fmt(recovery.penaltySaved/150)+' · penalidad ilustrativa evitada CLP '+fmt(recovery.penaltySaved)+' · variación costo de tenencia CLP '+fmt(recovery.holdingDelta));
+  add(bridge,'small','','Días-pedido de atraso evitados: '+fmt(recovery.backlogDaysBase-recovery.backlogDaysRecovered)+' · penalidad ilustrativa evitada CLP '+fmt(recovery.penaltySaved)+' · variación costo de tenencia CLP '+fmt(recovery.holdingDelta));
   add(bridge,'strong','','Resultado económico proxy incremental CLP '+fmt(recovery.economicProxyDelta));
   add(bridge,'small','',recovery.assumptions);
  }
