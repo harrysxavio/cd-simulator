@@ -454,6 +454,14 @@ for(const f of diag.findings){
  if(f.inherited&&['receiving','picking','transport'].includes(f.id))add(item,'p','diagnosis-note','Existe capacidad sin utilizar. Puede ser por flujo insuficiente aguas arriba; verifica las etapas anteriores antes de invertir.');
  add(item,'p','kpi-strategy','Prueba de intervención aislada: '+(counter.delta>0?'+':'')+fmt(counter.delta)+' unidades expedibles · cambio en resultado '+(counter.net>=0?'+':'')+fmt(counter.net)+' CLP.');
  add(item,'p','muted',counter.warning);
+ const decisionRow=add(item,'div','improvement-decision');
+ const preview=add(decisionRow,'div','improvement-preview');
+ add(preview,'strong','',f.potential>0?'Oportunidad estimada: +'+fmt(f.potential)+' unidades':'Sin mejora aislada de expedición');
+ add(preview,'small','',f.potential>0?'La intervención depende de las restricciones de las otras áreas.':'Revisa las áreas aguas arriba antes de aumentar recursos.');
+ const actionButton=add(decisionRow,'button','btn secondary',actions[f.id]?'Revisar intervención →':'Explorar intervención →');
+ actionButton.type='button';actionButton.setAttribute('aria-label','Explorar mejora de '+f.title);
+ actionButton.onclick=()=>{phase='recover';showSection('recovery');nav(NODES.findIndex(n=>n.id===f.id));$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
+
  if(f.potential>0){
  const projected=flow(decisions,{...actions,[f.id]:ACTIONS[f.id][2]},effectiveScenario());
  const costChange=finance(projected,effectiveScenario()).total-finance(r,effectiveScenario()).total;
