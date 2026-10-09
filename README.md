@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.13
+# Supply Chain Operations Lab · v11.14
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=123) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?v=124) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -126,7 +126,7 @@ node --experimental-default-type=module --test tests/*.test.mjs
 
 Existe un workflow de GitHub Actions en `.github/workflows/model-tests.yml`. **La integración anterior v11.9 verificó GitHub Actions y 118 pruebas de regresión en el PR #5; v11.10 requiere validación propia.** Se han realizado comprobaciones de integración con DOM simulado, que no sustituyen pruebas reales de navegador, Android, accesibilidad ni experiencia de usuarios.
 
-## Roadmap activo · v11.13
+## Roadmap activo · v11.14
 
 **[Consultar plan completo de cierre (hitos M1–M8)](docs/ROADMAP.md)**. Los valores mostrados son estimaciones de las funciones existentes, no porcentajes de esfuerzo restante.
 
@@ -181,6 +181,15 @@ La consolidación económica entre motores necesita primero unificar horizonte t
 - Se añade una advertencia visible: el inventario del catálogo SKU aún no deriva del stock agregado configurable. Los costos de los dos motores siguen separados.
 
 **Pendiente de M2:** origen físico único de stock y pedidos para las ocho áreas, migración completa del modelo agregado y prueba de escenarios de campaña conjunta. M3 (motor común) y M4 (economía unificada) siguen sin completarse. No sumar magnitudes de motores diferentes.
+
+## v11.14 · Reinicio global y auditoría de navegación y estado
+
+- Los controles **Ver operación** y **↺ Nueva campaña** permanecen disponibles en todas las etapas, incluida Configuración, Diagnóstico, Recuperación y el Dashboard. El botón de nueva campaña pide confirmación y reinicia decisiones, ajustes, sorpresa, recuperación, ID y vista activa.
+- La pestaña Operación vuelve a abrirse después de revelar demanda. En ese caso las decisiones históricas y cantidades editables quedan **en modo de solo lectura**, para impedir cambios retroactivos en compras congeladas. Los indicadores de la misión siguen mostrando los datos de demanda y recuperación del escenario actual.
+- La sesión guardada registra la pantalla activa (`currentSection`) y la restaura tras recargar o actualizar la página. Las sesiones anteriores que no tenían ese campo se migran a una pantalla válida, sin eliminar sus decisiones.
+- Los campos numéricos de planificación y recuperación ahora incluyen etiquetas accesibles.
+- La batería de auditoría incorpora combinaciones de escenarios económicos, campañas SKU, restricciones físicas, controles y recuperación de sesiones anteriores. El detalle y las limitaciones están en **[docs/AUDIT-V11.14.md](docs/AUDIT-V11.14.md)**.
+- Se mantiene la distinción entre el simulador agregado de una jornada y la cohorte SKU; sus contabilidades siguen separadas.
 
 ## Autoría y propósito
 

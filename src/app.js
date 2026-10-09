@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=123';
-import {campaignSkuContract} from './campaign-contract.js?v=123';
-import {laborAudit} from './labor.js?v=123';
-import {skuAudit} from './audit.js?v=123';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=123';
-import {integratedDemand} from './integrated.js?v=123';
-import {eventSimulation} from './events.js?v=123';
-import {deliveryTimeline} from './timeline.js?v=123';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=123';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=123';
-import {demandJourney} from './journey.js?v=123';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=123';
-import {flow,diagnose,ACTIONS} from './flow.js?v=123';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=123';
-import {areaKpis} from './kpis.js?v=123';
-import {causalAudit} from './causal.js?v=123';
-import {attentionSignals} from './attention.js?v=123';
+import {supplyBridge} from './supply-bridge.js?v=124';
+import {campaignSkuContract} from './campaign-contract.js?v=124';
+import {laborAudit} from './labor.js?v=124';
+import {skuAudit} from './audit.js?v=124';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=124';
+import {integratedDemand} from './integrated.js?v=124';
+import {eventSimulation} from './events.js?v=124';
+import {deliveryTimeline} from './timeline.js?v=124';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=124';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=124';
+import {demandJourney} from './journey.js?v=124';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=124';
+import {flow,diagnose,ACTIONS} from './flow.js?v=124';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=124';
+import {areaKpis} from './kpis.js?v=124';
+import {causalAudit} from './causal.js?v=124';
+import {attentionSignals} from './attention.js?v=124';
 const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,campaignId=createCampaignId();
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,campaignId=createCampaignId(),currentSection='operations';
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({schemaVersion:1,campaignId,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage}))}catch{}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;campaignId=typeof s.campaignId==='string'&&/^CD-[a-zA-Z0-9_-]{1,60}$/.test(s.campaignId)?s.campaignId:campaignId;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;shockDirection=s.shockDirection===-1?-1:1;skuPolicy=['lean','balanced','service'].includes(s.skuPolicy)?s.skuPolicy:'balanced';skuSupplierDelay=s.skuSupplierDelay===true;skuRecovery=Object.hasOwn(RECOVERY_OPTIONS,s.skuRecovery)?s.skuRecovery:'wait';skuUrgentArrival=[1,2,5,10,13].includes(s.skuUrgentArrival)?s.skuUrgentArrival:1;skuPurchaseCoverage=[0,25,50,75,100].includes(s.skuPurchaseCoverage)?s.skuPurchaseCoverage:100}catch{}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({schemaVersion:2,campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage}))}catch{}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;campaignId=typeof s.campaignId==='string'&&/^CD-[a-zA-Z0-9_-]{1,60}$/.test(s.campaignId)?s.campaignId:campaignId;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;currentSection=['setup','operations','preliminary','recovery','dashboard'].includes(s.currentSection)?s.currentSection:(revealed?'preliminary':'operations');if(!revealed&&!['setup','operations'].includes(currentSection))currentSection='operations';shockDirection=s.shockDirection===-1?-1:1;skuPolicy=['lean','balanced','service'].includes(s.skuPolicy)?s.skuPolicy:'balanced';skuSupplierDelay=s.skuSupplierDelay===true;skuRecovery=Object.hasOwn(RECOVERY_OPTIONS,s.skuRecovery)?s.skuRecovery:'wait';skuUrgentArrival=[1,2,5,10,13].includes(s.skuUrgentArrival)?s.skuUrgentArrival:1;skuPurchaseCoverage=[0,25,50,75,100].includes(s.skuPurchaseCoverage)?s.skuPurchaseCoverage:100}catch{}}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function revealSurprise(){
  if(revealed)return;
@@ -38,8 +38,8 @@ function applyDemandOverride(sign,percent){
 }
 function showSection(name){
 if((name==='recovery'||name==='dashboard')&&!revealed){name='preliminary'}
-if(name==='operations'&&revealed){name='preliminary'}
 if(name==='preliminary'&&!revealed)revealSurprise();
+currentSection=name;
 for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
 if(name==='dashboard')showResultView($('dashboardSection').getAttribute('data-result-view')||'overview');
 if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
@@ -461,16 +461,19 @@ function renderAttention(){
  add(root,'small','','Referencia flexible: dotación estándar más gastos variables ajustados al volumen efectivamente procesado. La diferencia contra la referencia fija se muestra como efecto volumen. Incluye dotación base y gastos variables asignables; excluye costos fijos compartidos y costo de mercancía para evitar asignaciones arbitrarias. Tolerancia configurable: '+scenario.areaCostTolerance+' %. Un gasto menor por bajo volumen no se considera ahorro de eficiencia.');
 }
 function render(){
+$('sessionStatus').textContent='Campaña '+campaignId+' · '+({setup:'Configuración',operations:revealed?'Plan original':'Operación',preliminary:'Diagnóstico',recovery:'Recuperación',dashboard:'Resultados'}[currentSection]);
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
 const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab();
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
-$('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?'Planificación':'Recuperación');
+$('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?(revealed?'Plan cerrado · consulta':'Planificación'):'Recuperación');
 $('progressFill').style.width=NODES.filter(x=>decisions[x.id]).length/8*100+'%';
 const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));add(b,'span','node-icon',x.icon);const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');add(b,'span','node-state',i===active?'●':'→');b.setAttribute('aria-current',i===active?'step':'false');b.onclick=()=>nav(i)});
-$('missionNumber').textContent=(phase==='plan'?'PLANIFICAR':'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent=areaKpis(r,effectiveScenario())[n.id].length+' KPI del área';
-const choices=$('choices');choices.replaceChildren();if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.onclick=()=>{decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
-const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.onchange=()=>{const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
+$('missionNumber').textContent=(phase==='plan'?(revealed?'PLAN ORIGINAL · SOLO LECTURA':'PLANIFICAR'):'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent=areaKpis(r,effectiveScenario())[n.id].length+' KPI del área';
+const choices=$('choices');choices.replaceChildren();const planFrozen=phase==='plan'&&revealed;
+if(planFrozen)add(choices,'p','diagnosis-note','Decisiones originales cerradas tras conocer la demanda real. Puedes revisar todas las áreas sin modificar el plan ni sus compras. Los KPI muestran la demanda revelada y las recuperaciones que ya hayas aplicado. Para cambiar el plan, pulsa «Nueva campaña»; para intervenir, entra en Recuperación.');
+if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.disabled=planFrozen;b.onclick=()=>{if(planFrozen)return;decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
+const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.setAttribute('aria-label',p.label+' ('+p.unit.trim()+')');input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.disabled=planFrozen;input.onchange=()=>{if(planFrozen)return;const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
 }const box=add(choices,'div','flow-summary');add(box,'strong','','Relación con las otras áreas');add(box,'p','','Recibe '+fmt(st.input)+' → entrega '+fmt(st.output)+' unidades. Capacidad '+fmt(st.capacity)+'.');add(box,'small','',st.detail);
 if(phase==='recover'&&['commercial','planning','purchasing'].includes(n.id)){
  add(choices,'h3','','Decisión de planificación cerrada');
@@ -500,7 +503,7 @@ if(phase==='recover'&&!['commercial','planning','purchasing'].includes(n.id)){
  }
  const control=add(choices,'div','numeric-control');
  add(control,'label','','O define una cantidad propia ('+cfg[1]+')');
- const num=add(control,'input','numeric-input');num.type='number';num.min=0;num.max=cfg[2];num.step=cfg[3];num.value=selected;
+ const num=add(control,'input','numeric-input');num.type='number';num.setAttribute('aria-label','Cantidad de recuperación para '+n.title+' ('+cfg[1]+')');num.min=0;num.max=cfg[2];num.step=cfg[3];num.value=selected;
  num.onchange=()=>{const v=Number(num.value);if(num.value===''||!Number.isFinite(v)||v<0||v>cfg[2]){num.value=selected;return}actions[n.id]=v;save();render()};
  const noAction=flow(decisions,{...actions,[n.id]:0},effectiveScenario());
  const contribution=before.dispatched-noAction.dispatched;
@@ -567,10 +570,12 @@ const opts=$('actions');opts.replaceChildren();diag.findings.forEach(f=>{const i
 $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage.input).length);$('focus').textContent=causal.focus?causal.focus.title+' · +'+fmt(causal.focus.delta)+' unid.':'Sin mejora individual';$('report').hidden=false;
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
-$('next').onclick=()=>{if(!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
+$('next').onclick=()=>{if(!revealed&&!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
 function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;campaignId=createCampaignId();decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
 $('reset').onclick=restartCampaign;
 $('restartFinal').onclick=restartCampaign;
+$('resetAnytime').onclick=restartCampaign;
+$('goToOperations').onclick=()=>{showSection('operations');$('operationsSection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('openReport').onclick=()=>{save();showSection('preliminary');$('preliminarySection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('export').onclick=()=>{const r=flow(decisions,actions,effectiveScenario()),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
 $('setupTab').onclick=()=>showSection('setup');
@@ -586,4 +591,4 @@ for(const [id,view] of [['overviewToAreas','areas'],['areasToInventory','invento
 $('improvementToRecovery').onclick=()=>{showSection('recovery');$('recoverySection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('beginExercise').onclick=()=>showSection('operations');
 $('resetScenario').onclick=()=>{scenario={...DEFAULT_SCENARIO};revealed=false;shockDirection=null;actions={};phase='plan';save();render();showSection('operations')};
-load();render();showSection(revealed?'preliminary':'operations');
+load();showSection(currentSection);
