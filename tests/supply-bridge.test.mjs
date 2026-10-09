@@ -59,7 +59,7 @@ test('partial purchases preserve the causal stock and cash trade-off',()=>{
  const none=supplyBridge({actualOrders:260,option:'emergency',urgentArrivalDay:2,purchaseCoveragePercent:0});
  assert.ok(original.purchasing.extraUnits>partial.purchasing.extraUnits);
  assert.ok(partial.purchasing.extraUnits>none.purchasing.extraUnits);
- assert.equal(none.decision.quality,'no-shortage');
+ assert.equal(none.decision.quality,'no-order');
  assert.equal(none.decision.extraUnits,0);
  assert.ok(partial.purchasing.extraCost<original.purchasing.extraCost);
  assert.equal(partial.purchaseCoveragePercent,50);
