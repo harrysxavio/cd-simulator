@@ -1,8 +1,8 @@
 {
-  "version": "11.26",
-  "assetRevision": 135,
-  "release": "v11.26 · Compra original SKU congelada y trazable",
+  "version": "11.27",
+  "assetRevision": 136,
+  "release": "v11.27 · M2-04a: alcance SKU y jornada diferenciados",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M2-03: orden original SKU identificada con cantidad, fecha prevista y valor; plan, shock, recuperación y confirmación comparten un mismo manifiesto sin compras retroactivas. Sin entrega prometida ni pagos reales."
+  "notes": "M2-04a: auditoría de fuentes y unidades por pantalla; costos, diagnóstico legado y exportación CSV etiquetados como jornada agregada. KPI SKU siguen cohorte de días 0–12; todavía no es motor físico/económico único."
 }

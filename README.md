@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.26
+# Supply Chain Operations Lab · v11.27
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.26-r135) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.27-r136) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.26](docs/STATUS-V11.26.md).
+- [Estado verificable actualizado de v11.27](docs/STATUS-V11.27.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.26 (M2-03):** las compras originales cuentan ahora con ID por SKU, cantidad, fecha prevista y costo inmutables. La misma orden queda auditada en planificación, cambio de demanda, recuperación y confirmación persistida, sin generar compras retroactivas. Las compras urgentes conservan identidades independientes. [Estado y limitaciones](docs/STATUS-V11.26.md).
+**Avance v11.27 (M2-04a):** las vistas ahora separan explícitamente resultados físicos SKU de métricas didácticas de una jornada; exportación CSV con procedencia y unidades explícitas. [Auditoría por pantalla](docs/M2-04A-SCOPE-AUDIT.md). El motor físico único completo continúa pendiente.
+
+**Base v11.26 (M2-03):** las compras originales cuentan ahora con ID por SKU, cantidad, fecha prevista y costo inmutables. La misma orden queda auditada en planificación, cambio de demanda, recuperación y confirmación persistida, sin generar compras retroactivas. Las compras urgentes conservan identidades independientes. [Estado y limitaciones](docs/STATUS-V11.26.md).
 
 **Base incremental v11.25 (M2-02):** planificación, recuperación y vistas de ocho áreas reutilizan la misma apertura de stock físico SKU validada. La reserva es una partición interna de esa apertura; nunca se suma. El stock agregado de una jornada continúa separado. [Evidencia de cierre y límites](docs/STATUS-V11.25.md).
 
