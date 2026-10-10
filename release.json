@@ -1,8 +1,8 @@
 {
-  "version": "11.25",
-  "assetRevision": 134,
-  "release": "v11.25 · Apertura SKU única, consistente en planificación y recuperación",
+  "version": "11.26",
+  "assetRevision": 135,
+  "release": "v11.26 · Compra original SKU congelada y trazable",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M2-02: mismo stock físico SKU para cálculo de compras, plan, shock, reserva, recuperación y resultados. Stock agregado de jornada sigue independiente; motor económico único pendiente."
+  "notes": "M2-03: orden original SKU identificada con cantidad, fecha prevista y valor; plan, shock, recuperación y confirmación comparten un mismo manifiesto sin compras retroactivas. Sin entrega prometida ni pagos reales."
 }
