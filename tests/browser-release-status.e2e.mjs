@@ -15,7 +15,7 @@ async function verify(mode){
   assert.equal(await page.locator('#releaseCurrentVersion').innerText(),'V11.24');
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
   assert.match(await page.locator('#releaseStatus').innerText(),/v11\.24 verificada en servidor/);
-  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/release=11\.23-r132/);
+  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/release=11\.24-r133/);
   await page.locator('#checkRelease').click();
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
   await page.evaluate(()=>{
