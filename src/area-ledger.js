@@ -32,6 +32,8 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  const transferred=sum(source.reserveTransfers,r=>r.qty);
  const shippedOrders=source.shipments.length;
  const shippedSkuUnits=sum(source.shipments,r=>sum(Object.values(r.lines),n=>n));
+ // The read model must not invent a second stock opening.
+ const openingState=source.openingState;
  const physicalOpening=sum(source.inventory.bySku,s=>s.opening);
  const available=sum(source.inventory.bySku,s=>s.available);
  const heldQuality=sum(source.inventory.bySku,s=>s.held);
@@ -80,6 +82,9 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
   stockConfidence:pickable+unverified===available,
   movedReserve:transferred===sum(comparison.recovered.ledger,d=>sum(Object.values(d.movedReserve),n=>n)),
   originalManifest:originals.every(po=>source.plan.originalPurchase[po.skuId]===po.orderedQty),
+  sameOpening:!!openingState&&openingState.scope==='sku-cohort'
+   &&source.inventory.bySku.every(s=>openingState.openingBySku[s.skuId]===s.opening)
+   &&openingState.totals.physicalSkuUnits===physicalOpening,
   finalDay:days.at(-1)?.remainingOrders===pending&&days.at(-1)?.cumulativeOrders===shippedOrders,
   dailyShipments:sum(days,d=>d.shippedOrders)===shippedOrders,
   uniqueAreas:new Set(rows.map(r=>r.id)).size===8,
@@ -87,6 +92,6 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  if(!Object.values(checks).every(Boolean))throw new Error('Lectura de las ocho áreas no reconcilia con la campaña SKU: '+Object.entries(checks).filter(([,ok])=>!ok).map(([k])=>k).join(', '));
  return frozen({campaignId,scope:'sku-cohort',horizonDays:source.horizonDays,unitConventions:SKU_UNIT_CONVENTIONS,measurements,
   metrics:{plannedOrders:source.plan.plannedOrders,forecastOrders:forecast,actualOrders:orderCount,originalPurchaseSkuUnits:ordered,extraPurchaseSkuUnits:newOrdered,receivedSkuUnits:received,releasedSkuUnits:released,transferSkuUnits:transferred,openingSkuUnits:physicalOpening,closingPickFaceSkuUnits:available,closingReserveSkuUnits:heldReserve,closingQualitySkuUnits:heldQuality,shippedSkuUnits,shippedOrders,pendingOrders:pending,customerDeliveries:deliveredToCustomer},
-  stages:rows,days,checks,passed:true,
+  openingState,stages:rows,days,checks,passed:true,
   assumptions:'Lectura compartida de UN mismo registro SKU de doce días. Comercial/Planning son decisiones iniciales, no movimientos físicos; Pick y Transporte comparten un único evento de salida del CD. No representa ni se suma a las unidades económicas del motor agregado de una jornada ni implica entrega al cliente.'});
 }
