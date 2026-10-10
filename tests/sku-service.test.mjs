@@ -30,6 +30,11 @@ test('M2/M3: same order totals appear in service diagnosis and canonical areas',
   assert.equal(service.pendingOrders,areas.metrics.pendingOrders);
   assert.equal(service.shippedOrders+service.pendingOrders,service.actualOrders);
   assert.equal(service.horizonDays,areas.horizonDays);
+  // M2-01: these values share a cohort and a day horizon, not an aggregate shift.
+  assert.equal(areas.measurements.actualOrders.unit,'orders');
+  assert.equal(areas.measurements.shippedSkuUnits.unit,'sku-units');
+  assert.equal(areas.measurements.actualOrders.horizonDays,areas.horizonDays);
+  assert.deepEqual(service.measurements,areas.measurements);
   assert.equal(service.completionPercent,100*service.shippedOrders/service.actualOrders);
   assert.match(service.boundary,/no son unidades de una jornada ni entregas confirmadas/);
   assert.ok(Object.isFrozen(service));
@@ -53,4 +58,5 @@ test('M2/M3: invalid, nonreconciled or tampered read models are rejected',()=>{
  assert.throws(()=>skuServiceBrief({...areas,passed:false}),/conciliada/);
  assert.throws(()=>skuServiceBrief({...areas,checks:{...areas.checks,allOrders:false}}),/conciliada/);
  assert.throws(()=>skuServiceBrief({...areas,metrics:{...areas.metrics,pendingOrders:3}}),/no concilian/);
+ assert.throws(()=>skuServiceBrief({...areas,measurements:{...areas.measurements,shippedOrders:{...areas.measurements.shippedOrders,unit:'sku-units'}}}),/unidades/);
 });

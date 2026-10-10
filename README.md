@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.23
+# Supply Chain Operations Lab · v11.24
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.23-r132) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.24-r133) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -14,11 +14,13 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
-- [Roadmap integrado M1–M8 con entregas U0–U5](docs/ROADMAP.md).
+- **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
+- [Estado verificable actualizado de v11.24](docs/STATUS-V11.24.md).
+- [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.23 (M2/M3):** la misión Diagnóstico muestra demanda, despachos y pendientes como **pedidos completos de la misma cohorte SKU reconciliada** que Resultados → Resumen y Áreas. No suma las unidades de la jornada agregada. La posible restricción se señala como **hipótesis del motor agregado**, todavía no como una causa SKU comprobada. Los 3 indicadores permanecen en formato compacto. Se corrigió además la versión estática visible en la cabecera.
+**Base v11.23 (M2/M3):** la misión Diagnóstico muestra demanda, despachos y pendientes como **pedidos completos de la misma cohorte SKU reconciliada** que Resultados → Resumen y Áreas. No suma las unidades de la jornada agregada. La posible restricción se señala como **hipótesis del motor agregado**, todavía no como una causa SKU comprobada. Los 3 indicadores permanecen en formato compacto. Se corrigió además la versión estática visible en la cabecera.
 
-**Prioridad tras v11.23:** completar convergencia M2/M3 (pedido y stock común), después U2c/U3 con compromisos de servicio y M4 contabilidad única. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
+**Prioridad v11.24 y siguientes:** primero contrato de unidades/horizontes (M2-01), después completar convergencia M2/M3 (pedido y stock común), después U2c/U3 con compromisos de servicio y M4 contabilidad única. El historial de versiones y porcentajes orientativos más abajo describe estados pasados; consultar el roadmap para las deudas actuales.
 
 ## v11.17 · U1 misión de Diagnóstico para gerente de CD
 

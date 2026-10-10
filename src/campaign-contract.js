@@ -1,6 +1,7 @@
 import {flow} from './flow.js';
 import {numericValue} from './engine.js';
 import {SKU_CATALOG} from './sku.js';
+import {SCOPE_DEFINITIONS} from './measurements.js';
 
 /**
  * One explicitly documented contract between campaign decisions and the SKU lab.
@@ -46,8 +47,8 @@ export function campaignSkuContract({
   delayDays:supplierDelay?{A:8}:{},...skuAreaCapacity
  };
  const trace={
-  campaignId,scope:'sample-not-accounting',aggregateUnit:'unidades equivalentes de jornada',
-  skuUnit:'unidades SKU por día',orderUnit:'pedidos completos',plannedCampaignUnits:area.plannedDemand,
+  campaignId,scope:'sample-not-accounting',aggregateUnit:SCOPE_DEFINITIONS.aggregate.displayUnit,
+  skuUnit:SCOPE_DEFINITIONS.sku.skuDisplayUnit,orderUnit:SCOPE_DEFINITIONS.sku.orderDisplayUnit,plannedCampaignUnits:area.plannedDemand,
   actualCampaignUnits:area.demand,plannedSampleOrders,actualSampleOrders,
   sampleRatio:area.demand/area.plannedDemand,
   stockFromCatalog:true,inventoryAccuracyLinked:true,inventoryReserveActionNotLinked:true,
