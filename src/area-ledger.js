@@ -17,6 +17,7 @@ const frozen=value=>{
  */
 export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-LAB',plannedOrders=200}={}){
  const source=campaign??campaignSnapshot({comparison,campaignId,plannedOrders});
+ const stagedMode=comparison?.recovered?.separateTransport===true;
  if(!comparison?.recovered?.ledger||source.scope!=='sku-cohort'||source.passed!==true)throw new Error('Campaña SKU sin conciliación de eventos');
  if(source.campaignId!==campaignId||source.plan.plannedOrders!==plannedOrders)throw new Error('Identidad o plan SKU no coincide');
  if(source.demand.actualOrders!==comparison.recovered.orders||source.horizonDays!==comparison.recovered.days)throw new Error('Horizonte o demanda SKU no coincide');
@@ -26,7 +27,7 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  const qualityLedger=source.qualityLedger;
  const inventoryLedger=source.inventoryLedger;
  const pickingLedger=source.pickingLedger;
- if(!pickingLedger?.passed||pickingLedger.stage!=='same-day-picking-to-dispatch'
+ if(!pickingLedger?.passed||pickingLedger.stage!==(stagedMode?'independent-staging':'same-day-picking-to-dispatch')
   ||pickingLedger.horizonDays!==source.horizonDays){
   throw new Error('Picking no comparte el registro físico de pedidos SKU');
  }
@@ -62,6 +63,9 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  const pickedOrders=pickingLedger.totals.pickedOrders;
  const pickedSkuUnits=pickingLedger.totals.pickedSkuUnits;
  const shippedSkuUnits=sum(source.shipments,r=>sum(Object.values(r.lines),n=>n));
+ const stagedOrders=pickingLedger.totals.awaitingTransportOrders;
+ const unpickedOrders=pickingLedger.totals.pendingUnpickedOrders;
+ const stagedSkuUnits=inventoryLedger.totals.stagingSkuUnits;
  // The read model must not invent a second stock opening.
  const openingState=source.openingState;
  const physicalOpening=sum(source.inventory.bySku,s=>s.opening);
@@ -74,7 +78,7 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  const receivingDailyCapacity=receivingLedger.capacitySkuUnitsPerDay===null
   ?'sin tope diario':units(receivingLedger.capacitySkuUnitsPerDay)+' SKU/día';
  const waitingQuality=comparison.recovered.waitingQuality;
- const pending=source.orders.filter(o=>o.status==='pending').length;
+ const pending=source.orders.filter(o=>o.status!=='shipped').length;
  const deliveredToCustomer=null; // Shipment at CD != proof of last-mile delivery.
  // Both management areas explain one pre-shock commercial/planning read-model.
  const planning=source.plan.commercialPlanning;
@@ -92,9 +96,9 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
   {id:'purchasing',title:'Compras',scope:'purchase-orders',headline:units(ordered)+' unidades SKU pedidas originalmente',detail:'Cumplimiento de proveedor '+fill+'; no suministradas '+units(supplierUnfilled)+' SKU. Con fecha de llegada modelada fuera del período '+units(supplierTotals.inTransitSkuUnits)+' SKU; en cola de Recepción '+units(supplierTotals.awaitingWarehouseReceiptSkuUnits)+' SKU; ya ingresadas al CD '+units(supplierTotals.warehouseReceivedSkuUnits)+' SKU. compra extraordinaria urgente '+units(newOrdered)+' SKU.',input:ordered+newOrdered,output:supplierTotals.arrivedByCutoffSkuUnits,unit:'unidades SKU; llegada modelada no significa ingreso a bodega',signal:supplierUnfilled>0||supplierTotals.inTransitSkuUnits>0||supplierTotals.awaitingWarehouseReceiptSkuUnits>0?'warning':'stable',causal:'Comprar, cumplir la orden, llegar al muelle e ingresar en bodega son etapas diferentes. El plazo extra del proveedor no adelanta recepciones y las compras urgentes se registran por separado.',evidence:['supplierLedger.rows','supplierLedger.totals','receipts']},
   {id:'receiving',title:'Recepción',scope:'receipts',headline:units(received)+' unidades ingresadas al CD',detail:units(waitingReceiving)+' unidades en cola del muelle al cierre. Capacidad '+receivingDailyCapacity+'; máxima cola '+units(receivingLedger.totals.peakWaitingSkuUnits)+' SKU; mayor espera '+units(receivingLedger.totals.oldestWaitingDays)+' días. La mercadería todavía en tránsito no está en bodega.',input:supplierTotals.arrivedByCutoffSkuUnits,output:received,unit:'unidades SKU por lote y día',signal:waitingReceiving>0?'warning':'stable',causal:'La cola se procesa por orden de llegada y dentro de la capacidad diaria. Un evento de recepción documenta el ingreso al CD; Calidad decide después cuándo puede prepararse.',evidence:['receivingLedger.daily','receipts','supplierLedger.rows']},
   {id:'quality',title:'Calidad',scope:'quality-release',headline:units(released)+' unidades liberadas',detail:units(heldQuality)+' unidades aún retenidas en Calidad al día '+source.horizonDays+'. Liberación diaria '+qualityLedger.releaseRatePercentPerDay+' % del stock en control; '+units(qualityLedger.totals.lotsStillHeld)+' lotes con saldo. Esta espera no es merma ni rechazo.',input:received,output:released,unit:'unidades SKU por lote y día',signal:heldQuality>0?'warning':'stable',causal:'Cada lote llega desde Recepción y permanece retenido hasta su liberación fechada. Solo tras esa liberación puede entrar al stock disponible, que Inventario vuelve a verificar antes de Picking.',evidence:['qualityLedger.daily','qualityLedger.lots','qualityReleases']},
-  {id:'inventory',title:'Inventario',scope:'stock-zones',headline:units(available)+' unidades SKU en PICK-FACE',detail:'En RESERVA-CD '+units(heldReserve)+'; retenidas en Calidad '+units(heldQuality)+'; verificables '+units(pickable)+'; sin verificar '+units(unverified)+' (también existen físicamente). Traslados '+units(transferred)+' SKU (internos, sin compra). El stock se concilia por SKU y día.',input:physicalOpening+received,output:available+heldQuality+heldReserve+shippedSkuUnits,unit:'unidades SKU físicas, no pedidos',signal:pending>0&&(heldReserve>0||unverified>0)?'warning':'stable',causal:'Stock inicial + recibido = expedido + PICK-FACE + RESERVA-CD + Calidad. Una diferencia de verificación restringe Picking pero no desaparecen unidades; mover reserva cambia ubicación, no stock total.',evidence:['inventoryLedger.daily','inventoryLedger.totals','inventoryMovements']},
-  {id:'picking',title:'Picking',scope:'coupled-shipment',headline:units(pickedOrders)+' pedidos completos preparados',detail:units(pickedSkuUnits)+' unidades SKU seleccionadas por mezcla de productos; '+units(pending)+' pedidos aún sin preparar. Cada preparación tiene su propio registro de pedido, día y capacidad.',input:orderCount,output:pickedOrders,unit:'pedidos completos; consumo medido en unidades SKU',signal:pending>0?'warning':'stable',causal:'Picking confirma una preparación por pedido completo cuando dispone de los SKU verificables y capacidad. Por ahora los pedidos preparados también se expiden ese día; no hay staging ni espera de Transporte independiente.',evidence:['pickingLedger.daily','picks','orders','shipments']},
-  {id:'transport',title:'Transporte',scope:'coupled-shipment',headline:units(shippedOrders)+' pedidos expedidos del CD',detail:units(shippedSkuUnits)+' unidades SKU; '+units(pending)+' pedidos aún sin despacho. Entregas confirmadas al cliente: sin información.',input:pickedOrders,output:shippedOrders,unit:'pedidos expedidos, no entregas',signal:pending>0?'warning':'stable',causal:'Transporte registra una expedición vinculada a Picking, todavía el mismo día; no se modela staging, espera de carga posterior ni prueba de entrega al cliente; M3-12 separará esa capacidad y cola.',evidence:['pickingLedger.daily','shipments','orders']},
+  {id:'inventory',title:'Inventario',scope:'stock-zones',headline:units(available)+' unidades SKU en PICK-FACE',detail:'En RESERVA-CD '+units(heldReserve)+'; retenidas en Calidad '+units(heldQuality)+'; verificables '+units(pickable)+'; sin verificar '+units(unverified)+' (también existen físicamente). Traslados '+units(transferred)+' SKU (internos, sin compra). '+(stagedMode?'En STAGING-CD '+units(stagedSkuUnits)+' SKU, ya preparados y no expedidos. ':'')+'El stock se concilia por SKU y día.',input:physicalOpening+received,output:available+heldQuality+heldReserve+stagedSkuUnits+shippedSkuUnits,unit:'unidades SKU físicas, no pedidos',signal:pending>0&&(heldReserve>0||unverified>0)?'warning':'stable',causal:'Stock inicial + recibido = expedido + PICK-FACE + RESERVA-CD + Calidad'+(stagedMode?' + STAGING-CD':'')+'. Una diferencia de verificación restringe Picking pero no desaparecen unidades; mover reserva cambia ubicación, no stock total.',evidence:['inventoryLedger.daily','inventoryLedger.totals','inventoryMovements']},
+  {id:'picking',title:'Picking',scope:stagedMode?'independent-staging':'coupled-shipment',headline:units(pickedOrders)+' pedidos completos preparados',detail:units(pickedSkuUnits)+' unidades SKU seleccionadas por mezcla de productos; '+units(unpickedOrders)+' pedidos aún sin preparar.'+(stagedMode?' '+units(stagedOrders)+' pedidos completos esperan Transporte en STAGING-CD.':'')+' Cada preparación tiene su propio registro de pedido, día y capacidad.',input:orderCount,output:pickedOrders,unit:'pedidos completos; consumo medido en unidades SKU',signal:pending>0?'warning':'stable',causal:stagedMode?'Picking retira SKU verificables de PICK-FACE y los asigna a pedidos completos en STAGING-CD, incluso si aún no hay capacidad de Transporte.':'Picking confirma una preparación por pedido completo cuando dispone de los SKU verificables y capacidad. Por ahora los pedidos preparados también se expiden ese día; no hay staging ni espera de Transporte independiente.',evidence:['pickingLedger.daily','picks','orders','shipments']},
+  {id:'transport',title:'Transporte',scope:stagedMode?'independent-staging':'coupled-shipment',headline:units(shippedOrders)+' pedidos expedidos del CD',detail:units(shippedSkuUnits)+' unidades SKU; '+units(pending)+' pedidos aún sin despacho.'+(stagedMode?' '+units(stagedOrders)+' preparados esperando camión; '+units(stagedSkuUnits)+' SKU en staging.':'')+' Entregas confirmadas al cliente: sin información.',input:pickedOrders,output:shippedOrders,unit:'pedidos expedidos, no entregas',signal:pending>0?'warning':'stable',causal:stagedMode?'Transporte despacha solo pedidos previamente preparados, respetando su capacidad diaria y la cola FIFO de staging. Despacho del CD no demuestra entrega al cliente.':'Transporte registra una expedición vinculada a Picking, todavía el mismo día; no se modela staging, espera de carga posterior ni prueba de entrega al cliente; M3-12 separará esa capacidad y cola.',evidence:['pickingLedger.daily','shipments','orders']},
  ];
  // M2-01: these values are typed and tied to the inclusive day-0..close horizon.
  // A complete order count is never a physical SKU unit count.
@@ -108,12 +112,14 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
   const arrived=sum(source.receipts.filter(r=>r.day===day.day),r=>r.qty);
   const qualityDay=qualityLedger.daily[day.day];
   const stockDay=inventoryLedger.daily[day.day];
+  const stageDay=pickingLedger.daily[day.day];
   const inspected=sum(source.qualityReleases.filter(r=>r.day===day.day),r=>r.qty);
   const moved=sum(source.reserveTransfers.filter(r=>r.day===day.day),r=>r.qty);
-  return {day:day.day,receivedSkuUnits:arrived,dockArrivedSkuUnits:receivedThisDay.arrivedSkuUnits,receivingQueueSkuUnits:receivedThisDay.waitingSkuUnits,receivingLots:receivedThisDay.receivedLots,releasedSkuUnits:inspected,qualityHeldSkuUnits:qualityDay.heldSkuUnits,qualityReleaseEvents:qualityDay.releaseEvents,movedReserveSkuUnits:moved,pickedOrders:pickingDay.pickedOrders,pickedSkuUnits:pickingDay.pickedSkuUnits,awaitingTransportOrders:pickingDay.awaitingTransportOrders,shippedOrders:dispatched,shippedSkuUnits:quantity,
+  return {day:day.day,receivedSkuUnits:arrived,dockArrivedSkuUnits:receivedThisDay.arrivedSkuUnits,receivingQueueSkuUnits:receivedThisDay.waitingSkuUnits,receivingLots:receivedThisDay.receivedLots,releasedSkuUnits:inspected,qualityHeldSkuUnits:qualityDay.heldSkuUnits,qualityReleaseEvents:qualityDay.releaseEvents,movedReserveSkuUnits:moved,pickedOrders:pickingDay.pickedOrders,pickedSkuUnits:pickingDay.pickedSkuUnits,awaitingTransportOrders:pickingDay.awaitingTransportOrders,stagedSkuUnits:stageDay.stagingSkuUnits??0,oldestStagingDays:stageDay.oldestWaitingDays??0,shippedOrders:dispatched,shippedSkuUnits:quantity,
    cumulativeOrders:source.orders.filter(o=>o.shippedDay!==null&&o.shippedDay<=day.day).length,
    remainingOrders:source.orders.filter(o=>o.shippedDay===null||o.shippedDay>day.day).length,
    closingPhysicalSkuUnits:stockDay.physicalSkuUnits,closingVerifiedSkuUnits:stockDay.verifiedSkuUnits,closingUnverifiedSkuUnits:stockDay.unverifiedSkuUnits,
+   closingStagingSkuUnits:stockDay.stagingSkuUnits,
    closingPickFaceSkuUnits:sum(Object.values(day.physical),n=>n),
    closingReserveSkuUnits:sum(Object.values(day.reserved),n=>n)};
  });
@@ -128,11 +134,12 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
    &&inventoryLedger.totals.receivedSkuUnits===received
    &&inventoryLedger.totals.shippedSkuUnits===shippedSkuUnits
    &&inventoryLedger.totals.pickFaceSkuUnits===available
+   &&inventoryLedger.totals.stagingSkuUnits===stagedSkuUnits
    &&inventoryLedger.totals.reserveSkuUnits===heldReserve
    &&inventoryLedger.totals.qualityHeldSkuUnits===heldQuality
    &&inventoryLedger.totals.verifiedSkuUnits===pickable
    &&inventoryLedger.totals.unverifiedSkuUnits===unverified,
-  physicalConservation:physicalOpening+received===shippedSkuUnits+available+heldQuality+heldReserve,
+  physicalConservation:physicalOpening+received===shippedSkuUnits+available+heldQuality+heldReserve+stagedSkuUnits,
   stockConfidence:pickable+unverified===available,
   movedReserve:transferred===sum(comparison.recovered.ledger,d=>sum(Object.values(d.movedReserve),n=>n)),
   originalManifest:originals.every(po=>source.plan.originalPurchase[po.skuId]===po.orderedQty),
@@ -158,7 +165,8 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
    &&openingState.totals.physicalSkuUnits===physicalOpening,
   finalDay:days.at(-1)?.remainingOrders===pending&&days.at(-1)?.cumulativeOrders===shippedOrders,
   dailyPicking:pickingLedger.passed&&pickedOrders===source.picks.length
-   &&pickedSkuUnits===shippedSkuUnits
+   &&pickedOrders===shippedOrders+stagedOrders
+   &&pickedSkuUnits===shippedSkuUnits+stagedSkuUnits
    &&sum(days,d=>d.pickedOrders)===pickedOrders
    &&sum(days,d=>d.pickedSkuUnits)===pickedSkuUnits,
   dailyShipments:sum(days,d=>d.shippedOrders)===shippedOrders,
@@ -166,7 +174,7 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  };
  if(!Object.values(checks).every(Boolean))throw new Error('Lectura de las ocho áreas no reconcilia con la campaña SKU: '+Object.entries(checks).filter(([,ok])=>!ok).map(([k])=>k).join(', '));
  return frozen({campaignId,scope:'sku-cohort',horizonDays:source.horizonDays,unitConventions:SKU_UNIT_CONVENTIONS,measurements,
-  metrics:{plannedOrders:source.plan.plannedOrders,forecastOrders:forecast,actualOrders:orderCount,originalPurchaseSkuUnits:ordered,extraPurchaseSkuUnits:newOrdered,receivedSkuUnits:received,releasedSkuUnits:released,transferSkuUnits:transferred,openingSkuUnits:physicalOpening,closingPickFaceSkuUnits:available,closingReserveSkuUnits:heldReserve,closingQualitySkuUnits:heldQuality,shippedSkuUnits,shippedOrders,pickedSkuUnits,pickedOrders,pendingOrders:pending,customerDeliveries:deliveredToCustomer},
-  openingState,commercialPlanning:planning,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,pickingLedger,stages:rows,days,checks,passed:true,
-  assumptions:'Lectura compartida de UN mismo registro SKU de doce días. Comercial/Planning son decisiones iniciales, no movimientos físicos; Picking y Transporte tienen eventos enlazados separados, pero comparten el día de expedición. El staging físico quedará para M3-12. No representa ni se suma a las unidades económicas del motor agregado de una jornada ni implica entrega al cliente.'});
+  metrics:{plannedOrders:source.plan.plannedOrders,forecastOrders:forecast,actualOrders:orderCount,originalPurchaseSkuUnits:ordered,extraPurchaseSkuUnits:newOrdered,receivedSkuUnits:received,releasedSkuUnits:released,transferSkuUnits:transferred,openingSkuUnits:physicalOpening,closingPickFaceSkuUnits:available,closingReserveSkuUnits:heldReserve,closingQualitySkuUnits:heldQuality,closingStagingSkuUnits:stagedSkuUnits,shippedSkuUnits,shippedOrders,pickedSkuUnits,pickedOrders,stagedOrders,unpickedOrders,pendingOrders:pending,customerDeliveries:deliveredToCustomer},
+  openingState,commercialPlanning:planning,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,pickingLedger,stagingAudit:source.stagingAudit,stages:rows,days,checks,passed:true,
+  assumptions:'Lectura compartida de UN mismo registro SKU de doce días. Comercial/Planning son decisiones iniciales, no movimientos físicos; Picking y Transporte tienen eventos enlazados separados; en el modo experimental se registra staging físico y salida posterior, pero la interfaz visible aún no lo activa (M3-12c). No representa ni se suma a las unidades económicas del motor agregado de una jornada ni implica entrega al cliente.'});
 }
