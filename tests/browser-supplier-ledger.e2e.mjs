@@ -32,7 +32,7 @@ async function verify(mode){
   assert.match(detail,/en cola de Recepción/);
   assert.match(detail,/ya ingresadas al CD/);
   assert.match(detail,/llegada modelada/);
-  assert.match(detail,/Compra urgente adicional/);
+  assert.match(detail,/compra extraordinaria urgente/);
   assert.match(received,/ingresadas al CD/);
   assert.match(received,/en cola del muelle/);
   assert.ok(!detail.includes('unidades confirmadas por proveedor original'),
