@@ -1,4 +1,5 @@
 import {supplyBridge} from './supply-bridge.js?v=136';
+import {createSkuSessionCache} from './sku-session.js?v=136';
 import {aggregateFlowCsv} from './aggregate-export.js?v=136';
 import {campaignSkuContract} from './campaign-contract.js?v=136';
 import {campaignAreaReadModel} from './area-ledger.js?v=136';
@@ -24,8 +25,9 @@ const $=id=>document.getElementById(id),KEY='supply-lab-v90';
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuReservePercent=0,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
-// Shared SKU read-model: one render, one physical order service.
-let currentSkuAreaModel=null;
+// One session-scoped, bounded physical SKU replay reused by all screens.
+const skuSession=createSkuSessionCache();
+let currentSkuAreaModel=null,currentSkuProjection=null;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 const skuContractInputs=contract=>skuReservePercent>0?{...contract.skuInputs,reservePercent:skuReservePercent}:contract.skuInputs;
@@ -147,6 +149,8 @@ function renderManagerBriefing(){
   ['Falta atender',view.pending]
  ];
  evidence.dataset.scope=service?'sku-cohort':'aggregate-day';
+ evidence.dataset.campaignId=service?currentSkuProjection?.campaignId||'':'';
+ evidence.dataset.projectionStamp=service?currentSkuProjection?.stamp||'':'';
  evidence.setAttribute('aria-label',service?'Pedidos completos SKU en '+service.horizonDays+' días':'Unidades equivalentes de una jornada');
  for(const [title,value] of essential){
   const card=add(evidence,'div','director-stat');
@@ -324,9 +328,8 @@ function renderLabor(){
   add(card,'small','','Dotación teórica para el flujo: '+a.staffRequired+' · exposición indicativa por capacidad no requerida: CLP '+fmt(a.idleCostIndicator));
  }
 }
-function renderCanonicalAreasFromSku(chain,contract,comparison){
+function renderCanonicalAreasFromSku(model){
  const host=$('canonicalAreaView');host.replaceChildren();
- const model=campaignAreaReadModel({comparison,campaign:chain.campaign,campaignId,plannedOrders:contract.plannedSampleOrders});
  const intro=add(host,'div','canonical-area-heading');
  add(intro,'span','canonical-kicker','MISIÓN 4 DE 4 · ENTENDER EL IMPACTO');
  add(intro,'h2','','🔗 Cómo operaron las ocho áreas');
@@ -401,7 +404,7 @@ function renderSkuLab(){
  const input=skuContractInputs(contract);
  if(currentSkuDecision){skuRecovery=currentSkuDecision.option;skuUrgentArrival=currentSkuDecision.urgentArrivalDay;skuPurchaseCoverage=currentSkuDecision.purchaseCoveragePercent;skuReservePercent=currentSkuDecision.reservePercent??0}
  let plannedSkuRun=null;
- currentSkuAreaModel=null;
+ currentSkuAreaModel=null;currentSkuProjection=null;
  const root=$('skuLab');root.replaceChildren();
  if(currentSkuDecision){const stamp=add(root,'div','sku-decision-stamp');add(stamp,'strong','','✓ Decisión SKU confirmada en simulación');add(stamp,'p','',(currentSkuDecision.option==='emergency'?'Compra extraordinaria de '+fmt(currentSkuDecision.orderedExtraUnits)+' unidades SKU.':currentSkuDecision.option==='reserve'?'Traslado interno de '+fmt(currentSkuDecision.releasedReserveUnits)+' unidades desde RESERVA-CD.':'Sin compra adicional.')+' Recuperación: '+fmt(currentSkuDecision.recoveredOrders)+' pedidos completos adicionales al día '+fmt(currentSkuDecision.horizonDays)+'. Consulta su trazabilidad en Recuperación.');}
  const controls=$('skuPolicyControls');controls.replaceChildren();
@@ -417,11 +420,14 @@ function renderSkuLab(){
  if(revealed){
   const actualOrders=contract.actualSampleOrders;
   // The selected comparison is shared between the operational trace and SKU audit.
-  const recovery=recoveryComparison({...input,option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
+  const projection=skuSession.getProjection({contract,skuInputs:input,option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
+  const recovery=projection.comparison;
   const integrated=recovery.integrated;
   plannedSkuRun=integrated.planned;
-  const chain=supplyBridge({...input,option:skuRecovery,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:recovery,campaignId});
-  const physicalAreas=renderCanonicalAreasFromSku(chain,contract,recovery);
+  const chain=projection.chain;
+  const physicalAreas=renderCanonicalAreasFromSku(projection.areaModel);
+  currentSkuProjection=projection;
+  for(const id of ['primarySkuSummary','canonicalAreaView']){$(id).dataset.campaignId=projection.campaignId;$(id).dataset.projectionStamp=projection.stamp;}
   // Reuse one immutable SKU projection for preliminary and final screens.
   currentSkuAreaModel=physicalAreas;
   renderPrimarySkuSummary(physicalAreas);
@@ -513,7 +519,7 @@ function renderSkuLab(){
     add(arrivalRow,'small','','Reposición extraordinaria '+fmt(purchased)+' unidades SKU · recibidas dentro del horizonte '+fmt(received)+' · pedidos adicionales completos '+fmt(recovery.recovered.completed-recovery.base.completed)+'.');
     if(recovery.recovered.completed===recovery.base.completed)add(arrivalRow,'small','','⚠ La compra no mejora los pedidos completos dentro del horizonte. Revisa plazo de llegada, capacidad de picking y stock remanente antes de comprometer el gasto.');
   }
-  const comparisons=Object.keys(RECOVERY_OPTIONS).map(id=>id===skuRecovery?recovery:recoveryComparison({...input,option:id,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage}));
+  const comparisons=Object.keys(RECOVERY_OPTIONS).map(id=>id===skuRecovery?recovery:skuSession.getComparison({contract,skuInputs:input,option:id,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage}));
   const candidates=comparisons.filter(x=>x.recovered.completed>recovery.base.completed);
   const recommended=[...candidates].sort((a,b)=>b.economicProxyDelta-a.economicProxyDelta||b.recovered.completed-a.recovered.completed)[0]||null;
   const advisor=add(bridge,'div','sku-advisor');
@@ -625,7 +631,7 @@ function renderSkuRecoveryMission(){
  }
  if(skuDecisions.length)add(root,'p','manager-warning','Hay una decisión registrada para una configuración anterior. Se conserva como histórica, pero no se aplica a este escenario actualizado. Puedes confirmar una decisión nueva sin modificar la anterior.');
  const selected=['emergency','reserve'].includes(skuRecovery)?skuRecovery:'wait';
- const preview=recoveryComparison({...input,option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
+ const preview=skuSession.getComparison({contract,skuInputs:input,option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
  const initial=preview.base.initial;
  const stockBox=add(root,'section','manager-inventory-review');
  add(stockBox,'h3','','1 · ¿Con qué contamos?');
