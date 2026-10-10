@@ -416,7 +416,7 @@ function renderSkuLab(){
  const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
  delayButton.type='button';delayButton.disabled=skuLocked;delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
  delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;save();renderSkuLab()};
- if(!revealed){$('canonicalAreaView').replaceChildren();$('primarySkuSummary').hidden=true}
+ if(!revealed){$('canonicalAreaView').replaceChildren();$('primarySkuSummary').hidden=true;for(const id of ['primarySkuSummary','canonicalAreaView']){delete $(id).dataset.campaignId;delete $(id).dataset.projectionStamp;}}
  if(revealed){
   const actualOrders=contract.actualSampleOrders;
   // The selected comparison is shared between the operational trace and SKU audit.
