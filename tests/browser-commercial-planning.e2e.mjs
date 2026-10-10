@@ -35,7 +35,8 @@ async function check(mode){
   assert.match(planningText,/un pedido completo puede contener varias unidades SKU/i);
   const original=await planning.locator('summary').innerText();
   const evidence=await page.locator('#primarySkuMetrics strong').allInnerTexts();
-  assert.deepEqual(evidence,['280','139','141'].length===3?evidence:evidence);
+  assert.equal(evidence[0],'280');
+  assert.equal(Number(evidence[1].replaceAll('.',''))+Number(evidence[2].replaceAll('.','')),280);
   await page.locator('#recoveryTab').click();
   await page.locator('#dashboardTab').click();
   await page.locator('#resultTabs [data-result-target="areas"]').click();
