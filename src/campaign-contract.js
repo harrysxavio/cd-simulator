@@ -2,6 +2,7 @@ import {flow} from './flow.js';
 import {numericValue} from './engine.js';
 import {SKU_CATALOG} from './sku.js';
 import {SCOPE_DEFINITIONS} from './measurements.js';
+import {skuOpeningState} from './opening-state.js';
 
 /**
  * One explicitly documented contract between campaign decisions and the SKU lab.
@@ -42,8 +43,11 @@ export function campaignSkuContract({
   pickingUnitCapacity:area.pickingCapacity,
   transportUnitCapacity:area.stages[7].capacity
  };
+ // A single SKU opening is shared across policy, recovery and recorded events.
+ // Aggregate scenario.initialStock remains separate until a later explicit mapping.
+ const openingState=skuOpeningState();
  const skuInputs={
-  policy,plannedOrders:plannedSampleOrders,actualOrders:actualSampleOrders,
+  policy,plannedOrders:plannedSampleOrders,actualOrders:actualSampleOrders,stock:openingState.openingBySku,
   delayDays:supplierDelay?{A:8}:{},...skuAreaCapacity
  };
  const trace={
@@ -51,7 +55,7 @@ export function campaignSkuContract({
   skuUnit:SCOPE_DEFINITIONS.sku.skuDisplayUnit,orderUnit:SCOPE_DEFINITIONS.sku.orderDisplayUnit,plannedCampaignUnits:area.plannedDemand,
   actualCampaignUnits:area.demand,plannedSampleOrders,actualSampleOrders,
   sampleRatio:area.demand/area.plannedDemand,
-  stockFromCatalog:true,inventoryAccuracyLinked:true,inventoryReserveActionNotLinked:true,
+  stockFromCatalog:true,stockOpeningShared:true,inventoryAccuracyLinked:true,inventoryReserveActionNotLinked:true,
   note:'Muestra de pedidos SKU derivada de la proporción de demanda de la campaña agregada. No representa la totalidad de sus unidades ni de su inventario. La exactitud de Inventario condiciona el picking SKU sin destruir existencias. La reserva de Inventario agregado y los costos todavía no son intercambiables.'
  };
  // Freeze nested arrays/objects to prevent one UI view from mutating the plan
@@ -64,5 +68,5 @@ export function campaignSkuContract({
   return value;
  };
  return freeze({campaignId,area,commercialForecast,planningCoverage,supplierRate,
-  plannedSampleOrders,actualSampleOrders,skuAreaCapacity,skuInputs,trace});
+  plannedSampleOrders,actualSampleOrders,openingState,skuAreaCapacity,skuInputs,trace});
 }

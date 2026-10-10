@@ -1,8 +1,8 @@
 {
-  "version": "11.24",
-  "assetRevision": 133,
-  "release": "v11.24 · Contrato de medidas y roadmap de 43 microfases",
+  "version": "11.25",
+  "assetRevision": 134,
+  "release": "v11.25 · Apertura SKU única, consistente en planificación y recuperación",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M2-01: pedidos completos, unidades SKU y unidades equivalentes de una jornada poseen tipos y horizontes incompatibles explícitos, verificados en diagnóstico y áreas. Los motores físicos y económicos aún NO están unificados."
+  "notes": "M2-02: mismo stock físico SKU para cálculo de compras, plan, shock, reserva, recuperación y resultados. Stock agregado de jornada sigue independiente; motor económico único pendiente."
 }

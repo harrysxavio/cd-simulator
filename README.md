@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.24
+# Supply Chain Operations Lab · v11.25
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.24-r133) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.25-r134) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,8 +15,10 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.24](docs/STATUS-V11.24.md).
+- [Estado verificable actualizado de v11.25](docs/STATUS-V11.25.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
+
+**Avance incremental v11.25 (M2-02):** planificación, recuperación y vistas de ocho áreas reutilizan la misma apertura de stock físico SKU validada. La reserva es una partición interna de esa apertura; nunca se suma. El stock agregado de una jornada continúa separado. [Evidencia de cierre y límites](docs/STATUS-V11.25.md).
 
 **Base v11.23 (M2/M3):** la misión Diagnóstico muestra demanda, despachos y pendientes como **pedidos completos de la misma cohorte SKU reconciliada** que Resultados → Resumen y Áreas. No suma las unidades de la jornada agregada. La posible restricción se señala como **hipótesis del motor agregado**, todavía no como una causa SKU comprobada. Los 3 indicadores permanecen en formato compacto. Se corrigió además la versión estática visible en la cabecera.
 

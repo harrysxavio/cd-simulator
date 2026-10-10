@@ -70,7 +70,11 @@ test('inventory accuracy and reserve from aggregate flow are not silently added 
  assert.equal(c.trace.inventoryAccuracyLinked,true);
  assert.equal(c.trace.inventoryReserveActionNotLinked,true);
  assert.ok(!('extraDeliveries' in c.skuInputs));
- assert.ok(!('stock' in c.skuInputs));
+ // M2-02 explicitly passes the *physical SKU catalog opening*. The legacy
+ // aggregate stock and its reserve action must not add units to this map.
+ assert.deepEqual(c.skuInputs.stock,inventory);
+ assert.equal(c.openingState.totals.physicalSkuUnits,295);
+ assert.equal(c.openingState.totals.reserveSkuUnits,0);
  assert.equal(c.skuInputs.inventoryAccuracyPercent,85);
 });
 

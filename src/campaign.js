@@ -1,4 +1,5 @@
 import {SKU_CATALOG} from './sku.js';
+import {skuOpeningState} from './opening-state.js';
 
 /**
  * Immutable, canonical read model for ONE SKU event-simulation campaign.
@@ -17,6 +18,12 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  if(!replay||!Array.isArray(replay.ledger)||!Array.isArray(replay.ordersDetail)||!Array.isArray(replay.deliveries)||!Array.isArray(comparison.urgent))throw new Error('Falta registro de eventos por pedido');
  const catalog=SKU_CATALOG.map(p=>({id:p.id,name:p.name,unitCost:p.unitCost}));
  const ids=catalog.map(p=>p.id),opening={...replay.initial};
+ // Verify that the recorded event book and reserve start from ONE opening.
+ const openingState=comparison.openingState??skuOpeningState({stock:opening,reservePercent:comparison.reservePercent??0});
+ if(openingState.scope!=='sku-cohort'||ids.some(id=>openingState.openingBySku[id]!==opening[id]
+  ||openingState.reserveBySku[id]!==replay.openingReserve?.[id])){
+  throw new Error('La apertura y reserva SKU no coinciden con el libro de eventos');
+ }
  const purchaseOrders=[
   ...replay.deliveries.map(d=>({id:'PO-'+d.id,source:'original',skuId:d.id,orderedQty:d.ordered,supplierFulfilledQty:d.received,supplierUnfilledQty:d.unreceived,expectedArrivalDay:d.arrivalDay,unitCost:d.unitCost})),
   ...comparison.urgent.map((d,i)=>({id:'URG-'+String(i+1).padStart(3,'0')+'-'+d.id,source:'urgent',skuId:d.id,orderedQty:d.qty,supplierFulfilledQty:d.qty,supplierUnfilledQty:0,expectedArrivalDay:d.day,unitCost:d.unitCost}))
@@ -101,11 +108,11 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  };
  const result={
   campaignId,version:1,scope:'sku-cohort',currency:'CLP',horizonDays:replay.days,
-  catalog,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
+  catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase},
   demand:{actualOrders:replay.orders,revealed:true},
   purchaseOrders,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
-  inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:{...opening},openingReserve:{...replay.openingReserve},closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
+  inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones.'
  };
