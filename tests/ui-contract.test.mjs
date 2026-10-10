@@ -81,9 +81,14 @@ test('single campaign contract supplies physical SKU capacities and limits',()=>
  for(const key of ['receivingUnitCapacity:area.receivingCapacity','pickingUnitCapacity:area.pickingCapacity','transportUnitCapacity:area.stages[7].capacity']){
   assert.ok(adapter.includes(key),'Missing SKU capacity: '+key);
  }
- assert.ok(app.includes('const chain=supplyBridge({...input'));
+ const session=readFileSync(new URL('../src/sku-session.js',import.meta.url),'utf8');
+ assert.ok(app.includes('const chain=projection.chain'));
+ assert.ok(session.includes('comparisonResult:entry.comparison'));
+ assert.ok(session.includes('readModel({'));
  assert.ok(app.includes('const audit=skuAudit({...input'));
- assert.ok(app.includes('comparisonResult:recovery'));
+ assert.ok(app.includes('const recovery=projection.comparison'));
+ assert.ok(app.includes('skuSession.getComparison({contract,skuInputs:input'));
+ assert.ok(session.includes('replay({'));
 });
 
 test('supplier and quality constraints in campaign adapter drive SKU reports',()=>{
