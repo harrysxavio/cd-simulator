@@ -135,7 +135,8 @@ test('restart and operation review are available from every stage, including rev
  assert.ok(!app.includes("if(name==='operations'&&revealed){name='preliminary'}"),'Revealed plan must be viewable');
  assert.ok(app.includes("currentSection=name;"),'Current stage must persist');
  assert.ok(app.includes("load();showSection(currentSection);"),'Resume last stage');
- assert.ok(app.includes("revealed?'preliminary':'operations'"),'Legacy v11.13 stage fallback');
+ const persistence=readFileSync(new URL('../src/session-state.js',import.meta.url),'utf8');
+ assert.ok(persistence.includes("revealed?'preliminary':'operations'"),'Stage fallback must live in validated session codec');
 });
 
 test('returning to operation after revealing surprise is read-only and cannot re-plan purchases',()=>{
