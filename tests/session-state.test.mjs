@@ -81,7 +81,7 @@ test('M2-05: malformed numbers, unknown choices, fake ID, broken shape never cor
  assert.equal(s.scenario.initialStock,0);
  assert.equal(s.scenario.demandShockPercent,100);
  assert.equal(s.scenario.actualDemand,1000);
- assert.equal(s.decisions.commercial,undefined);
+ assert.equal(s.decisions.commercial,'accurate','invalid choice must fall back to safe START');
  assert.equal(s.decisions.values.inventory,92);
  assert.equal(s.decisions.values.receiving,undefined);
  assert.equal(s.actions.receiving,500);
