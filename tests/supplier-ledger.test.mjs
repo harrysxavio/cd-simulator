@@ -16,6 +16,16 @@ const build=(extra={})=>{
 };
 const total=(a,key)=>a.reduce((n,v)=>n+v[key],0);
 
+test('M3-07: an exhausted supplier delivery cannot produce zero-unit lots on later days',()=>{
+ const {comparison,campaign}=build({option:'wait',receivingUnitCapacity:500,qualityReleasePercent:100,days:12});
+ const receiptEvents=comparison.recovered.ledger.flatMap(d=>d.receiptEvents);
+ assert.ok(receiptEvents.length>0);
+ assert.ok(receiptEvents.every(r=>Number.isSafeInteger(r.qty)&&r.qty>0));
+ assert.equal(receiptEvents.length,campaign.receipts.length);
+ assert.ok(campaign.receipts.every(r=>r.qty>0));
+ assert.ok(campaign.supplierLedger.rows.every(po=>po.warehouseReceiptIds.length===campaign.receipts.filter(r=>r.purchaseOrderId===po.id).length));
+});
+
 test('M3-07: complete supplier model agrees with physical receipts and eight-area evidence',()=>{
  const {comparison,campaign,model}=build({option:'combined',urgentArrivalDay:2,receivingUnitCapacity:20,supplierFill:{A:75,B:85,C:95},delayDays:{A:8}});
  const ledger=campaign.supplierLedger,t=ledger.totals;
