@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.36.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.37.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -89,8 +89,9 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 09 | **Código/CI/merge aprobados** | PR #31 fusionado como v11.33; lotes retenidos/liberados y cero-eventos corregidos. |
 | 10 | **Código/CI/merge aprobados** | PR #32 en main (v11.34), inventario SKU por día/ubicación conciliado. |
 | 11 | **Código/CI/merge aprobados** | PR #33 fusionado como v11.35: preparación por pedido/BOM con evento propio y despacho todavía acoplado. |
-| 12a | **En curso** | PR v11.36: núcleo opt-in FIFO con staging físico, transporte desacoplado y auditoría SKU/día; UI y ocho áreas siguen en modo estable, hasta 12b/c. CI/merge/Pages por verificar. |
-| 12b–12c | **Pendiente** | Integrar staging con campaña, Inventario, KPIs y UI compacta sin duplicar stock. |
+| 12a | **Código/CI/merge aprobados** | PR #34 fusionado, v11.36. FIFO físico de staging y transporte con capacidad independiente probados. |
+| 12b | **En curso** | PR v11.37: registros, Inventario y ocho áreas con staging reconciliado, sin activar la UI; CI/merge por verificar. |
+| 12c | **Pendiente** | Activación del modo staging en el flujo de usuario, UX móvil, KPI y persistencia. |
 | 04c–04d | **Pendientes** | Transición física de decisiones y retiro del paralelo; dependen parcialmente de M3. |
 | 13–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
 
