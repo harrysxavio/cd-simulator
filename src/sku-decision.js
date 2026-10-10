@@ -47,7 +47,10 @@ export function createSkuRecoveryDecision({campaignId,skuInputs,option='wait',ur
  return freezeDeep({
   version:1,scope:'sku-cohort',status:'confirmed-in-simulator',campaignId,scenarioSignature:signature,
   action:option==='wait'?'wait-without-purchase':option==='reserve'?'release-on-site-reserve':'extraordinary-purchase',option,urgentArrivalDay,purchaseCoveragePercent,reservePercent:skuInputs.reservePercent??0,
+  // Persist PO identity, original quantity, due day and unit valuation with
+  // a confirmed decision; older v1 confirmations without this array remain valid.
   originalPurchase:{...comparison.originalPurchase},
+  originalPurchaseOrders:snapshot.plan.originalPurchaseOrders.map(po=>({...po})), 
   urgentPurchaseOrders,reserveTransfers,
   releasedReserveUnits:reserveTransfers.reduce((n,r)=>n+r.qty,0),
   firstReserveTransferDay:reserveTransfers.length?Math.min(...reserveTransfers.map(x=>x.day)):null,
@@ -75,6 +78,15 @@ export function skuDecisionStatus({decision,contract}={}){
   !Number.isInteger(decision.purchaseCoveragePercent)||!Number.isFinite(decision.urgentOrderCommitmentCLP)||
   decision.urgentOrderCommitmentCLP<0)return 'invalid';
  if(decision.option!=='emergency'&&decision.urgentPurchaseOrders.length)return 'invalid';
+ if(decision.originalPurchaseOrders!==undefined){
+  if(!Array.isArray(decision.originalPurchaseOrders)||decision.originalPurchaseOrders.length===0
+   ||new Set(decision.originalPurchaseOrders.map(po=>po?.skuId)).size!==decision.originalPurchaseOrders.length
+   ||decision.originalPurchaseOrders.some(po=>!po||po.id!=='PO-'+po.skuId
+    ||po.source!=='original'||!Number.isSafeInteger(po.orderedQty)||po.orderedQty<0
+    ||po.orderedQty!==decision.originalPurchase?.[po.skuId]
+    ||!Number.isSafeInteger(po.expectedArrivalDay)||po.expectedArrivalDay<0
+    ||!Number.isSafeInteger(po.unitCost)||po.unitCost<0))return 'invalid';
+ }
  if(decision.reserveTransfers!==undefined&&(!Array.isArray(decision.reserveTransfers)||decision.reserveTransfers.some(x=>!Number.isSafeInteger(x.qty)||x.qty<1)))return 'invalid';
  return 'current';
 }
