@@ -48,7 +48,9 @@ test('canonical 12-day SKU result is first in overview, legacy aggregate is coll
  assert.ok(html.indexOf('id="primarySkuSummary"')<html.indexOf('id="legacyAggregateDetails"'));
  assert.ok(html.includes('modelo didáctico anterior')||html.includes('Modelo didáctico anterior'))
  assert.ok(app.includes('function renderPrimarySkuSummary(model)'));
- assert.ok(app.includes('const physicalAreas=renderCanonicalAreasFromSku(chain,contract,recovery)'));
+ assert.ok(app.includes('const projection=skuSession.getProjection({contract,skuInputs:input'));
+ assert.ok(app.includes('const physicalAreas=renderCanonicalAreasFromSku(projection.areaModel)'));
+ assert.ok(app.includes('currentSkuProjection=projection'));
  assert.ok(app.includes('renderPrimarySkuSummary(physicalAreas)'));
  assert.ok(app.includes("$('primaryToAreas').onclick"));
  assert.ok(html.includes('class="mission-guide"'));
