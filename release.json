@@ -1,8 +1,8 @@
 {
-  "version": "11.31",
-  "assetRevision": 140,
-  "release": "v11.31 · M3-07 Compras y proveedores conciliados",
+  "version": "11.32",
+  "assetRevision": 141,
+  "release": "v11.32 · M3-08 Recepción trazable por capacidad, día y lote",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-07: conciliación por PO entre unidades pedidas, cumplimiento modelado de proveedor, llegada prevista, tránsito, cola y recepción real al CD, sin adelantar inventario ni confundir llegada con ingreso. Compras urgentes separadas, lead time y cantidades contrastados con eventos SKU."
+  "notes": "M3-08: FIFO de muelle por PO y SKU; llegadas simuladas, recepción por lote, capacidad diaria, cola y días de espera, sin convertir tránsito o ingreso en stock listo para picking. Conciliación diaria con el mismo replay, sin inventario paralelo."
 }
