@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.34
+# Supply Chain Operations Lab · v11.35
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.34-r143) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.35-r144) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.34](docs/STATUS-V11.34.md).
+- [Estado verificable actualizado de v11.35](docs/STATUS-V11.35.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.34 (M3-10):** Inventario ahora tiene un libro físico único por SKU/día con movimientos y conservación de PICK-FACE, RESERVA-CD y Calidad. El stock no verificable sigue siendo inventario físico, no pérdida. [Estado y límites](docs/STATUS-V11.34.md).
+**Avance v11.35 (M3-11):** Picking emite preparación por pedido completo, mezcla SKU y día, auditable contra el despacho de Transporte. Por ahora ambas etapas se completan el mismo día; la cola staging y Transporte independiente quedan pendientes de M3-12. [Estado y límites](docs/STATUS-V11.35.md).
+
+**Base v11.34 (M3-10):** Inventario ahora tiene un libro físico único por SKU/día con movimientos y conservación de PICK-FACE, RESERVA-CD y Calidad. El stock no verificable sigue siendo inventario físico, no pérdida. [Estado y límites](docs/STATUS-V11.34.md).
 
 **Base v11.33 (M3-09):** Calidad usa un libro físico único por lote y día para retención, liberación y conciliación con Recepción e Inventario; prohíbe liberaciones de cantidad cero y explica que retenido no equivale a merma o rechazo. [Estado y límites](docs/STATUS-V11.33.md).
 

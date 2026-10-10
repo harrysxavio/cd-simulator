@@ -48,7 +48,7 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   const receivedUrgent=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
   const released=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
   // Track traceable physical events, preserving existing daily totals.
-  const receiptEvents=[],releaseEvents=[],shipmentEvents=[],reserveEvents=[],dockArrivals=[];
+  const receiptEvents=[],releaseEvents=[],pickEvents=[],shipmentEvents=[],reserveEvents=[],dockArrivals=[];
   const movedReserve=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
   if(reserveReleaseDay===day)for(const p of SKU_CATALOG){const qty=heldReserve[p.id];if(qty>0){heldReserve[p.id]-=qty;available[p.id]+=qty;movedReserve[p.id]=qty;reserveEvents.push({id:'MOVE-'+day+'-'+p.id,day,skuId:p.id,qty,from:'RESERVA-CD',to:'PICK-FACE',verified:true});}}
   for(const d of timeline.deliveries)if(d.arrivalDay===day&&d.received>0){
@@ -103,7 +103,7 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   // A separate, daily promiseable balance limits picking; its complement
   // remains physically in the warehouse, not written off or held by Quality.
   const pickable=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,Math.floor(available[p.id]*inventoryAccuracyPercent/100)]));
-  let shipped=0,shippedUnits=0;
+  let shipped=0,shippedUnits=0,pickedOrders=0,pickedUnits=0;
   for(const order of queue){
    if(shipped>=dailyCapacity)break;
    if(order.fulfilledDay!==null)continue;
@@ -113,17 +113,20 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
    if(shippedUnits+kitUnits>(transportUnitCapacity===null?Infinity:transportUnitCapacity))continue;
    if(!Object.entries(lines).every(([id,qty])=>pickable[id]>=qty))continue;
    for(const [id,qty] of Object.entries(lines)){available[id]-=qty;pickable[id]-=qty;}
+   const pickId='PICK-'+order.id;
+   pickEvents.push({pickId,orderId:order.id,templateId:types[order.type].id,day,lines:{...lines},units:kitUnits});
    order.fulfilledDay=day;types[order.type].fulfilled++;shipped++;shippedUnits+=kitUnits;
-   shipmentEvents.push({orderId:order.id,templateId:types[order.type].id,day,lines:{...lines},units:kitUnits});
+   pickedOrders++;pickedUnits+=kitUnits;
+   shipmentEvents.push({pickId,orderId:order.id,templateId:types[order.type].id,day,lines:{...lines},units:kitUnits});
   }
   const unverifiedStock=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,available[p.id]-pickable[p.id]]));
   const completed=queue.filter(o=>o.fulfilledDay!==null).length;
   const backlog=n-completed;
-  ledger.push({day,dockArrivals,receiptEvents,receivingQueue,receivingUsedSkuUnits,receivingCapacitySkuUnits:receivingUnitCapacity,releaseEvents,reserveEvents,shipmentEvents,received,released,movedReserve,reserveStock:{...heldReserve},receivedUrgent,waitingReceiving,waitingQuality,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(lot=>lot.id===p.id).reduce((n,x)=>n+x.remaining,0)])),shipped,shippedUnits,completed,backlog,stock:{...available},pickableStock:{...pickable},unverifiedStock,onTime:queue.filter(o=>o.fulfilledDay===0).length});
+  ledger.push({day,dockArrivals,receiptEvents,receivingQueue,receivingUsedSkuUnits,receivingCapacitySkuUnits:receivingUnitCapacity,releaseEvents,reserveEvents,pickEvents,pickedOrders,pickedUnits,shipmentEvents,received,released,movedReserve,reserveStock:{...heldReserve},receivedUrgent,waitingReceiving,waitingQuality,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(lot=>lot.id===p.id).reduce((n,x)=>n+x.remaining,0)])),shipped,shippedUnits,completed,backlog,stock:{...available},pickableStock:{...pickable},unverifiedStock,onTime:queue.filter(o=>o.fulfilledDay===0).length});
  }
  const completed=queue.filter(o=>o.fulfilledDay!==null).length;
  const consumed=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,initial[p.id]+ledger.reduce((total,entry)=>total+entry.received[p.id],0)-available[p.id]-heldReserve[p.id]-qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)]));
  const late=queue.filter(o=>o.fulfilledDay!==null&&o.fulfilledDay>0);
  const backlogAgeDays=queue.filter(o=>o.fulfilledDay===null).length*(days+1);
- return {orders:n,ordersDetail:queue.map(o=>({id:o.id,templateId:types[o.type].id,lines:{...types[o.type].lines},fulfilledDay:o.fulfilledDay})),policy,days,dailyCapacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,ledger,types,initial,openingReserve,endingReserveStock:{...heldReserve},reserveReleaseDay,endingStock:available,endingPickableStock:{...ledger.at(-1).pickableStock},endingUnverifiedStock:{...ledger.at(-1).unverifiedStock},heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)])),consumed,deliveries:timeline.deliveries,extraDeliveries,waitingReceiving:ledger.at(-1).waitingReceiving,waitingQuality:ledger.at(-1).waitingQuality,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Las entregas esperan capacidad de Recepción, y las unidades recibidas permanecen retenidas hasta su liberación por Calidad. La tasa de liberación es diaria sobre el stock en control (no defectos ni rechazos). El stock inicial ubicado en RESERVA-CD es parte del inventario físico inicial (nunca se suma una segunda vez) y solo pasa a PICK-FACE mediante un evento de traslado verificable en su día efectivo. Inventario conserva la totalidad del stock físico y separa la fracción confiable para picking de la fracción no verificable, reestimada diariamente; no equivale a merma, pérdida ni cuarentena de Calidad. Picking y Transporte comparten el despacho por pedido completo y tienen límites diarios de unidades SKU, sin inventario de trabajo en proceso. Sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
+ return {orders:n,ordersDetail:queue.map(o=>({id:o.id,templateId:types[o.type].id,lines:{...types[o.type].lines},pickedDay:o.fulfilledDay,fulfilledDay:o.fulfilledDay})),policy,days,dailyCapacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,ledger,types,initial,openingReserve,endingReserveStock:{...heldReserve},reserveReleaseDay,endingStock:available,endingPickableStock:{...ledger.at(-1).pickableStock},endingUnverifiedStock:{...ledger.at(-1).unverifiedStock},heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)])),consumed,deliveries:timeline.deliveries,extraDeliveries,waitingReceiving:ledger.at(-1).waitingReceiving,waitingQuality:ledger.at(-1).waitingQuality,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Las entregas esperan capacidad de Recepción, y las unidades recibidas permanecen retenidas hasta su liberación por Calidad. La tasa de liberación es diaria sobre el stock en control (no defectos ni rechazos). El stock inicial ubicado en RESERVA-CD es parte del inventario físico inicial (nunca se suma una segunda vez) y solo pasa a PICK-FACE mediante un evento de traslado verificable en su día efectivo. Inventario conserva la totalidad del stock físico y separa la fracción confiable para picking de la fracción no verificable, reestimada diariamente; no equivale a merma, pérdida ni cuarentena de Calidad. Picking emite un evento auditable propio antes de la expedición del mismo día, pero todavía no mantiene pedidos preparados en staging: Transporte y Picking permanecen acoplados hasta M3-12. Sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
 }

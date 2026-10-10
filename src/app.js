@@ -1,27 +1,27 @@
-import {supplyBridge} from './supply-bridge.js?v=143';
-import {createSkuSessionCache} from './sku-session.js?v=143';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=143';
-import {aggregateFlowCsv} from './aggregate-export.js?v=143';
-import {campaignSkuContract} from './campaign-contract.js?v=143';
-import {campaignAreaReadModel} from './area-ledger.js?v=143';
-import {laborAudit} from './labor.js?v=143';
-import {skuAudit} from './audit.js?v=143';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=143';
-import {integratedDemand} from './integrated.js?v=143';
-import {eventSimulation} from './events.js?v=143';
-import {deliveryTimeline} from './timeline.js?v=143';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=143';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=143';
-import {demandJourney} from './journey.js?v=143';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=143';
-import {flow,diagnose,ACTIONS} from './flow.js?v=143';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=143';
-import {areaKpis} from './kpis.js?v=143';
-import {causalAudit} from './causal.js?v=143';
-import {managerDiagnosis} from './diagnosis-guide.js?v=143';
-import {skuServiceBrief} from './sku-service.js?v=143';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=143';
-import {attentionSignals} from './attention.js?v=143';
+import {supplyBridge} from './supply-bridge.js?v=144';
+import {createSkuSessionCache} from './sku-session.js?v=144';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=144';
+import {aggregateFlowCsv} from './aggregate-export.js?v=144';
+import {campaignSkuContract} from './campaign-contract.js?v=144';
+import {campaignAreaReadModel} from './area-ledger.js?v=144';
+import {laborAudit} from './labor.js?v=144';
+import {skuAudit} from './audit.js?v=144';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=144';
+import {integratedDemand} from './integrated.js?v=144';
+import {eventSimulation} from './events.js?v=144';
+import {deliveryTimeline} from './timeline.js?v=144';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=144';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=144';
+import {demandJourney} from './journey.js?v=144';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=144';
+import {flow,diagnose,ACTIONS} from './flow.js?v=144';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=144';
+import {areaKpis} from './kpis.js?v=144';
+import {causalAudit} from './causal.js?v=144';
+import {managerDiagnosis} from './diagnosis-guide.js?v=144';
+import {skuServiceBrief} from './sku-service.js?v=144';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=144';
+import {attentionSignals} from './attention.js?v=144';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -396,9 +396,10 @@ function renderCanonicalAreasFromSku(model){
   add(card,'strong','','Día '+day.day+' · '+fmt(day.shippedOrders)+' pedidos expedidos · '+fmt(day.remainingOrders)+' pendientes');
   add(card,'small','','Muelle +'+fmt(day.dockArrivedSkuUnits)+' SKU · recibido '+fmt(day.receivedSkuUnits)+' SKU · cola '+fmt(day.receivingQueueSkuUnits)+' SKU');
   add(card,'small','','Calidad liberó '+fmt(day.releasedSkuUnits)+' SKU · retenido '+fmt(day.qualityHeldSkuUnits)+' SKU · reserva trasladada '+fmt(day.movedReserveSkuUnits)+' SKU');
+  add(card,'small','','Picking '+fmt(day.pickedOrders)+' pedidos · '+fmt(day.pickedSkuUnits)+' SKU preparados · expedidos '+fmt(day.shippedOrders)+' pedidos');
   add(card,'small','','PICK-FACE '+fmt(day.closingPickFaceSkuUnits)+' SKU · RESERVA-CD '+fmt(day.closingReserveSkuUnits)+' SKU · verificable '+fmt(day.closingVerifiedSkuUnits)+' SKU · sin verificar '+fmt(day.closingUnverifiedSkuUnits)+' SKU');
  }
- add(host,'p','canonical-boundary','Nota de realismo: el modelo actual confirma Picking y Transporte en un mismo evento de despacho. Todavía no simula staging, carga en camión ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
+ add(host,'p','canonical-boundary','Nota de realismo: Picking ahora registra cada preparación por separado, pero se despacha el mismo día. Todavía no se simulan staging, espera de transporte ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
  return model;
 }
 function renderPrimarySkuSummary(model){

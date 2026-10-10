@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.34.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.35.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -87,8 +87,9 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 07 | **Código/CI/merge aprobados** | PR #29 en main como v11.31; llegada proveedor/PO, cola y recibos físicos auditados. |
 | 08 | **Código/CI/merge aprobados** | PR #30 integrado como v11.32; cola FIFO física de Recepción auditada por PO/SKU/día. |
 | 09 | **Código/CI/merge aprobados** | PR #31 fusionado como v11.33; lotes retenidos/liberados y cero-eventos corregidos. |
-| 10 | **En curso** | PR v11.34: conservación física por SKU, ubicación y día, verificación independiente de stock; CI/merge/Pages por comprobar. |
+| 10 | **Código/CI/merge aprobados** | PR #32 en main (v11.34), inventario SKU por día/ubicación conciliado. |
+| 11 | **En curso** | PR v11.35: preparaciones Picking con evento por pedido/BOM, enlace al despacho, capacidad y evidencia. Same-day coupling explícito; separar staging en M3-12. CI/merge/Pages por verificar. |
 | 04c–04d | **Pendientes** | Transición física de decisiones y retiro del paralelo; dependen parcialmente de M3. |
-| 11–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
+| 12–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.

@@ -1,8 +1,8 @@
 {
-  "version": "11.34",
-  "assetRevision": 143,
-  "release": "v11.34 · M3-10 Inventario físico por SKU y ubicación",
+  "version": "11.35",
+  "assetRevision": 144,
+  "release": "v11.35 · M3-11 Preparación Picking auditada por pedido",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-10: mismo stock físico por SKU/día en PICK-FACE, RESERVA-CD y Calidad; movimientos de recepción, liberación, reserva y despacho conciliados sin nuevos eventos. La fracción sin verificar es stock existente y no merma. No unifica economía agregada ni separa Picking y Transporte."
+  "notes": "M3-11: evento propio de Picking por pedido/BOM y día, con capacidad física SKU y enlace explícito a expedición. En este incremento ambos ocurren el mismo día; staging y cola independiente de Transporte quedan para M3-12. Inventario físico se mantiene conciliado y despacho no equivale a entrega."
 }
