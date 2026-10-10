@@ -1,8 +1,8 @@
 {
-  "version": "11.33",
-  "assetRevision": 142,
-  "release": "v11.33 · M3-09 Calidad por lote, retención y liberación",
+  "version": "11.34",
+  "assetRevision": 143,
+  "release": "v11.34 · M3-10 Inventario físico por SKU y ubicación",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-09: una sola conciliación por lote y día de unidades recibidas, retenidas y liberadas por Calidad, sin cero-eventos ni inventario fantasma. La tasa de liberación didáctica no es rechazo, merma ni certificación del producto; el stock liberado requiere además verificación de Inventario antes de Picking."
+  "notes": "M3-10: mismo stock físico por SKU/día en PICK-FACE, RESERVA-CD y Calidad; movimientos de recepción, liberación, reserva y despacho conciliados sin nuevos eventos. La fracción sin verificar es stock existente y no merma. No unifica economía agregada ni separa Picking y Transporte."
 }
