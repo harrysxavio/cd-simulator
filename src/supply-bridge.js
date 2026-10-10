@@ -11,6 +11,18 @@ export function supplyBridge({policy='balanced',plannedOrders=200,actualOrders=2
  const arrival=Object.fromEntries(result.urgent.map(x=>[x.id,x.day]));
  const procurementLedger=skuProcurementReconciliation(result);
  const campaign=campaignSnapshot({comparison:result,campaignId,plannedOrders});
+ // M3-07: audit the new canonical PO+receipt ledger against the historical
+ // reconciliation without creating a second source of warehouse stock.
+ const supplier=campaign.supplierLedger.totals,old=procurementLedger.totals;
+ if(supplier.originalOrderedSkuUnits!==old.originalOrdered
+  ||supplier.originalFulfilledSkuUnits!==old.originalSupplierFulfilled
+  ||supplier.originalShortfallSkuUnits!==old.originalSupplierShortfall
+  ||supplier.urgentOrderedSkuUnits!==old.urgentOrdered
+  ||supplier.warehouseReceivedSkuUnits!==old.originalReceived+old.urgentReceived
+  ||supplier.awaitingWarehouseReceiptSkuUnits!==old.waitingReceiving
+  ||supplier.inTransitSkuUnits!==old.originalInTransit+old.urgentInTransit){
+  throw new Error('Compras y Recepción difieren entre registros SKU');
+ }
  const receipts=result.recovered.ledger.map(day=>({
   day:day.day,received:{...day.received},released:{...day.released},waitingQuality:day.waitingQuality,receivedUrgent:{...day.receivedUrgent},waitingReceiving:day.waitingReceiving,shipped:day.shipped,shippedUnits:day.shippedUnits,
   completed:day.completed,pending:day.backlog,stock:{...day.stock},reserveStock:{...day.reserveStock},movedReserve:{...day.movedReserve},pickableStock:{...day.pickableStock},unverifiedStock:{...day.unverifiedStock}
