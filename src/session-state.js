@@ -94,15 +94,16 @@ export function normalizeSessionRecord(raw,{fallbackCampaignId}={}){
   revealed,shockDirection,
   skuPolicy:choose(raw.skuPolicy,POLICIES,'balanced'),
   skuSupplierDelay:raw.skuSupplierDelay===true,
-  skuRecovery:choose(raw.skuRecovery,DECISION_OPTIONS.includes(raw.skuRecovery)?DECISION_OPTIONS:['wait','emergency','reserve','overtime','combined'],'wait'),
+  skuRecovery:choose(raw.skuRecovery,['wait','emergency','reserve','overtime','combined'],'wait'),
   skuUrgentArrival:choose(raw.skuUrgentArrival,ARRIVALS,1),
   skuPurchaseCoverage:choose(raw.skuPurchaseCoverage,COVERAGES,100),
   skuReservePercent:choose(raw.skuReservePercent,RESERVES,0),
   skuDecisions:safeConfirmedDecisions(raw.skuDecisions,campaignId)
  };
- // Old v2 allowed 5 recovery options in its comparator, not only 3
- // confirmable decisions. Non-confirmable options remain usable in previews.
- state.skuRecovery=choose(raw.skuRecovery,['wait','emergency','reserve','overtime','combined'],'wait');
+ // Reject impossible actualDemand (not user-editable); an absurd persisted value
+ // must never silently seed an impossible future execution.
+ if(!Number.isSafeInteger(state.scenario.actualDemand)||state.scenario.actualDemand<1
+  ||state.scenario.actualDemand>100000)state.scenario.actualDemand=state.scenario.demand;
  return state;
 }
 export function deserializeSession(raw,{fallbackCampaignId}={}){
