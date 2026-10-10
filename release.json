@@ -1,8 +1,8 @@
 {
-  "version": "11.23",
-  "assetRevision": 132,
-  "release": "v11.23 · Indicadores de diagnóstico físico desde cohorte SKU compartida",
+  "version": "11.24",
+  "assetRevision": 133,
+  "release": "v11.24 · Contrato de medidas y roadmap de 43 microfases",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "Diagnóstico y Resultados muestran pedidos completos del mismo read-model SKU. La hipótesis causal agregada de una jornada está expresamente marcada como provisional; no existe aún motor económico único."
+  "notes": "M2-01: pedidos completos, unidades SKU y unidades equivalentes de una jornada poseen tipos y horizontes incompatibles explícitos, verificados en diagnóstico y áreas. Los motores físicos y económicos aún NO están unificados."
 }
