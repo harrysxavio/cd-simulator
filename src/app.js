@@ -25,19 +25,23 @@ import {attentionSignals} from './attention.js?v=146';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuReservePercent=0,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuSeparateTransport=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuReservePercent=0,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
 // One session-scoped, bounded physical SKU replay reused by all screens.
 const skuSession=createSkuSessionCache();
 let currentSkuAreaModel=null,currentSkuProjection=null;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
-const skuContractInputs=contract=>skuReservePercent>0?{...contract.skuInputs,reservePercent:skuReservePercent}:contract.skuInputs;
+const skuContractInputs=contract=>{
+ const stock=skuReservePercent>0?{...contract.skuInputs,reservePercent:skuReservePercent}:contract.skuInputs;
+ // The legacy signature stays identical when staging is not selected.
+ return skuSeparateTransport?{...stock,separateTransport:true}:stock;
+};
 const activeSkuDecision=contract=>skuDecisions.findLast(d=>skuDecisionStatus({decision:d,contract:{...contract,skuInputs:skuContractInputs(contract)}})==='current')||null;
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
 function save(){
  try{
   const data={campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,
-   skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions};
+   skuPolicy,skuSupplierDelay,skuSeparateTransport,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions};
   localStorage.setItem(KEY,serializeSession(data));
  }catch{
   // Browser privacy mode or exhausted storage must not break the exercise.
@@ -52,7 +56,7 @@ function load(){
   campaignId=s.campaignId;currentSection=s.currentSection;
   decisions=s.decisions;actions=s.actions;active=s.active;phase=s.phase;
   scenario=s.scenario;strategy=s.strategy;revealed=s.revealed;shockDirection=s.shockDirection;
-  skuPolicy=s.skuPolicy;skuSupplierDelay=s.skuSupplierDelay;skuRecovery=s.skuRecovery;
+  skuPolicy=s.skuPolicy;skuSupplierDelay=s.skuSupplierDelay;skuSeparateTransport=s.skuSeparateTransport;skuRecovery=s.skuRecovery;
   skuUrgentArrival=s.skuUrgentArrival;skuPurchaseCoverage=s.skuPurchaseCoverage;
   skuReservePercent=s.skuReservePercent;skuDecisions=s.skuDecisions;
   skuSession.clear();currentSkuAreaModel=null;currentSkuProjection=null;
@@ -444,6 +448,13 @@ function renderSkuLab(){
  const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
  delayButton.type='button';delayButton.disabled=skuLocked;delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
  delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;save();renderSkuLab()};
+ const stageToggle=add(controls,'button',skuSeparateTransport?'btn':'btn secondary',
+  skuSeparateTransport?'🚚 Staging activo · separar Picking y Transporte':'🚚 Activar staging de pedidos preparados');
+ stageToggle.type='button';
+ stageToggle.setAttribute('aria-pressed',String(skuSeparateTransport));
+ stageToggle.setAttribute('aria-label','Separar Picking y Transporte con pedidos preparados en staging');
+ stageToggle.onclick=()=>{skuSeparateTransport=!skuSeparateTransport;save();renderSkuLab()};
+ add(controls,'small','','Con staging, un pedido preparado espera camión dentro del CD. Puedes activarlo o volver al despacho del mismo día; no cambia las compras originales.');
  if(!revealed){$('canonicalAreaView').replaceChildren();$('primarySkuSummary').hidden=true;for(const id of ['primarySkuSummary','canonicalAreaView']){delete $(id).dataset.campaignId;delete $(id).dataset.projectionStamp;}}
  if(revealed){
   const actualOrders=contract.actualSampleOrders;
@@ -910,7 +921,7 @@ $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!revealed&&!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
-function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;skuSession.clear();currentSkuAreaModel=null;currentSkuProjection=null;campaignId=createCampaignId();decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
+function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;skuSession.clear();currentSkuAreaModel=null;currentSkuProjection=null;campaignId=createCampaignId();decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuSeparateTransport=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
 $('reset').onclick=restartCampaign;
 $('restartFinal').onclick=restartCampaign;
 $('resetAnytime').onclick=restartCampaign;
