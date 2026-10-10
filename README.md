@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.27
+# Supply Chain Operations Lab · v11.28
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.27-r136) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.28-r137) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.27](docs/STATUS-V11.27.md).
+- [Estado verificable actualizado de v11.28](docs/STATUS-V11.28.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.27 (M2-04a):** las vistas ahora separan explícitamente resultados físicos SKU de métricas didácticas de una jornada; exportación CSV con procedencia y unidades explícitas. [Auditoría por pantalla](docs/M2-04A-SCOPE-AUDIT.md). El motor físico único completo continúa pendiente.
+**Avance v11.28 (M2-04b):** la misma configuración de campaña SKU reutiliza un único replay y proyección física entre Diagnóstico, Resultados, Áreas y Recuperación. Caché LRU acotada, invalidación por decisión y reconstrucción determinista tras recargar. [Estado y límites](docs/STATUS-V11.28.md).
+
+**Base v11.27 (M2-04a):** las vistas ahora separan explícitamente resultados físicos SKU de métricas didácticas de una jornada; exportación CSV con procedencia y unidades explícitas. [Auditoría por pantalla](docs/M2-04A-SCOPE-AUDIT.md). El motor físico único completo continúa pendiente.
 
 **Base v11.26 (M2-03):** las compras originales cuentan ahora con ID por SKU, cantidad, fecha prevista y costo inmutables. La misma orden queda auditada en planificación, cambio de demanda, recuperación y confirmación persistida, sin generar compras retroactivas. Las compras urgentes conservan identidades independientes. [Estado y limitaciones](docs/STATUS-V11.26.md).
 
