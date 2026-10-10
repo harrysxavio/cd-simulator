@@ -56,6 +56,9 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   let receivingRemaining=receivingUnitCapacity===null?Infinity:receivingUnitCapacity;
   for(const shipment of pendingReceipts){
    if(receivingRemaining<=0)break;
+   // Already unloaded deliveries remain in the timeline for audit, but must
+   // NEVER generate another empty warehouse lot on later campaign days.
+   if(shipment.remaining<=0)continue;
    const qty=Math.min(shipment.remaining,receivingRemaining);
    shipment.remaining-=qty;receivingRemaining-=qty;
    received[shipment.id]+=qty;

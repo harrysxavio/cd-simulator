@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.30
+# Supply Chain Operations Lab · v11.31
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.30-r139) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.31-r140) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.30](docs/STATUS-V11.30.md).
+- [Estado verificable actualizado de v11.31](docs/STATUS-V11.31.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.30 (M3-06):** Comercial y Planning ahora usan un compromiso de pronóstico y compras originales por SKU único y congelado. La demanda revelada se contrasta contra ese plan sin recalcularlo; ambas áreas leen los mismos datos que Resultados. [Detalles y límites](docs/STATUS-V11.30.md).
+**Avance v11.31 (M3-07):** Compras y proveedor se concilian por orden SKU y fecha de llegada modelada; las ocho áreas diferencian cumplimiento, tránsito, cola del muelle y recepción física por lote. Rechaza recepciones anticipadas o sin PO. [Estado y límites](docs/STATUS-V11.31.md).
+
+**Base v11.30 (M3-06):** Comercial y Planning ahora usan un compromiso de pronóstico y compras originales por SKU único y congelado. La demanda revelada se contrasta contra ese plan sin recalcularlo; ambas áreas leen los mismos datos que Resultados. [Detalles y límites](docs/STATUS-V11.30.md).
 
 **Base v11.29 (M2-05):** las sesiones guardadas migran a un esquema v3 validado con controles de campos, decisiones, escenario y estado de recuperación, conservando la misma clave del navegador y el ID de campaña. Un JSON corrupto no puede ejecutar eventos falsos; las campañas nuevas limpian la caché y la recarga reconstruye los eventos SKU. [Estado y limitaciones](docs/STATUS-V11.29.md).
 
