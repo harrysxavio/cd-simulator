@@ -103,10 +103,13 @@ test('M3-07: original supplier commitments remain unchanged under surprises and 
   {actualOrders:260,option:'overtime'}
  ]){
   const campaign=build(x).campaign;
-  assert.deepEqual(
-   campaign.supplierLedger.rows.filter(p=>p.source==='original'),
-   baseline.supplierLedger.rows.filter(p=>p.source==='original')
-  );
+  const committed=rows=>rows.filter(p=>p.source==='original').map(p=>({
+   id:p.id,skuId:p.skuId,ordered:p.orderedSkuUnits,
+   supplierFulfilled:p.supplierFulfilledSkuUnits,supplierShortfall:p.supplierShortfallSkuUnits,
+   modeledArrivalDay:p.modeledArrivalDay
+  }));
+  assert.deepEqual(committed(campaign.supplierLedger.rows),committed(baseline.supplierLedger.rows),
+   'Original POs are frozen; their physical warehouse reception may vary under recovery');
   assert.equal(campaign.supplierLedger.totals.originalOrderedSkuUnits,baseline.supplierLedger.totals.originalOrderedSkuUnits);
  }
 });
