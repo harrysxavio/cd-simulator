@@ -87,7 +87,7 @@ test('M3-12a: unchanged physical stock under Quality hold, reserve location and 
 });
 
 test('M3-12a: reject falsified staging inventory, pickup order, capacity or departure day',()=>{
- const r=eventSimulation({separateTransport:true,transportUnitCapacity:1,pickingUnitCapacity:10,orders:80,days:4});
+ const r=eventSimulation({separateTransport:true,transportUnitCapacity:8,pickingUnitCapacity:10,orders:80,days:4});
  check(r);
  const badStaging={...r,ledger:r.ledger.map((d,i)=>i!==0?d:{
   ...d,stagingStock:{...d.stagingStock,A:d.stagingStock.A+1}
