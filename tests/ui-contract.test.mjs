@@ -55,7 +55,7 @@ test('each diagnosis area offers an actionable improvement with accessible label
 });
 
 test('SKU decisions persist across reload and restart resets them',()=>{
- for(const key of ['skuPolicy','skuSupplierDelay','skuRecovery','skuUrgentArrival']){
+ for(const key of ['skuPolicy','skuSupplierDelay','skuSeparateTransport','skuRecovery','skuUrgentArrival']){
   const session=readFileSync(new URL('../src/session-state.js',import.meta.url),'utf8');
   assert.ok(session.includes(key),'Missing persistent SKU field: '+key);
   assert.ok(app.includes('serializeSession(data)'));
@@ -64,7 +64,7 @@ test('SKU decisions persist across reload and restart resets them',()=>{
  assert.match(app,/skuUrgentArrival=s\.skuUrgentArrival/);
  assert.match(readFileSync(new URL('../src/session-state.js',import.meta.url),'utf8'),/const ARRIVALS=Object\.freeze\(\[1,2,5,10,13\]\)/);
  assert.match(app,/skuRecovery=s\.skuRecovery/);
- assert.ok(app.includes("skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save()"));
+ assert.ok(app.includes("skuPolicy='balanced';skuSupplierDelay=false;skuSeparateTransport=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save()"));
 });
 
 test('the percentage of urgent SKU purchases persists, drives the comparison and resets',()=>{
