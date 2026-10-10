@@ -1,8 +1,8 @@
 {
-  "version": "11.29",
-  "assetRevision": 138,
-  "release": "v11.29 · Migración y recuperación segura de campañas",
+  "version": "11.30",
+  "assetRevision": 139,
+  "release": "v11.30 · M3-06 Comercial y Planning con compromiso SKU único",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M2-05: migración de sesiones locales anteriores al esquema v3; validación de entradas, decisiones, horizonte, escenario y reinicio. La cohorte SKU se reconstruye a partir de parámetros guardados, sin conservar eventos completos en el navegador. No certifica la publicación pública ni la unificación de motores."
+  "notes": "M3-06: pronóstico de pedidos completos, cobertura y compras originales por SKU congeladas antes del cambio de demanda; las ocho áreas comparten la misma lectura y rechazan cantidades o forecast incompatibles. El agregado de una jornada y la economía permanecen separados."
 }

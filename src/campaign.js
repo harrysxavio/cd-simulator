@@ -1,6 +1,7 @@
 import {SKU_CATALOG} from './sku.js';
 import {skuOpeningState} from './opening-state.js';
 import {assertFrozenOriginalPurchases} from './original-purchase.js';
+import {commercialPlanningReading} from './commercial-planning.js';
 
 /**
  * Immutable, canonical read model for ONE SKU event-simulation campaign.
@@ -35,7 +36,11 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  ];
  const purchaseById=new Map(purchaseOrders.map(p=>[p.id,p]));
  const originalPurchase={...purchasePlan.bySku};
+ const planningReading=commercialPlanningReading(comparison.planningCommitment,{actualOrders:replay.orders,originalPurchaseOrders:purchasePlan});
  if(purchasePlan.plannedOrders!==plannedOrders||purchasePlan.forecastOrders!==comparison.forecastOrders
+  ||planningReading.forecastOrders!==comparison.forecastOrders
+  ||planningReading.planningCoveragePercent!==comparison.planningCoveragePercent
+  ||planningReading.commitment.plannedForecastPercent!==comparison.plannedForecastPercent
   ||purchasePlan.committedValueCLP!==comparison.committedPurchaseValue
   ||ids.some(id=>originalPurchase[id]!==comparison.originalPurchase[id])){
   throw new Error('El plan de compra original no coincide con la campaña');
@@ -101,6 +106,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   purchasedQty:purchaseOrders.every(p=>p.orderedQty===p.supplierFulfilledQty+p.supplierUnfilledQty
    &&receivedByPO.get(p.id)<=p.supplierFulfilledQty),
   frozenManifest:ids.every(id=>originalPurchase[id]===comparison.originalPurchase[id])
+   &&planningReading.totalCommittedSkuUnits===purchasePlan.rows.reduce((n,po)=>n+po.orderedQty,0)
    &&purchaseOrders.filter(po=>po.source==='original').every(po=>purchasePlan.rows.some(row=>row.id===po.id&&row.orderedQty===po.orderedQty&&row.expectedArrivalDay===po.expectedArrivalDay)), 
   orderBalance:orders.length===replay.orders&&shipments.length===replay.completed
    &&orders.filter(o=>o.status==='pending').length===replay.pending
@@ -120,7 +126,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const result={
   campaignId,version:1,scope:'sku-cohort',currency:'CLP',horizonDays:replay.days,
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
-   planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows}, 
+   planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows,commercialPlanning:planningReading}, 
   demand:{actualOrders:replay.orders,revealed:true},
   purchaseOrders,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
