@@ -6,6 +6,7 @@ import {supplierOrderLedger} from './supplier-ledger.js';
 import {warehouseReceivingReadModel} from './receiving-ledger.js';
 import {qualityLotReadModel} from './quality-ledger.js';
 import {physicalInventoryReadModel} from './inventory-ledger.js';
+import {pickingOrderReadModel} from './picking-ledger.js';
 
 /**
  * Immutable, canonical read model for ONE SKU event-simulation campaign.
@@ -49,7 +50,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   ||ids.some(id=>originalPurchase[id]!==comparison.originalPurchase[id])){
   throw new Error('El plan de compra original no coincide con la campaña');
  }
- const receipts=[],qualityReleases=[],reserveTransfers=[],shipments=[],dailyEvents=[],inventoryMovements=[];
+ const receipts=[],qualityReleases=[],reserveTransfers=[],picks=[],shipments=[],dailyEvents=[],inventoryMovements=[];
  let sequence=0;
  const newId=()=>campaignId+'-EVT-'+String(++sequence).padStart(7,'0');
  // Stock on day -1 is the baseline, not a supplier receipt.
@@ -72,15 +73,19 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
    qualityReleases.push(row);dailyEvents.push(row);
    inventoryMovements.push({id:row.id,day:row.day,type:'quality_to_available',skuId:row.skuId,qty:row.qty,lotId:row.lotId});
   }
+  for(const item of day.pickEvents??[]){
+   const row={id:newId(),type:'picking',pickId:item.pickId,orderId:item.orderId,templateId:item.templateId,day:day.day,units:item.units,lines:{...item.lines}};
+   picks.push(row);dailyEvents.push(row);
+  }
   for(const item of day.shipmentEvents??[]){
-   const row={id:newId(),day:day.day,type:'shipment',orderId:item.orderId,templateId:item.templateId,units:item.units,lines:{...item.lines}};
+   const row={id:newId(),day:day.day,type:'shipment',pickId:item.pickId,orderId:item.orderId,templateId:item.templateId,units:item.units,lines:{...item.lines}};
    shipments.push(row);dailyEvents.push(row);
    for(const [skuId,qty] of Object.entries(row.lines))inventoryMovements.push({id:row.id+'-'+skuId,day:row.day,type:'dispatched',skuId,qty,orderId:row.orderId});
   }
  }
  const shippedById=new Map(shipments.map(s=>[s.orderId,s]));
  const orders=replay.ordersDetail.map(o=>({
-  id:o.id,templateId:o.templateId,lines:{...o.lines},status:o.fulfilledDay===null?'pending':'shipped',shippedDay:o.fulfilledDay
+  id:o.id,templateId:o.templateId,lines:{...o.lines},status:o.fulfilledDay===null?'pending':'shipped',pickedDay:o.pickedDay,shippedDay:o.fulfilledDay
  }));
  const qualityLots=receipts.map(r=>{
   const released=qualityReleases.filter(x=>x.lotId===r.lotId).reduce((sum,x)=>sum+x.qty,0);
@@ -105,6 +110,8 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const receivingLedger=warehouseReceivingReadModel({replay,supplierLedger,receipts});
  const qualityLedger=qualityLotReadModel({replay,receipts,qualityReleases,qualityLots});
  const inventoryLedger=physicalInventoryReadModel({replay,openingState,receipts,qualityReleases,reserveTransfers,shipments,inventoryMovements,receivingLedger,qualityLedger,campaignId});
+ const pickingLedger=pickingOrderReadModel({replay,shipments,orders});
+ const pickedById=new Map(picks.map(p=>[p.pickId,p]));
  const receivedByPO=new Map(purchaseOrders.map(x=>[x.id,0]));
  for(const item of receipts)receivedByPO.set(item.purchaseOrderId,receivedByPO.get(item.purchaseOrderId)+item.qty);
  const orderIds=new Set(orders.map(o=>o.id)),shipmentIds=new Set(shipments.map(s=>s.orderId));
@@ -112,6 +119,9 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const checks={
   uniqueOrders:orderIds.size===orders.length,
   uniqueShipments:shipmentIds.size===shipments.length&&shipments.every(s=>orderIds.has(s.orderId)),
+  pickingLedger:pickingLedger.passed&&picks.length===pickingLedger.totals.pickedOrders
+   &&picks.length===pickedById.size&&shipments.every(s=>pickedById.get(s.pickId)?.orderId===s.orderId)
+   &&picks.every(p=>orders.some(o=>o.id===p.orderId&&o.pickedDay===p.day)),
   uniqueEvents:eventIds.size===dailyEvents.length,
   purchasedQty:purchaseOrders.every(p=>p.orderedQty===p.supplierFulfilledQty+p.supplierUnfilledQty
    &&receivedByPO.get(p.id)<=p.supplierFulfilledQty),
@@ -142,6 +152,8 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
    day.receiptEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.received).reduce((n,v)=>n+v,0)
    &&day.releaseEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.released).reduce((n,v)=>n+v,0)
    &&day.reserveEvents.reduce((n,r)=>n+r.qty,0)===Object.values(day.movedReserve).reduce((n,v)=>n+v,0)
+   &&day.pickEvents.length===day.pickedOrders
+   &&day.pickEvents.reduce((n,p)=>n+p.units,0)===day.pickedUnits
    &&day.shipmentEvents.length===day.shipped
    &&day.shipmentEvents.reduce((n,r)=>n+r.units,0)===day.shippedUnits)
  };
@@ -150,7 +162,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows,commercialPlanning:planningReading}, 
   demand:{actualOrders:replay.orders,revealed:true},
-  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
+  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,pickingLedger,orders,receipts,qualityLots,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones.'
