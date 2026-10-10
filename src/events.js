@@ -90,6 +90,9 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   let qualityBudget=Math.ceil(awaitingQuality*qualityReleasePercent/100);
   for(const lot of qualityQueue){
    if(qualityBudget<=0)break;
+   // Earlier lots stay in the journal, but an exhausted lot cannot produce
+   // a zero-unit quality release or a fictitious inventory movement.
+   if(lot.remaining<=0)continue;
    const qty=Math.min(lot.remaining,qualityBudget);
    lot.remaining-=qty;qualityBudget-=qty;
    available[lot.id]+=qty;released[lot.id]+=qty;
