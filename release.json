@@ -1,8 +1,8 @@
 {
-  "version": "11.36",
-  "assetRevision": 145,
-  "release": "v11.36 · M3-12a staging físico experimental del motor",
+  "version": "11.37",
+  "assetRevision": 146,
+  "release": "v11.37 · M3-12b campaña e inventario con staging conciliados",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-12a: simulación física opt-in con Picking y Transporte independientes, cola de pedidos preparados en STAGING-CD, consumo de inventario solo al despachar y auditoría de conservación por SKU/día. NO se activa aún en la interfaz ni en las ocho áreas: M3-12b migrará registros de Inventario, resultados y UI. El modo estándar sigue sin cambios y no implica entrega final al cliente."
+  "notes": "M3-12b: comparación y campaña pueden ejecutar staging opt-in; registros canónicos de pedidos preparados/expedidos en fechas distintas, movimientos PICK-FACE a STAGING-CD y posterior despacho; ocho áreas y balances diarios concilian sin contar doble inventario. Modo visible estándar continúa sin staging hasta M3-12c. No hay entrega final al cliente ni unificación con la economía agregada."
 }
