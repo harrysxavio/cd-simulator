@@ -97,10 +97,10 @@ test('M2-04b: reload reconstructs same campaign and physical facts from persiste
  const c=campaign('CD-RELOADED',1400);
  const a=createSkuSessionCache().getProjection(options(c,'emergency',2,50));
  const saved={campaignId:c.campaignId,plannedSampleOrders:c.plannedSampleOrders,skuInputs:JSON.parse(JSON.stringify(c.skuInputs))};
- const b=createSkuSessionCache().getProjection(options({campaignId:saved.campaignId,plannedSampleOrders:saved.plannedSampleOrders},'emergency',2,50).skuInputs?{
+ const b=createSkuSessionCache().getProjection({
   contract:{campaignId:saved.campaignId,plannedSampleOrders:saved.plannedSampleOrders},
   skuInputs:saved.skuInputs,option:'emergency',urgentArrivalDay:2,purchaseCoveragePercent:50
- }:null);
+ });
  assert.deepEqual(a.areaModel,b.areaModel);
  assert.deepEqual(a.chain.campaign,b.chain.campaign);
  assert.equal(a.campaignId,b.campaignId);
