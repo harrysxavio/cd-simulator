@@ -48,11 +48,19 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   const receivedUrgent=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
   const released=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
   // Track traceable physical events, preserving existing daily totals.
-  const receiptEvents=[],releaseEvents=[],shipmentEvents=[],reserveEvents=[];
+  const receiptEvents=[],releaseEvents=[],shipmentEvents=[],reserveEvents=[],dockArrivals=[];
   const movedReserve=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
   if(reserveReleaseDay===day)for(const p of SKU_CATALOG){const qty=heldReserve[p.id];if(qty>0){heldReserve[p.id]-=qty;available[p.id]+=qty;movedReserve[p.id]=qty;reserveEvents.push({id:'MOVE-'+day+'-'+p.id,day,skuId:p.id,qty,from:'RESERVA-CD',to:'PICK-FACE',verified:true});}}
-  for(const d of timeline.deliveries)if(d.arrivalDay===day&&d.received>0)pendingReceipts.push({id:d.id,remaining:d.received,urgent:false,purchaseOrderId:'PO-'+d.id});
-  for(const [i,d] of extraDeliveries.entries())if(d.day===day&&d.qty>0)pendingReceipts.push({id:d.id,remaining:d.qty,urgent:true,purchaseOrderId:'URG-'+String(i+1).padStart(3,'0')+'-'+d.id});
+  for(const d of timeline.deliveries)if(d.arrivalDay===day&&d.received>0){
+   const purchaseOrderId='PO-'+d.id;
+   pendingReceipts.push({id:d.id,remaining:d.received,arrivalDay:day,urgent:false,purchaseOrderId});
+   dockArrivals.push({purchaseOrderId,skuId:d.id,qty:d.received,day,urgent:false});
+  }
+  for(const [i,d] of extraDeliveries.entries())if(d.day===day&&d.qty>0){
+   const purchaseOrderId='URG-'+String(i+1).padStart(3,'0')+'-'+d.id;
+   pendingReceipts.push({id:d.id,remaining:d.qty,arrivalDay:day,urgent:true,purchaseOrderId});
+   dockArrivals.push({purchaseOrderId,skuId:d.id,qty:d.qty,day,urgent:true});
+  }
   let receivingRemaining=receivingUnitCapacity===null?Infinity:receivingUnitCapacity;
   for(const shipment of pendingReceipts){
    if(receivingRemaining<=0)break;
@@ -67,7 +75,14 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
    receiptEvents.push({lotId,purchaseOrderId:shipment.purchaseOrderId,skuId:shipment.id,qty,day,urgent:shipment.urgent});
    if(shipment.urgent)receivedUrgent[shipment.id]+=qty;
   }
-  const waitingReceiving=pendingReceipts.reduce((sum,x)=>sum+x.remaining,0);
+  // End-of-day dock queue is a physical work queue, not warehouse on-hand stock.
+  // Keep only unprocessed units, with their real modeled arrival day and PO.
+  const receivingQueue=pendingReceipts.filter(x=>x.remaining>0).map(x=>({
+   purchaseOrderId:x.purchaseOrderId,skuId:x.id,arrivalDay:x.arrivalDay,
+   remainingSkuUnits:x.remaining,waitingDays:day-x.arrivalDay,urgent:x.urgent
+  }));
+  const waitingReceiving=receivingQueue.reduce((sum,x)=>sum+x.remainingSkuUnits,0);
+  const receivingUsedSkuUnits=receiptEvents.reduce((sum,x)=>sum+x.qty,0);
   // Quality is a separate physical holding state: received does not mean pickable.
   // Apply a daily release rate to this queue. At 100% all receipts clear same day.
   // The ceiling prevents tiny but positive daily batches from becoming permanently stuck.
@@ -101,7 +116,7 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   const unverifiedStock=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,available[p.id]-pickable[p.id]]));
   const completed=queue.filter(o=>o.fulfilledDay!==null).length;
   const backlog=n-completed;
-  ledger.push({day,receiptEvents,releaseEvents,reserveEvents,shipmentEvents,received,released,movedReserve,reserveStock:{...heldReserve},receivedUrgent,waitingReceiving,waitingQuality,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(lot=>lot.id===p.id).reduce((n,x)=>n+x.remaining,0)])),shipped,shippedUnits,completed,backlog,stock:{...available},pickableStock:{...pickable},unverifiedStock,onTime:queue.filter(o=>o.fulfilledDay===0).length});
+  ledger.push({day,dockArrivals,receiptEvents,receivingQueue,receivingUsedSkuUnits,receivingCapacitySkuUnits:receivingUnitCapacity,releaseEvents,reserveEvents,shipmentEvents,received,released,movedReserve,reserveStock:{...heldReserve},receivedUrgent,waitingReceiving,waitingQuality,heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(lot=>lot.id===p.id).reduce((n,x)=>n+x.remaining,0)])),shipped,shippedUnits,completed,backlog,stock:{...available},pickableStock:{...pickable},unverifiedStock,onTime:queue.filter(o=>o.fulfilledDay===0).length});
  }
  const completed=queue.filter(o=>o.fulfilledDay!==null).length;
  const consumed=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,initial[p.id]+ledger.reduce((total,entry)=>total+entry.received[p.id],0)-available[p.id]-heldReserve[p.id]-qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)]));

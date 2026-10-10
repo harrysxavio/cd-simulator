@@ -3,6 +3,7 @@ import {skuOpeningState} from './opening-state.js';
 import {assertFrozenOriginalPurchases} from './original-purchase.js';
 import {commercialPlanningReading} from './commercial-planning.js';
 import {supplierOrderLedger} from './supplier-ledger.js';
+import {warehouseReceivingReadModel} from './receiving-ledger.js';
 
 /**
  * Immutable, canonical read model for ONE SKU event-simulation campaign.
@@ -99,6 +100,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  // Procurement is observed from the same canonical purchase orders and
  // *dated* warehouse receipts, not from another simulated supplier timeline.
  const supplierLedger=supplierOrderLedger({purchaseOrders,receipts,horizonDays:replay.days});
+ const receivingLedger=warehouseReceivingReadModel({replay,supplierLedger,receipts});
  const receivedByPO=new Map(purchaseOrders.map(x=>[x.id,0]));
  for(const item of receipts)receivedByPO.set(item.purchaseOrderId,receivedByPO.get(item.purchaseOrderId)+item.qty);
  const orderIds=new Set(orders.map(o=>o.id)),shipmentIds=new Set(shipments.map(s=>s.orderId));
@@ -109,6 +111,8 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   uniqueEvents:eventIds.size===dailyEvents.length,
   purchasedQty:purchaseOrders.every(p=>p.orderedQty===p.supplierFulfilledQty+p.supplierUnfilledQty
    &&receivedByPO.get(p.id)<=p.supplierFulfilledQty),
+  receivingLedger:receivingLedger.passed&&receivingLedger.totals.receivedSkuUnits===receipts.reduce((n,r)=>n+r.qty,0)
+   &&receivingLedger.totals.closingWaitingSkuUnits===replay.waitingReceiving,
   supplierLedger:supplierLedger.passed
    &&supplierLedger.totals.warehouseReceivedSkuUnits===receipts.reduce((n,r)=>n+r.qty,0)
    &&supplierLedger.totals.awaitingWarehouseReceiptSkuUnits===replay.waitingReceiving
@@ -136,7 +140,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows,commercialPlanning:planningReading}, 
   demand:{actualOrders:replay.orders,revealed:true},
-  purchaseOrders,supplierLedger,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
+  purchaseOrders,supplierLedger,receivingLedger,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones.'
