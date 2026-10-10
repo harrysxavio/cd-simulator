@@ -30,7 +30,7 @@ async function run(device){
   await page.locator('#resultTabs [data-result-target="areas"]').click();
   await page.locator('#canonicalAreaView [data-area-id="transport"] summary').click();
   assert.match(await page.locator('#canonicalAreaView [data-area-id="transport"]').innerText(),/no se modela staging/);
-  const original=await page.locator('#primarySkuMetrics').innerText();
+  const original=await page.locator('#primarySkuMetrics').textContent();
   await page.locator('#resultTabs [data-result-target="inventory"]').click();
   await toggle.click();
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
@@ -58,16 +58,16 @@ async function run(device){
   assert.ok(rows.every(x=>/preparados.*esperan camión.*expedidos/.test(x)));
   assert.ok(rows.every(x=>/STAGING-CD \d+ SKU/.test(x)));
   assert.ok(rows.some(x=>/esperan camión/.test(x)));
-  const current=await page.locator('#primarySkuMetrics').innerText();
+  const current=await page.locator('#primarySkuMetrics').textContent();
   assert.notEqual(current,original,'opt-in must modify the physical order-state view');
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
-  assert.equal(await page.locator('#primarySkuMetrics').innerText(),current,'saved staging session must restore deterministic metrics');
+  assert.equal(await page.locator('#primarySkuMetrics').textContent(),current,'saved staging session must restore deterministic metrics');
   await page.locator('#resultTabs [data-result-target="inventory"]').click();
   await toggle.click();
   assert.equal(await toggle.getAttribute('aria-pressed'),'false');
   assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).skuSeparateTransport,KEY),false);
-  assert.equal(await page.locator('#primarySkuMetrics').innerText(),original,'turning off staging restores original model');
+  assert.equal(await page.locator('#primarySkuMetrics').textContent(),original,'turning off staging restores original model');
   if(device==='phone')for(const width of [360,412]){
    await page.setViewportSize({width,height:810});
    const dim=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
