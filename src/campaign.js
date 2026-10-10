@@ -38,6 +38,9 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const originalPurchase={...purchasePlan.bySku};
  const planningReading=commercialPlanningReading(comparison.planningCommitment,{actualOrders:replay.orders,originalPurchaseOrders:purchasePlan});
  if(purchasePlan.plannedOrders!==plannedOrders||purchasePlan.forecastOrders!==comparison.forecastOrders
+  ||planningReading.forecastOrders!==comparison.forecastOrders
+  ||planningReading.planningCoveragePercent!==comparison.planningCoveragePercent
+  ||planningReading.commitment.plannedForecastPercent!==comparison.plannedForecastPercent
   ||purchasePlan.committedValueCLP!==comparison.committedPurchaseValue
   ||ids.some(id=>originalPurchase[id]!==comparison.originalPurchase[id])){
   throw new Error('El plan de compra original no coincide con la campaña');
