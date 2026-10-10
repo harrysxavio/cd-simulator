@@ -1,3 +1,5 @@
+import {skuServiceMeasurements} from './measurements.js';
+
 /**
  * M2/M3 transitional service brief. Uses the SAME reconciled SKU read model
  * already used by the Results > Summary and Results > Areas screens.
@@ -17,11 +19,21 @@ export function skuServiceBrief(areaModel){
   ||actualOrders!==shippedOrders+pendingOrders){
   throw new Error('Pedidos de campaña SKU no concilian');
  }
+ // M2-01: attach validated dimensions; no implicit conversion or replay.
+ const measures=skuServiceMeasurements({horizonDays:areaModel.horizonDays,actualOrders,shippedOrders,pendingOrders,shippedSkuUnits:areaModel.metrics.shippedSkuUnits});
+ for(const key of ['actualOrders','shippedOrders','pendingOrders','shippedSkuUnits']){
+  if(areaModel.measurements?.[key]?.value!==measures[key].value
+   ||areaModel.measurements?.[key]?.unit!==measures[key].unit
+   ||areaModel.measurements?.[key]?.scope!==measures[key].scope
+   ||areaModel.measurements?.[key]?.horizonDays!==measures[key].horizonDays){
+   throw new Error('Pedidos de campaña SKU no concilian con sus unidades');
+  }
+ }
  const completionPercent=actualOrders?100*shippedOrders/actualOrders:100;
  return Object.freeze({
   campaignId:areaModel.campaignId,
   scope:'sku-cohort',
-  horizonDays:areaModel.horizonDays,
+  horizonDays:areaModel.horizonDays,measurements:measures,
   actualOrders,shippedOrders,pendingOrders,completionPercent,
   severity:pendingOrders===0?'stable':completionPercent<70?'critical':'warning',
   reading:pendingOrders
