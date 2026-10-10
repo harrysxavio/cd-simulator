@@ -45,7 +45,7 @@ test('M2-01: zero demand, inconsistent orders and invalid horizons',()=>{
   horizonDays:12,actualOrders:100,shippedOrders:50,pendingOrders:10,shippedSkuUnits:200
  }),/no concilian/);
  for(const horizonDays of [-1,1.5,366,undefined]){
-  assert.throws(()=>orders(1,horizonDays),/Horizonte SKU inválido/);
+  assert.throws(()=>measuredCount(1,{scope:'sku-cohort',unit:'orders',horizonDays}),/Horizonte SKU inválido/);
  }
  for(const value of [-1,NaN,Infinity,1.3,Number.MAX_SAFE_INTEGER+1]){
   assert.throws(()=>orders(value),/entera requerida/);
