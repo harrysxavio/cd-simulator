@@ -1,8 +1,8 @@
 {
-  "version": "11.30",
-  "assetRevision": 139,
-  "release": "v11.30 · M3-06 Comercial y Planning con compromiso SKU único",
+  "version": "11.31",
+  "assetRevision": 140,
+  "release": "v11.31 · M3-07 Compras y proveedores conciliados",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-06: pronóstico de pedidos completos, cobertura y compras originales por SKU congeladas antes del cambio de demanda; las ocho áreas comparten la misma lectura y rechazan cantidades o forecast incompatibles. El agregado de una jornada y la economía permanecen separados."
+  "notes": "M3-07: conciliación por PO entre unidades pedidas, cumplimiento modelado de proveedor, llegada prevista, tránsito, cola y recepción real al CD, sin adelantar inventario ni confundir llegada con ingreso. Compras urgentes separadas, lead time y cantidades contrastados con eventos SKU."
 }
