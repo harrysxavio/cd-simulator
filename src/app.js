@@ -359,17 +359,23 @@ function renderLabor(){
  }
 }
 function renderCanonicalAreasFromSku(model){
+ const stageActive=model.pickingLedger?.stage==='independent-staging';
  const host=$('canonicalAreaView');host.replaceChildren();
  const intro=add(host,'div','canonical-area-heading');
  add(intro,'span','canonical-kicker','MISIÓN 4 DE 4 · ENTENDER EL IMPACTO');
  add(intro,'h2','','🔗 Cómo operaron las ocho áreas');
  add(intro,'p','','Una misma campaña SKU, con '+fmt(model.metrics.actualOrders)+' pedidos y '+model.horizonDays+' días. Cada área explica su papel usando los mismos pedidos, compras, recepciones, lotes e inventario; no son ocho simulaciones diferentes.');
  const numbers=add(host,'div','canonical-area-numbers');
- for(const [name,value,unit] of [
+ const areaCounts=stageActive?[
+  ['Sin preparar',model.metrics.unpickedOrders,'pedidos'],
+  ['En staging',model.metrics.stagedOrders,'pedidos preparados'],
+  ['Salieron del CD',model.metrics.shippedOrders,'pedidos expedidos']
+ ]:[
   ['Pedidos reales',model.metrics.actualOrders,'pedidos'],
   ['Salieron del CD',model.metrics.shippedOrders,'pedidos completos'],
   ['Pendientes al cierre',model.metrics.pendingOrders,'pedidos sin fecha confirmada']
- ]){
+ ];
+ for(const [name,value,unit] of areaCounts){
   const tile=add(numbers,'div','canonical-area-stat');
   add(tile,'span','',name);add(tile,'strong','',fmt(value));add(tile,'small','',unit);
  }
@@ -393,36 +399,43 @@ function renderCanonicalAreasFromSku(model){
  }
  const timeline=add(host,'details','canonical-day-detail');
  add(timeline,'summary','','📆 Ver los movimientos diarios que explican el resultado');
- add(timeline,'p','','Son salidas del CD y movimientos internos de la misma cohorte; los pendientes no tienen entrega prometida.');
+ add(timeline,'p','',stageActive?'Picking deja pedidos completos en STAGING-CD hasta que Transporte pueda despacharlos. Espera simulada, no promesa de entrega.':'Son salidas del CD y movimientos internos de la misma cohorte; los pendientes no tienen entrega prometida.');
  const days=add(timeline,'div','canonical-day-grid');
  for(const day of model.days){
   const card=add(days,'div','canonical-day-row');
-  add(card,'strong','','Día '+day.day+' · '+fmt(day.shippedOrders)+' pedidos expedidos · '+fmt(day.remainingOrders)+' pendientes');
+  add(card,'strong','',stageActive?'Día '+day.day+' · '+fmt(day.pickedOrders)+' preparados · '+fmt(day.awaitingTransportOrders)+' esperan camión · '+fmt(day.shippedOrders)+' expedidos':'Día '+day.day+' · '+fmt(day.shippedOrders)+' pedidos expedidos · '+fmt(day.remainingOrders)+' pendientes');
   add(card,'small','','Muelle +'+fmt(day.dockArrivedSkuUnits)+' SKU · recibido '+fmt(day.receivedSkuUnits)+' SKU · cola '+fmt(day.receivingQueueSkuUnits)+' SKU');
   add(card,'small','','Calidad liberó '+fmt(day.releasedSkuUnits)+' SKU · retenido '+fmt(day.qualityHeldSkuUnits)+' SKU · reserva trasladada '+fmt(day.movedReserveSkuUnits)+' SKU');
   add(card,'small','','Picking '+fmt(day.pickedOrders)+' pedidos · '+fmt(day.pickedSkuUnits)+' SKU preparados · expedidos '+fmt(day.shippedOrders)+' pedidos');
+  if(stageActive)add(card,'small','','STAGING-CD '+fmt(day.closingStagingSkuUnits)+' SKU · espera máxima '+fmt(day.oldestStagingDays)+' días');
   add(card,'small','','PICK-FACE '+fmt(day.closingPickFaceSkuUnits)+' SKU · RESERVA-CD '+fmt(day.closingReserveSkuUnits)+' SKU · verificable '+fmt(day.closingVerifiedSkuUnits)+' SKU · sin verificar '+fmt(day.closingUnverifiedSkuUnits)+' SKU');
  }
- add(host,'p','canonical-boundary','Nota de realismo: Picking ahora registra cada preparación por separado, pero se despacha el mismo día. Todavía no se simulan staging, espera de transporte ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
+ add(host,'p','canonical-boundary',stageActive?'Nota de realismo: un pedido preparado queda en STAGING-CD hasta su despacho real. No se simulan carga detallada ni entrega confirmada al cliente. Comercial y Planning no son ingresos físicos.':'Nota de realismo: Picking ahora registra cada preparación por separado, pero se despacha el mismo día. Todavía no se simulan staging, espera de transporte ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
  return model;
 }
 function renderPrimarySkuSummary(model){
  const panel=$('primarySkuSummary'),metrics=$('primarySkuMetrics'),insight=$('primarySkuInsight');
  panel.hidden=false;metrics.replaceChildren();insight.replaceChildren();
  const total=model.metrics.actualOrders,shipped=model.metrics.shippedOrders,pending=model.metrics.pendingOrders;
+ const stageActive=model.pickingLedger?.stage==='independent-staging';
  const percent=total?100*shipped/total:100;
- $('primarySkuHeading').textContent=pending?'📦 Aún quedan pedidos pendientes':'📦 La cohorte de pedidos fue expedida';
+ $('primarySkuHeading').textContent=stageActive&&model.metrics.stagedOrders?'📦 Pedidos preparados esperan Transporte':pending?'📦 Aún quedan pedidos pendientes':'📦 La cohorte de pedidos fue expedida';
  $('primarySkuIntro').textContent='Resultado de '+fmt(total)+' pedidos completos de la cohorte SKU, observados del día 0 al '+model.horizonDays+'. La misma información alimenta las ocho áreas.';
- for(const [title,n,unit] of [
+ const summaryCounts=stageActive?[
+  ['Sin preparar',model.metrics.unpickedOrders,'pedidos completos'],
+  ['En staging',model.metrics.stagedOrders,'pedidos preparados'],
+  ['Despachados CD',shipped,percent.toFixed(1).replace('.',',')+' % del total']
+ ]:[
   ['Pedidos solicitados',total,'pedidos completos'],
   ['Despachados desde CD',shipped,percent.toFixed(1).replace('.',',')+' % de la cohorte'],
   ['Pendientes al corte',pending,'sin fecha de entrega confirmada']
- ]){
+ ];
+ for(const [title,n,unit] of summaryCounts){
   const tile=add(metrics,'div','canonical-area-stat');
   add(tile,'span','',title);add(tile,'strong','',fmt(n));add(tile,'small','',unit);
  }
  add(insight,'strong','',pending?'Prioridad de gerencia: recuperar pedidos sin inventar existencias':'Prioridad de gerencia: sostener el servicio y revisar el costo');
- add(insight,'p','',pending
+ add(insight,'p','',stageActive&&model.metrics.stagedOrders?'Hay '+fmt(model.metrics.stagedOrders)+' pedidos listos en staging y '+fmt(model.metrics.unpickedOrders)+' sin preparar. Revisa la capacidad de Transporte antes de comprar más: preparar no equivale a despachar ni a entregar al cliente.':pending
   ? 'Se pueden investigar compras, reserva física y capacidad por área. La vista de las ocho áreas permite ver qué ingresó, qué se liberó y qué salió realmente del CD. Ninguna expedición equivale a entrega confirmada.'
   : 'Los pedidos de esta cohorte salieron del CD dentro del horizonte simulado. El costo de la campaña y la recepción por parte del cliente todavía requieren datos adicionales.');
 }
