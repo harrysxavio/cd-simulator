@@ -1,8 +1,8 @@
 {
-  "version": "11.37",
-  "assetRevision": 146,
-  "release": "v11.37 · M3-12b campaña e inventario con staging conciliados",
+  "version": "11.38",
+  "assetRevision": 147,
+  "release": "v11.38 · M3-12c staging visible y persistente",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-12b: comparación y campaña pueden ejecutar staging opt-in; registros canónicos de pedidos preparados/expedidos en fechas distintas, movimientos PICK-FACE a STAGING-CD y posterior despacho; ocho áreas y balances diarios concilian sin contar doble inventario. Modo visible estándar continúa sin staging hasta M3-12c. No hay entrega final al cliente ni unificación con la economía agregada."
+  "notes": "M3-12c: un control educativo activa Picking y Transporte independientes con STAGING-CD físico. Las tarjetas compactas y la línea diaria distinguen pendientes de preparación, kits preparados en staging y expedidos. El usuario puede volver al modo anterior; la elección se guarda sin almacenar ni duplicar eventos. Auditoría de stock, compras, costo y valorización incluyen staging. No implica entrega al cliente ni unificación de economía agregada."
 }

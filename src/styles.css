@@ -700,3 +700,7 @@ html,body{max-width:100%;overflow-x:clip}
  .canonical-area-stat span{font-size:.77rem}
  .canonical-area-stat small{font-size:.73rem}
 }
+
+/* M3-12c: staging is a real mobile decision, not a small decorative chip. */
+#skuPolicyControls button{min-height:44px}
+#skuPolicyControls>small{display:block;width:100%;grid-column:1/-1;min-width:0;line-height:1.45;font-size:.8rem}

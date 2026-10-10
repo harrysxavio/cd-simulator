@@ -94,6 +94,8 @@ export function normalizeSessionRecord(raw,{fallbackCampaignId}={}){
   revealed,shockDirection,
   skuPolicy:choose(raw.skuPolicy,POLICIES,'balanced'),
   skuSupplierDelay:raw.skuSupplierDelay===true,
+  // Optional M3-12c toggle: older saved campaigns retain original same-day dispatch.
+  skuSeparateTransport:raw.skuSeparateTransport===true,
   skuRecovery:choose(raw.skuRecovery,['wait','emergency','reserve','overtime','combined'],'wait'),
   skuUrgentArrival:choose(raw.skuUrgentArrival,ARRIVALS,1),
   skuPurchaseCoverage:choose(raw.skuPurchaseCoverage,COVERAGES,100),

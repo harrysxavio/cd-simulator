@@ -1,43 +1,47 @@
-import {supplyBridge} from './supply-bridge.js?v=146';
-import {createSkuSessionCache} from './sku-session.js?v=146';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=146';
-import {aggregateFlowCsv} from './aggregate-export.js?v=146';
-import {campaignSkuContract} from './campaign-contract.js?v=146';
-import {campaignAreaReadModel} from './area-ledger.js?v=146';
-import {laborAudit} from './labor.js?v=146';
-import {skuAudit} from './audit.js?v=146';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=146';
-import {integratedDemand} from './integrated.js?v=146';
-import {eventSimulation} from './events.js?v=146';
-import {deliveryTimeline} from './timeline.js?v=146';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=146';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=146';
-import {demandJourney} from './journey.js?v=146';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=146';
-import {flow,diagnose,ACTIONS} from './flow.js?v=146';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=146';
-import {areaKpis} from './kpis.js?v=146';
-import {causalAudit} from './causal.js?v=146';
-import {managerDiagnosis} from './diagnosis-guide.js?v=146';
-import {skuServiceBrief} from './sku-service.js?v=146';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=146';
-import {attentionSignals} from './attention.js?v=146';
+import {supplyBridge} from './supply-bridge.js?v=147';
+import {createSkuSessionCache} from './sku-session.js?v=147';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=147';
+import {aggregateFlowCsv} from './aggregate-export.js?v=147';
+import {campaignSkuContract} from './campaign-contract.js?v=147';
+import {campaignAreaReadModel} from './area-ledger.js?v=147';
+import {laborAudit} from './labor.js?v=147';
+import {skuAudit} from './audit.js?v=147';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=147';
+import {integratedDemand} from './integrated.js?v=147';
+import {eventSimulation} from './events.js?v=147';
+import {deliveryTimeline} from './timeline.js?v=147';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=147';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=147';
+import {demandJourney} from './journey.js?v=147';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=147';
+import {flow,diagnose,ACTIONS} from './flow.js?v=147';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=147';
+import {areaKpis} from './kpis.js?v=147';
+import {causalAudit} from './causal.js?v=147';
+import {managerDiagnosis} from './diagnosis-guide.js?v=147';
+import {skuServiceBrief} from './sku-service.js?v=147';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=147';
+import {attentionSignals} from './attention.js?v=147';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
-let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuReservePercent=0,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
+let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuSeparateTransport=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuReservePercent=0,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
 // One session-scoped, bounded physical SKU replay reused by all screens.
 const skuSession=createSkuSessionCache();
 let currentSkuAreaModel=null,currentSkuProjection=null;
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
-const skuContractInputs=contract=>skuReservePercent>0?{...contract.skuInputs,reservePercent:skuReservePercent}:contract.skuInputs;
+const skuContractInputs=contract=>{
+ const stock=skuReservePercent>0?{...contract.skuInputs,reservePercent:skuReservePercent}:contract.skuInputs;
+ // The legacy signature stays identical when staging is not selected.
+ return skuSeparateTransport?{...stock,separateTransport:true}:stock;
+};
 const activeSkuDecision=contract=>skuDecisions.findLast(d=>skuDecisionStatus({decision:d,contract:{...contract,skuInputs:skuContractInputs(contract)}})==='current')||null;
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
 function save(){
  try{
   const data={campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,
-   skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions};
+   skuPolicy,skuSupplierDelay,skuSeparateTransport,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions};
   localStorage.setItem(KEY,serializeSession(data));
  }catch{
   // Browser privacy mode or exhausted storage must not break the exercise.
@@ -52,7 +56,7 @@ function load(){
   campaignId=s.campaignId;currentSection=s.currentSection;
   decisions=s.decisions;actions=s.actions;active=s.active;phase=s.phase;
   scenario=s.scenario;strategy=s.strategy;revealed=s.revealed;shockDirection=s.shockDirection;
-  skuPolicy=s.skuPolicy;skuSupplierDelay=s.skuSupplierDelay;skuRecovery=s.skuRecovery;
+  skuPolicy=s.skuPolicy;skuSupplierDelay=s.skuSupplierDelay;skuSeparateTransport=s.skuSeparateTransport;skuRecovery=s.skuRecovery;
   skuUrgentArrival=s.skuUrgentArrival;skuPurchaseCoverage=s.skuPurchaseCoverage;
   skuReservePercent=s.skuReservePercent;skuDecisions=s.skuDecisions;
   skuSession.clear();currentSkuAreaModel=null;currentSkuProjection=null;
@@ -355,17 +359,23 @@ function renderLabor(){
  }
 }
 function renderCanonicalAreasFromSku(model){
+ const stageActive=model.pickingLedger?.stage==='independent-staging';
  const host=$('canonicalAreaView');host.replaceChildren();
  const intro=add(host,'div','canonical-area-heading');
  add(intro,'span','canonical-kicker','MISIÓN 4 DE 4 · ENTENDER EL IMPACTO');
  add(intro,'h2','','🔗 Cómo operaron las ocho áreas');
  add(intro,'p','','Una misma campaña SKU, con '+fmt(model.metrics.actualOrders)+' pedidos y '+model.horizonDays+' días. Cada área explica su papel usando los mismos pedidos, compras, recepciones, lotes e inventario; no son ocho simulaciones diferentes.');
  const numbers=add(host,'div','canonical-area-numbers');
- for(const [name,value,unit] of [
+ const areaCounts=stageActive?[
+  ['Sin preparar',model.metrics.unpickedOrders,'pedidos'],
+  ['En staging',model.metrics.stagedOrders,'pedidos preparados'],
+  ['Salieron del CD',model.metrics.shippedOrders,'pedidos expedidos']
+ ]:[
   ['Pedidos reales',model.metrics.actualOrders,'pedidos'],
   ['Salieron del CD',model.metrics.shippedOrders,'pedidos completos'],
   ['Pendientes al cierre',model.metrics.pendingOrders,'pedidos sin fecha confirmada']
- ]){
+ ];
+ for(const [name,value,unit] of areaCounts){
   const tile=add(numbers,'div','canonical-area-stat');
   add(tile,'span','',name);add(tile,'strong','',fmt(value));add(tile,'small','',unit);
  }
@@ -389,36 +399,43 @@ function renderCanonicalAreasFromSku(model){
  }
  const timeline=add(host,'details','canonical-day-detail');
  add(timeline,'summary','','📆 Ver los movimientos diarios que explican el resultado');
- add(timeline,'p','','Son salidas del CD y movimientos internos de la misma cohorte; los pendientes no tienen entrega prometida.');
+ add(timeline,'p','',stageActive?'Picking deja pedidos completos en STAGING-CD hasta que Transporte pueda despacharlos. Espera simulada, no promesa de entrega.':'Son salidas del CD y movimientos internos de la misma cohorte; los pendientes no tienen entrega prometida.');
  const days=add(timeline,'div','canonical-day-grid');
  for(const day of model.days){
   const card=add(days,'div','canonical-day-row');
-  add(card,'strong','','Día '+day.day+' · '+fmt(day.shippedOrders)+' pedidos expedidos · '+fmt(day.remainingOrders)+' pendientes');
+  add(card,'strong','',stageActive?'Día '+day.day+' · '+fmt(day.pickedOrders)+' preparados · '+fmt(day.awaitingTransportOrders)+' esperan camión · '+fmt(day.shippedOrders)+' expedidos':'Día '+day.day+' · '+fmt(day.shippedOrders)+' pedidos expedidos · '+fmt(day.remainingOrders)+' pendientes');
   add(card,'small','','Muelle +'+fmt(day.dockArrivedSkuUnits)+' SKU · recibido '+fmt(day.receivedSkuUnits)+' SKU · cola '+fmt(day.receivingQueueSkuUnits)+' SKU');
   add(card,'small','','Calidad liberó '+fmt(day.releasedSkuUnits)+' SKU · retenido '+fmt(day.qualityHeldSkuUnits)+' SKU · reserva trasladada '+fmt(day.movedReserveSkuUnits)+' SKU');
   add(card,'small','','Picking '+fmt(day.pickedOrders)+' pedidos · '+fmt(day.pickedSkuUnits)+' SKU preparados · expedidos '+fmt(day.shippedOrders)+' pedidos');
+  if(stageActive)add(card,'small','','STAGING-CD '+fmt(day.closingStagingSkuUnits)+' SKU · espera máxima '+fmt(day.oldestStagingDays)+' días');
   add(card,'small','','PICK-FACE '+fmt(day.closingPickFaceSkuUnits)+' SKU · RESERVA-CD '+fmt(day.closingReserveSkuUnits)+' SKU · verificable '+fmt(day.closingVerifiedSkuUnits)+' SKU · sin verificar '+fmt(day.closingUnverifiedSkuUnits)+' SKU');
  }
- add(host,'p','canonical-boundary','Nota de realismo: Picking ahora registra cada preparación por separado, pero se despacha el mismo día. Todavía no se simulan staging, espera de transporte ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
+ add(host,'p','canonical-boundary',stageActive?'Nota de realismo: un pedido preparado queda en STAGING-CD hasta su despacho real. No se simulan carga detallada ni entrega confirmada al cliente. Comercial y Planning no son ingresos físicos.':'Nota de realismo: Picking ahora registra cada preparación por separado, pero se despacha el mismo día. Todavía no se simulan staging, espera de transporte ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
  return model;
 }
 function renderPrimarySkuSummary(model){
  const panel=$('primarySkuSummary'),metrics=$('primarySkuMetrics'),insight=$('primarySkuInsight');
  panel.hidden=false;metrics.replaceChildren();insight.replaceChildren();
  const total=model.metrics.actualOrders,shipped=model.metrics.shippedOrders,pending=model.metrics.pendingOrders;
+ const stageActive=model.pickingLedger?.stage==='independent-staging';
  const percent=total?100*shipped/total:100;
- $('primarySkuHeading').textContent=pending?'📦 Aún quedan pedidos pendientes':'📦 La cohorte de pedidos fue expedida';
+ $('primarySkuHeading').textContent=stageActive&&model.metrics.stagedOrders?'📦 Pedidos preparados esperan Transporte':pending?'📦 Aún quedan pedidos pendientes':'📦 La cohorte de pedidos fue expedida';
  $('primarySkuIntro').textContent='Resultado de '+fmt(total)+' pedidos completos de la cohorte SKU, observados del día 0 al '+model.horizonDays+'. La misma información alimenta las ocho áreas.';
- for(const [title,n,unit] of [
+ const summaryCounts=stageActive?[
+  ['Sin preparar',model.metrics.unpickedOrders,'pedidos completos'],
+  ['En staging',model.metrics.stagedOrders,'pedidos preparados'],
+  ['Despachados CD',shipped,percent.toFixed(1).replace('.',',')+' % del total']
+ ]:[
   ['Pedidos solicitados',total,'pedidos completos'],
   ['Despachados desde CD',shipped,percent.toFixed(1).replace('.',',')+' % de la cohorte'],
   ['Pendientes al corte',pending,'sin fecha de entrega confirmada']
- ]){
+ ];
+ for(const [title,n,unit] of summaryCounts){
   const tile=add(metrics,'div','canonical-area-stat');
   add(tile,'span','',title);add(tile,'strong','',fmt(n));add(tile,'small','',unit);
  }
  add(insight,'strong','',pending?'Prioridad de gerencia: recuperar pedidos sin inventar existencias':'Prioridad de gerencia: sostener el servicio y revisar el costo');
- add(insight,'p','',pending
+ add(insight,'p','',stageActive&&model.metrics.stagedOrders?'Hay '+fmt(model.metrics.stagedOrders)+' pedidos listos en staging y '+fmt(model.metrics.unpickedOrders)+' sin preparar. Revisa la capacidad de Transporte antes de comprar más: preparar no equivale a despachar ni a entregar al cliente.':pending
   ? 'Se pueden investigar compras, reserva física y capacidad por área. La vista de las ocho áreas permite ver qué ingresó, qué se liberó y qué salió realmente del CD. Ninguna expedición equivale a entrega confirmada.'
   : 'Los pedidos de esta cohorte salieron del CD dentro del horizonte simulado. El costo de la campaña y la recepción por parte del cliente todavía requieren datos adicionales.');
 }
@@ -444,6 +461,13 @@ function renderSkuLab(){
  const delayButton=add(controls,'button',skuSupplierDelay?'btn':'btn secondary',skuSupplierDelay?'Demora SKU A: +8 días':'Simular atraso SKU A (+8 días)');
  delayButton.type='button';delayButton.disabled=skuLocked;delayButton.setAttribute('aria-pressed',String(skuSupplierDelay));
  delayButton.onclick=()=>{skuSupplierDelay=!skuSupplierDelay;save();renderSkuLab()};
+ const stageToggle=add(controls,'button',skuSeparateTransport?'btn':'btn secondary',
+  skuSeparateTransport?'🚚 Staging activo · separar Picking y Transporte':'🚚 Activar staging de pedidos preparados');
+ stageToggle.type='button';
+ stageToggle.setAttribute('aria-pressed',String(skuSeparateTransport));
+ stageToggle.setAttribute('aria-label','Separar Picking y Transporte con pedidos preparados en staging');
+ stageToggle.onclick=()=>{skuSeparateTransport=!skuSeparateTransport;save();renderSkuLab()};
+ add(controls,'small','','Con staging, un pedido preparado espera camión dentro del CD. Puedes activarlo o volver al despacho del mismo día; no cambia las compras originales.');
  if(!revealed){$('canonicalAreaView').replaceChildren();$('primarySkuSummary').hidden=true;for(const id of ['primarySkuSummary','canonicalAreaView']){delete $(id).dataset.campaignId;delete $(id).dataset.projectionStamp;}}
  if(revealed){
   const actualOrders=contract.actualSampleOrders;
@@ -466,7 +490,7 @@ function renderSkuLab(){
   add(trace,'small','','Manifiesto SKU comprometido: '+Object.entries(chain.purchasing.originalPurchase).map(([id,qty])=>'SKU '+id+' '+fmt(qty)).join(' · ')+'.');
   add(trace,'small','','Compras: proveedor cumple '+supplierRate.toFixed(1)+' % de las unidades de compra ordinaria. Solicitadas SKU '+fmt(chain.purchasing.originalOrdered)+' · entregadas '+fmt(chain.purchasing.originalDelivered)+' · faltantes definitivos '+fmt(chain.purchasing.originalUnfilled)+'.');
   add(trace,'small','','Calidad: libera '+fmt(chain.quality.releasePercent)+' % diario del stock retenido · quedan '+fmt(chain.quality.waiting)+' unidades pendientes de liberar.');
-  add(trace,'small','','Capacidad diaria compartida desde la campaña: Recepción '+fmt(area.receivingCapacity)+' unidades SKU · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'.');
+  add(trace,'small','','Capacidad diaria '+(skuSeparateTransport?'independiente':'compartida')+' desde la campaña: Recepción '+fmt(area.receivingCapacity)+' unidades SKU · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'.');
   if(chain.receiving.waitingReceiving)add(trace,'small','','⚠ Quedan '+fmt(chain.receiving.waitingReceiving)+' unidades por ingresar al término del horizonte por restricciones de recepción.');
   add(trace,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
   add(trace,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' no ingresadas al corte');
@@ -474,12 +498,12 @@ function renderSkuLab(){
   add(trace,'small','','Inventario físico después de Calidad: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
   add(trace,'small','','Exactitud de Inventario '+fmt(chain.inventory.accuracyPercent)+' % → stock verificable para picking: '+Object.entries(chain.inventory.pickable).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'.');
   add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
-  add(trace,'small','','Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
+  add(trace,'small','',skuSeparateTransport?'Picking: '+fmt(physicalAreas.metrics.pickedOrders)+' preparados · '+fmt(physicalAreas.metrics.stagedOrders)+' en staging esperando Transporte · '+fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar.':'Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
   const canonical=chain.campaign;
   const campaignCard=add(trace,'details','supply-trace-detail');
   add(campaignCard,'summary','','🧾 Ver campaña única de pedidos y movimientos SKU');
-  add(campaignCard,'small','','Identificador '+canonical.campaignId+' · '+fmt(canonical.orders.length)+' pedidos identificables · '+fmt(canonical.shipments.length)+' despachos trazados · '+fmt(canonical.receipts.length)+' ingresos a CD · '+fmt(canonical.qualityReleases.length)+' liberaciones registradas.');
+  add(campaignCard,'small','','Identificador '+canonical.campaignId+' · '+fmt(canonical.orders.length)+' pedidos identificables · '+(skuSeparateTransport?fmt(canonical.picks.length)+' preparaciones · ':'')+fmt(canonical.shipments.length)+' despachos trazados · '+fmt(canonical.receipts.length)+' ingresos a CD · '+fmt(canonical.qualityReleases.length)+' liberaciones registradas.');
   add(campaignCard,'small','',canonical.passed?'✓ Eventos por pedido, recepción, calidad y stock reconciliados':'⚠ Inconsistencias en los eventos detallados; revisar auditoría.');
   add(campaignCard,'small','','Las compras originales permanecen congeladas. Esta cohorte SKU todavía no sustituye el cálculo agregado del resultado final.');
   const commitment=chain.procurementLedger;
@@ -491,7 +515,7 @@ function renderSkuLab(){
    const line=add(commitmentDetail,'div','supply-trace-day');
    add(line,'strong','','SKU '+item.id+' · pedido original '+fmt(item.originalOrdered)+' · urgente '+fmt(item.urgentOrdered));
    add(line,'small','','Proveedor incumple '+fmt(item.originalSupplierShortfall)+' · aún por arribar '+fmt(item.originalInTransit+item.urgentInTransit)+' · cola Recepción '+fmt(item.waitingReceiving));
-   add(line,'small','','Recibido CD '+fmt(item.inventory.received)+' · retenido Calidad '+fmt(item.inventory.held)+' · físico en almacén '+fmt(item.inventory.available)+' = verificable '+fmt(item.inventory.pickable)+' + no verificable '+fmt(item.inventory.unverified)+(item.balanced?' ✓':' ⚠'));
+   add(line,'small','','Recibido CD '+fmt(item.inventory.received)+' · retenido Calidad '+fmt(item.inventory.held)+' · físico en PICK-FACE '+fmt(item.inventory.available)+(skuSeparateTransport?' · en staging '+fmt(item.inventory.staged):'')+' = verificable '+fmt(item.inventory.pickable)+' + no verificable '+fmt(item.inventory.unverified)+(item.balanced?' ✓':' ⚠'));
   }
   const verdict=add(trace,'div','supply-verdict '+chain.decision.quality);
   add(verdict,'strong','',chain.decision.quality==='effective'?'Compra con impacto operativo':chain.decision.quality==='late'?'Atención: reposición fuera de plazo':chain.decision.quality==='no-gain'?'Compra sin mejora de servicio':chain.decision.quality==='receiving-blocked'?'Recepción bloquea la compra':chain.decision.quality==='no-order'?'Sin reposición extraordinaria':'No es necesaria una compra adicional');
@@ -506,7 +530,8 @@ function renderSkuLab(){
    add(row,'small','','Recepción: '+Object.entries(day.received).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+(day.waitingReceiving?' · espera de recepción '+fmt(day.waitingReceiving):''));
    add(row,'small','','Verificable para picking: '+Object.entries(day.pickableStock).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+' · no verificable '+fmt(Object.values(day.unverifiedStock).reduce((sum,v)=>sum+v,0))+' unidades.');
    add(row,'small','','Liberado por Calidad: '+Object.entries(day.released).map(([id,qty])=>id+' '+fmt(qty)).join(' · ')+(day.waitingQuality?' · retenido '+fmt(day.waitingQuality):''));
-   add(row,'small','','Stock final: '+Object.entries(day.stock).map(([id,qty])=>id+' '+fmt(qty)).join(' · '));
+   add(row,'small','','Stock PICK-FACE: '+Object.entries(day.stock).map(([id,qty])=>id+' '+fmt(qty)).join(' · '));
+    if(skuSeparateTransport)add(row,'small','','STAGING-CD '+fmt(day.stagingUnits)+' SKU · '+fmt(day.stagingOrders)+' pedidos esperando camión');
    add(row,'small','','Completados acumulados: '+fmt(day.completed)+' · pendientes: '+fmt(day.pending));
   }
   add(trace,'small','muted',chain.assumptions);
@@ -577,9 +602,9 @@ function renderSkuLab(){
   add(auditCard,'strong','',audit.passed?'✓ Conciliación física y económica SKU correcta':'⚠ Inconsistencia en conciliación SKU');
   add(auditCard,'small','','Auditoría de productos disponibles y pendientes en Calidad, por SKU.');
   if(audit.orders.completed!==chain.picking.completed)add(auditCard,'small','','⚠ Auditoría y traza operativa no coinciden.');
-  for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' − retenido en Calidad '+fmt(p.held)+' − reserva ubicada '+fmt(p.reserved)+' = disponible final '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
-  add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' − stock retenido CLP '+fmt(audit.stockValue.held)+' − reserva CLP '+fmt(audit.stockValue.reserved)+' = disponible final CLP '+fmt(audit.stockValue.closing));
-  add(auditCard,'small','','Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(audit.orders.completed)+' completos + '+fmt(audit.orders.pending)+' pendientes');
+  for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' − retenido Calidad '+fmt(p.held)+' − reserva '+fmt(p.reserved)+(skuSeparateTransport?' − staging '+fmt(p.staged):'')+' = disponible '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
+  add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' − stock retenido CLP '+fmt(audit.stockValue.held)+' − reserva CLP '+fmt(audit.stockValue.reserved)+(skuSeparateTransport?' − staging CLP '+fmt(audit.stockValue.staged):'')+' = disponible final CLP '+fmt(audit.stockValue.closing));
+  add(auditCard,'small','',skuSeparateTransport?'Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar + '+fmt(physicalAreas.metrics.stagedOrders)+' en staging + '+fmt(audit.orders.completed)+' expedidos':'Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(audit.orders.completed)+' completos + '+fmt(audit.orders.pending)+' pendientes');
   add(auditCard,'small','',audit.procurement.passed?'✓ Compras, proveedor, tránsito, recepción y stock reconciliados':'⚠ Descuadre entre compromisos y movimientos de inventario');
   add(auditCard,'small','',audit.assumptions);
   // Put cross-area explanation after the user selects recovery inputs.
@@ -910,7 +935,7 @@ $('riskCount').textContent=String(diag.findings.filter(f=>f.stage.output<f.stage
 }
 $('prev').onclick=()=>nav(Math.max(0,active-1));
 $('next').onclick=()=>{if(!revealed&&!decisions[NODES[active].id])decisions[NODES[active].id]=DEFAULTS[NODES[active].id];if(active<7)active++;else if(phase==='plan'){active=0;showSection('preliminary')}else{render();showSection('dashboard');$('report').scrollIntoView({behavior:'smooth',block:'start'});return}save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})};
-function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;skuSession.clear();currentSkuAreaModel=null;currentSkuProjection=null;campaignId=createCampaignId();decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
+function restartCampaign(){if(!confirm('¿Iniciar una campaña nueva desde cero? Se perderán las decisiones y resultados actuales guardados en este navegador.'))return;skuSession.clear();currentSkuAreaModel=null;currentSkuProjection=null;campaignId=createCampaignId();decisions={...START,values:{}};actions={};active=0;phase='plan';revealed=false;shockDirection=null;scenario={...DEFAULT_SCENARIO};strategy='balanced';skuPolicy='balanced';skuSupplierDelay=false;skuSeparateTransport=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save();showSection('operations');if(typeof window!=='undefined')window.scrollTo?.({top:0,behavior:'smooth'})}
 $('reset').onclick=restartCampaign;
 $('restartFinal').onclick=restartCampaign;
 $('resetAnytime').onclick=restartCampaign;
