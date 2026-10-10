@@ -1,5 +1,6 @@
 import {campaignSnapshot} from './campaign.js';
 import {SKU_CATALOG} from './sku.js';
+import {SKU_UNIT_CONVENTIONS,skuServiceMeasurements} from './measurements.js';
 
 const sum=(items,fn)=>items.reduce((total,x)=>total+fn(x),0);
 const units=n=>Math.round(n).toLocaleString('es-CL');
@@ -53,6 +54,9 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
   {id:'picking',title:'Picking',scope:'coupled-shipment',headline:units(shippedOrders)+' pedidos completos preparados',detail:units(shippedSkuUnits)+' unidades SKU consumidas según BOM; '+units(pending)+' pedidos quedan pendientes.',input:orderCount,output:shippedOrders,unit:'pedidos completos (unidades SKU como consumo)',signal:pending>0?'warning':'stable',causal:'El motor solo confirma un pedido completo cuando tiene toda su mezcla SKU y capacidad de preparación; no existe cola física separada de pedidos preparados.',evidence:['orders','shipments']},
   {id:'transport',title:'Transporte',scope:'coupled-shipment',headline:units(shippedOrders)+' pedidos expedidos del CD',detail:units(shippedSkuUnits)+' unidades SKU; '+units(pending)+' pedidos aún sin despacho. Entregas confirmadas al cliente: sin información.',input:shippedOrders,output:shippedOrders,unit:'pedidos expedidos, no entregas',signal:pending>0?'warning':'stable',causal:'Picking y Transporte comparten el evento de expedición y límites diarios; no se modela staging, carga posterior ni prueba de entrega al cliente.',evidence:['shipments','orders']},
  ];
+ // M2-01: these values are typed and tied to the inclusive day-0..close horizon.
+ // A complete order count is never a physical SKU unit count.
+ const measurements=skuServiceMeasurements({horizonDays:source.horizonDays,actualOrders:orderCount,shippedOrders,pendingOrders:pending,shippedSkuUnits});
  const days=source.inventory.daily.map(day=>{
   const within=source.shipments.filter(s=>s.day===day.day);
   const quantity=sum(within,x=>sum(Object.values(x.lines),n=>n));
@@ -81,7 +85,7 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
   uniqueAreas:new Set(rows.map(r=>r.id)).size===8,
  };
  if(!Object.values(checks).every(Boolean))throw new Error('Lectura de las ocho áreas no reconcilia con la campaña SKU: '+Object.entries(checks).filter(([,ok])=>!ok).map(([k])=>k).join(', '));
- return frozen({campaignId,scope:'sku-cohort',horizonDays:source.horizonDays,unitConventions:{orders:'pedidos completos',physical:'unidades por SKU',currency:'CLP',time:'días'},
+ return frozen({campaignId,scope:'sku-cohort',horizonDays:source.horizonDays,unitConventions:SKU_UNIT_CONVENTIONS,measurements,
   metrics:{plannedOrders:source.plan.plannedOrders,forecastOrders:forecast,actualOrders:orderCount,originalPurchaseSkuUnits:ordered,extraPurchaseSkuUnits:newOrdered,receivedSkuUnits:received,releasedSkuUnits:released,transferSkuUnits:transferred,openingSkuUnits:physicalOpening,closingPickFaceSkuUnits:available,closingReserveSkuUnits:heldReserve,closingQualitySkuUnits:heldQuality,shippedSkuUnits,shippedOrders,pendingOrders:pending,customerDeliveries:deliveredToCustomer},
   stages:rows,days,checks,passed:true,
   assumptions:'Lectura compartida de UN mismo registro SKU de doce días. Comercial/Planning son decisiones iniciales, no movimientos físicos; Pick y Transporte comparten un único evento de salida del CD. No representa ni se suma a las unidades económicas del motor agregado de una jornada ni implica entrega al cliente.'});
