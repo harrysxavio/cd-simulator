@@ -1,8 +1,8 @@
 {
-  "version": "11.28",
-  "assetRevision": 137,
-  "release": "v11.28 · M2-04b proyección SKU compartida entre vistas",
+  "version": "11.29",
+  "assetRevision": 138,
+  "release": "v11.29 · Migración y recuperación segura de campañas",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "Un solo replay físico SKU por firma de campaña y decisiones en una sesión; mismo read-model para diagnóstico, resultados, áreas y recuperación. Recarga reconstruye eventos deterministas; caché limitada a 10 alternativas. Sin integración económica global ni despacho final separado de Picking."
+  "notes": "M2-05: migración de sesiones locales anteriores al esquema v3; validación de entradas, decisiones, horizonte, escenario y reinicio. La cohorte SKU se reconstruye a partir de parámetros guardados, sin conservar eventos completos en el navegador. No certifica la publicación pública ni la unificación de motores."
 }
