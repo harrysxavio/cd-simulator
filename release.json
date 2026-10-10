@@ -1,8 +1,8 @@
 {
-  "version": "11.35",
-  "assetRevision": 144,
-  "release": "v11.35 · M3-11 Preparación Picking auditada por pedido",
+  "version": "11.36",
+  "assetRevision": 145,
+  "release": "v11.36 · M3-12a staging físico experimental del motor",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-11: evento propio de Picking por pedido/BOM y día, con capacidad física SKU y enlace explícito a expedición. En este incremento ambos ocurren el mismo día; staging y cola independiente de Transporte quedan para M3-12. Inventario físico se mantiene conciliado y despacho no equivale a entrega."
+  "notes": "M3-12a: simulación física opt-in con Picking y Transporte independientes, cola de pedidos preparados en STAGING-CD, consumo de inventario solo al despachar y auditoría de conservación por SKU/día. NO se activa aún en la interfaz ni en las ocho áreas: M3-12b migrará registros de Inventario, resultados y UI. El modo estándar sigue sin cambios y no implica entrega final al cliente."
 }
