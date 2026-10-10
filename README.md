@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.32
+# Supply Chain Operations Lab · v11.33
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.32-r141) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.33-r142) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.32](docs/STATUS-V11.32.md).
+- [Estado verificable actualizado de v11.33](docs/STATUS-V11.33.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.32 (M3-08):** Recepción registra por día arribos al muelle, lotes positivos ingresados, límite de capacidad, cola por PO con antigüedad y FIFO verificable; la cola no es stock. Las ocho áreas comparten ese libro sin replays paralelos y el detalle móvil sigue compacto. [Estado y límites](docs/STATUS-V11.32.md).
+**Avance v11.33 (M3-09):** Calidad usa un libro físico único por lote y día para retención, liberación y conciliación con Recepción e Inventario; prohíbe liberaciones de cantidad cero y explica que retenido no equivale a merma o rechazo. [Estado y límites](docs/STATUS-V11.33.md).
+
+**Base v11.32 (M3-08):** Recepción registra por día arribos al muelle, lotes positivos ingresados, límite de capacidad, cola por PO con antigüedad y FIFO verificable; la cola no es stock. Las ocho áreas comparten ese libro sin replays paralelos y el detalle móvil sigue compacto. [Estado y límites](docs/STATUS-V11.32.md).
 
 **Base v11.31 (M3-07):** Compras y proveedor se concilian por orden SKU y fecha de llegada modelada; las ocho áreas diferencian cumplimiento, tránsito, cola del muelle y recepción física por lote. Rechaza recepciones anticipadas o sin PO. [Estado y límites](docs/STATUS-V11.31.md).
 
