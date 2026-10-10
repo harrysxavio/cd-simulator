@@ -44,11 +44,19 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  const waitingQuality=comparison.recovered.waitingQuality;
  const pending=source.orders.filter(o=>o.status==='pending').length;
  const deliveredToCustomer=null; // Shipment at CD != proof of last-mile delivery.
- const forecast=source.plan.forecastOrders;
- const target=Math.max(0,orderCount-forecast);
+ // Both management areas explain one pre-shock commercial/planning read-model.
+ const planning=source.plan.commercialPlanning;
+ if(!planning||planning.scope!=='sku-cohort'||planning.actualOrders!==orderCount
+  ||planning.plannedOrders!==plannedOrders||planning.totalCommittedSkuUnits!==ordered
+  ||planning.forecastOrders!==source.plan.forecastOrders
+  ||planning.rows.some(row=>source.plan.originalPurchase[row.skuId]!==row.committedSkuUnits)){
+  throw new Error('Comercial y Planning no concilian con el libro SKU');
+ }
+ const forecast=planning.forecastOrders;
+ const target=Math.max(0,planning.varianceVsForecastOrders);
  const rows=[
-  {id:'commercial',title:'Comercial',scope:'plan',headline:units(forecast)+' pedidos previstos',detail:'Se revelaron '+units(orderCount)+' pedidos reales. Desviación frente al pronóstico SKU: '+(orderCount>=forecast?'+':'−')+units(Math.abs(orderCount-forecast))+' pedidos.',input:source.plan.plannedOrders,output:forecast,unit:'pedidos',signal:target>0?'warning':'stable',causal:'El pronóstico influye en la compra inicial; después de revelar demanda no se reescribe.',evidence:['plan.forecastOrders','demand.actualOrders']},
-  {id:'planning',title:'Planificación',scope:'plan',headline:units(ordered)+' unidades SKU comprometidas',detail:'Cobertura configurada '+source.plan.planningCoveragePercent+' %. Se conservaron '+units(physicalOpening)+' unidades físicas iniciales en el catálogo (incluida reserva).',input:forecast,output:ordered,unit:'entrada pedidos, salida unidades SKU',signal:pending>0?'warning':'stable',causal:'La planificación convirtió pronóstico, inventario de referencia y cobertura en compras por SKU. No existe equivalencia de 1 pedido = 1 unidad.',evidence:['plan.originalPurchase','inventory.initial']},
+  {id:'commercial',title:'Comercial',scope:'plan',headline:units(forecast)+' pedidos previstos',detail:'Se revelaron '+units(planning.actualOrders)+' pedidos reales. Diferencia vs. pronóstico: '+(planning.varianceVsForecastOrders>=0?'+':'−')+units(Math.abs(planning.varianceVsForecastOrders))+' pedidos.',input:planning.plannedOrders,output:forecast,unit:'pedidos completos',signal:target>0?'warning':'stable',causal:'El pronóstico SKU se fija antes de observar la demanda. Si faltan pedidos por pronosticar, la compra inicial no puede reescribirse retroactivamente.',evidence:['plan.commercialPlanning.forecastOrders','plan.commercialPlanning.varianceVsForecastOrders']},
+  {id:'planning',title:'Planificación',scope:'plan',headline:units(planning.totalCommittedSkuUnits)+' unidades SKU comprometidas',detail:'Se configuró '+planning.planningCoveragePercent+' % de cobertura. Las compras se calcularon con '+units(forecast)+' pedidos previstos y '+units(physicalOpening)+' unidades SKU de stock inicial, sin añadir reserva como nueva existencia.',input:forecast,output:ordered,unit:'entrada pedidos; salida unidades SKU',signal:pending>0?'warning':'stable',causal:'La planificación usa la mezcla de productos de los pedidos, el inventario inicial y la cobertura elegida. Un pedido completo puede contener varias unidades SKU.',evidence:['plan.commercialPlanning.rows','plan.originalPurchaseOrders','inventory.initial']},
   {id:'purchasing',title:'Compras',scope:'purchase-orders',headline:units(supplierFulfilled)+' unidades confirmadas por proveedor original',detail:'Compra original '+units(ordered)+' SKU; incumplidas '+units(supplierUnfilled)+'; compra extraordinaria separada '+units(newOrdered)+' SKU.',input:ordered+newOrdered,output:supplierFulfilled+newOrdered,unit:'unidades SKU de proveedor, no stock de CD',signal:supplierUnfilled>0?'warning':'stable',causal:'Pedido a proveedor y entrega del proveedor son distintos de recepción física y liberación de Calidad.',evidence:['purchaseOrders','receipts']},
   {id:'receiving',title:'Recepción',scope:'receipts',headline:units(received)+' unidades ingresadas al CD',detail:units(waitingReceiving)+' unidades pendientes de procesar en Recepción al cierre. Ingresar no significa estar disponible para Picking.',input:supplierFulfilled+newOrdered,output:received,unit:'unidades SKU',signal:waitingReceiving>0?'warning':'stable',causal:'Solo los eventos de ingreso con ID de orden y lote prueban recepción física; las unidades en tránsito no se contabilizan como recibidas.',evidence:['receipts','dailyEvents']},
   {id:'quality',title:'Calidad',scope:'quality-release',headline:units(released)+' unidades liberadas',detail:units(heldQuality)+' unidades aún retenidas en Calidad al día '+source.horizonDays+'.',input:received,output:released,unit:'unidades SKU',signal:heldQuality>0?'warning':'stable',causal:'La liberación se registra por lote y día; no se confunde una recepción con unidades habilitadas.',evidence:['qualityLots','qualityReleases']},
@@ -82,6 +90,10 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
   stockConfidence:pickable+unverified===available,
   movedReserve:transferred===sum(comparison.recovered.ledger,d=>sum(Object.values(d.movedReserve),n=>n)),
   originalManifest:originals.every(po=>source.plan.originalPurchase[po.skuId]===po.orderedQty),
+  commercialPlanning:planning.forecastOrders===forecast
+   &&planning.varianceVsForecastOrders===orderCount-forecast
+   &&planning.totalCommittedSkuUnits===ordered
+   &&planning.rows.every(row=>originals.some(po=>po.id===row.purchaseOrderId&&po.orderedQty===row.committedSkuUnits)),
   sameOpening:!!openingState&&openingState.scope==='sku-cohort'
    &&source.inventory.bySku.every(s=>openingState.openingBySku[s.skuId]===s.opening)
    &&openingState.totals.physicalSkuUnits===physicalOpening,
@@ -92,6 +104,6 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  if(!Object.values(checks).every(Boolean))throw new Error('Lectura de las ocho áreas no reconcilia con la campaña SKU: '+Object.entries(checks).filter(([,ok])=>!ok).map(([k])=>k).join(', '));
  return frozen({campaignId,scope:'sku-cohort',horizonDays:source.horizonDays,unitConventions:SKU_UNIT_CONVENTIONS,measurements,
   metrics:{plannedOrders:source.plan.plannedOrders,forecastOrders:forecast,actualOrders:orderCount,originalPurchaseSkuUnits:ordered,extraPurchaseSkuUnits:newOrdered,receivedSkuUnits:received,releasedSkuUnits:released,transferSkuUnits:transferred,openingSkuUnits:physicalOpening,closingPickFaceSkuUnits:available,closingReserveSkuUnits:heldReserve,closingQualitySkuUnits:heldQuality,shippedSkuUnits,shippedOrders,pendingOrders:pending,customerDeliveries:deliveredToCustomer},
-  openingState,stages:rows,days,checks,passed:true,
+  openingState,commercialPlanning:planning,stages:rows,days,checks,passed:true,
   assumptions:'Lectura compartida de UN mismo registro SKU de doce días. Comercial/Planning son decisiones iniciales, no movimientos físicos; Pick y Transporte comparten un único evento de salida del CD. No representa ni se suma a las unidades económicas del motor agregado de una jornada ni implica entrega al cliente.'});
 }
