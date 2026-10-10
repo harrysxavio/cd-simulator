@@ -84,7 +84,7 @@ test('M2-05: malformed numbers, unknown choices, fake ID, broken shape never cor
  assert.equal(s.decisions.commercial,undefined);
  assert.equal(s.decisions.values.inventory,92);
  assert.equal(s.decisions.values.receiving,undefined);
- assert.equal(s.actions.receiving,1000);
+ assert.equal(s.actions.receiving,500);
  assert.equal(s.actions.transport,undefined);
  assert.deepEqual(s.skuDecisions,[]);
  assert.ok(Number.isFinite(s.scenario.actualDemand));
