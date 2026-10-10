@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.30.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.31.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -83,8 +83,9 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 04a | **Código/CI/merge aprobados** | PR #25 integrado como v11.27: vistas SKU vs. jornada y CSV correctamente etiquetados. |
 | 04b | **Código/CI/merge aprobados** | PR #26 fusionado en main como v11.28; caché SKU limitada y vistas compartidas. |
 | 05 | **Código/CI/merge aprobados** | PR #27 en main, v11.29, migración a sesión v3 y reinicio seguro. |
-| 06 | **En curso** | PR v11.30: forecast/Planning SKU único, compartido por ocho áreas; verificar Node+Chromium, merge y Pages. |
+| 06 | **Código/CI/merge aprobados** | PR #28 fusionado en main como v11.30: Comercial/Planning comparten forecast y compromiso de compras. |
+| 07 | **En curso** | PR v11.31: libro proveedor/Recepción por PO, cumplimiento, plazo y cola; verificar Node+Chromium, merge y Pages. |
 | 04c–04d | **Pendientes** | Transición física de decisiones y retiro del paralelo; dependen parcialmente de M3. |
-| 07–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
+| 08–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
