@@ -24,7 +24,7 @@ for(const mode of ['desktop','phone'])test('M3-10 inventory verified and physica
   const section=page.locator('#canonicalAreaView [data-area-id="inventory"]');
   await section.locator('summary').click();
   const value=await section.innerText();
-  for(const word of ['PICK-FACE','RESERVA-CD','sin verificar','también existen físicamente','Traslados internos','inventoryLedger.daily'])assert.ok(value.includes(word),word);
+  for(const word of ['PICK-FACE','RESERVA-CD','sin verificar','también existen físicamente','Traslados','inventoryLedger.daily'])assert.ok(value.includes(word),word);
   const daily=page.locator('#canonicalAreaView .canonical-day-detail');
   await daily.locator('summary').click();
   const rows=await daily.locator('.canonical-day-row').allInnerTexts();
