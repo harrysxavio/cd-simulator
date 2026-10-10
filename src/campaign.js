@@ -5,6 +5,7 @@ import {commercialPlanningReading} from './commercial-planning.js';
 import {supplierOrderLedger} from './supplier-ledger.js';
 import {warehouseReceivingReadModel} from './receiving-ledger.js';
 import {qualityLotReadModel} from './quality-ledger.js';
+import {physicalInventoryReadModel} from './inventory-ledger.js';
 
 /**
  * Immutable, canonical read model for ONE SKU event-simulation campaign.
@@ -103,6 +104,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const supplierLedger=supplierOrderLedger({purchaseOrders,receipts,horizonDays:replay.days});
  const receivingLedger=warehouseReceivingReadModel({replay,supplierLedger,receipts});
  const qualityLedger=qualityLotReadModel({replay,receipts,qualityReleases,qualityLots});
+ const inventoryLedger=physicalInventoryReadModel({replay,openingState,receipts,qualityReleases,reserveTransfers,shipments,inventoryMovements,receivingLedger,qualityLedger,campaignId});
  const receivedByPO=new Map(purchaseOrders.map(x=>[x.id,0]));
  for(const item of receipts)receivedByPO.set(item.purchaseOrderId,receivedByPO.get(item.purchaseOrderId)+item.qty);
  const orderIds=new Set(orders.map(o=>o.id)),shipmentIds=new Set(shipments.map(s=>s.orderId));
@@ -130,6 +132,9 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   qualityLedger:qualityLedger.passed&&qualityLedger.totals.receivedSkuUnits===receivingLedger.totals.receivedSkuUnits
    &&qualityLedger.totals.releasedSkuUnits===qualityReleases.reduce((n,r)=>n+r.qty,0)
    &&qualityLedger.totals.closingHeldSkuUnits===replay.waitingQuality,
+  inventoryLedger:inventoryLedger.passed&&inventoryLedger.totals.closingQualitySkuUnits===undefined
+   &&inventoryLedger.totals.qualityHeldSkuUnits===replay.waitingQuality
+   &&inventoryLedger.totals.shippedSkuUnits===Object.values(replay.consumed).reduce((a,b)=>a+b,0),
   physicalDaily:physicalDailyValid,
   skuBalance:bySku.every(x=>x.opening+x.received===x.dispatched+x.held+x.reserved+x.available
    &&x.dispatched===replay.consumed[x.skuId]&&x.held===x.closingQuality&&x.available===x.closingAvailable&&x.reserved===x.closingReserved&&x.available===x.closingPickable+x.closingUnverified),
@@ -145,7 +150,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows,commercialPlanning:planningReading}, 
   demand:{actualOrders:replay.orders,revealed:true},
-  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
+  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones.'
