@@ -31,6 +31,7 @@ async function run(device){
   await page.locator('#canonicalAreaView [data-area-id="transport"] summary').click();
   assert.match(await page.locator('#canonicalAreaView [data-area-id="transport"]').innerText(),/no se modela staging/);
   const original=await page.locator('#primarySkuMetrics').innerText();
+  await page.locator('#resultTabs [data-result-target="inventory"]').click();
   await toggle.click();
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
   assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).skuSeparateTransport,KEY),true);
@@ -62,6 +63,7 @@ async function run(device){
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('#primarySkuMetrics').innerText(),current,'saved staging session must restore deterministic metrics');
+  await page.locator('#resultTabs [data-result-target="inventory"]').click();
   await toggle.click();
   assert.equal(await toggle.getAttribute('aria-pressed'),'false');
   assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).skuSeparateTransport,KEY),false);
