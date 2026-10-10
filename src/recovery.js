@@ -2,6 +2,7 @@ import {integratedDemand} from './integrated.js';
 import {eventSimulation} from './events.js';
 import {SKU_CATALOG,ORDER_TEMPLATES} from './sku.js';
 import {skuOpeningState} from './opening-state.js';
+import {assertFrozenOriginalPurchases} from './original-purchase.js';
 
 export const RECOVERY_OPTIONS={
  wait:{label:'Aceptar espera',extraCapacity:0,urgent:false},
@@ -47,6 +48,9 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  }
  const capacity=dailyCapacity+choice.extraCapacity;
  const recovered=eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,stock:openingStock,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent,reserveStock,reserveReleaseDay:choice.releaseReserve?urgentArrivalDay:null});
+ // A recovery option may create a SEPARATE urgent PO, but cannot rewrite
+ // an original supplier commitment (including its expected arrival day).
+ assertFrozenOriginalPurchases(base.originalPurchaseOrders,recovered);
  const urgentBase=urgent.reduce((n,d)=>n+d.qty*d.unitCost,0);
  const urgentSurcharge=urgentBase*emergencySurchargeRate;
  const extraLabor=choice.extraCapacity?extraCapacityDailyCost*(days+1):0;
@@ -68,6 +72,6 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
    if(observed[skuId]!==qty)throw new Error('La apertura SKU cambia entre escenarios');
   }
  }
- return {option,label:choice.label,urgentArrivalDay,purchaseCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
+ return {option,label:choice.label,urgentArrivalDay,purchaseCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,originalPurchaseOrders:base.originalPurchaseOrders,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
   assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Se paga refuerzo por todas las jornadas, aun si queda ocioso. Compra urgente llega el día configurado y no mejora cumplimiento anterior a la recepción. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. Reserva interna: una partición del stock inicial ubicado en RESERVA-CD; un traslado la hace disponible para Picking en el día seleccionado, sin sumar inventario ni costo de compra. No hay devoluciones, IVA ni costos de transporte.'};
 }

@@ -1,5 +1,6 @@
 import {SKU_CATALOG} from './sku.js';
 import {skuOpeningState} from './opening-state.js';
+import {assertFrozenOriginalPurchases} from './original-purchase.js';
 
 /**
  * Immutable, canonical read model for ONE SKU event-simulation campaign.
@@ -24,12 +25,21 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   ||openingState.reserveBySku[id]!==replay.openingReserve?.[id])){
   throw new Error('La apertura y reserva SKU no coinciden con el libro de eventos');
  }
+ // Snapshot uses the one immutable purchasing manifest created at planning.
+ // Reject modified supplier PO quantities/dates even if receipts still balance.
+ const purchasePlan=comparison.originalPurchaseOrders;
+ assertFrozenOriginalPurchases(purchasePlan,replay);
  const purchaseOrders=[
-  ...replay.deliveries.map(d=>({id:'PO-'+d.id,source:'original',skuId:d.id,orderedQty:d.ordered,supplierFulfilledQty:d.received,supplierUnfilledQty:d.unreceived,expectedArrivalDay:d.arrivalDay,unitCost:d.unitCost})),
+  ...purchasePlan.rows.map(po=>({...po})), 
   ...comparison.urgent.map((d,i)=>({id:'URG-'+String(i+1).padStart(3,'0')+'-'+d.id,source:'urgent',skuId:d.id,orderedQty:d.qty,supplierFulfilledQty:d.qty,supplierUnfilledQty:0,expectedArrivalDay:d.day,unitCost:d.unitCost}))
  ];
  const purchaseById=new Map(purchaseOrders.map(p=>[p.id,p]));
- const originalPurchase=Object.fromEntries(replay.deliveries.map(d=>[d.id,d.ordered]));
+ const originalPurchase={...purchasePlan.bySku};
+ if(purchasePlan.plannedOrders!==plannedOrders||purchasePlan.forecastOrders!==comparison.forecastOrders
+  ||purchasePlan.committedValueCLP!==comparison.committedPurchaseValue
+  ||ids.some(id=>originalPurchase[id]!==comparison.originalPurchase[id])){
+  throw new Error('El plan de compra original no coincide con la campaña');
+ }
  const receipts=[],qualityReleases=[],reserveTransfers=[],shipments=[],dailyEvents=[],inventoryMovements=[];
  let sequence=0;
  const newId=()=>campaignId+'-EVT-'+String(++sequence).padStart(7,'0');
@@ -90,7 +100,8 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   uniqueEvents:eventIds.size===dailyEvents.length,
   purchasedQty:purchaseOrders.every(p=>p.orderedQty===p.supplierFulfilledQty+p.supplierUnfilledQty
    &&receivedByPO.get(p.id)<=p.supplierFulfilledQty),
-  frozenManifest:ids.every(id=>originalPurchase[id]===comparison.originalPurchase[id]),
+  frozenManifest:ids.every(id=>originalPurchase[id]===comparison.originalPurchase[id])
+   &&purchaseOrders.filter(po=>po.source==='original').every(po=>purchasePlan.rows.some(row=>row.id===po.id&&row.orderedQty===po.orderedQty&&row.expectedArrivalDay===po.expectedArrivalDay)), 
   orderBalance:orders.length===replay.orders&&shipments.length===replay.completed
    &&orders.filter(o=>o.status==='pending').length===replay.pending
    &&orders.every(o=>o.status==='pending'?!shippedById.has(o.id):
@@ -109,7 +120,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const result={
   campaignId,version:1,scope:'sku-cohort',currency:'CLP',horizonDays:replay.days,
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
-   planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase},
+   planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows}, 
   demand:{actualOrders:replay.orders,revealed:true},
   purchaseOrders,orders,receipts,qualityLots,qualityReleases,reserveTransfers,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},

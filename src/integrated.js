@@ -1,5 +1,6 @@
 import {eventSimulation} from './events.js';
 import {inventoryPolicy} from './policy.js';
+import {freezeOriginalPurchaseOrders,assertFrozenOriginalPurchases} from './original-purchase.js';
 
 /** Compare identical operational policy under planned and actual order volumes.
  * Procurement is frozen at plan: the surprise must not trigger retroactive buys.
@@ -18,8 +19,12 @@ export function integratedDemand({policy='service',plannedOrders=200,actualOrder
  // A frozen purchase order may be replayed against any actual demand.
  // Override event simulation procurement through a fixed purchase manifest.
  const baseline=eventSimulation({policy,orders:plannedOrders,days,dailyCapacity,stock,delayDays,supplierFill,qualityReleasePercent,inventoryAccuracyPercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,reserveStock,fixedPurchases:purchase});
+ // Freeze identity, SKU, quantities, supplier arrival assumptions and CLP value
+ // BEFORE observing the actual-demand replay.
+ const originalPurchaseOrders=freezeOriginalPurchaseOrders({planned:baseline,purchase,committedValueCLP:committedPurchaseValue,plannedOrders,forecastOrders});
  const surprise=eventSimulation({policy,orders:actualOrders,days,dailyCapacity,stock,delayDays,supplierFill,qualityReleasePercent,inventoryAccuracyPercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,reserveStock,fixedPurchases:purchase});
- const comparison={planned:baseline,actual:surprise,plannedOrders,actualOrders,policy,purchase,committedPurchaseValue,forecastOrders,plannedForecastPercent,planningCoveragePercent,
+ assertFrozenOriginalPurchases(originalPurchaseOrders,surprise);
+ const comparison={planned:baseline,actual:surprise,plannedOrders,actualOrders,policy,purchase,originalPurchaseOrders,committedPurchaseValue,forecastOrders,plannedForecastPercent,planningCoveragePercent,
   impact:{orders:actualOrders-plannedOrders,onTime:surprise.onTime-baseline.onTime,completed:surprise.completed-baseline.completed,pending:surprise.pending-baseline.pending,late:surprise.late-baseline.late}};
  return {...comparison,assumptions:'La compra se calcula una sola vez según el pronóstico comercial y la cobertura de Planeación; se congela al revelar la demanda real. El motor SKU de pedidos y recepciones sigue siendo un laboratorio paralelo, no sustituye el flujo agregado principal.'};
 }
