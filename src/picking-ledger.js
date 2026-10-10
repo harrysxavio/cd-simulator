@@ -1,4 +1,5 @@
 import {SKU_CATALOG,ORDER_TEMPLATES} from './sku.js';
+import {stagingIntegrityReadModel} from './staging-ledger.js';
 
 const sum=(items,fn)=>items.reduce((n,item)=>n+fn(item),0);
 const valid=n=>Number.isSafeInteger(n)&&n>=0;
@@ -20,6 +21,49 @@ export function pickingOrderReadModel({replay,shipments,orders}={}){
   ||!valid(replay.dailyCapacity)
   ||!(replay.pickingUnitCapacity===null||valid(replay.pickingUnitCapacity))){
   fail('faltan eventos de preparación o límites');
+ }
+ if(replay.separateTransport){
+  // Reuse the sole audited physical staging replay, never invent a second
+  // shipment timeline; Picking and carrier departure may occur on later days.
+  const stage=stagingIntegrityReadModel(replay);
+  const byOrder=new Map(orders.map(o=>[o.id,o]));
+  if(byOrder.size!==orders.length||orders.length!==replay.orders)fail('cohorte de pedidos inconsistente');
+  const seen=new Set();
+  const daily=stage.daily.map(d=>{
+   const frame=replay.ledger[d.day],picks=frame.pickEvents,departures=frame.shipmentEvents;
+   for(const p of picks){
+    const o=byOrder.get(p.orderId);
+    if(!o||seen.has(p.orderId)||o.pickedDay!==d.day
+     ||!['staged','shipped'].includes(o.status)||!linesMatch(p.lines,o.lines))fail('preparación no concilia con pedido canónico');
+    seen.add(p.orderId);
+   }
+   const actual=shipments.filter(s=>s.day===d.day);
+   if(actual.length!==departures.length||actual.some(s=>!departures.some(e=>
+    s.orderId===e.orderId&&s.pickId===e.pickId&&s.units===e.units
+    &&s.templateId===e.templateId&&linesMatch(s.lines,e.lines))))fail('salida del CD no corresponde a Transporte');
+   return {day:d.day,pickedOrders:d.pickedOrders,pickedSkuUnits:d.preparedSkuUnits,
+    shippedOrders:d.shippedOrders,awaitingTransportOrders:d.stagingOrders,
+    stagingSkuUnits:d.stagingSkuUnits,oldestWaitingDays:d.oldestWaitingDays,
+    capacitySkuUnits:replay.pickingUnitCapacity,
+    orders:picks.map(p=>({pickId:p.pickId,orderId:p.orderId,day:p.day,
+     templateId:p.templateId,units:p.units,lines:{...p.lines}}))};
+  });
+  if(seen.size!==stage.totals.preparedOrders
+   ||shipments.length!==stage.totals.shippedOrders
+   ||orders.filter(o=>o.status==='staged').length!==stage.totals.stagingOrders
+   ||orders.filter(o=>o.status==='pending').length!==stage.totals.unpickedOrders
+   ||orders.some(o=>o.status==='staged'&&o.shippedDay!==null)
+   ||orders.some(o=>o.status==='shipped'&&o.shippedDay===null)){
+   fail('preparados, en staging y expedidos no cuadran');
+  }
+  return freeze({scope:'sku-cohort',stage:'independent-staging',horizonDays:replay.days,
+   daily,stagingAudit:stage,totals:{
+    pickedOrders:stage.totals.preparedOrders,
+    pickedSkuUnits:sum(daily,d=>d.pickedSkuUnits),
+    shippedOrders:stage.totals.shippedOrders,
+    awaitingTransportOrders:stage.totals.stagingOrders,
+    pendingUnpickedOrders:stage.totals.unpickedOrders
+   },passed:true,boundary:'Pedido preparado queda en STAGING-CD hasta salida física distinta. Capacidad Picking y Transporte independientes; el despacho desde CD no demuestra entrega final.'});
  }
  const skuIds=SKU_CATALOG.map(p=>p.id);
  const templates=new Map(ORDER_TEMPLATES.map(t=>[t.id,t.lines]));
