@@ -1,8 +1,8 @@
 {
-  "version": "11.27",
-  "assetRevision": 136,
-  "release": "v11.27 · M2-04a: alcance SKU y jornada diferenciados",
+  "version": "11.28",
+  "assetRevision": 137,
+  "release": "v11.28 · M2-04b proyección SKU compartida entre vistas",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M2-04a: auditoría de fuentes y unidades por pantalla; costos, diagnóstico legado y exportación CSV etiquetados como jornada agregada. KPI SKU siguen cohorte de días 0–12; todavía no es motor físico/económico único."
+  "notes": "Un solo replay físico SKU por firma de campaña y decisiones en una sesión; mismo read-model para diagnóstico, resultados, áreas y recuperación. Recarga reconstruye eventos deterministas; caché limitada a 10 alternativas. Sin integración económica global ni despacho final separado de Picking."
 }
