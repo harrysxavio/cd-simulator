@@ -396,9 +396,10 @@ function renderCanonicalAreasFromSku(model){
   add(card,'strong','','Día '+day.day+' · '+fmt(day.shippedOrders)+' pedidos expedidos · '+fmt(day.remainingOrders)+' pendientes');
   add(card,'small','','Muelle +'+fmt(day.dockArrivedSkuUnits)+' SKU · recibido '+fmt(day.receivedSkuUnits)+' SKU · cola '+fmt(day.receivingQueueSkuUnits)+' SKU');
   add(card,'small','','Calidad liberó '+fmt(day.releasedSkuUnits)+' SKU · retenido '+fmt(day.qualityHeldSkuUnits)+' SKU · reserva trasladada '+fmt(day.movedReserveSkuUnits)+' SKU');
+  add(card,'small','','Picking '+fmt(day.pickedOrders)+' pedidos · '+fmt(day.pickedSkuUnits)+' SKU preparados · expedidos '+fmt(day.shippedOrders)+' pedidos');
   add(card,'small','','PICK-FACE '+fmt(day.closingPickFaceSkuUnits)+' SKU · RESERVA-CD '+fmt(day.closingReserveSkuUnits)+' SKU · verificable '+fmt(day.closingVerifiedSkuUnits)+' SKU · sin verificar '+fmt(day.closingUnverifiedSkuUnits)+' SKU');
  }
- add(host,'p','canonical-boundary','Nota de realismo: el modelo actual confirma Picking y Transporte en un mismo evento de despacho. Todavía no simula staging, carga en camión ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
+ add(host,'p','canonical-boundary','Nota de realismo: Picking ahora registra cada preparación por separado, pero se despacha el mismo día. Todavía no se simulan staging, espera de transporte ni prueba de entrega. Comercial y Planning son compromisos de gestión, no eventos de ingreso de productos.');
  return model;
 }
 function renderPrimarySkuSummary(model){
