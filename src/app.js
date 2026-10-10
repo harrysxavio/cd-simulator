@@ -1,4 +1,5 @@
 import {supplyBridge} from './supply-bridge.js?v=135';
+import {aggregateFlowCsv} from './aggregate-export.js?v=135';
 import {campaignSkuContract} from './campaign-contract.js?v=135';
 import {campaignAreaReadModel} from './area-ledger.js?v=135';
 import {laborAudit} from './labor.js?v=135';
@@ -881,7 +882,15 @@ $('restartFinal').onclick=restartCampaign;
 $('resetAnytime').onclick=restartCampaign;
 $('goToOperations').onclick=()=>{showSection('operations');$('operationsSection').scrollIntoView({behavior:'smooth',block:'start'})};
 $('openReport').onclick=()=>{save();showSection('preliminary');$('preliminarySection').scrollIntoView({behavior:'smooth',block:'start'})};
-$('export').onclick=()=>{const r=flow(decisions,actions,effectiveScenario()),rows=[['Área','Entrada','Salida','Capacidad','Recuperación'],...r.stages.map(s=>[NODES.find(n=>n.id===s.id).title,s.input,s.output,s.capacity,actions[s.id]||0])];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='supply-chain-cadena.csv';document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url)};
+$('export').onclick=()=>{
+ // Export ONLY the educational one-shift flow. Do not silently label these
+ // equivalent units as actual SKU order shipments or physical stock.
+ const flowResult=flow(decisions,actions,effectiveScenario());
+ const csv=aggregateFlowCsv({stages:flowResult.stages,areaNames:flowResult.stages.map(stage=>NODES.find(n=>n.id===stage.id).title),actions});
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ const a=document.createElement('a');a.href=url;a.download='supply-chain-jornada-agregada.csv';
+ document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
+};
 $('setupTab').onclick=()=>showSection('setup');
 $('operationsTab').onclick=()=>showSection('operations');
 $('preliminaryTab').onclick=()=>showSection('preliminary');
