@@ -14,7 +14,7 @@ async function exercise(mode){
   await page.evaluate(()=>{
    const key='supply-lab-v90',s=JSON.parse(localStorage.getItem(key));
    s.revealed=true;s.shockDirection=1;s.phase='recover';s.currentSection='dashboard';
-   s.scenario={...s.scenario,demand:1000,demandShockPercent:40};
+   // Force a small but positive unload capacity so the browser checks a\n   // real physical FIFO backlog rather than assuming that one must exist.\n   s.scenario={...s.scenario,demand:1000,demandShockPercent:40,receivingOperators:1,receivingUnitsPerHour:1};
    s.decisions={...s.decisions,commercial:'under',planning:'partial',purchasing:'reliable',receiving:'low'};
    s.skuPolicy='service';s.skuRecovery='combined';s.skuUrgentArrival=1;
    s.skuPurchaseCoverage=100;s.skuReservePercent=0;s.skuDecisions=[];
