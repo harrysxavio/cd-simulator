@@ -24,7 +24,6 @@ export function stagingIntegrityReadModel(replay){
  const byId=new Map(orders.map(o=>[o.id,o]));
  if(byId.size!==orders.length||orders.length!==replay.orders)fail('pedidos originales inconsistentes');
  const prepared=new Map(),shipped=new Map(),stage=Object.fromEntries(ids.map(id=>[id,0]));
- const totalBySku=Object.fromEntries(ids.map(id=>[id,0]));
  let receivedToDate=0,shippedUnitsToDate=0;
  const days=[];
  for(const d of replay.ledger){
@@ -85,8 +84,7 @@ export function stagingIntegrityReadModel(replay){
  }
  if(shipped.size!==replay.completed||replay.pending!==orders.length-shipped.size
   ||prepared.size-shipped.size!==replay.endingStagingOrders
-  ||ids.some(id=>stage[id]!==replay.endingStagingStock?.[id]
-   ||totalBySku[id]!==0)
+  ||ids.some(id=>stage[id]!==replay.endingStagingStock?.[id])
   ||sum(Object.values(replay.consumed),v=>v)!==shippedUnitsToDate
   ||orders.some(o=>o.fulfilledDay!==null&&(o.pickedDay===null||o.pickedDay>o.fulfilledDay))){
   fail('balance acumulado de pedidos preparados y expedidos inválido');
