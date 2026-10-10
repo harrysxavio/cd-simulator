@@ -28,6 +28,7 @@ async function run(device){
   assert.equal(await toggle.count(),1);
   assert.equal(await toggle.getAttribute('aria-pressed'),'false');
   await page.locator('#resultTabs [data-result-target="areas"]').click();
+  await page.locator('#canonicalAreaView [data-area-id="transport"] summary').click();
   assert.match(await page.locator('#canonicalAreaView [data-area-id="transport"]').innerText(),/no se modela staging/);
   const original=await page.locator('#primarySkuMetrics').innerText();
   await toggle.click();
