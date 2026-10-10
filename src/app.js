@@ -1,27 +1,28 @@
-import {supplyBridge} from './supply-bridge.js?v=137';
-import {createSkuSessionCache} from './sku-session.js?v=137';
-import {aggregateFlowCsv} from './aggregate-export.js?v=137';
-import {campaignSkuContract} from './campaign-contract.js?v=137';
-import {campaignAreaReadModel} from './area-ledger.js?v=137';
-import {laborAudit} from './labor.js?v=137';
-import {skuAudit} from './audit.js?v=137';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=137';
-import {integratedDemand} from './integrated.js?v=137';
-import {eventSimulation} from './events.js?v=137';
-import {deliveryTimeline} from './timeline.js?v=137';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=137';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=137';
-import {demandJourney} from './journey.js?v=137';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=137';
-import {flow,diagnose,ACTIONS} from './flow.js?v=137';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=137';
-import {areaKpis} from './kpis.js?v=137';
-import {causalAudit} from './causal.js?v=137';
-import {managerDiagnosis} from './diagnosis-guide.js?v=137';
-import {skuServiceBrief} from './sku-service.js?v=137';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=137';
-import {attentionSignals} from './attention.js?v=137';
-const $=id=>document.getElementById(id),KEY='supply-lab-v90';
+import {supplyBridge} from './supply-bridge.js?v=138';
+import {createSkuSessionCache} from './sku-session.js?v=138';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=138';
+import {aggregateFlowCsv} from './aggregate-export.js?v=138';
+import {campaignSkuContract} from './campaign-contract.js?v=138';
+import {campaignAreaReadModel} from './area-ledger.js?v=138';
+import {laborAudit} from './labor.js?v=138';
+import {skuAudit} from './audit.js?v=138';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=138';
+import {integratedDemand} from './integrated.js?v=138';
+import {eventSimulation} from './events.js?v=138';
+import {deliveryTimeline} from './timeline.js?v=138';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=138';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=138';
+import {demandJourney} from './journey.js?v=138';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=138';
+import {flow,diagnose,ACTIONS} from './flow.js?v=138';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=138';
+import {areaKpis} from './kpis.js?v=138';
+import {causalAudit} from './causal.js?v=138';
+import {managerDiagnosis} from './diagnosis-guide.js?v=138';
+import {skuServiceBrief} from './sku-service.js?v=138';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=138';
+import {attentionSignals} from './attention.js?v=138';
+const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
 let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={...DEFAULT_SCENARIO},strategy='balanced',revealed=false,shockDirection=null,skuPolicy='balanced',skuSupplierDelay=false,skuRecovery='wait',skuUrgentArrival=1,skuPurchaseCoverage=100,skuReservePercent=0,skuDecisions=[],campaignId=createCampaignId(),currentSection='operations';
@@ -33,8 +34,33 @@ const fmt=n=>Math.round(n).toLocaleString('es-CL');
 const skuContractInputs=contract=>skuReservePercent>0?{...contract.skuInputs,reservePercent:skuReservePercent}:contract.skuInputs;
 const activeSkuDecision=contract=>skuDecisions.findLast(d=>skuDecisionStatus({decision:d,contract:{...contract,skuInputs:skuContractInputs(contract)}})==='current')||null;
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({schemaVersion:2,campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions}))}catch{}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(!s)return;campaignId=typeof s.campaignId==='string'&&/^CD-[a-zA-Z0-9_-]{1,60}$/.test(s.campaignId)?s.campaignId:campaignId;scenario=cleanScenario(s.scenario||{});strategy=['service','balanced','cost'].includes(s.strategy)?s.strategy:'balanced';for(const n of NODES){if(n.choices.some(c=>c.id===s.decisions?.[n.id]))decisions[n.id]=s.decisions[n.id];const v=s.decisions?.values?.[n.id],p=PARAMETERS[n.id];if(v!==undefined&&Number.isFinite(+v)&&+v>=p.min&&+v<=p.max)decisions.values[n.id]=+v;if(Number.isFinite(+s.actions?.[n.id]))actions[n.id]=Math.max(0,Math.min(ACTIONS[n.id][2],+s.actions[n.id]))}active=Math.max(0,Math.min(7,s.active||0));phase=s.phase==='recover'?'recover':'plan';revealed=!!s.revealed;currentSection=['setup','operations','preliminary','recovery','dashboard'].includes(s.currentSection)?s.currentSection:(revealed?'preliminary':'operations');if(!revealed&&!['setup','operations'].includes(currentSection))currentSection='operations';shockDirection=s.shockDirection===-1?-1:1;skuPolicy=['lean','balanced','service'].includes(s.skuPolicy)?s.skuPolicy:'balanced';skuSupplierDelay=s.skuSupplierDelay===true;skuRecovery=Object.hasOwn(RECOVERY_OPTIONS,s.skuRecovery)?s.skuRecovery:'wait';skuUrgentArrival=[1,2,5,10,13].includes(s.skuUrgentArrival)?s.skuUrgentArrival:1;skuPurchaseCoverage=[0,25,50,75,100].includes(s.skuPurchaseCoverage)?s.skuPurchaseCoverage:100;skuReservePercent=[0,10,20,30].includes(s.skuReservePercent)?s.skuReservePercent:0;skuDecisions=Array.isArray(s.skuDecisions)?s.skuDecisions.filter(d=>d&&d.version===1&&d.campaignId===campaignId&&d.status==='confirmed-in-simulator').slice(-25):[]}catch{}}
+function save(){
+ try{
+  const data={campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,
+   skuPolicy,skuSupplierDelay,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions};
+  localStorage.setItem(KEY,serializeSession(data));
+ }catch{
+  // Browser privacy mode or exhausted storage must not break the exercise.
+  // New physical SKU ledgers are deliberately never stored in localStorage.
+ }
+}
+function load(){
+ try{
+  const restored=deserializeSession(localStorage.getItem(KEY),{fallbackCampaignId:campaignId});
+  if(!restored.state)return;
+  const s=restored.state;
+  campaignId=s.campaignId;currentSection=s.currentSection;
+  decisions=s.decisions;actions=s.actions;active=s.active;phase=s.phase;
+  scenario=s.scenario;strategy=s.strategy;revealed=s.revealed;shockDirection=s.shockDirection;
+  skuPolicy=s.skuPolicy;skuSupplierDelay=s.skuSupplierDelay;skuRecovery=s.skuRecovery;
+  skuUrgentArrival=s.skuUrgentArrival;skuPurchaseCoverage=s.skuPurchaseCoverage;
+  skuReservePercent=s.skuReservePercent;skuDecisions=s.skuDecisions;
+  skuSession.clear();currentSkuAreaModel=null;currentSkuProjection=null;
+ }catch{
+  // Invalid, unknown-future or malformed saved sessions are never executed.
+  // Leave the current fresh campaign unchanged.
+ }
+}
 function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
 function revealSurprise(){
  if(revealed)return;
