@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.37
+# Supply Chain Operations Lab · v11.38
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.37-r146) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.38-r147) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.37](docs/STATUS-V11.37.md).
+- [Estado verificable actualizado de v11.38](docs/STATUS-V11.38.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.37 (M3-12b):** Campaña, Inventario y ocho áreas pueden reconciliar STAGING-CD por SKU/día, distinguiendo pedidos pendientes, preparados y expedidos. Esta capacidad aún es experimental: el recorrido visible mantiene el modo estable hasta M3-12c. [Estado y límites](docs/STATUS-V11.37.md).
+**Avance v11.38 (M3-12c):** El laboratorio SKU permite activar staging con un control reversible y persistente. Resumen y ocho áreas distinguen pedidos sin preparar, preparados esperando camión y expedidos, con stock STAGING-CD conciliado por SKU/día. Las sesiones anteriores mantienen su comportamiento hasta que el usuario active el control. [Estado y límites](docs/STATUS-V11.38.md).
+
+**Base v11.37 (M3-12b):** Campaña, Inventario y ocho áreas pueden reconciliar STAGING-CD por SKU/día, distinguiendo pedidos pendientes, preparados y expedidos. Esta capacidad aún es experimental: el recorrido visible mantiene el modo estable hasta M3-12c. [Estado y límites](docs/STATUS-V11.37.md).
 
 **Base v11.36 (M3-12a):** El motor incorpora una opción experimental de staging físico con Picking, espera y despacho por capacidad independiente, conciliando SKU por día. **No está activada todavía en el simulador visible**: integración de campañas y vistas pendiente de M3-12b/c. [Estado y límites](docs/STATUS-V11.36.md).
 
