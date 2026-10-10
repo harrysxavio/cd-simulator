@@ -56,18 +56,22 @@ test('each diagnosis area offers an actionable improvement with accessible label
 
 test('SKU decisions persist across reload and restart resets them',()=>{
  for(const key of ['skuPolicy','skuSupplierDelay','skuRecovery','skuUrgentArrival']){
-  assert.match(app,new RegExp('JSON\\.stringify\\(\\{[^}]*'+key));
+  const session=readFileSync(new URL('../src/session-state.js',import.meta.url),'utf8');
+  assert.ok(session.includes(key),'Missing persistent SKU field: '+key);
+  assert.ok(app.includes('serializeSession(data)'));
   assert.match(app,new RegExp(key+'='));
  }
- assert.match(app,/skuUrgentArrival=\[1,2,5,10,13\]\.includes\(s\.skuUrgentArrival\)/);
- assert.match(app,/skuRecovery=Object\.hasOwn\(RECOVERY_OPTIONS,s\.skuRecovery\)/);
+ assert.match(app,/skuUrgentArrival=s\.skuUrgentArrival/);
+ assert.match(readFileSync(new URL('../src/session-state.js',import.meta.url),'utf8'),/const ARRIVALS=Object\.freeze\(\[1,2,5,10,13\]\)/);
+ assert.match(app,/skuRecovery=s\.skuRecovery/);
  assert.ok(app.includes("skuPolicy='balanced';skuSupplierDelay=false;skuRecovery='wait';skuUrgentArrival=1;skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save()"));
 });
 
 test('the percentage of urgent SKU purchases persists, drives the comparison and resets',()=>{
  assert.match(app,/skuPurchaseCoverage=100/);
- assert.ok(app.includes('skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions}'));
- assert.match(app,/skuPurchaseCoverage=\[0,25,50,75,100\]\.includes\(s\.skuPurchaseCoverage\)/);
+ assert.ok(app.includes('skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions};'));
+ assert.match(app,/skuPurchaseCoverage=s\.skuPurchaseCoverage/);
+ assert.match(readFileSync(new URL('../src/session-state.js',import.meta.url),'utf8'),/const COVERAGES=Object\.freeze\(\[0,25,50,75,100\]\)/);
  assert.match(app,/purchaseCoveragePercent:skuPurchaseCoverage/);
  assert.match(app,/coverInput\.onchange=\(\)=>\{skuPurchaseCoverage=Number\(coverInput\.value\);save\(\);renderSkuLab\(\)\}/);
  assert.ok(app.includes("skuPurchaseCoverage=100;skuReservePercent=0;skuDecisions=[];save();showSection('operations')"));
@@ -114,9 +118,12 @@ test('commercial and planning decisions feed frozen SKU purchases through adapte
 });
 
 test('campaign ID persists and restarting creates a new campaign',()=>{
- assert.ok(app.includes('schemaVersion:2,campaignId,currentSection,decisions'));
+ const storage=readFileSync(new URL('../src/session-state.js',import.meta.url),'utf8');
+ assert.ok(storage.includes('SESSION_SCHEMA_VERSION=3'));
+ assert.ok(app.includes('serializeSession(data)'));
+ assert.ok(app.includes('deserializeSession(localStorage.getItem(KEY)'));
  assert.ok(app.includes('campaignId=createCampaignId();decisions='));
- assert.ok(app.includes('campaignId=typeof s.campaignId'));
+ assert.ok(app.includes('campaignId=s.campaignId'));
 });
 
 test('restart and operation review are available from every stage, including revealed sessions',()=>{
