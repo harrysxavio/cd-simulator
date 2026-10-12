@@ -1,6 +1,7 @@
 import {campaignSnapshot} from './campaign.js';
 import {SKU_CATALOG} from './sku.js';
 import {SKU_UNIT_CONVENTIONS,skuServiceMeasurements} from './measurements.js';
+import {operationalChainAudit} from './operational-chain-audit.js';
 
 const sum=(items,fn)=>items.reduce((total,x)=>total+fn(x),0);
 const units=n=>Math.round(n).toLocaleString('es-CL');
@@ -123,7 +124,17 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
    closingPickFaceSkuUnits:sum(Object.values(day.physical),n=>n),
    closingReserveSkuUnits:sum(Object.values(day.reserved),n=>n)};
  });
+ const metrics={plannedOrders:source.plan.plannedOrders,forecastOrders:forecast,actualOrders:orderCount,
+  originalPurchaseSkuUnits:ordered,extraPurchaseSkuUnits:newOrdered,
+  receivedSkuUnits:received,releasedSkuUnits:released,transferSkuUnits:transferred,
+  openingSkuUnits:physicalOpening,closingPickFaceSkuUnits:available,
+  closingReserveSkuUnits:heldReserve,closingQualitySkuUnits:heldQuality,
+  closingStagingSkuUnits:stagedSkuUnits,shippedSkuUnits,shippedOrders,
+  pickedSkuUnits,pickedOrders,stagedOrders,unpickedOrders,pendingOrders:pending,
+  customerDeliveries:deliveredToCustomer};
+ const chainAudit=operationalChainAudit({comparison,campaign:source,stages:rows,days,metrics});
  const checks={
+  chainAudit:chainAudit.passed&&chainAudit.days.length===days.length,
   allOrders:orderCount===shippedOrders+pending,
   sumReceipts:received===sum(comparison.recovered.ledger,d=>sum(Object.values(d.received),n=>n)),
   sumQuality:released===sum(comparison.recovered.ledger,d=>sum(Object.values(d.released),n=>n)),
@@ -174,7 +185,7 @@ export function campaignAreaReadModel({comparison,campaign=null,campaignId='SKU-
  };
  if(!Object.values(checks).every(Boolean))throw new Error('Lectura de las ocho áreas no reconcilia con la campaña SKU: '+Object.entries(checks).filter(([,ok])=>!ok).map(([k])=>k).join(', '));
  return frozen({campaignId,scope:'sku-cohort',horizonDays:source.horizonDays,unitConventions:SKU_UNIT_CONVENTIONS,measurements,
-  metrics:{plannedOrders:source.plan.plannedOrders,forecastOrders:forecast,actualOrders:orderCount,originalPurchaseSkuUnits:ordered,extraPurchaseSkuUnits:newOrdered,receivedSkuUnits:received,releasedSkuUnits:released,transferSkuUnits:transferred,openingSkuUnits:physicalOpening,closingPickFaceSkuUnits:available,closingReserveSkuUnits:heldReserve,closingQualitySkuUnits:heldQuality,closingStagingSkuUnits:stagedSkuUnits,shippedSkuUnits,shippedOrders,pickedSkuUnits,pickedOrders,stagedOrders,unpickedOrders,pendingOrders:pending,customerDeliveries:deliveredToCustomer},
+  metrics,chainAudit,
   openingState,commercialPlanning:planning,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,pickingLedger,stagingAudit:source.stagingAudit,stages:rows,days,checks,passed:true,
-  assumptions:'Lectura compartida de UN mismo registro SKU de doce días. Comercial/Planning son decisiones iniciales, no movimientos físicos; Picking y Transporte tienen eventos enlazados separados; en el modo experimental se registra staging físico y salida posterior, pero la interfaz visible aún no lo activa (M3-12c). '+(stagedMode?'':'En el modo normal, el staging físico quedará para M3-12 al habilitarse. ')+'No representa ni se suma a las unidades económicas del motor agregado de una jornada ni implica entrega al cliente.'});
+  assumptions:'Lectura compartida de UN mismo registro SKU de doce días. Comercial/Planning son decisiones iniciales, no movimientos físicos; Picking y Transporte tienen eventos enlazados separados; con staging activado se registra la espera de pedidos preparados y salida posterior, sin contar dos veces stock. '+(stagedMode?'':'En el modo normal, el staging físico quedará para M3-12 al habilitarse. ')+'No representa ni se suma a las unidades económicas del motor agregado de una jornada ni implica entrega al cliente.'});
 }
