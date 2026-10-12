@@ -75,4 +75,4 @@ SKU ni facturas por el mero hecho de tener un precio.
    v11.43 / revisión 152.
 4. Android físico/TalkBack no suplido por emulación Chromium; sigue M7.
 
-**Estado a la creación:** código en rama; CI/PR/Pages aún por verificar.
+**Cierre verificado (2026-10-12):** PR [#41](https://github.com/harrysxavio/cd-simulator/pull/41) fusionada a `main` como `ca92d70`. Regresión de rama [38303361061](https://github.com/harrysxavio/cd-simulator/actions/runs/38303361061), Chromium de rama [38303361004](https://github.com/harrysxavio/cd-simulator/actions/runs/38303361004), regresión de `main` [38303809990](https://github.com/harrysxavio/cd-simulator/actions/runs/38303809990), Chromium de `main` [38303810043](https://github.com/harrysxavio/cd-simulator/actions/runs/38303810043), despliegue Pages [38303808959](https://github.com/harrysxavio/cd-simulator/actions/runs/38303808959) y verificación HTTP pública [38303810006](https://github.com/harrysxavio/cd-simulator/actions/runs/38303810006): **aprobados**. Android físico/TalkBack pendiente en M7.
