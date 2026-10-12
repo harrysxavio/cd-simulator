@@ -66,5 +66,4 @@ La tarjeta técnica duplicada desaparece; el detalle permanece plegado.
 - Despliegue Pages HTTP verifica v11.42 y revision 151.
 - Prueba Android física/TalkBack queda pendiente de M7.
 
-**Estado a la creación del documento:** implementado en rama; falta
-PR, CI, integración y comprobación HTTP.
+**Cierre verificado (2026-10-12):** PR [#40](https://github.com/harrysxavio/cd-simulator/pull/40) fusionada en `main` (merge `72fffc2`). Modelo de rama [38293955615](https://github.com/harrysxavio/cd-simulator/actions/runs/38293955615), Chromium de rama [38293955796](https://github.com/harrysxavio/cd-simulator/actions/runs/38293955796), modelo de `main` [38294405709](https://github.com/harrysxavio/cd-simulator/actions/runs/38294405709), Chromium de `main` [38294405777](https://github.com/harrysxavio/cd-simulator/actions/runs/38294405777), despliegue Pages [38294405618](https://github.com/harrysxavio/cd-simulator/actions/runs/38294405618), HTTP público [38294405842](https://github.com/harrysxavio/cd-simulator/actions/runs/38294405842): **todos aprobados**. Android físico/TalkBack pendiente de M7.
