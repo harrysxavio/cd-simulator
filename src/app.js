@@ -3,6 +3,7 @@ import {createSkuSessionCache} from './sku-session.js?v=149';
 import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=149';
 import {aggregateFlowCsv} from './aggregate-export.js?v=149';
 import {campaignSkuContract} from './campaign-contract.js?v=149';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=149';
 import {campaignAreaReadModel} from './area-ledger.js?v=149';
 import {laborAudit} from './labor.js?v=149';
 import {skuAudit} from './audit.js?v=149';
@@ -240,7 +241,7 @@ function renderDiagnosis(current){
  for(const item of items){const c=add(pre,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1])}
  const comparison=$('demandComparison');comparison.replaceChildren();
  add(comparison,'strong','',revealed?'Sorpresa revelada: nueva demanda real':'Diagnóstico del plan antes de conocer la demanda real');
- add(comparison,'p','','Plan base: '+fmt(initial.plannedDemand)+' unidades · Pronóstico ajustado: '+fmt(initial.estimated)+(revealed?' · Pedidos reales: '+fmt(initial.demand):' · Pedidos reales: todavía desconocidos')+'.');
+ add(comparison,'p','','Plan base: '+fmt(initial.plannedDemand)+' unidades · Pronóstico ajustado: '+fmt(initial.estimated)+(revealed?' · Demanda observada (unidades equivalentes): '+fmt(initial.demand):' · Demanda real: todavía desconocida')+'.');
  if(revealed)add(comparison,'p','','Antes de la sorpresa: '+fmt(initialPlan.dispatched)+' / '+fmt(initialPlan.demand)+' unidades ('+percent(initialPlan.dispatched,initialPlan.demand)+'). Tras la sorpresa y antes de recuperar: '+fmt(initial.dispatched)+' / '+fmt(initial.demand)+' unidades ('+percent(initial.dispatched,initial.demand)+'). La capacidad, el abastecimiento y el costo inicial se mantienen; cambia el volumen de pedidos.');
  if(revealed){
   const journey=demandJourney(decisions,actions,effectiveScenario());
@@ -440,8 +441,8 @@ function renderPrimarySkuSummary(model){
   : 'Los pedidos de esta cohorte salieron del CD dentro del horizonte simulado. El costo de la campaña y la recepción por parte del cliente todavía requieren datos adicionales.');
 }
 function renderSkuLab(){
- // The SKU order ledger now respects the operational capacities chosen in the
- // eight-area campaign. These capacities are SKU units per day, not order counts.
+ // The SKU/day limits inherited from the aggregate shift are DIDACTIC
+ // hypotheses rather than physically calibrated productivity rates.
  // Central interpretation of the eight-area decisions. The SKU cohort is a sample.
  const contract=campaignSkuContract({decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,supplierDelay:skuSupplierDelay,campaignId});
  const {area,commercialForecast,planningCoverage,supplierRate,skuAreaCapacity}=contract;
@@ -487,10 +488,24 @@ function renderSkuLab(){
   add(trace,'strong','','🔗 Cómo se conectan las áreas');
   add(trace,'small','','Comercial → Planeación: pronóstico '+commercialForecast.toFixed(1)+' % de 200 pedidos · cobertura planificada '+planningCoverage.toFixed(1)+' %. La orden de compra SKU original queda congelada y la demanda sorpresa no la recalcula.');
   add(trace,'small','','La cohorte de '+fmt(contract.plannedSampleOrders)+' pedidos SKU representa solo una muestra; la campaña principal trabaja con '+fmt(contract.trace.plannedCampaignUnits)+' unidades agregadas. Stock y costos todavía no son intercambiables entre motores.');
+  // Trace only existing ledger outcomes; never recompute their physical events.
+  const coverage=decisionPhysicalCoverage({boundaryAudit:contract.boundaryAudit,areaModel:physicalAreas});
+  add(trace,'small','','Decisiones: supuestos didácticos. Movimientos: registro físico SKU simulado; capacidad SKU/día todavía sin calibración independiente.');
+  const evidencePanel=add(trace,'details','manager-po-detail');
+  evidencePanel.dataset.decisionCoverage='sku-events';
+  add(evidencePanel,'summary','','Ver origen de decisiones y evidencia de las ocho áreas');
+  for(const item of coverage.areas){
+   const line=add(evidencePanel,'p','manager-fineprint');
+   line.dataset.areaId=item.area;
+   line.dataset.evidenceClass=item.evidenceClass;
+   const title={commercial:'Comercial',planning:'Planificación',purchasing:'Compras',receiving:'Recepción',quality:'Calidad',inventory:'Inventario',picking:'Picking',transport:'Transporte'}[item.area];
+   add(line,'strong','',title);
+   add(line,'span','',': '+item.explanation+'. '+(item.evidenceClass==='managerial-plan'?'Compromiso de planificación.':'Evento simulado por SKU/día.'));
+  }
   add(trace,'small','','Manifiesto SKU comprometido: '+Object.entries(chain.purchasing.originalPurchase).map(([id,qty])=>'SKU '+id+' '+fmt(qty)).join(' · ')+'.');
   add(trace,'small','','Compras: proveedor cumple '+supplierRate.toFixed(1)+' % de las unidades de compra ordinaria. Solicitadas SKU '+fmt(chain.purchasing.originalOrdered)+' · entregadas '+fmt(chain.purchasing.originalDelivered)+' · faltantes definitivos '+fmt(chain.purchasing.originalUnfilled)+'.');
   add(trace,'small','','Calidad: libera '+fmt(chain.quality.releasePercent)+' % diario del stock retenido · quedan '+fmt(chain.quality.waiting)+' unidades pendientes de liberar.');
-  add(trace,'small','','Capacidad diaria '+(skuSeparateTransport?'independiente':'compartida')+' desde la campaña: Recepción '+fmt(area.receivingCapacity)+' unidades SKU · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'.');
+  add(trace,'small','','Límites SKU/día asumidos desde la jornada agregada (sin calibrar): Recepción '+fmt(area.receivingCapacity)+' · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'. '+(skuSeparateTransport?'Staging independiente habilitado.':'Picking y Transporte despachan el mismo día.'));
   if(chain.receiving.waitingReceiving)add(trace,'small','','⚠ Quedan '+fmt(chain.receiving.waitingReceiving)+' unidades por ingresar al término del horizonte por restricciones de recepción.');
   add(trace,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
   add(trace,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' no ingresadas al corte');
