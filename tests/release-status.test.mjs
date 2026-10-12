@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {compareRelease,checkPublishedRelease,RELEASE} from '../src/release-status.js';
+// Derive the next advertised version so each release doesn't require a fixture edit.
+const NEXT_RELEASE=RELEASE.version.replace(/\.(\d+)$/,(_,n)=>'.'+(Number(n)+1));
 const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const app=readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 const manifest=JSON.parse(readFileSync(new URL('../release.json',import.meta.url),'utf8'));
@@ -22,7 +24,7 @@ test('release protocol: HTML, manifest, JS module and styling all advertise same
 });
 test('release check recognizes newer, older and invalid manifests rather than assuming deployment success',()=>{
  assert.equal(compareRelease(manifest),'current');
- assert.equal(compareRelease({version:'11.41',assetRevision:RELEASE.assetRevision+1}),'newer');
+ assert.equal(compareRelease({version:NEXT_RELEASE,assetRevision:RELEASE.assetRevision+1}),'newer');
  assert.equal(compareRelease({version:'11.20',assetRevision:129}),'older-server');
  for(const v of [{},{version:'x.y',assetRevision:2},{version:'11.39',assetRevision:'148'},null])
   assert.equal(compareRelease(v),'invalid');
