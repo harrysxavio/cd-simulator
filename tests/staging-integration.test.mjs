@@ -41,7 +41,7 @@ test('M3-12b: canonical campaign preserves picked / staged / shipped as distinct
  assert.match(area.stages[5].detail,/STAGING-CD/);
  assert.match(area.stages[6].detail,/esperan Transporte/);
  assert.match(area.stages[7].detail,/preparados esperando camión/);
- assert.match(area.assumptions,/interfaz visible aún no lo activa/);
+ assert.match(area.assumptions,/con staging activado se registra la espera de pedidos preparados/);
 });
 
 test('M3-12b: per-day SKU balance has physically staged units, no duplicate stock',()=>{
