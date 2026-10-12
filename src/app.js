@@ -4,6 +4,7 @@ import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session
 import {aggregateFlowCsv} from './aggregate-export.js?v=151';
 import {campaignSkuContract} from './campaign-contract.js?v=151';
 import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=151';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=151';
 import {campaignAreaReadModel} from './area-ledger.js?v=151';
 import {laborAudit} from './labor.js?v=151';
 import {skuAudit} from './audit.js?v=151';
@@ -522,6 +523,28 @@ function renderSkuLab(contract=currentCampaignContract()){
   add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
   add(trace,'small','',skuSeparateTransport?'Picking: '+fmt(physicalAreas.metrics.pickedOrders)+' preparados · '+fmt(physicalAreas.metrics.stagedOrders)+' en staging esperando Transporte · '+fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar.':'Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
+  // M4-14: explain rates only on demand; never add them to the aggregate P&L.
+  const costRates=skuCostCatalogReadModel({catalog:SKU_CATALOG});
+  const costsPanel=add(trace,'details','supply-trace-detail sku-cost-catalog');
+  costsPanel.dataset.costScope='sku-cohort';
+  add(costsPanel,'summary','','💰 Ver tarifas y supuestos SKU (CLP)');
+  add(costsPanel,'p','manager-fineprint','Estos valores son ejemplos para la cohorte SKU de 12 días, no pagos ni utilidad. Solo se valorizan movimientos registrados. No sumarlos al resultado de una jornada.');
+  for(const sku of costRates.productCosts){
+   const line=add(costsPanel,'p','manager-fineprint');
+   line.dataset.skuCostId=sku.id;
+   add(line,'strong','','SKU '+sku.id+': ');
+   add(line,'span','','CLP '+fmt(sku.rateCLPPerPhysicalUnit)+' por unidad física · costo estándar de inventario, no desembolso.');
+  }
+  for(const rule of costRates.activityRates){
+   const line=add(costsPanel,'p','manager-fineprint');
+   line.dataset.activityCostId=rule.id;
+   const displayed=rule.id==='urgent-surcharge'||rule.id==='inventory-holding'
+    ?(100*rule.rate).toLocaleString('es-CL')+' %'
+    :'CLP '+fmt(rule.rate);
+   add(line,'span','',rule.label+': '+displayed+' · '+rule.basis+'.');
+  }
+  add(costsPanel,'p','manager-fineprint','Aún sin tarifa física validada: '+costRates.unpricedOperations.map(x=>x.label).join(', ')+'. Las tasas por defecto son supuestos; faltan costos completos por actividad y pagos comprobados.');
+
   const canonical=chain.campaign;
   const campaignCard=add(trace,'details','supply-trace-detail');
   add(campaignCard,'summary','','🧾 Ver campaña única de pedidos y movimientos SKU');
