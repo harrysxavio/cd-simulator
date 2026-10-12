@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium,devices} from 'playwright';
 import {mkdir} from 'node:fs/promises';
+import {RELEASE} from '../src/release-status.js';
 
 const BASE=process.env.E2E_BASE_URL||'http://127.0.0.1:8000';
 async function verify(mode){
@@ -11,11 +12,11 @@ async function verify(mode){
  page.on('pageerror',e=>errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
  try{
-  await page.goto(BASE+'/?release=11.39-r148&test='+mode,{waitUntil:'networkidle'});
-  assert.equal(await page.locator('#releaseCurrentVersion').innerText(),'V11.39');
+  await page.goto(BASE+'/?release='+RELEASE.version+'-r'+RELEASE.assetRevision+'&test='+mode,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('#releaseCurrentVersion').innerText(),'V'+RELEASE.version);
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
-  assert.match(await page.locator('#releaseStatus').innerText(),/v11\.39 verificada en servidor/);
-  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/release=11\.39-r148/);
+  assert.ok((await page.locator('#releaseStatus').innerText()).includes('v'+RELEASE.version+' verificada en servidor'));
+  assert.ok((await page.locator('#forceCurrentRelease').getAttribute('href')).includes('release='+RELEASE.version+'-r'+RELEASE.assetRevision));
   await page.locator('#checkRelease').click();
   await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
   await page.evaluate(()=>{
@@ -69,9 +70,9 @@ test('browser warns when public manifest is newer than cached HTML', {timeout:90
  const page=await browser.newPage();
  try{
   await page.goto(BASE+'/?release-check=newer',{waitUntil:'networkidle'});
-  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:'11.40',assetRevision:149})}));
+  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:'11.41',assetRevision:RELEASE.assetRevision+1})}));
   await page.locator('#checkRelease').click();
   await page.waitForFunction(()=>document.getElementById('releaseStatus').textContent.includes('versión nueva'));
-  assert.match(await page.locator('#forceCurrentRelease').getAttribute('href'),/11\.40-r149/);
+  assert.ok((await page.locator('#forceCurrentRelease').getAttribute('href')).includes('11.41-r'+(RELEASE.assetRevision+1)));
  }finally{await browser.close()}
 });
