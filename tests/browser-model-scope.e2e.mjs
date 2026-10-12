@@ -34,6 +34,14 @@ async function verify(mode){
   await page.locator('#resultTabs [data-result-target="areas"]').click();
   assert.equal(await page.locator('#canonicalAreaView').isVisible(),true);
   assert.ok((await page.locator('#canonicalAreaView').innerText()).length>100);
+  // M2-04c: review decision provenance in the existing SKU inventory tab.
+  await page.locator('#resultTabs [data-result-target="inventory"]').click();
+  const coverage=page.locator('[data-decision-coverage="sku-events"]');
+  assert.equal(await coverage.count(),1);
+  assert.equal(await coverage.locator('[data-evidence-class="managerial-plan"]').count(),2);
+  assert.equal(await coverage.locator('[data-evidence-class="dated-simulation"]').count(),6);
+  await coverage.locator('summary').click();
+  assert.match(await coverage.innerText(),/capacidad|SKU|stock/i);
   await page.locator('#resultTabs [data-result-target="economics"]').click();
   assert.match(await page.locator('[data-result-page="economics"]').innerText(),/jornada agregada/);
   await page.locator('#resultTabs [data-result-target="improvement"]').click();
