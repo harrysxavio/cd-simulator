@@ -42,6 +42,25 @@ async function verify(mode){
   assert.equal(await coverage.locator('[data-evidence-class="dated-simulation"]').count(),6);
   await coverage.locator('summary').click();
   assert.match(await coverage.innerText(),/capacidad|SKU|stock/i);
+  // M4-14: SKU cost rates are visible on demand, never masquerade as P&L.
+  const costRates=page.locator('[data-cost-scope="sku-cohort"]');
+  assert.equal(await costRates.count(),1);
+  assert.equal(await costRates.getAttribute('open'),null);
+  await costRates.locator('summary').click();
+  assert.equal(await costRates.locator('[data-sku-cost-id]').count(),3);
+  assert.equal(await costRates.locator('[data-activity-cost-id]').count(),5);
+  assert.match(await costRates.innerText(),/SKU A: CLP 1\.800/);
+  assert.match(await costRates.innerText(),/SKU B: CLP 3\.200/);
+  assert.match(await costRates.innerText(),/SKU C: CLP 6\.500/);
+  assert.match(await costRates.innerText(),/no pagos ni utilidad/i);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:800});
+   const sizes=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(sizes.scroll<=sizes.width+2,'SKU cost disclosure overflow '+JSON.stringify(sizes));
+   const target=await costRates.locator('summary').boundingBox();
+   assert.ok(target?.height>=44,'Cost disclosure is not touch-friendly');
+  }
+
   await page.locator('#resultTabs [data-result-target="economics"]').click();
   assert.match(await page.locator('[data-result-page="economics"]').innerText(),/jornada agregada/);
   await page.locator('#resultTabs [data-result-target="improvement"]').click();
