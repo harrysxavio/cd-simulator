@@ -61,6 +61,33 @@ async function verify(mode){
    assert.ok(target?.height>=44,'Cost disclosure is not touch-friendly');
   }
 
+  // M4-15: one immutable daily valuation; drilldowns stay folded on phones.
+  const valuation=page.locator('[data-valuation-scope="sku-cohort"]');
+  assert.equal(await valuation.count(),1);
+  assert.equal(await valuation.getAttribute('open'),null);
+  await valuation.locator(':scope > summary').click();
+  assert.match(await valuation.innerText(),/Apertura CLP/);
+  assert.match(await valuation.innerText(),/stock físico CLP/);
+  assert.match(await valuation.innerText(),/no crean inventario, compras ni pagos/);
+  const skuDetail=valuation.locator('details').first();
+  const dailyDetail=valuation.locator('details').nth(1);
+  assert.equal(await skuDetail.getAttribute('open'),null);
+  assert.equal(await dailyDetail.getAttribute('open'),null);
+  await skuDetail.locator('summary').click();
+  assert.equal(await valuation.locator('[data-valuation-sku]').count(),3);
+  assert.match(await skuDetail.innerText(),/SKU A/);
+  await dailyDetail.locator('summary').click();
+  assert.equal(await valuation.locator('[data-valuation-day]').count(),13);
+  assert.match(await dailyDetail.innerText(),/Día 12/);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const dims=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(dims.scroll<=dims.width+2,'Valuation horizontal overflow '+JSON.stringify(dims));
+   for(const summary of [valuation.locator(':scope > summary'),skuDetail.locator('summary'),dailyDetail.locator('summary')]){
+    const touch=await summary.boundingBox();
+    assert.ok(touch?.height>=44,'Valuation touch target below 44px');
+   }
+  }
   await page.locator('#resultTabs [data-result-target="economics"]').click();
   assert.match(await page.locator('[data-result-page="economics"]').innerText(),/jornada agregada/);
   await page.locator('#resultTabs [data-result-target="improvement"]').click();
