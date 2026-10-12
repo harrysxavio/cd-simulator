@@ -38,6 +38,13 @@ const skuContractInputs=contract=>{
  return skuSeparateTransport?{...stock,separateTransport:true}:stock;
 };
 const activeSkuDecision=contract=>skuDecisions.findLast(d=>skuDecisionStatus({decision:d,contract:{...contract,skuInputs:skuContractInputs(contract)}})==='current')||null;
+// M2-04d: one input adapter for all screens; only SKU events are physical.
+// Individual SKU controls can request a fresh contract, while a full render
+// passes the identical frozen contract to Results and Recovery.
+const currentCampaignContract=()=>campaignSkuContract({
+ decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,
+ supplierDelay:skuSupplierDelay,campaignId
+});
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
 function save(){
  try{
@@ -440,11 +447,11 @@ function renderPrimarySkuSummary(model){
   ? 'Se pueden investigar compras, reserva física y capacidad por área. La vista de las ocho áreas permite ver qué ingresó, qué se liberó y qué salió realmente del CD. Ninguna expedición equivale a entrega confirmada.'
   : 'Los pedidos de esta cohorte salieron del CD dentro del horizonte simulado. El costo de la campaña y la recepción por parte del cliente todavía requieren datos adicionales.');
 }
-function renderSkuLab(){
+function renderSkuLab(contract=currentCampaignContract()){
  // The SKU/day limits inherited from the aggregate shift are DIDACTIC
  // hypotheses rather than physically calibrated productivity rates.
- // Central interpretation of the eight-area decisions. The SKU cohort is a sample.
- const contract=campaignSkuContract({decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,supplierDelay:skuSupplierDelay,campaignId});
+ // M2-04d: consume the same immutable contract as the main render.
+ // Standalone policy controls create a fresh contract after changing settings.
  const {area,commercialForecast,planningCoverage,supplierRate,skuAreaCapacity}=contract;
  const currentSkuDecision=activeSkuDecision(contract),skuLocked=!!currentSkuDecision;
  const input=skuContractInputs(contract);
@@ -666,9 +673,10 @@ function renderSkuLab(){
  }
  add(supplementary,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Estos ejercicios de referencia son hipótesis aisladas; no usan las capacidades compartidas ni forman parte de la conciliación principal de la campaña SKU.');
 }
-function renderSkuRecoveryMission(){
+function renderSkuRecoveryMission(contract=null){
  const root=$('skuRecoveryDecision');if(!revealed||currentSection!=='recovery'){root.replaceChildren();return}
- const contract=campaignSkuContract({decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,supplierDelay:skuSupplierDelay,campaignId});
+ // Reuse the currently rendered contract; only standalone calls rebuild it.
+ contract=contract??currentCampaignContract();
  const confirmed=activeSkuDecision(contract),input=skuContractInputs(contract);
  root.replaceChildren();
  if(confirmed){
@@ -835,7 +843,9 @@ function renderAttention(){
 function render(){
 $('sessionStatus').textContent='Campaña '+campaignId+' · '+({setup:'Configuración',operations:revealed?'Plan original':'Operación',preliminary:'Diagnóstico',recovery:'Recuperación',dashboard:'Resultados'}[currentSection]);
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
-const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab();renderSkuRecoveryMission();
+// One aggregate read (as decision input), one frozen SKU contract for this UI render.
+ // Economics and historical heuristics remain explicitly aggregate, not SKU facts.
+const contract=currentCampaignContract(),r=contract.area,diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab(contract);renderSkuRecoveryMission(contract);
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?(revealed?'Plan cerrado · consulta':'Planificación'):'Recuperación');
