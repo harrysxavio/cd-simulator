@@ -1,4 +1,4 @@
-export const RELEASE=Object.freeze({version:'11.39',assetRevision:148});
+export const RELEASE=Object.freeze({version:'11.40',assetRevision:149});
 export function compareRelease(manifest,expected=RELEASE){
  if(!manifest||typeof manifest!=='object'||!/^[0-9]+\.[0-9]+$/.test(manifest.version)||!Number.isInteger(manifest.assetRevision))return 'invalid';
  if(manifest.version===expected.version&&manifest.assetRevision===expected.assetRevision)return 'current';
