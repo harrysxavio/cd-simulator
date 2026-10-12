@@ -164,7 +164,7 @@ test('returning to operation after revealing surprise is read-only and cannot re
 test('U2 recovery mission has distinct preview and confirmation with auditable SKU decision persistence',()=>{
  const source=readFileSync(new URL('../src/sku-decision.js',import.meta.url),'utf8');
  for(const id of ['skuRecoveryMission','skuRecoveryDecision','skuRecoveryHeading'])assert.ok(html.includes('id="'+id+'"'));
- assert.ok(app.includes('renderSkuRecoveryMission();'));
+ assert.ok(app.includes('renderSkuRecoveryMission(contract);'));
  assert.ok(app.includes("skuDecisions=[...skuDecisions,record].slice(-25)"));
  assert.ok(app.includes('const record=createSkuRecoveryDecision('));
  assert.ok(app.includes("confirm('¿Registrar esta decisión en la campaña SKU?"));
