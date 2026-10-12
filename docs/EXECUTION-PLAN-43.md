@@ -94,7 +94,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 12c | **Código/CI/merge aprobados** | PR #36 v11.38, activación staging con 3 KPI, persistencia y sesiones migradas; Node+Chromium verdes. |
 | 13a | **Completada** | PR #37 fusionado como v11.39 (SHA ce52b36); Model regression #38280303705 y Browser smoke #38280302776 verdes; Pages #38280302926 verificado. |
 | 13b | **Completada** | PR #38 v11.40 fusionada en `main` (549c5e2); modelo y Chromium de rama/main verdes; Pages deploy #38282619824 y HTTP #38282620106 aprobados. Contrato auditable de supuestos agregado→SKU, sin mezclar existencias ni economía. Ver STATUS-V11.40.md. |
-| 04c | **En curso** | v11.41: distinguir hipótesis de jornada de evidencias de compromisos/eventos SKU en las ocho áreas, mostrar procedencia y rechazar fuentes incompatibles. Pruebas, PR y Pages pendientes. Ver STATUS-V11.41.md. |
+| 04c | **Completada** | PR #39 v11.41 integrada en `main` (merge e8d94a47). Modelo #38284569085, Chromium #38284569172, despliegue #38284568413 y Pages HTTP #38284569139 aprobados. Ocho hipótesis mapeadas a compromisos/eventos SKU con evidencia. Ver STATUS-V11.41.md. |
 | 04d | **Pendiente** | Revisar retiro progresivo de las vistas y cálculos agregados duplicados, sujeto a paridad demostrable y economía SKU M4; no eliminar diagnóstico ni costos útiles prematuramente. |
 | 14–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
 
