@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.43.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.44.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -97,6 +97,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 04c | **Completada** | PR #39 v11.41 integrada en `main` (merge e8d94a47). Modelo #38284569085, Chromium #38284569172, despliegue #38284568413 y Pages HTTP #38284569139 aprobados. Ocho hipótesis mapeadas a compromisos/eventos SKU con evidencia. Ver STATUS-V11.41.md. |
 | 04d | **Completada (alcance seguro)** | PR #40 v11.42 fusionada en `main` (merge 72fffc2); modelo #38294405709, Chromium #38294405777, Pages deploy #38294405618 y HTTP #38294405842 aprobados. Un contrato compartido entre Resultados/Recuperación y KPI técnico duplicado retirado. Economía y heurística agregadas quedan identificadas hasta M4/M6. Ver STATUS-V11.42.md. |
 | 14 | **Completada** | PR #41 v11.43 fusionada a `main` (`ca92d70`), modelo #38303809990, Chromium #38303810043, Pages #38303808959 y HTTP #38303810006 aprobados. Tarifa CLP única por SKU/recurso/proxy con fuentes auditables y actividades sin costo conocido. Ver STATUS-V11.43.md. |
-| 15–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. Siguiente M4-15: valor de inventario SKU por zona y día, con fuentes del catálogo. |
+| 15 | **En curso** | v11.44: valor CLP por SKU/día/ubicación desde un único libro de inventario, conciliación física y económica, panel móvil plegado. Node/Chromium/PR/Pages pendientes. Ver STATUS-V11.44.md. |
+| 16–42 | **Pendientes de cierre** | Funciones parciales existentes; próximas M4-16 compra comprometida vs recepción y caja, M4-17–19 operación/resultados/auditoría, sin duplicar economía agregada. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
