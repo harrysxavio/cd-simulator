@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=152';
-import {createSkuSessionCache} from './sku-session.js?v=152';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=152';
-import {aggregateFlowCsv} from './aggregate-export.js?v=152';
-import {campaignSkuContract} from './campaign-contract.js?v=152';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=152';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=152';
-import {campaignAreaReadModel} from './area-ledger.js?v=152';
-import {laborAudit} from './labor.js?v=152';
-import {skuAudit} from './audit.js?v=152';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=152';
-import {integratedDemand} from './integrated.js?v=152';
-import {eventSimulation} from './events.js?v=152';
-import {deliveryTimeline} from './timeline.js?v=152';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=152';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=152';
-import {demandJourney} from './journey.js?v=152';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=152';
-import {flow,diagnose,ACTIONS} from './flow.js?v=152';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=152';
-import {areaKpis} from './kpis.js?v=152';
-import {causalAudit} from './causal.js?v=152';
-import {managerDiagnosis} from './diagnosis-guide.js?v=152';
-import {skuServiceBrief} from './sku-service.js?v=152';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=152';
-import {attentionSignals} from './attention.js?v=152';
+import {supplyBridge} from './supply-bridge.js?v=153';
+import {createSkuSessionCache} from './sku-session.js?v=153';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=153';
+import {aggregateFlowCsv} from './aggregate-export.js?v=153';
+import {campaignSkuContract} from './campaign-contract.js?v=153';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=153';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=153';
+import {campaignAreaReadModel} from './area-ledger.js?v=153';
+import {laborAudit} from './labor.js?v=153';
+import {skuAudit} from './audit.js?v=153';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=153';
+import {integratedDemand} from './integrated.js?v=153';
+import {eventSimulation} from './events.js?v=153';
+import {deliveryTimeline} from './timeline.js?v=153';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=153';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=153';
+import {demandJourney} from './journey.js?v=153';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=153';
+import {flow,diagnose,ACTIONS} from './flow.js?v=153';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=153';
+import {areaKpis} from './kpis.js?v=153';
+import {causalAudit} from './causal.js?v=153';
+import {managerDiagnosis} from './diagnosis-guide.js?v=153';
+import {skuServiceBrief} from './sku-service.js?v=153';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=153';
+import {attentionSignals} from './attention.js?v=153';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -545,6 +545,42 @@ function renderSkuLab(contract=currentCampaignContract()){
   }
   add(costsPanel,'p','manager-fineprint','Aún sin tarifa física validada: '+costRates.unpricedOperations.map(x=>x.label).join(', ')+'. Las tasas por defecto son supuestos; faltan costos completos por actividad y pagos comprobados.');
 
+  // M4-15: identical physical SKU ledger already rendered in this campaign.
+  // The valuation is read-only and cannot introduce stock or customer payments.
+  const valuation=chain.campaign.inventoryValuation;
+  const valuePanel=add(trace,'details','supply-trace-detail sku-inventory-valuation');
+  valuePanel.dataset.valuationScope='sku-cohort';
+  const valueSummary=add(valuePanel,'summary','','📦 Ver valor del inventario por SKU y día (CLP)');
+  add(valuePanel,'p','manager-fineprint',
+   'Apertura CLP '+fmt(valuation.totals.openingCLP)+' + recibido CLP '+fmt(valuation.totals.receivedToDateCLP)+
+   ' − expedido CLP '+fmt(valuation.totals.shippedToDateCLP)+' = stock físico CLP '+fmt(valuation.totals.closingPhysicalCLP)+'.');
+  add(valuePanel,'p','manager-fineprint',
+   'Al cierre: disponible CLP '+fmt(valuation.totals.pickFaceCLP)+' · Calidad CLP '+fmt(valuation.totals.qualityHeldCLP)+
+   ' · reserva CLP '+fmt(valuation.totals.reserveCLP)+' · staging CLP '+fmt(valuation.totals.stagingCLP)+'.');
+  add(valuePanel,'p','manager-fineprint',
+   'Stock verificable y no verificable ya están incluidos en disponible. Traslados y liberaciones no crean inventario, compras ni pagos.');
+  const skuBreakdown=add(valuePanel,'details','supply-trace-detail');
+  add(skuBreakdown,'summary','','Ver valor final de los tres SKU');
+  for(const line of valuation.daily.at(-1).bySku){
+   const item=add(skuBreakdown,'p','manager-fineprint');
+   item.dataset.valuationSku=line.skuId;
+   add(item,'strong','','SKU '+line.skuId+' · ');
+   add(item,'span','','CLP '+fmt(line.closingPhysicalCLP)+' en stock físico = disponible '+fmt(line.pickFaceCLP)+
+    ' + Calidad '+fmt(line.qualityHeldCLP)+' + reserva '+fmt(line.reserveCLP)+' + staging '+fmt(line.stagingCLP)+'.');
+  }
+  const dailyValues=add(valuePanel,'details','supply-trace-detail');
+  add(dailyValues,'summary','','Ver saldos y entradas por día');
+  for(const day of valuation.daily){
+   const line=add(dailyValues,'p','manager-fineprint');
+   line.dataset.valuationDay=String(day.day);
+   add(line,'strong','','Día '+day.day+' · ');
+   add(line,'span','','recibido '+fmt(day.totals.receivedTodayCLP)+
+    ' · expedido '+fmt(day.totals.shippedTodayCLP)+' · stock final CLP '+fmt(day.totals.closingPhysicalCLP));
+  }
+  add(valuePanel,'p','manager-fineprint',
+   'Importes a costo estándar ilustrativo, no ingresos, gastos operacionales, flujo de caja ni entrega confirmada al cliente. No sumar al motor de jornada agregada.');
+
+
   const canonical=chain.campaign;
   const campaignCard=add(trace,'details','supply-trace-detail');
   add(campaignCard,'summary','','🧾 Ver campaña única de pedidos y movimientos SKU');
@@ -648,7 +684,7 @@ function renderSkuLab(contract=currentCampaignContract()){
   add(auditCard,'small','','Auditoría de productos disponibles y pendientes en Calidad, por SKU.');
   if(audit.orders.completed!==chain.picking.completed)add(auditCard,'small','','⚠ Auditoría y traza operativa no coinciden.');
   for(const p of audit.bySku)add(auditCard,'small','','SKU '+p.id+' · inicial '+fmt(p.opening)+' + recibido '+fmt(p.received)+' − despachado '+fmt(p.shipped)+' − retenido Calidad '+fmt(p.held)+' − reserva '+fmt(p.reserved)+(skuSeparateTransport?' − staging '+fmt(p.staged):'')+' = disponible '+fmt(p.closing)+(p.balanced?' ✓':' ⚠'));
-  add(auditCard,'small','','Valor stock inicial CLP '+fmt(audit.stockValue.opening)+' + entradas CLP '+fmt(audit.stockValue.received)+' − costo despachado CLP '+fmt(audit.stockValue.shipped)+' − stock retenido CLP '+fmt(audit.stockValue.held)+' − reserva CLP '+fmt(audit.stockValue.reserved)+(skuSeparateTransport?' − staging CLP '+fmt(audit.stockValue.staged):'')+' = disponible final CLP '+fmt(audit.stockValue.closing));
+  add(auditCard,'small','','El valor CLP por SKU, día y ubicación está conciliado en el apartado desplegable de Inventario. Su cálculo proviene de los mismos movimientos físicos.');
   add(auditCard,'small','',skuSeparateTransport?'Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar + '+fmt(physicalAreas.metrics.stagedOrders)+' en staging + '+fmt(audit.orders.completed)+' expedidos':'Pedidos: '+fmt(audit.orders.requested)+' solicitados = '+fmt(audit.orders.completed)+' completos + '+fmt(audit.orders.pending)+' pendientes');
   add(auditCard,'small','',audit.procurement.passed?'✓ Compras, proveedor, tránsito, recepción y stock reconciliados':'⚠ Descuadre entre compromisos y movimientos de inventario');
   add(auditCard,'small','',audit.assumptions);
