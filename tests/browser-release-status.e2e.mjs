@@ -5,6 +5,8 @@ import {mkdir} from 'node:fs/promises';
 import {RELEASE} from '../src/release-status.js';
 
 const BASE=process.env.E2E_BASE_URL||'http://127.0.0.1:8000';
+// Simulate a newer manifest without hardcoding the release under test.
+const NEXT_RELEASE=RELEASE.version.replace(/\.(\d+)$/,(_,n)=>'.'+(Number(n)+1));
 async function verify(mode){
  const browser=await chromium.launch({headless:true,executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
  const context=await browser.newContext(mode==='mobile'?{...devices['Pixel 7']}:{viewport:{width:1250,height:900}});
@@ -70,9 +72,9 @@ test('browser warns when public manifest is newer than cached HTML', {timeout:90
  const page=await browser.newPage();
  try{
   await page.goto(BASE+'/?release-check=newer',{waitUntil:'networkidle'});
-  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:'11.41',assetRevision:RELEASE.assetRevision+1})}));
+  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:NEXT_RELEASE,assetRevision:RELEASE.assetRevision+1})}));
   await page.locator('#checkRelease').click();
   await page.waitForFunction(()=>document.getElementById('releaseStatus').textContent.includes('versión nueva'));
-  assert.ok((await page.locator('#forceCurrentRelease').getAttribute('href')).includes('11.41-r'+(RELEASE.assetRevision+1)));
+  assert.ok((await page.locator('#forceCurrentRelease').getAttribute('href')).includes(NEXT_RELEASE+'-r'+(RELEASE.assetRevision+1)));
  }finally{await browser.close()}
 });
