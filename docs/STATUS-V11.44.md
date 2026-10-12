@@ -79,4 +79,4 @@ las existencias ni registrar un pago ficticio.
   del manifest, HTML y JavaScript.
 - Android físico/TalkBack todavía pendiente de M7.
 
-**Registro de cierre:** pendiente al crear este informe.
+**Cierre verificado (2026-10-12):** PR [#42](https://github.com/harrysxavio/cd-simulator/pull/42) fusionada a `main` (commit `d132809`). Modelo de rama [38308098722](https://github.com/harrysxavio/cd-simulator/actions/runs/38308098722), Chromium de rama [38308098638](https://github.com/harrysxavio/cd-simulator/actions/runs/38308098638), modelo de `main` [38308500673](https://github.com/harrysxavio/cd-simulator/actions/runs/38308500673), Chromium de `main` [38308500757](https://github.com/harrysxavio/cd-simulator/actions/runs/38308500757), despliegue Pages [38308500685](https://github.com/harrysxavio/cd-simulator/actions/runs/38308500685) y comprobación HTTP [38308500774](https://github.com/harrysxavio/cd-simulator/actions/runs/38308500774): **seis controles aprobados**. Android físico/TalkBack pendiente para M7.
