@@ -47,6 +47,8 @@ async function run(name,mobile,scenarioChanges,choiceChanges,expect){
   }else assert.equal(await page.locator('#directorPilot').isVisible(),false,'Irrelevant emergency PO suggestion was displayed');
   await page.locator('#diagnosisTechnical summary').click();
   assert.equal(await page.locator('#demandComparison').isVisible(),true);
+  // M2-04d: six unique technical cards; no duplicated fulfilment KPI.
+  assert.equal(await page.locator('#preliminaryMetrics .metric').count(),6);
   assert.equal(await page.locator('#preliminaryFindings .diagnosis-card').count(),8,'Eight original technical area KPI must remain accessible');
   const badButtons=page.locator('#preliminaryFindings .diagnosis-card').filter({hasText:'Comercial'}).locator('button');
   assert.equal(await badButtons.count(),0,'Historical Commercial choices must not offer a fake post-shock recovery action');

@@ -1,8 +1,8 @@
 {
-  "version": "11.41",
-  "assetRevision": 150,
-  "release": "v11.41 · M2-04c procedencia de decisiones y evidencia SKU",
+  "version": "11.42",
+  "assetRevision": 151,
+  "release": "v11.42 · M2-04d contrato único de render y eliminación de duplicidades",
   "date": "2026-10-12",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M2-04c: auditoría inmutable clasifica ocho decisiones como hipótesis de jornada y sus resultados como compromisos o eventos SKU simulados, sin calibración ficticia ni duplicar inventario. Nueva explicación desplegable en Compras/Inventario y corrección de etiqueta de demanda agregada. No modifica los movimientos físicos, el motor económico o la compra original."
+  "notes": "M2-04d: una actualización de la UI comparte el mismo contrato inmutable agregado/SKU entre Resultados y Recuperación, sin recalcular el adaptador ni crear otro flujo físico; un KPI repetido del diagnóstico técnico se retira. Economía, heurísticas y CSV agregados siguen separados y explícitamente didácticos; su sustitución por contabilidad SKU queda para M4."
 }

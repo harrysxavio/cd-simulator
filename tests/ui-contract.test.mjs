@@ -25,9 +25,22 @@ test('UI entrypoint cache version matches imported module versions',()=>{
  assert.equal(css,version,'stylesheet and app entrypoint must share release version');
 });
 test('render invokes all critical sections',()=>{
- for(const call of ['setup();','dashboard(r);','renderKpiLesson(r);','renderAttention();','renderLabor();','renderSkuLab();','renderDiagnosis(r);']){
+ for(const call of ['setup();','dashboard(r);','renderKpiLesson(r);','renderAttention();','renderLabor();','renderSkuLab(contract);','renderSkuRecoveryMission(contract);','renderDiagnosis(r);']){
   assert.ok(app.includes(call),'Missing render path: '+call);
  }
+});
+
+test('M2-04d: the renderer reuses one frozen campaign contract and removes redundant technical KPI',()=>{
+ // Prevent independently generated shift values from being displayed as
+ // if they were a second physical campaign within the same render.
+ const calls=[...app.matchAll(/campaignSkuContract\(/g)];
+ assert.equal(calls.length,1,'One adapter constructor must serve the full render');
+ assert.ok(app.includes('function renderSkuLab(contract=currentCampaignContract())'));
+ assert.ok(app.includes('function renderSkuRecoveryMission(contract=null)'));
+ assert.ok(app.includes('contract=contract??currentCampaignContract()'));
+ assert.ok(app.includes('renderSkuLab(contract);renderSkuRecoveryMission(contract);'));
+ assert.ok(!app.includes("['Cumplimiento',percent(initial.dispatched,initial.demand)]"),
+  'Duplicated aggregate fulfillment card was reintroduced');
 });
 
 test('preliminary diagnosis reveals surprise before recovery',()=>{
@@ -81,7 +94,8 @@ test('the percentage of urgent SKU purchases persists, drives the comparison and
 test('single campaign contract supplies physical SKU capacities and limits',()=>{
  const adapter=readFileSync(new URL('../src/campaign-contract.js',import.meta.url),'utf8');
  assert.ok(app.includes("import {campaignSkuContract} from './campaign-contract.js?v="));
- assert.ok(app.includes('const contract=campaignSkuContract('));
+ assert.ok(app.includes('const currentCampaignContract=()=>campaignSkuContract({'));
+ assert.ok(app.includes('const contract=currentCampaignContract(),r=contract.area'));
  for(const key of ['receivingUnitCapacity:area.receivingCapacity','pickingUnitCapacity:area.pickingCapacity','transportUnitCapacity:area.stages[7].capacity']){
   assert.ok(adapter.includes(key),'Missing SKU capacity: '+key);
  }
@@ -150,7 +164,7 @@ test('returning to operation after revealing surprise is read-only and cannot re
 test('U2 recovery mission has distinct preview and confirmation with auditable SKU decision persistence',()=>{
  const source=readFileSync(new URL('../src/sku-decision.js',import.meta.url),'utf8');
  for(const id of ['skuRecoveryMission','skuRecoveryDecision','skuRecoveryHeading'])assert.ok(html.includes('id="'+id+'"'));
- assert.ok(app.includes('renderSkuRecoveryMission();'));
+ assert.ok(app.includes('renderSkuRecoveryMission(contract);'));
  assert.ok(app.includes("skuDecisions=[...skuDecisions,record].slice(-25)"));
  assert.ok(app.includes('const record=createSkuRecoveryDecision('));
  assert.ok(app.includes("confirm('¿Registrar esta decisión en la campaña SKU?"));

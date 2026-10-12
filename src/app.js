@@ -1,28 +1,28 @@
-import {supplyBridge} from './supply-bridge.js?v=150';
-import {createSkuSessionCache} from './sku-session.js?v=150';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=150';
-import {aggregateFlowCsv} from './aggregate-export.js?v=150';
-import {campaignSkuContract} from './campaign-contract.js?v=150';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=150';
-import {campaignAreaReadModel} from './area-ledger.js?v=150';
-import {laborAudit} from './labor.js?v=150';
-import {skuAudit} from './audit.js?v=150';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=150';
-import {integratedDemand} from './integrated.js?v=150';
-import {eventSimulation} from './events.js?v=150';
-import {deliveryTimeline} from './timeline.js?v=150';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=150';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=150';
-import {demandJourney} from './journey.js?v=150';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=150';
-import {flow,diagnose,ACTIONS} from './flow.js?v=150';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=150';
-import {areaKpis} from './kpis.js?v=150';
-import {causalAudit} from './causal.js?v=150';
-import {managerDiagnosis} from './diagnosis-guide.js?v=150';
-import {skuServiceBrief} from './sku-service.js?v=150';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=150';
-import {attentionSignals} from './attention.js?v=150';
+import {supplyBridge} from './supply-bridge.js?v=151';
+import {createSkuSessionCache} from './sku-session.js?v=151';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=151';
+import {aggregateFlowCsv} from './aggregate-export.js?v=151';
+import {campaignSkuContract} from './campaign-contract.js?v=151';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=151';
+import {campaignAreaReadModel} from './area-ledger.js?v=151';
+import {laborAudit} from './labor.js?v=151';
+import {skuAudit} from './audit.js?v=151';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=151';
+import {integratedDemand} from './integrated.js?v=151';
+import {eventSimulation} from './events.js?v=151';
+import {deliveryTimeline} from './timeline.js?v=151';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=151';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=151';
+import {demandJourney} from './journey.js?v=151';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=151';
+import {flow,diagnose,ACTIONS} from './flow.js?v=151';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=151';
+import {areaKpis} from './kpis.js?v=151';
+import {causalAudit} from './causal.js?v=151';
+import {managerDiagnosis} from './diagnosis-guide.js?v=151';
+import {skuServiceBrief} from './sku-service.js?v=151';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=151';
+import {attentionSignals} from './attention.js?v=151';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -38,6 +38,13 @@ const skuContractInputs=contract=>{
  return skuSeparateTransport?{...stock,separateTransport:true}:stock;
 };
 const activeSkuDecision=contract=>skuDecisions.findLast(d=>skuDecisionStatus({decision:d,contract:{...contract,skuInputs:skuContractInputs(contract)}})==='current')||null;
+// M2-04d: one input adapter for all screens; only SKU events are physical.
+// Individual SKU controls can request a fresh contract, while a full render
+// passes the identical frozen contract to Results and Recovery.
+const currentCampaignContract=()=>campaignSkuContract({
+ decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,
+ supplierDelay:skuSupplierDelay,campaignId
+});
 function add(root,tag,cls,t){const e=document.createElement(tag);e.className=cls||'';if(t!==undefined)e.textContent=t;root.append(e);return e}
 function save(){
  try{
@@ -237,7 +244,7 @@ function renderDiagnosis(current){
  const percent=(a,b)=>b?((100*a/b).toFixed(1)+'%'):'N/D';
  const cash=v=>'CLP '+Math.round(v).toLocaleString('es-CL');
  const pre=$('preliminaryMetrics');pre.replaceChildren();
- const items=[['Cumplimiento del plan original',percent(initialPlan.dispatched,initialPlan.demand)],['Cumplimiento tras sorpresa',revealed?percent(initial.dispatched,initial.demand):'Pendiente'],['Cumplimiento',percent(initial.dispatched,initial.demand)],['Picking unid./operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso Picking',percent(initial.picked,initial.stages[6].capacity)],['Costo por unidad',oldCost.costPerUnit===null?'N/D':cash(oldCost.costPerUnit)],['Unidades pendientes',fmt(initial.pending)]];
+ const items=[['Cumplimiento del plan original',percent(initialPlan.dispatched,initialPlan.demand)],['Cumplimiento tras sorpresa',revealed?percent(initial.dispatched,initial.demand):'Pendiente'],['Picking unid./operario',scenario.pickingOperators?(initial.picked/scenario.pickingOperators).toFixed(1):'N/D'],['Uso Picking',percent(initial.picked,initial.stages[6].capacity)],['Costo por unidad',oldCost.costPerUnit===null?'N/D':cash(oldCost.costPerUnit)],['Unidades pendientes',fmt(initial.pending)]];
  for(const item of items){const c=add(pre,'div','metric');add(c,'span','',item[0]);add(c,'strong','',item[1])}
  const comparison=$('demandComparison');comparison.replaceChildren();
  add(comparison,'strong','',revealed?'Sorpresa revelada: nueva demanda real':'Diagnóstico del plan antes de conocer la demanda real');
@@ -440,11 +447,11 @@ function renderPrimarySkuSummary(model){
   ? 'Se pueden investigar compras, reserva física y capacidad por área. La vista de las ocho áreas permite ver qué ingresó, qué se liberó y qué salió realmente del CD. Ninguna expedición equivale a entrega confirmada.'
   : 'Los pedidos de esta cohorte salieron del CD dentro del horizonte simulado. El costo de la campaña y la recepción por parte del cliente todavía requieren datos adicionales.');
 }
-function renderSkuLab(){
+function renderSkuLab(contract=currentCampaignContract()){
  // The SKU/day limits inherited from the aggregate shift are DIDACTIC
  // hypotheses rather than physically calibrated productivity rates.
- // Central interpretation of the eight-area decisions. The SKU cohort is a sample.
- const contract=campaignSkuContract({decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,supplierDelay:skuSupplierDelay,campaignId});
+ // M2-04d: consume the same immutable contract as the main render.
+ // Standalone policy controls create a fresh contract after changing settings.
  const {area,commercialForecast,planningCoverage,supplierRate,skuAreaCapacity}=contract;
  const currentSkuDecision=activeSkuDecision(contract),skuLocked=!!currentSkuDecision;
  const input=skuContractInputs(contract);
@@ -666,9 +673,10 @@ function renderSkuLab(){
  }
  add(supplementary,'p','muted','Asignación determinista por tipo de pedido en orden de mezcla. Los pedidos son completos o pendientes. Los bloqueos por SKU pueden coincidir; no se deben sumar. La demanda mensual es una hipótesis de análisis para calcular cobertura y reposición, no la duración de la campaña de un día. La clasificación ABC se calcula por valor demandado (unidades × costo ilustrativo) y puede diferir de la rotación física. Estos ejercicios de referencia son hipótesis aisladas; no usan las capacidades compartidas ni forman parte de la conciliación principal de la campaña SKU.');
 }
-function renderSkuRecoveryMission(){
+function renderSkuRecoveryMission(contract=null){
  const root=$('skuRecoveryDecision');if(!revealed||currentSection!=='recovery'){root.replaceChildren();return}
- const contract=campaignSkuContract({decisions,actions,scenario:effectiveScenario(),policy:skuPolicy,supplierDelay:skuSupplierDelay,campaignId});
+ // Reuse the currently rendered contract; only standalone calls rebuild it.
+ contract=contract??currentCampaignContract();
  const confirmed=activeSkuDecision(contract),input=skuContractInputs(contract);
  root.replaceChildren();
  if(confirmed){
@@ -835,7 +843,9 @@ function renderAttention(){
 function render(){
 $('sessionStatus').textContent='Campaña '+campaignId+' · '+({setup:'Configuración',operations:revealed?'Plan original':'Operación',preliminary:'Diagnóstico',recovery:'Recuperación',dashboard:'Resultados'}[currentSection]);
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
-const r=flow(decisions,actions,effectiveScenario()),diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab();renderSkuRecoveryMission();
+// One aggregate read (as decision input), one frozen SKU contract for this UI render.
+ // Economics and historical heuristics remain explicitly aggregate, not SKU facts.
+const contract=currentCampaignContract(),r=contract.area,diag=diagnose(decisions,actions,effectiveScenario()),n=NODES[active],st=r.stages[active];setup();dashboard(r);renderKpiLesson(r);renderAttention();renderLabor();renderSkuLab(contract);renderSkuRecoveryMission(contract);
 $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pending);$('fulfillment').textContent=(r.dispatched/r.demand*100).toFixed(1).replace('.',',')+'%';
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?(revealed?'Plan cerrado · consulta':'Planificación'):'Recuperación');
