@@ -1,8 +1,8 @@
 {
-  "version": "11.40",
-  "assetRevision": 149,
-  "release": "v11.40 · M3-13b contrato de decisiones agregado/SKU",
+  "version": "11.41",
+  "assetRevision": 150,
+  "release": "v11.41 · M2-04c procedencia de decisiones y evidencia SKU",
   "date": "2026-10-12",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-13b: audita la traducción de decisiones agregadas a supuestos de la cohorte SKU y rechaza creación implícita de stock, mezcla de costos/despachos y capacidades inconsistentes. La escala SKU/día permanece como hipótesis no calibrada. Conserva auditoría M3-13a, sin cambiar movimientos físicos ni economía agregada."
+  "notes": "M2-04c: auditoría inmutable clasifica ocho decisiones como hipótesis de jornada y sus resultados como compromisos o eventos SKU simulados, sin calibración ficticia ni duplicar inventario. Nueva explicación desplegable en Compras/Inventario y corrección de etiqueta de demanda agregada. No modifica los movimientos físicos, el motor económico o la compra original."
 }
