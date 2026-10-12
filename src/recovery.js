@@ -1,3 +1,4 @@
+import {SKU_COST_DEFAULTS} from './sku-cost-catalog.js';
 import {integratedDemand} from './integrated.js';
 import {eventSimulation} from './events.js';
 import {SKU_CATALOG,ORDER_TEMPLATES} from './sku.js';
@@ -17,7 +18,7 @@ export const RECOVERY_OPTIONS={
  * Reserve reallocation is a dated internal movement of catalog opening stock,
  * not new stock or a supplier receipt. No movement is modeled without stock.
  */
-export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,option='wait',unitRevenue=9000,emergencySurchargeRate=0.3,extraCapacityDailyCost=70000,latePenaltyPerOrderDay=150,holdingRatePerDay=0.0005,urgentArrivalDay=1,purchaseCoveragePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,stock=null,reservePercent=0,separateTransport=false}={}){
+export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,option='wait',unitRevenue=SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder,emergencySurchargeRate=SKU_COST_DEFAULTS.recovery.urgentSurchargeRate,extraCapacityDailyCost=SKU_COST_DEFAULTS.recovery.addedCapacityCLPPerDay,latePenaltyPerOrderDay=SKU_COST_DEFAULTS.recovery.backlogPenaltyCLPPerOrderDay,holdingRatePerDay=SKU_COST_DEFAULTS.recovery.holdingFractionPerCLPDay,urgentArrivalDay=1,purchaseCoveragePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,stock=null,reservePercent=0,separateTransport=false}={}){
  if(typeof separateTransport!=='boolean')throw new Error('Modo staging inválido');
  const choice=RECOVERY_OPTIONS[option];
  if(!choice)throw new Error('Recuperación desconocida');

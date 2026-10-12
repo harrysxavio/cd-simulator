@@ -1,8 +1,8 @@
 {
-  "version": "11.42",
-  "assetRevision": 151,
-  "release": "v11.42 · M2-04d contrato único de render y eliminación de duplicidades",
+  "version": "11.43",
+  "assetRevision": 152,
+  "release": "v11.43 · M4-14 catálogo trazable de costos SKU",
   "date": "2026-10-12",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M2-04d: una actualización de la UI comparte el mismo contrato inmutable agregado/SKU entre Resultados y Recuperación, sin recalcular el adaptador ni crear otro flujo físico; un KPI repetido del diagnóstico técnico se retira. Economía, heurísticas y CSV agregados siguen separados y explícitamente didácticos; su sustitución por contabilidad SKU queda para M4."
+  "notes": "M4-14: catálogo CLP de costo estándar por SKU y tasas de recuperación; fuente única para valores por producto, ingreso proxy, recargo urgente, refuerzo diario, penalidad y tenencia. Presenta tarifas en detalle móvil desplegable; distingue valorización, compromiso, proxy y pagos no verificados. Actividades físicas sin tarifa se muestran como no valorizadas. Sin cambiar eventos ni resultados históricos."
 }

@@ -1,28 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=151';
-import {createSkuSessionCache} from './sku-session.js?v=151';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=151';
-import {aggregateFlowCsv} from './aggregate-export.js?v=151';
-import {campaignSkuContract} from './campaign-contract.js?v=151';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=151';
-import {campaignAreaReadModel} from './area-ledger.js?v=151';
-import {laborAudit} from './labor.js?v=151';
-import {skuAudit} from './audit.js?v=151';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=151';
-import {integratedDemand} from './integrated.js?v=151';
-import {eventSimulation} from './events.js?v=151';
-import {deliveryTimeline} from './timeline.js?v=151';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=151';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=151';
-import {demandJourney} from './journey.js?v=151';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=151';
-import {flow,diagnose,ACTIONS} from './flow.js?v=151';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=151';
-import {areaKpis} from './kpis.js?v=151';
-import {causalAudit} from './causal.js?v=151';
-import {managerDiagnosis} from './diagnosis-guide.js?v=151';
-import {skuServiceBrief} from './sku-service.js?v=151';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=151';
-import {attentionSignals} from './attention.js?v=151';
+import {supplyBridge} from './supply-bridge.js?v=152';
+import {createSkuSessionCache} from './sku-session.js?v=152';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=152';
+import {aggregateFlowCsv} from './aggregate-export.js?v=152';
+import {campaignSkuContract} from './campaign-contract.js?v=152';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=152';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=152';
+import {campaignAreaReadModel} from './area-ledger.js?v=152';
+import {laborAudit} from './labor.js?v=152';
+import {skuAudit} from './audit.js?v=152';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=152';
+import {integratedDemand} from './integrated.js?v=152';
+import {eventSimulation} from './events.js?v=152';
+import {deliveryTimeline} from './timeline.js?v=152';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=152';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=152';
+import {demandJourney} from './journey.js?v=152';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=152';
+import {flow,diagnose,ACTIONS} from './flow.js?v=152';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=152';
+import {areaKpis} from './kpis.js?v=152';
+import {causalAudit} from './causal.js?v=152';
+import {managerDiagnosis} from './diagnosis-guide.js?v=152';
+import {skuServiceBrief} from './sku-service.js?v=152';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=152';
+import {attentionSignals} from './attention.js?v=152';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -522,6 +523,28 @@ function renderSkuLab(contract=currentCampaignContract()){
   add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
   add(trace,'small','',skuSeparateTransport?'Picking: '+fmt(physicalAreas.metrics.pickedOrders)+' preparados · '+fmt(physicalAreas.metrics.stagedOrders)+' en staging esperando Transporte · '+fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar.':'Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
   add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
+  // M4-14: explain rates only on demand; never add them to the aggregate P&L.
+  const costRates=skuCostCatalogReadModel({catalog:SKU_CATALOG});
+  const costsPanel=add(trace,'details','supply-trace-detail sku-cost-catalog');
+  costsPanel.dataset.costScope='sku-cohort';
+  add(costsPanel,'summary','','💰 Ver tarifas y supuestos SKU (CLP)');
+  add(costsPanel,'p','manager-fineprint','Estos valores son ejemplos para la cohorte SKU de 12 días, no pagos ni utilidad. Solo se valorizan movimientos registrados. No sumarlos al resultado de una jornada.');
+  for(const sku of costRates.productCosts){
+   const line=add(costsPanel,'p','manager-fineprint');
+   line.dataset.skuCostId=sku.id;
+   add(line,'strong','','SKU '+sku.id+': ');
+   add(line,'span','','CLP '+fmt(sku.rateCLPPerPhysicalUnit)+' por unidad física · costo estándar de inventario, no desembolso.');
+  }
+  for(const rule of costRates.activityRates){
+   const line=add(costsPanel,'p','manager-fineprint');
+   line.dataset.activityCostId=rule.id;
+   const displayed=rule.id==='urgent-surcharge'||rule.id==='inventory-holding'
+    ?(100*rule.rate).toLocaleString('es-CL')+' %'
+    :'CLP '+fmt(rule.rate);
+   add(line,'span','',rule.label+': '+displayed+' · '+rule.basis+'.');
+  }
+  add(costsPanel,'p','manager-fineprint','Aún sin tarifa física validada: '+costRates.unpricedOperations.map(x=>x.label).join(', ')+'. Las tasas por defecto son supuestos; faltan costos completos por actividad y pagos comprobados.');
+
   const canonical=chain.campaign;
   const campaignCard=add(trace,'details','supply-trace-detail');
   add(campaignCard,'summary','','🧾 Ver campaña única de pedidos y movimientos SKU');
