@@ -1,8 +1,8 @@
 {
-  "version": "11.38",
-  "assetRevision": 147,
-  "release": "v11.38 · M3-12c staging visible y persistente",
+  "version": "11.39",
+  "assetRevision": 148,
+  "release": "v11.39 · M3-13a auditoría diaria de ocho áreas",
   "date": "2026-10-09",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-12c: un control educativo activa Picking y Transporte independientes con STAGING-CD físico. Las tarjetas compactas y la línea diaria distinguen pendientes de preparación, kits preparados en staging y expedidos. El usuario puede volver al modo anterior; la elección se guarda sin almacenar ni duplicar eventos. Auditoría de stock, compras, costo y valorización incluyen staging. No implica entrega al cliente ni unificación de economía agregada."
+  "notes": "M3-13a: prueba inmutable de traspasos Comercial/Planning/Compras/Recepción/Calidad/Inventario/Picking/Transporte usando una sola cohorte física SKU. Reconcilia por día pedidos sin preparar, staging, expedidos, unidades y ubicaciones; funciona con staging activo/inactivo y no suma dos veces el mismo stock. No incluye todavía certificación Pages ni desmantela los modelos agregados."
 }
