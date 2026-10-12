@@ -93,7 +93,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 12b | **Código/CI/merge aprobados** | PR #35 v11.37: campaña, Inventario y ocho áreas reconciliados, staging en modo opt-in. |
 | 12c | **Código/CI/merge aprobados** | PR #36 v11.38, activación staging con 3 KPI, persistencia y sesiones migradas; Node+Chromium verdes. |
 | 13a | **Completada** | PR #37 fusionado como v11.39 (SHA ce52b36); Model regression #38280303705 y Browser smoke #38280302776 verdes; Pages #38280302926 verificado. |
-| 13b | **En curso** | PR #38 (v11.40): auditoría de ocho hipótesis de traducción agregado → cohorte SKU, stock aislado y fuentes prohibidas; pendiente CI final, merge y Pages HTTP. Ver STATUS-V11.40.md. |
+| 13b | **Completada** | PR #38 v11.40 fusionada en `main` (549c5e2); modelo y Chromium de rama/main verdes; Pages deploy #38282619824 y HTTP #38282620106 aprobados. Contrato auditable de supuestos agregado→SKU, sin mezclar existencias ni economía. Ver STATUS-V11.40.md. |
 | 04c–04d | **Pendientes** | Transición física de decisiones y retiro del paralelo; dependen parcialmente de M3. |
 | 14–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
 
