@@ -1,8 +1,8 @@
 {
-  "version": "11.43",
-  "assetRevision": 152,
-  "release": "v11.43 · M4-14 catálogo trazable de costos SKU",
+  "version": "11.44",
+  "assetRevision": 153,
+  "release": "v11.44 · M4-15 valorización diaria del inventario físico SKU",
   "date": "2026-10-12",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M4-14: catálogo CLP de costo estándar por SKU y tasas de recuperación; fuente única para valores por producto, ingreso proxy, recargo urgente, refuerzo diario, penalidad y tenencia. Presenta tarifas en detalle móvil desplegable; distingue valorización, compromiso, proxy y pagos no verificados. Actividades físicas sin tarifa se muestran como no valorizadas. Sin cambiar eventos ni resultados históricos."
+  "notes": "M4-15: desde el único libro de eventos y saldos físicos SKU conciliados, valora por día y SKU aperturas, recepciones, expediciones y cierre en PICK-FACE, Calidad, RESERVA-CD y STAGING-CD; verificable/no verificable son subconjuntos de disponible. Auditoría de costo estándar CLP con pruebas de no duplicación, escenarios extremos y vista móvil plegada. No representa caja, ventas, ganancia ni economía de jornada agregada."
 }
