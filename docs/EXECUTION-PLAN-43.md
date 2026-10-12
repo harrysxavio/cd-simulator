@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.39.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.41.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -94,7 +94,8 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 12c | **Código/CI/merge aprobados** | PR #36 v11.38, activación staging con 3 KPI, persistencia y sesiones migradas; Node+Chromium verdes. |
 | 13a | **Completada** | PR #37 fusionado como v11.39 (SHA ce52b36); Model regression #38280303705 y Browser smoke #38280302776 verdes; Pages #38280302926 verificado. |
 | 13b | **Completada** | PR #38 v11.40 fusionada en `main` (549c5e2); modelo y Chromium de rama/main verdes; Pages deploy #38282619824 y HTTP #38282620106 aprobados. Contrato auditable de supuestos agregado→SKU, sin mezclar existencias ni economía. Ver STATUS-V11.40.md. |
-| 04c–04d | **Pendientes** | Transición física de decisiones y retiro del paralelo; dependen parcialmente de M3. |
+| 04c | **En curso** | v11.41: distinguir hipótesis de jornada de evidencias de compromisos/eventos SKU en las ocho áreas, mostrar procedencia y rechazar fuentes incompatibles. Pruebas, PR y Pages pendientes. Ver STATUS-V11.41.md. |
+| 04d | **Pendiente** | Revisar retiro progresivo de las vistas y cálculos agregados duplicados, sujeto a paridad demostrable y economía SKU M4; no eliminar diagnóstico ni costos útiles prematuramente. |
 | 14–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
