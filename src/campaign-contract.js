@@ -3,6 +3,7 @@ import {numericValue} from './engine.js';
 import {SKU_CATALOG} from './sku.js';
 import {SCOPE_DEFINITIONS} from './measurements.js';
 import {skuOpeningState} from './opening-state.js';
+import {auditSkuDecisionBoundary} from './sku-boundary-audit.js';
 
 /**
  * One explicitly documented contract between campaign decisions and the SKU lab.
@@ -50,6 +51,9 @@ export function campaignSkuContract({
   policy,plannedOrders:plannedSampleOrders,actualOrders:actualSampleOrders,stock:openingState.openingBySku,
   delayDays:supplierDelay?{A:8}:{},...skuAreaCapacity
  };
+ // Prove each managerial proxy is separated from physical quantities and costs.
+ const boundaryAudit=auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSampleOrders,
+  commercialForecast,planningCoverage,supplierRate,skuAreaCapacity});
  const trace={
   campaignId,scope:'sample-not-accounting',aggregateUnit:SCOPE_DEFINITIONS.aggregate.displayUnit,
   skuUnit:SCOPE_DEFINITIONS.sku.skuDisplayUnit,orderUnit:SCOPE_DEFINITIONS.sku.orderDisplayUnit,plannedCampaignUnits:area.plannedDemand,
@@ -68,5 +72,5 @@ export function campaignSkuContract({
   return value;
  };
  return freeze({campaignId,area,commercialForecast,planningCoverage,supplierRate,
-  plannedSampleOrders,actualSampleOrders,openingState,skuAreaCapacity,skuInputs,trace});
+  plannedSampleOrders,actualSampleOrders,openingState,skuAreaCapacity,skuInputs,trace,boundaryAudit});
 }

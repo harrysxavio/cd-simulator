@@ -1,8 +1,8 @@
 {
-  "version": "11.39",
-  "assetRevision": 148,
-  "release": "v11.39 · M3-13a auditoría diaria de ocho áreas",
-  "date": "2026-10-09",
+  "version": "11.40",
+  "assetRevision": 149,
+  "release": "v11.40 · M3-13b contrato de decisiones agregado/SKU",
+  "date": "2026-10-12",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M3-13a: prueba inmutable de traspasos Comercial/Planning/Compras/Recepción/Calidad/Inventario/Picking/Transporte usando una sola cohorte física SKU. Reconcilia por día pedidos sin preparar, staging, expedidos, unidades y ubicaciones; funciona con staging activo/inactivo y no suma dos veces el mismo stock. No incluye todavía certificación Pages ni desmantela los modelos agregados."
+  "notes": "M3-13b: audita la traducción de decisiones agregadas a supuestos de la cohorte SKU y rechaza creación implícita de stock, mezcla de costos/despachos y capacidades inconsistentes. La escala SKU/día permanece como hipótesis no calibrada. Conserva auditoría M3-13a, sin cambiar movimientos físicos ni economía agregada."
 }
