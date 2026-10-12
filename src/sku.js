@@ -1,11 +1,12 @@
+import {SKU_COST_DEFAULTS} from './sku-cost-catalog.js';
 /** Phase 3: deterministic SKU/order lab. Independent of the legacy aggregate engine.
  * Every fulfilled order must have ALL required SKU units. No fractional orders.
  * Greedy FIFO allocation is explicit; this is not an optimal fulfillment solver.
  */
 export const SKU_CATALOG=[
- {id:'A',name:'Producto A · alta rotación',rotation:'alta',initial:150,unitCost:1800,leadDays:2,safetyDays:2},
- {id:'B',name:'Producto B · media rotación',rotation:'media',initial:90,unitCost:3200,leadDays:5,safetyDays:4},
- {id:'C',name:'Producto C · baja rotación',rotation:'baja',initial:55,unitCost:6500,leadDays:10,safetyDays:6}
+ {id:'A',name:'Producto A · alta rotación',rotation:'alta',initial:150,unitCost:SKU_COST_DEFAULTS.standardCostCLPPerSku.A,leadDays:2,safetyDays:2},
+ {id:'B',name:'Producto B · media rotación',rotation:'media',initial:90,unitCost:SKU_COST_DEFAULTS.standardCostCLPPerSku.B,leadDays:5,safetyDays:4},
+ {id:'C',name:'Producto C · baja rotación',rotation:'baja',initial:55,unitCost:SKU_COST_DEFAULTS.standardCostCLPPerSku.C,leadDays:10,safetyDays:6}
 ];
 export const ORDER_TEMPLATES=[
  {id:'basic',name:'Pedido básico',share:45,lines:{A:2}},
