@@ -55,4 +55,4 @@ establecerán qué decisiones pueden pasar al motor por SKU bajo equivalencia
 comprobada. M4 y posteriores todavía no pueden tomar ingresos/costos de
 `flow()` como contabilidad de campaña SKU.
 
-**Estado a la apertura de PR:** código en rama; cierre sujeto a CI/merge/Pages.
+**Cierre verificado (2026-10-12):** PR #38 integrada a `main` (merge `549c5e2`). Modelo CI de rama [38282160593](https://github.com/harrysxavio/cd-simulator/actions/runs/38282160593), Chromium de rama [38282160632](https://github.com/harrysxavio/cd-simulator/actions/runs/38282160632), modelo de `main` [38282619951](https://github.com/harrysxavio/cd-simulator/actions/runs/38282619951), Chromium de `main` [38282620154](https://github.com/harrysxavio/cd-simulator/actions/runs/38282620154), despliegue [38282619824](https://github.com/harrysxavio/cd-simulator/actions/runs/38282619824) y Pages HTTP [38282620106](https://github.com/harrysxavio/cd-simulator/actions/runs/38282620106): **aprobados**. Android físico/TalkBack no verificados; reservado para M7.
