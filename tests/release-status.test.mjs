@@ -38,7 +38,7 @@ test('release status requests live server manifest with no-cache and query nonce
   assert.equal(options.headers['Cache-Control'],'no-cache');
   return {ok:true,json:async()=>manifest};
  };
- assert.deepEqual(await checkPublishedRelease({baseUrl:'https://harrysxavio.github.io/cd-simulator/?release='+RELEASE.version+'-r'+RELEASE.assetRevision',fetcher}),{status:'current',manifest});
+ assert.deepEqual(await checkPublishedRelease({baseUrl:'https://harrysxavio.github.io/cd-simulator/?release='+RELEASE.version+'-r'+RELEASE.assetRevision,fetcher}),{status:'current',manifest});
  assert.equal(called,1);
  await assert.rejects(checkPublishedRelease({baseUrl:'https://harrysxavio.github.io/cd-simulator/',fetcher:async()=>({ok:false,status:503})}),/HTTP 503/);
 });
