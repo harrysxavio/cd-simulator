@@ -92,8 +92,8 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 12a | **Código/CI/merge aprobados** | PR #34 fusionado, v11.36. FIFO físico de staging y transporte con capacidad independiente probados. |
 | 12b | **Código/CI/merge aprobados** | PR #35 v11.37: campaña, Inventario y ocho áreas reconciliados, staging en modo opt-in. |
 | 12c | **Código/CI/merge aprobados** | PR #36 v11.38, activación staging con 3 KPI, persistencia y sesiones migradas; Node+Chromium verdes. |
-| 13a | **En curso** | PR v11.39: auditoría cruzada de las ocho áreas por pedido/SKU/día, casos con y sin staging, rechazo de registros incompatibles. CI/merge por comprobar. |
-| 13b | **Pendiente** | Cerrar la traducción de decisiones agregadas vs físicas SKU sin mezclar el cálculo de jornada y campaña. |
+| 13a | **Completada** | PR #37 fusionado como v11.39 (SHA ce52b36); Model regression #38280303705 y Browser smoke #38280302776 verdes; Pages #38280302926 verificado. |
+| 13b | **En curso** | PR #38 (v11.40): auditoría de ocho hipótesis de traducción agregado → cohorte SKU, stock aislado y fuentes prohibidas; pendiente CI final, merge y Pages HTTP. Ver STATUS-V11.40.md. |
 | 04c–04d | **Pendientes** | Transición física de decisiones y retiro del paralelo; dependen parcialmente de M3. |
 | 14–42 | **Pendientes de cierre** | Existen funcionalidades parciales previas; verificar implementación individual al llegar a cada ID. |
 
