@@ -59,5 +59,4 @@ agregada. El retiro de vistas y cálculos paralelos se evalúa como
   HTML, `release.json` y JavaScript.
 - Android físico con TalkBack queda fuera de esta microfase, para M7.
 
-**Estado al escribir este informe:** código listo en rama, pendiente de CI,
-PR, integración y comprobación de Pages.
+**Cierre verificado (2026-10-12):** PR [#39](https://github.com/harrysxavio/cd-simulator/pull/39) integrada a `main` (merge `e8d94a47`). Modelo de rama [38284051053](https://github.com/harrysxavio/cd-simulator/actions/runs/38284051053), Chromium de rama [38284051225](https://github.com/harrysxavio/cd-simulator/actions/runs/38284051225), modelo de `main` [38284569085](https://github.com/harrysxavio/cd-simulator/actions/runs/38284569085), Chromium de `main` [38284569172](https://github.com/harrysxavio/cd-simulator/actions/runs/38284569172), despliegue [38284568413](https://github.com/harrysxavio/cd-simulator/actions/runs/38284568413) y Pages HTTP [38284569139](https://github.com/harrysxavio/cd-simulator/actions/runs/38284569139): **todos aprobados**. Android físico/TalkBack permanece pendiente para M7.
