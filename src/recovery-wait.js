@@ -37,7 +37,7 @@ export function waitWithoutInterventionReadModel({baseline,recovered,comparison}
   ||comparison.operationalCost?.totals?.totalCostCLP!==0){
   fail('la opción de esperar no coincide con el baseline físico congelado');
  }
- const orders=new Set(),shippedByDay=new Map(),stagedByDay=new Map();
+ const orders=new Set(),shippedByDay=new Map();
  for(const order of actual.ordersDetail){
   if(!order||typeof order.id!=='string'||!order.id||orders.has(order.id)
    ||(order.fulfilledDay!==null&&(!integer(order.fulfilledDay)||order.fulfilledDay>horizon))
@@ -48,9 +48,6 @@ export function waitWithoutInterventionReadModel({baseline,recovered,comparison}
   orders.add(order.id);
   if(order.fulfilledDay!==null)shippedByDay.set(order.fulfilledDay,
    (shippedByDay.get(order.fulfilledDay)||0)+1);
-  if(order.fulfilledDay===null&&order.pickedDay!==null){
-   stagedByDay.set(order.pickedDay,(stagedByDay.get(order.pickedDay)||0)+1);
-  }
  }
  const rows=[];let cumulative=0,backlogOrderDays=0;
  for(let day=0;day<=horizon;day++){
@@ -59,8 +56,6 @@ export function waitWithoutInterventionReadModel({baseline,recovered,comparison}
    ||!integer(entry.backlog)||entry.shipped!==physicalShipped
    ||entry.shipmentEvents?.length!==physicalShipped
    ||!Array.isArray(entry.reserveEvents)||entry.reserveEvents.length!==0
-   ||!Array.isArray(entry.receivedUrgent)
-      &&Object.values(entry.receivedUrgent??{}).some(n=>n!==0)
    ||Object.values(entry.receivedUrgent??{}).some(n=>n!==0)
    ||!integer(entry.stagingOrders)){
    fail('la cronología física no concilia');
