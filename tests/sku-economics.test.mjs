@@ -139,19 +139,24 @@ test('M4-18: no shipments yields no income; deployed reinforcement still costs C
  assert.ok(economics.daily.every(x=>x.shippedOrders===0));
 });
 
-test('M4-18: negative incremental comparison revenue under staging does not make gross shipments negative',()=>{
+test('M4-18: negative incremental comparison revenue under FIFO staging does not imply negative gross shipped value',()=>{
  const {comparison,campaign,economics}=make({
-  option:'wait',separateTransport:true,transportUnitCapacity:0,
+  option:'wait',separateTransport:true,transportUnitCapacity:2,
   actualOrders:280
  });
  assert.equal(campaign.passed,true);
- assert.equal(comparison.recovered.completed,0);
  assert.ok(comparison.base.completed>0);
- assert.ok(comparison.incrementalRevenue<0);
- assert.equal(economics.totals.potentialDispatchValueCLP,0);
- assert.equal(economics.totals.dispatchedMaterialCostCLP,0);
+ assert.ok(comparison.recovered.completed<=comparison.base.completed);
+ assert.equal(comparison.incrementalRevenue,
+  (comparison.recovered.completed-comparison.base.completed)*comparison.unitRevenue);
+ assert.ok(economics.totals.potentialDispatchValueCLP>=0);
+ assert.equal(economics.totals.potentialDispatchValueCLP,
+  comparison.recovered.completed*comparison.unitRevenue);
+ assert.equal(economics.totals.dispatchedMaterialCostCLP,
+  campaign.inventoryValuation.totals.shippedToDateCLP);
  assert.equal(economics.totals.incrementalOperatingCostCLP,0);
- assert.equal(economics.totals.partialContributionCLP,0);
+ assert.equal(economics.totals.partialContributionCLP,
+  economics.totals.potentialDispatchValueCLP-economics.totals.dispatchedMaterialCostCLP);
  assert.equal(economics.confirmedCustomerDeliveries,null);
 });
 
