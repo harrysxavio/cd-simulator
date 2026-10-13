@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.48.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.49.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -102,6 +102,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 17 | **Completada** | PR #44 v11.46 integrada en `main` (5407119). Modelo #38336924290, Chromium #38336924312, Pages #38336924413 y HTTP #38336924292 aprobados. Costos de refuerzo cobrados solo por jornada operativa activada, con capacidad contratada/usada/ociosa auditada y sin inventar horas ni salarios. Ver STATUS-V11.46.md. |
 | 18 | **Completada** | PR #45 v11.47 integrada en `main` (3e03422); modelo #38342297015, Chromium #38342296935, Pages #38342297012 y HTTP #38342296927 aprobados. Contribución parcial SKU por pedido expedido, material consumido y refuerzo aplicable; compromisos/proxies excluidos, sin confundir caja, utilidad ni EBITDA. Ver STATUS-V11.47.md. |
 | 19 | **Completada** | PR #46 v11.48 integrada en `main` (7d8849c); Node #38386765739, Chromium #38386765814, Pages #38386765517 y HTTP #38386765720 aprobados. Auditoría SKU por evento/PO/día, 3 partidas incluidas y 6 excluidas sin doble conteo ni caja inventada; guardia de sintaxis JS nueva. Ver STATUS-V11.48.md. |
-| 20–42 | **Pendientes de cierre** | Siguiente M5-20: baseline inmutable para todas las alternativas de recuperación; M5–M8 continúan en microfases según plan. |
+| 20 | **En curso** | v11.49: baseline SKU preintervención congelado con pronóstico/compra/stock/capacidades/demanda; mismo objeto para cinco alternativas, clave por supuestos y LRU acotado. CI, PR y publicación aún requieren cierre. Ver STATUS-V11.49.md. |
+| 21–42 | **Pendientes de cierre** | Siguiente M5-21: esperar sin intervenir, backlog y fechas respecto de la misma base. Continúa M5–M8 según plan. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.

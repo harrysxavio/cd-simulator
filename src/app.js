@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=157';
-import {createSkuSessionCache} from './sku-session.js?v=157';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=157';
-import {aggregateFlowCsv} from './aggregate-export.js?v=157';
-import {campaignSkuContract} from './campaign-contract.js?v=157';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=157';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=157';
-import {campaignAreaReadModel} from './area-ledger.js?v=157';
-import {laborAudit} from './labor.js?v=157';
-import {skuAudit} from './audit.js?v=157';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=157';
-import {integratedDemand} from './integrated.js?v=157';
-import {eventSimulation} from './events.js?v=157';
-import {deliveryTimeline} from './timeline.js?v=157';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=157';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=157';
-import {demandJourney} from './journey.js?v=157';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=157';
-import {flow,diagnose,ACTIONS} from './flow.js?v=157';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=157';
-import {areaKpis} from './kpis.js?v=157';
-import {causalAudit} from './causal.js?v=157';
-import {managerDiagnosis} from './diagnosis-guide.js?v=157';
-import {skuServiceBrief} from './sku-service.js?v=157';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=157';
-import {attentionSignals} from './attention.js?v=157';
+import {supplyBridge} from './supply-bridge.js?v=158';
+import {createSkuSessionCache} from './sku-session.js?v=158';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=158';
+import {aggregateFlowCsv} from './aggregate-export.js?v=158';
+import {campaignSkuContract} from './campaign-contract.js?v=158';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=158';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=158';
+import {campaignAreaReadModel} from './area-ledger.js?v=158';
+import {laborAudit} from './labor.js?v=158';
+import {skuAudit} from './audit.js?v=158';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=158';
+import {integratedDemand} from './integrated.js?v=158';
+import {eventSimulation} from './events.js?v=158';
+import {deliveryTimeline} from './timeline.js?v=158';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=158';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=158';
+import {demandJourney} from './journey.js?v=158';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=158';
+import {flow,diagnose,ACTIONS} from './flow.js?v=158';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=158';
+import {areaKpis} from './kpis.js?v=158';
+import {causalAudit} from './causal.js?v=158';
+import {managerDiagnosis} from './diagnosis-guide.js?v=158';
+import {skuServiceBrief} from './sku-service.js?v=158';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=158';
+import {attentionSignals} from './attention.js?v=158';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -813,6 +813,32 @@ function renderSkuLab(contract=currentCampaignContract()){
   const advisor=add(bridge,'div','sku-advisor');
   add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
   add(advisor,'p','muted','Las alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
+  // M5-20: each alternative must reuse the very same frozen scenario object.
+  const frozenBase=recovery.baselineSnapshot;
+  if(!frozenBase||frozenBase.scope!=='sku-cohort'
+   ||comparisons.some(trial=>trial.baselineSnapshot!==frozenBase
+    ||trial.base!==frozenBase.integrated.actual
+    ||trial.integrated!==frozenBase.integrated)){
+   throw new Error('El comparador debe partir del mismo baseline SKU congelado');
+  }
+  const baseDisclosure=add(advisor,'details','supply-trace-detail sku-common-baseline');
+  baseDisclosure.dataset.baselineScope='sku-cohort';
+  add(baseDisclosure,'summary','','🔒 Misma base para las 5 alternativas');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Demanda real: '+fmt(frozenBase.actualOrders)+' pedidos · '+
+   'stock inicial: '+fmt(frozenBase.openingState.totals.physicalSkuUnits)+' SKU, de ellos '+
+   fmt(frozenBase.openingState.totals.reserveSkuUnits)+' en RESERVA-CD.');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Sin intervenir: '+fmt(frozenBase.integrated.actual.completed)+' pedidos expedidos y '+
+   fmt(frozenBase.integrated.actual.pending)+' pendientes en '+
+   fmt(frozenBase.days+1)+' días de simulación.');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Compra original comprometida: CLP '+
+   fmt(frozenBase.integrated.committedPurchaseValue)+
+   ' · no cambia al elegir compra urgente, espera, reserva o refuerzo.');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Cambiar demanda, política, abastecimiento, capacidad base o % inicial reservado '+
+   'crea otro escenario de partida. Cambiar solo la recuperación NO modifica esta base.');
   for(const trial of comparisons){
    const optionCard=add(advisor,'div','sku-advisor-option'+(trial.option===skuRecovery?' current':''));
    const headline=add(optionCard,'div','sku-advisor-head');
