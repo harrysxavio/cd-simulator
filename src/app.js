@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=154';
-import {createSkuSessionCache} from './sku-session.js?v=154';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=154';
-import {aggregateFlowCsv} from './aggregate-export.js?v=154';
-import {campaignSkuContract} from './campaign-contract.js?v=154';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=154';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=154';
-import {campaignAreaReadModel} from './area-ledger.js?v=154';
-import {laborAudit} from './labor.js?v=154';
-import {skuAudit} from './audit.js?v=154';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=154';
-import {integratedDemand} from './integrated.js?v=154';
-import {eventSimulation} from './events.js?v=154';
-import {deliveryTimeline} from './timeline.js?v=154';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=154';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=154';
-import {demandJourney} from './journey.js?v=154';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=154';
-import {flow,diagnose,ACTIONS} from './flow.js?v=154';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=154';
-import {areaKpis} from './kpis.js?v=154';
-import {causalAudit} from './causal.js?v=154';
-import {managerDiagnosis} from './diagnosis-guide.js?v=154';
-import {skuServiceBrief} from './sku-service.js?v=154';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=154';
-import {attentionSignals} from './attention.js?v=154';
+import {supplyBridge} from './supply-bridge.js?v=155';
+import {createSkuSessionCache} from './sku-session.js?v=155';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=155';
+import {aggregateFlowCsv} from './aggregate-export.js?v=155';
+import {campaignSkuContract} from './campaign-contract.js?v=155';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=155';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=155';
+import {campaignAreaReadModel} from './area-ledger.js?v=155';
+import {laborAudit} from './labor.js?v=155';
+import {skuAudit} from './audit.js?v=155';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=155';
+import {integratedDemand} from './integrated.js?v=155';
+import {eventSimulation} from './events.js?v=155';
+import {deliveryTimeline} from './timeline.js?v=155';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=155';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=155';
+import {demandJourney} from './journey.js?v=155';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=155';
+import {flow,diagnose,ACTIONS} from './flow.js?v=155';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=155';
+import {areaKpis} from './kpis.js?v=155';
+import {causalAudit} from './causal.js?v=155';
+import {managerDiagnosis} from './diagnosis-guide.js?v=155';
+import {skuServiceBrief} from './sku-service.js?v=155';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=155';
+import {attentionSignals} from './attention.js?v=155';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -632,6 +632,36 @@ function renderSkuLab(contract=currentCampaignContract()){
   }
   add(poPanel,'p','manager-fineprint',
    'Se valorizan solo las recepciones físicas. Compra comprometida, material expedido y salida de caja simulada son conceptos distintos; no sumar estos valores entre sí ni a la jornada agregada.');
+  // M4-17: distinct from purchases, stock valuation and the aggregate day.
+  const labor=canonical.operationalCost;
+  const laborPanel=add(trace,'details','supply-trace-detail sku-operational-cost');
+  laborPanel.dataset.operationalCostScope='sku-cohort';
+  add(laborPanel,'summary','','🛠️ Refuerzo: jornadas y capacidad ociosa (CLP)');
+  add(laborPanel,'p','manager-fineprint',
+   'Jornadas de refuerzo activadas '+fmt(labor.totals.chargeableShifts)+
+   ' / '+fmt(labor.daily.length)+' · tarifa CLP '+fmt(labor.rateCLPPerActivatedShift)+
+   ' por jornada activada · costo modelado CLP '+fmt(labor.totals.totalCostCLP)+'.');
+  add(laborPanel,'p','manager-fineprint',
+   'Cupos adicionales asignados '+fmt(labor.totals.assignedExtraSlots)+
+   ' · utilizados sobre capacidad base '+fmt(labor.totals.utilizedExtraSlots)+
+   ' · ociosos '+fmt(labor.totals.idleExtraSlots)+'.');
+  add(laborPanel,'p','manager-fineprint',
+   labor.extraCapacityOrdersPerDay
+    ?'Solo se activa refuerzo en días con picking o expedición. Si se activa, se paga la jornada incluso con cupos ociosos; días sin actividad no se contratan.'
+    :'No se solicitó refuerzo adicional de capacidad: no hay jornadas ni cargos extra.');
+  const laborDays=add(laborPanel,'details','supply-trace-detail');
+  add(laborDays,'summary','','Ver activación y costo por día');
+  for(const day of labor.daily){
+   const line=add(laborDays,'p','manager-fineprint');
+   line.dataset.operationalCostDay=String(day.day);
+   add(line,'strong','','Día '+day.day+' · ');
+   add(line,'span','',(day.activated?'refuerzo activado':'sin refuerzo')+
+    ' · cupos ociosos '+fmt(day.idleExtraSlots)+
+    ' · CLP '+fmt(day.costCLP)+'.');
+  }
+  add(laborPanel,'p','manager-fineprint',
+   'Los cupos son capacidad máxima de pedidos, no horas ni trabajadores comprobados. Pago real y costos base por área: sin datos. Es un costo operativo ilustrativo, no nómina, ni venta ni inventario.');
+
   add(trace,'small','','Abastecimiento pendiente de ingresar: '+fmt(commitment.totals.originalInTransit+commitment.totals.urgentInTransit)+' unidades aún no arribadas · '+fmt(commitment.totals.waitingReceiving)+' en cola de Recepción · '+fmt(commitment.totals.originalSupplierShortfall)+' unidades incumplidas por proveedor.');
   const commitmentDetail=add(trace,'details','supply-trace-detail');
   add(commitmentDetail,'summary','','Ver conciliación de compras por SKU');

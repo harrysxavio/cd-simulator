@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.45.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.46.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -99,6 +99,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 14 | **Completada** | PR #41 v11.43 fusionada a `main` (`ca92d70`), modelo #38303809990, Chromium #38303810043, Pages #38303808959 y HTTP #38303810006 aprobados. Tarifa CLP única por SKU/recurso/proxy con fuentes auditables y actividades sin costo conocido. Ver STATUS-V11.43.md. |
 | 15 | **Completada** | PR #42 v11.44 fusionada en `main` (d132809). Modelo #38308500673, Chromium #38308500757, Pages #38308500685 y HTTP #38308500774 aprobados. Conciliación CLP del mismo libro físico SKU por día, zona y catálogo, sin doble conteo ni pagos inventados. Ver STATUS-V11.44.md. |
 | 16 | **Completada** | PR #43 v11.45 integrada en `main` (683fda8). Modelo #38335533678, Chromium #38335533680, Pages #38335533220 y HTTP #38335533663 aprobados. Compras SKU por PO: compromiso, proveedor, tránsito, muelle, ingreso físico valorizado y caja no comprobada. Ver STATUS-V11.45.md. |
-| 17–42 | **Pendientes de cierre** | Siguiente M4-17: gastos operacionales condicionados a recursos efectivamente aplicables; después M4-18 resultado, M4-19 auditoría, M5–M8 según plan. |
+| 17 | **En curso** | v11.46: refuerzo por jornadas con Picking o expedición físicos, cupos asignados/usados/ociosos y tarifa por turno activado; mantiene cobro de capacidad ociosa contratada, sin inventar horas/personas. CI/PR/Pages sujetos a verificación. Ver STATUS-V11.46.md. |
+| 18–42 | **Pendientes de cierre** | Siguiente M4-18: estado económico SKU con ingresos potenciales, consumo de inventario y gastos sin doble conteo; M4-19 auditoría, después M5–M8. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
