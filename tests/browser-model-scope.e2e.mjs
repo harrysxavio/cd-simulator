@@ -169,6 +169,39 @@ async function verify(mode){
     assert.ok(rect?.height>=44,'M4-16 purchase disclosure must be touch-friendly');
    }
   }
+  // M5-22: urgent PO is a modeled supplier arrival, NOT a receipt or payment.
+  const urgent=page.locator('[data-urgent-po-scope="sku-cohort"]');
+  assert.equal(await urgent.count(),1);
+  assert.equal(await urgent.getAttribute('open'),null);
+  await urgent.locator(':scope > summary').click();
+  assert.match(await urgent.innerText(),/Compra urgente: del proveedor al stock SKU/);
+  assert.match(await urgent.innerText(),/costo base comprometido CLP/);
+  assert.match(await urgent.innerText(),/Llegó al muelle/);
+  assert.match(await urgent.innerText(),/ingresó a bodega/);
+  assert.match(await urgent.innerText(),/Calidad liberó/);
+  assert.match(await urgent.innerText(),/NO acreditan factura ni pago/);
+  const urgentSkus=urgent.locator('details').first();
+  const urgentDays=urgent.locator('details').nth(1);
+  assert.equal(await urgentSkus.getAttribute('open'),null);
+  assert.equal(await urgentDays.getAttribute('open'),null);
+  await urgentSkus.locator('summary').click();
+  assert.equal(await urgent.locator('[data-urgent-sku]').count(),3);
+  assert.match(await urgentSkus.innerText(),/SKU A/);
+  await urgentDays.locator('summary').click();
+  assert.equal(await urgent.locator('[data-urgent-day]').count(),13);
+  assert.match(await urgentDays.innerText(),/Día 12/);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const dims=await page.evaluate(()=>({
+    width:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(dims.scroll<=dims.width+2,'Urgent PO panel horizontal overflow '+JSON.stringify(dims));
+   for(const summary of [urgent.locator(':scope > summary'),urgentSkus.locator('summary'),urgentDays.locator('summary')]){
+    const rect=await summary.boundingBox();
+    assert.ok(rect?.height>=44,'M5-22 PO control too small for mobile');
+   }
+  }
   // M4-17: physically activated extra shifts, never invented payroll-hours.
   const resource=page.locator('[data-operational-cost-scope="sku-cohort"]');
   assert.equal(await resource.count(),1);
