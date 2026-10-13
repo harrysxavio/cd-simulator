@@ -139,6 +139,22 @@ test('M4-18: no shipments yields no income; deployed reinforcement still costs C
  assert.ok(economics.daily.every(x=>x.shippedOrders===0));
 });
 
+test('M4-18: negative incremental comparison revenue under staging does not make gross shipments negative',()=>{
+ const {comparison,campaign,economics}=make({
+  option:'wait',separateTransport:true,transportUnitCapacity:0,
+  actualOrders:280
+ });
+ assert.equal(campaign.passed,true);
+ assert.equal(comparison.recovered.completed,0);
+ assert.ok(comparison.base.completed>0);
+ assert.ok(comparison.incrementalRevenue<0);
+ assert.equal(economics.totals.potentialDispatchValueCLP,0);
+ assert.equal(economics.totals.dispatchedMaterialCostCLP,0);
+ assert.equal(economics.totals.incrementalOperatingCostCLP,0);
+ assert.equal(economics.totals.partialContributionCLP,0);
+ assert.equal(economics.confirmedCustomerDeliveries,null);
+});
+
 test('M4-18: configured unit revenue is respected and traceable, not forced to defaults',()=>{
  const low=make({option:'wait',actualOrders:100,unitRevenue:100});
  const zero=make({option:'wait',actualOrders:100,unitRevenue:0});
