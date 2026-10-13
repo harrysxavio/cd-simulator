@@ -37,4 +37,9 @@ El costo de compra, el plazo del proveedor, el ingreso efectivo a bodega y el us
 3. GitHub Pages **v11.51 revisión 160** desplegado y verificación HTTP pública aprobada.
 4. Android físico/TalkBack continúa pendiente para M7.
 
-**Evidencias de cierre:** pendientes de verificación.
+**Cierre verificado (13 de octubre de 2026, Chile):** PR [#49](https://github.com/harrysxavio/cd-simulator/pull/49) integrada en `main` (commit funcional `5e0a180`), versión **v11.51 revisión 160**.
+- PR final: [Node #38472852986](https://github.com/harrysxavio/cd-simulator/actions/runs/38472852986) y [Chromium #38472852997](https://github.com/harrysxavio/cd-simulator/actions/runs/38472852997) aprobados.
+- `main`: [Node #38473362127](https://github.com/harrysxavio/cd-simulator/actions/runs/38473362127), [Chromium #38473362124](https://github.com/harrysxavio/cd-simulator/actions/runs/38473362124), [GitHub Pages #38473360995](https://github.com/harrysxavio/cd-simulator/actions/runs/38473360995) y [HTTP #38473362204](https://github.com/harrysxavio/cd-simulator/actions/runs/38473362204): **todos aprobados**.
+- Durante las pruebas Node se corrigieron dos expectativas incorrectas: una PO grande puede monopolizar varios días de recepción FIFO y un test debe realmente variar la cobertura. En Chromium se actualizó el selector antiguo de «Día de recepción» a «Día previsto de llegada al muelle», preservando la persistencia móvil y la claridad física.
+- Los nuevos controles comprueban trazabilidad y conservación por SKU/PO desde faltante, compromiso y fecha supuesta de llegada hasta muelle, bodega y Calidad. Sin inventar facturas, pagos ni disponibilidad anticipada; no se suma a la jornada agregada.
+- **Android físico/TalkBack siguen pendientes para M7. Siguiente M5-23:** trasladar stock real desde RESERVA-CD a PICK-FACE sin crear compras ni unidades nuevas.
