@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=159';
-import {createSkuSessionCache} from './sku-session.js?v=159';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=159';
-import {aggregateFlowCsv} from './aggregate-export.js?v=159';
-import {campaignSkuContract} from './campaign-contract.js?v=159';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=159';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=159';
-import {campaignAreaReadModel} from './area-ledger.js?v=159';
-import {laborAudit} from './labor.js?v=159';
-import {skuAudit} from './audit.js?v=159';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=159';
-import {integratedDemand} from './integrated.js?v=159';
-import {eventSimulation} from './events.js?v=159';
-import {deliveryTimeline} from './timeline.js?v=159';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=159';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=159';
-import {demandJourney} from './journey.js?v=159';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=159';
-import {flow,diagnose,ACTIONS} from './flow.js?v=159';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=159';
-import {areaKpis} from './kpis.js?v=159';
-import {causalAudit} from './causal.js?v=159';
-import {managerDiagnosis} from './diagnosis-guide.js?v=159';
-import {skuServiceBrief} from './sku-service.js?v=159';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=159';
-import {attentionSignals} from './attention.js?v=159';
+import {supplyBridge} from './supply-bridge.js?v=160';
+import {createSkuSessionCache} from './sku-session.js?v=160';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=160';
+import {aggregateFlowCsv} from './aggregate-export.js?v=160';
+import {campaignSkuContract} from './campaign-contract.js?v=160';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=160';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=160';
+import {campaignAreaReadModel} from './area-ledger.js?v=160';
+import {laborAudit} from './labor.js?v=160';
+import {skuAudit} from './audit.js?v=160';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=160';
+import {integratedDemand} from './integrated.js?v=160';
+import {eventSimulation} from './events.js?v=160';
+import {deliveryTimeline} from './timeline.js?v=160';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=160';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=160';
+import {demandJourney} from './journey.js?v=160';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=160';
+import {flow,diagnose,ACTIONS} from './flow.js?v=160';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=160';
+import {areaKpis} from './kpis.js?v=160';
+import {causalAudit} from './causal.js?v=160';
+import {managerDiagnosis} from './diagnosis-guide.js?v=160';
+import {skuServiceBrief} from './sku-service.js?v=160';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=160';
+import {attentionSignals} from './attention.js?v=160';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -632,6 +632,53 @@ function renderSkuLab(contract=currentCampaignContract()){
   }
   add(poPanel,'p','manager-fineprint',
    'Se valorizan solo las recepciones físicas. Compra comprometida, material expedido y salida de caja simulada son conceptos distintos; no sumar estos valores entre sí ni a la jornada agregada.');
+
+  // M5-22: compact PO-to-dock-to-warehouse-to-Quality trace, with no fake ETA.
+  if(['emergency','combined'].includes(recovery.option)){
+   const urgent=canonical.urgentPurchase;
+   const urgentPanel=add(trace,'details','supply-trace-detail sku-urgent-purchase-trace');
+   urgentPanel.dataset.urgentPoScope='sku-cohort';
+   add(urgentPanel,'summary','','🚚 Compra urgente: del proveedor al stock SKU');
+   add(urgentPanel,'p','manager-fineprint',
+    'Compra simulada: '+fmt(urgent.totals.committedSkuUnits)+' unidades SKU · '+
+    'costo base comprometido CLP '+fmt(urgent.totals.principalCommitmentCLP)+
+    ' + recargo supuesto CLP '+fmt(urgent.totals.surchargeAssumptionCLP)+'.');
+   add(urgentPanel,'p','manager-fineprint',
+    'Llegó al muelle '+fmt(urgent.totals.modeledDockArrivalsSkuUnits)+
+    ' · ingresó a bodega '+fmt(urgent.totals.warehouseReceivedSkuUnits)+
+    ' · en tránsito '+fmt(urgent.totals.inTransitAtCutoffSkuUnits)+
+    ' · espera Recepción '+fmt(urgent.totals.waitingWarehouseAtCutoffSkuUnits)+'.');
+   add(urgentPanel,'p','manager-fineprint',
+    'De lo ingresado, Calidad liberó '+fmt(urgent.totals.releasedFromQualitySkuUnits)+
+    ' y mantiene '+fmt(urgent.totals.heldAtQualitySkuUnits)+
+    ' unidades retenidas. Liberado no siempre significa listo para picking.');
+   const urgentBySku=add(urgentPanel,'details','supply-trace-detail');
+   add(urgentBySku,'summary','','Ver las órdenes y fechas por SKU');
+   for(const line of urgent.bySku){
+    const item=add(urgentBySku,'p','manager-fineprint');
+    item.dataset.urgentSku=line.skuId;
+    add(item,'strong','','SKU '+line.skuId+' · ');
+    add(item,'span','',line.committedSkuUnits
+     ?'PO '+line.purchaseOrderId+' · '+fmt(line.committedSkuUnits)+' uds · llegada prevista al muelle día '+
+      line.modeledDockArrivalDay+' · primera recepción '+(line.firstWarehouseReceiptDay===null?'sin registro':'día '+line.firstWarehouseReceiptDay)+
+      ' · ingreso '+fmt(line.warehouseReceivedSkuUnits)+' · liberación Calidad '+
+      fmt(line.releasedFromQualitySkuUnits)+' · pendiente muelle '+fmt(line.waitingWarehouseAtCutoffSkuUnits)+'.'
+     :'sin compra extraordinaria (faltante o cobertura 0 %).');
+   }
+   const urgentDays=add(urgentPanel,'details','supply-trace-detail');
+   add(urgentDays,'summary','','Ver llegadas y recepciones por día');
+   for(const day of urgent.daily){
+    const item=add(urgentDays,'p','manager-fineprint');
+    item.dataset.urgentDay=String(day.day);
+    add(item,'strong','','Día '+day.day+' · ');
+    add(item,'span','','llegó al muelle '+fmt(day.arrivedAtDockSkuUnits)+
+     ' · recibió bodega '+fmt(day.warehouseReceivedSkuUnits)+'.');
+   }
+   add(urgentPanel,'p','manager-fineprint',
+    'La fecha del proveedor es una suposición y solo marca llegada al muelle. Recepción y Calidad pueden demorar el uso del SKU. '+
+    'El compromiso y recargo NO acreditan factura ni pago. No asumir que cada pedido adicional usó material de esta compra.');
+  }
+
   // M4-17: distinct from purchases, stock valuation and the aggregate day.
   const labor=canonical.operationalCost;
   const laborPanel=add(trace,'details','supply-trace-detail sku-operational-cost');
@@ -794,13 +841,13 @@ function renderSkuLab(contract=currentCampaignContract()){
   coverInput.onchange=()=>{skuPurchaseCoverage=Number(coverInput.value);save();renderSkuLab()};
   add(coverRow,'small','','0 % evita compras extraordinarias; 100 % cubre el faltante teórico por SKU. Revisa despachos y caja antes de elegir.');
   const arrivalControl=add(arrivalRow,'div','surprise-controls');
-  const arrivalLabel=add(arrivalControl,'label','','Día de recepción de compra urgente');
-  const arrivalInput=add(arrivalControl,'select','numeric-input');arrivalInput.setAttribute('aria-label','Día de recepción de compra urgente');
+  const arrivalLabel=add(arrivalControl,'label','','Día previsto de llegada al muelle');
+  const arrivalInput=add(arrivalControl,'select','numeric-input');arrivalInput.setAttribute('aria-label','Día previsto de llegada al muelle');
   for(const d of [1,2,5,10,13]){const opt=add(arrivalInput,'option','',d===13?'Día 13 · fuera del horizonte':'Día '+d);opt.value=String(d);}
   arrivalInput.value=String(skuUrgentArrival);arrivalInput.disabled=skuLocked;
   arrivalInput.onchange=()=>{skuUrgentArrival=Number(arrivalInput.value);save();renderSkuLab()};
   // Do not replay the selected option: it was calculated above.
-  add(arrivalRow,'small','',skuUrgentArrival>12?'⚠ La compra llega después del horizonte de 12 días: genera desembolso comprometido, pero no resuelve pedidos dentro del período.':'La compra llega el día '+skuUrgentArrival+'. No puede resolver pedidos anteriores; inventario y picking solo disponen de ella desde la recepción.');
+  add(arrivalRow,'small','',skuUrgentArrival>12?'⚠ La compra llegaría después del horizonte: crea un compromiso, no un pago ni stock disponible dentro del período.':'Llegada prevista al muelle día '+skuUrgentArrival+'. Recepción y Calidad pueden retrasar cuándo el stock realmente estará disponible para Picking.');
   if(recovery.urgent.length){
     const purchased=recovery.urgent.reduce((n,p)=>n+p.qty,0);
     const received=recovery.recovered.ledger.reduce((n,e)=>n+Object.values(e.receivedUrgent).reduce((a,qty)=>a+qty,0),0);
@@ -1027,7 +1074,7 @@ function renderSkuRecoveryMission(contract=null){
   coverage.value=String(skuPurchaseCoverage);
   coverage.onchange=()=>{skuPurchaseCoverage=Number(coverage.value);save();render()};
   }
-  const date=add(row,'label','',selected==='reserve'?'¿En qué día se habilitará físicamente la reserva?':'¿Cuándo llegará al CD? (supuesto, no confirmación del proveedor)');
+  const date=add(row,'label','',selected==='reserve'?'¿En qué día se habilitará físicamente la reserva?':'¿Qué día llegaría al muelle? (supuesto, no confirmación)');
   const arrival=add(row,'select','numeric-input');arrival.setAttribute('aria-label',selected==='reserve'?'Día de habilitación de la reserva ubicada':'Día previsto de compra extraordinaria en Recuperación');
   for(const d of [1,2,5,10,13]){const op=add(arrival,'option','',d===13?'Día 13 · fuera del horizonte':'Día '+d);op.value=String(d)}
   arrival.value=String(skuUrgentArrival);

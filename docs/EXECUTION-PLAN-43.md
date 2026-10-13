@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.50.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.51.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -104,6 +104,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 19 | **Completada** | PR #46 v11.48 integrada en `main` (7d8849c); Node #38386765739, Chromium #38386765814, Pages #38386765517 y HTTP #38386765720 aprobados. Auditoría SKU por evento/PO/día, 3 partidas incluidas y 6 excluidas sin doble conteo ni caja inventada; guardia de sintaxis JS nueva. Ver STATUS-V11.48.md. |
 | 20 | **Completada** | PR #47 v11.49 integrada en `main` (b9d6217); Node #38400327588, Chromium #38400327536, Pages #38400327324, HTTP #38400327630 aprobados. Una base congelada y compartida por cinco alternativas, rechazo de cambios físicos implícitos y caché acotada. Ver STATUS-V11.49.md. |
 | 21 | **Completada** | PR #48 v11.50 integrada en `main` (d688d0b). Node #38453947047, Chromium #38453946397, Pages #38453945793 y HTTP #38453947375 aprobados. Esperar **reutiliza el replay físico original**, sin acción/costo incremental, con backlog y fechas exactas; staging en baseline evita deltas falsos. Ver STATUS-V11.50.md. |
-| 22–42 | **Pendientes de cierre** | Siguiente M5-22: compra urgente por SKU, PO, plazo, recargo y recepción trazada desde baseline congelado; después M5–M8. |
+| 22 | **En curso** | v11.51: faltante y cobertura urgente por SKU, PO, costo, muelle, recepción, Calidad y recargo separados de caja; Node/Chromium/Pages sujetos a aprobación. Ver STATUS-V11.51.md. |
+| 23–42 | **Pendientes de cierre** | Siguiente M5-23: traslado de reserva interna existente sin inventar stock; después M5–M8. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
