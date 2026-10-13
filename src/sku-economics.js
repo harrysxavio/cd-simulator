@@ -55,7 +55,9 @@ export function skuPartialContributionReadModel({
   ||!nonnegative(comparison.extraLabor)||!nonnegative(comparison.incrementalExpense)
   ||!nonnegative(comparison.penaltyRecovered)||!nonnegative(comparison.holdingRecovered)
   ||!qty(comparison.base?.completed)||!qty(replay.completed)
-  ||!nonnegative(comparison.incrementalRevenue)){
+  // Comparisons can LOSE dispatches (e.g. independent staging with limited transport).
+  // Their incremental revenue may be legitimately negative; gross dispatch value cannot.
+  ||!signed(comparison.incrementalRevenue)){
   invalid('fuentes, tarifa, período o alcance incompatibles');
  }
  const unitRevenue=comparison.unitRevenue,shipmentsByDay=new Map(),ids=new Set();
