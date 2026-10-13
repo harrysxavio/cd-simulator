@@ -52,4 +52,9 @@ El veredicto confirma **consistencia de la simulación**, NO hace una auditoría
 3. Pages y HTTP de **v11.48/revisión 157** aprobados.
 4. Prueba Android físico/TalkBack continúa programada para M7; no declarar cubierta con emulación.
 
-**Evidencia de cierre:** pendiente de obtención al crear este documento.
+**Cierre verificado (13 de octubre de 2026, hora de Chile):** PR [#46](https://github.com/harrysxavio/cd-simulator/pull/46) fusionada en `main` (merge `7d8849c`). 
+- Rama de PR final: [Node #38386176695](https://github.com/harrysxavio/cd-simulator/actions/runs/38386176695) y [Chromium #38386176909](https://github.com/harrysxavio/cd-simulator/actions/runs/38386176909) **aprobados**.
+- Código funcional en `main`: [Node #38386765739](https://github.com/harrysxavio/cd-simulator/actions/runs/38386765739), [Chromium #38386765814](https://github.com/harrysxavio/cd-simulator/actions/runs/38386765814), [Pages #38386765517](https://github.com/harrysxavio/cd-simulator/actions/runs/38386765517) y [HTTP #38386765720](https://github.com/harrysxavio/cd-simulator/actions/runs/38386765720): **todos aprobados**.
+- Corrección preventiva de esta microfase: el primer E2E detectó una declaración duplicada de `const audit` en el renderizador, que impedía cargar toda la interfaz; se renombró `financialAudit` y se añadió `tests/app-module-syntax.test.mjs`, por lo que la regresión Node revisa la sintaxis de `src/app.js` antes de Chromium.
+- Resultado aprobado: compras y recepción, inventario por ubicación, costo de material expedido, turnos adicionales y contribución parcial conciliados por eventos físicos/CLP. El veredicto es **consistencia didáctica**, nunca contabilidad real, EBITDA, utilidad, factura ni caja.
+- Android físico y TalkBack permanecen pendientes dentro de M7. Siguiente microfase: **M5-20: baseline inmutable común a alternativas**.
