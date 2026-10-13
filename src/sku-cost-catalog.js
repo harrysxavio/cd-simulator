@@ -30,7 +30,7 @@ export const SKU_COST_DEFAULTS=freezeDeep({
 const ACTIVITY_RULES=freezeDeep([
  {id:'order-revenue',label:'Ingreso ilustrativo por pedido completo expedido',rateKey:'revenueCLPPerShippedOrder',basis:'CLP/pedido',category:'revenue-proxy',recognition:'estimated-not-confirmed',cashConfirmed:false},
  {id:'urgent-surcharge',label:'Recargo de compra extraordinaria',rateKey:'urgentSurchargeRate',basis:'fracción del valor de compra urgente',category:'incremental-purchase-commitment',recognition:'commitment-not-payment',cashConfirmed:false},
- {id:'extra-capacity',label:'Refuerzo de capacidad',rateKey:'addedCapacityCLPPerDay',basis:'CLP/día de campaña',category:'operational-assumption',recognition:'simplified-daily-cost',cashConfirmed:false},
+ {id:'extra-capacity',label:'Refuerzo de capacidad',rateKey:'addedCapacityCLPPerDay',basis:'CLP/jornada de refuerzo activada',category:'operational-assumption',recognition:'simplified-daily-cost',cashConfirmed:false},
  {id:'backlog-penalty',label:'Penalidad ilustrativa por retraso',rateKey:'backlogPenaltyCLPPerOrderDay',basis:'CLP/pedido pendiente/día',category:'decision-proxy',recognition:'not-booked-penalty',cashConfirmed:false},
  {id:'inventory-holding',label:'Tenencia ilustrativa de stock',rateKey:'holdingFractionPerCLPDay',basis:'fracción del valor SKU/día',category:'decision-proxy',recognition:'not-booked-storage',cashConfirmed:false}
 ]);
