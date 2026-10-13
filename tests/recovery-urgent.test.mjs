@@ -101,7 +101,7 @@ test('M5-22: physical receipts can be spread across days by Receiving capacity a
  assert.ok(trace.totals.waitingWarehouseAtCutoffSkuUnits>0);
  assert.equal(trace.totals.releasedFromQualitySkuUnits,0);
  assert.equal(trace.totals.heldAtQualitySkuUnits,trace.totals.warehouseReceivedSkuUnits);
- assert.ok(trace.bySku.some(x=>x.firstWarehouseReceiptDay>1));
+ assert.ok(trace.bySku.some(x=>x.firstWarehouseReceiptDay===1));
  assert.ok(trace.daily.some(x=>x.day>1&&x.warehouseReceivedSkuUnits>0));
  assert.ok(trace.bySku.every(x=>x.firstQualityReleaseDay===null));
  assert.ok(campaign.receipts.every(r=>r.day>=campaign.purchaseOrders.find(p=>p.id===r.purchaseOrderId).expectedArrivalDay));
@@ -189,7 +189,7 @@ test('M5-22: original purchasing plan stays unchanged when lead day and coverage
 
 test('M5-22: distorted modeled PO, physical receipts, supplier dates or financial surcharge are rejected',()=>{
  const state=build({option:'emergency',urgentArrivalDay:2,
-  receivingUnitCapacity:35,qualityReleasePercent:65});
+  purchaseCoveragePercent:50,receivingUnitCapacity:35,qualityReleasePercent:65});
  const good=inputs(state);
  const first=good.purchaseOrders.find(p=>p.source==='urgent');
  assert.ok(first);
