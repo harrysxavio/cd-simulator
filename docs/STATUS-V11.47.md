@@ -59,4 +59,9 @@ No sumar estas cifras a `finance()` de jornada agregada. Tampoco sumarlas direct
 3. Pages desplegado y verificación HTTP efectiva de **v11.47 / revisión 156**.
 4. Android físico/TalkBack permanece pendiente para M7.
 
-**Evidencia final:** pendiente al redactar; no marcar completada por mera existencia de código.
+**Cierre verificado (13 de octubre de 2026, hora de Chile):** PR [#45](https://github.com/harrysxavio/cd-simulator/pull/45) integrada en `main` mediante merge `3e03422`.
+
+- Rama de PR: regresión Node [#38341935965](https://github.com/harrysxavio/cd-simulator/actions/runs/38341935965) y Chromium [#38341935891](https://github.com/harrysxavio/cd-simulator/actions/runs/38341935891) aprobados.
+- `main`: regresión Node [#38342297015](https://github.com/harrysxavio/cd-simulator/actions/runs/38342297015), Chromium [#38342296935](https://github.com/harrysxavio/cd-simulator/actions/runs/38342296935), Pages [#38342297012](https://github.com/harrysxavio/cd-simulator/actions/runs/38342297012) y verificación HTTP [#38342296927](https://github.com/harrysxavio/cd-simulator/actions/runs/38342296927): **aprobados**.
+- Durante la primera revisión, los controles detectaron una validación incorrecta: el delta económico de una alternativa puede ser negativo cuando transporta menos pedidos que el baseline. Se corrigió y se agregó una prueba que evita confundir un delta negativo con ingreso bruto negativo. Una prueba intermedia también asumía erróneamente que el baseline despachaba con capacidad de Transporte cero; se sustituyó por un caso físico factible. **Las suites finales quedaron verdes.**
+- Android físico/TalkBack aún pendiente dentro de M7. M4-19 continuará la auditoría económica transversal.
