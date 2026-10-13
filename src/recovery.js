@@ -31,7 +31,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const baselineInputs={policy,plannedOrders,actualOrders,delayDays,supplierFill,
   dailyCapacity,days,qualityReleasePercent,inventoryAccuracyPercent,
   receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,
-  plannedForecastPercent,planningCoveragePercent,stock,reservePercent};
+  plannedForecastPercent,planningCoveragePercent,stock,reservePercent,separateTransport};
  const baseline=baselineSnapshot===null?createRecoveryBaseline(baselineInputs)
   :assertRecoveryBaseline(baselineSnapshot,baselineInputs);
  const openingState=baseline.openingState;
@@ -56,7 +56,9 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
   }
  }
  const capacity=dailyCapacity+choice.extraCapacity;
- const recovered=eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,stock:openingStock,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent,reserveStock,reserveReleaseDay:choice.releaseReserve?urgentArrivalDay:null,separateTransport});
+ // Waiting makes NO intervention: reuse the exact event book of the
+ // frozen actual-demand baseline, including the same Picking/Transport mode.
+ const recovered=option==='wait'?base.actual:eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,stock:openingStock,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent,reserveStock,reserveReleaseDay:choice.releaseReserve?urgentArrivalDay:null,separateTransport});
  // A recovery option may create a SEPARATE urgent PO, but cannot rewrite
  // an original supplier commitment (including its expected arrival day).
  assertFrozenOriginalPurchases(base.originalPurchaseOrders,recovered);
