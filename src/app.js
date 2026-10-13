@@ -632,6 +632,36 @@ function renderSkuLab(contract=currentCampaignContract()){
   }
   add(poPanel,'p','manager-fineprint',
    'Se valorizan solo las recepciones físicas. Compra comprometida, material expedido y salida de caja simulada son conceptos distintos; no sumar estos valores entre sí ni a la jornada agregada.');
+  // M4-17: distinct from purchases, stock valuation and the aggregate day.
+  const labor=canonical.operationalCost;
+  const laborPanel=add(trace,'details','supply-trace-detail sku-operational-cost');
+  laborPanel.dataset.operationalCostScope='sku-cohort';
+  add(laborPanel,'summary','','🛠️ Refuerzo: jornadas y capacidad ociosa (CLP)');
+  add(laborPanel,'p','manager-fineprint',
+   'Jornadas de refuerzo activadas '+fmt(labor.totals.chargeableShifts)+
+   ' / '+fmt(labor.daily.length)+' · tarifa CLP '+fmt(labor.rateCLPPerActivatedShift)+
+   ' por jornada activada · costo modelado CLP '+fmt(labor.totals.totalCostCLP)+'.');
+  add(laborPanel,'p','manager-fineprint',
+   'Cupos adicionales asignados '+fmt(labor.totals.assignedExtraSlots)+
+   ' · utilizados sobre capacidad base '+fmt(labor.totals.utilizedExtraSlots)+
+   ' · ociosos '+fmt(labor.totals.idleExtraSlots)+'.');
+  add(laborPanel,'p','manager-fineprint',
+   labor.extraCapacityOrdersPerDay
+    ?'Solo se activa refuerzo en días con picking o expedición. Si se activa, se paga la jornada incluso con cupos ociosos; días sin actividad no se contratan.'
+    :'No se solicitó refuerzo adicional de capacidad: no hay jornadas ni cargos extra.');
+  const laborDays=add(laborPanel,'details','supply-trace-detail');
+  add(laborDays,'summary','','Ver activación y costo por día');
+  for(const day of labor.daily){
+   const line=add(laborDays,'p','manager-fineprint');
+   line.dataset.operationalCostDay=String(day.day);
+   add(line,'strong','','Día '+day.day+' · ');
+   add(line,'span','',(day.activated?'refuerzo activado':'sin refuerzo')+
+    ' · cupos ociosos '+fmt(day.idleExtraSlots)+
+    ' · CLP '+fmt(day.costCLP)+'.');
+  }
+  add(laborPanel,'p','manager-fineprint',
+   'Los cupos son capacidad máxima de pedidos, no horas ni trabajadores comprobados. Pago real y costos base por área: sin datos. Es un costo operativo ilustrativo, no nómina, ni venta ni inventario.');
+
   add(trace,'small','','Abastecimiento pendiente de ingresar: '+fmt(commitment.totals.originalInTransit+commitment.totals.urgentInTransit)+' unidades aún no arribadas · '+fmt(commitment.totals.waitingReceiving)+' en cola de Recepción · '+fmt(commitment.totals.originalSupplierShortfall)+' unidades incumplidas por proveedor.');
   const commitmentDetail=add(trace,'details','supply-trace-detail');
   add(commitmentDetail,'summary','','Ver conciliación de compras por SKU');
