@@ -724,10 +724,15 @@ function renderSkuLab(contract=currentCampaignContract()){
   }
   const auditExcluded=add(auditPanel,'details','supply-trace-detail');
   add(auditExcluded,'summary','','Ver 6 conceptos excluidos');
+  const auditLabels={
+   'original-purchase':'Compra original','urgent-purchase':'Compra urgente',
+   'urgent-surcharge':'Recargo urgente','closing-inventory':'Stock en bodega',
+   'backlog-proxy':'Retrasos hipotéticos','holding-proxy':'Tenencia hipotética'
+  };
   for(const line of audit.excluded){
    const p=add(auditExcluded,'p','manager-fineprint');
    p.dataset.auditExcluded=line.id;
-   add(p,'strong','',line.id.replaceAll('-',' ')+' · ');
+   add(p,'strong','',(auditLabels[line.id]||line.id)+' · ');
    add(p,'span','','CLP '+fmt(line.amountCLP)+' · '+line.reason+'.');
   }
   add(auditPanel,'p','manager-fineprint',
