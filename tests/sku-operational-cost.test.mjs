@@ -102,7 +102,7 @@ test('M4-17: staging with constrained transport can still require picking reinfo
 
 test('M4-17: recovery estimates cannot erase deployed but unused reinforcement',()=>{
  const {comparison,campaign,operating}=get({
-  option:'overtime',actualOrders:200,days:3,transportUnitCapacity:1
+  option:'overtime',actualOrders:200,days:3,transportUnitCapacity:2
  });
  assert.equal(campaign.passed,true);
  assert.ok(operating.totals.chargeableShifts>0);
