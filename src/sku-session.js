@@ -1,4 +1,5 @@
 import {recoveryComparison} from './recovery.js';
+import {createRecoveryBaseline,recoveryBaselineKey} from './recovery-baseline.js';
 import {supplyBridge} from './supply-bridge.js';
 import {campaignAreaReadModel} from './area-ledger.js';
 
@@ -14,12 +15,16 @@ import {campaignAreaReadModel} from './area-ledger.js';
  * not retain an unbounded number of detailed order/event ledgers in memory.
  */
 export function createSkuSessionCache({
- replay=recoveryComparison,bridge=supplyBridge,readModel=campaignAreaReadModel,maxEntries=10
+ replay=recoveryComparison,bridge=supplyBridge,readModel=campaignAreaReadModel,
+ baselineBuilder=createRecoveryBaseline,maxEntries=10
 }={}){
  if(!Number.isSafeInteger(maxEntries)||maxEntries<1||maxEntries>30){
   throw new Error('Límite de caché SKU inválido');
  }
  const entries=new Map();
+ // Reuse one frozen before-intervention baseline across ALL choices for the
+ // same physical campaign scenario. Bounded separately from view projections.
+ const baselines=new Map();
  let simulations=0,projections=0,serial=0;
  const freezeDeep=value=>{
   if(value&&typeof value==='object'&&!Object.isFrozen(value)){
@@ -41,6 +46,25 @@ export function createSkuSessionCache({
   const key=JSON.stringify([contract.campaignId,skuInputs,option,urgentArrivalDay,purchaseCoveragePercent]);
   return {key,contract,skuInputs,option,urgentArrivalDay,purchaseCoveragePercent};
  }
+ function baselineFor(i){
+  const key=JSON.stringify([i.contract.campaignId,recoveryBaselineKey(i.skuInputs)]);
+  const existing=baselines.get(key);
+  if(existing){
+   baselines.delete(key);baselines.set(key,existing);
+   return existing;
+  }
+  const baseline=freezeDeep(baselineBuilder(i.skuInputs));
+  if(baseline?.scope!=='sku-cohort'
+   ||baseline.stage!=='before-recovery'
+   ||baseline.scenarioKey!==recoveryBaselineKey(i.skuInputs)
+   ||baseline.plannedOrders!==i.contract.plannedSampleOrders
+   ||baseline.actualOrders!==i.skuInputs.actualOrders){
+   throw new Error('El baseline SKU no corresponde a la campaña');
+  }
+  baselines.set(key,baseline);
+  while(baselines.size>maxEntries)baselines.delete(baselines.keys().next().value);
+  return baseline;
+ }
  function getEntry(options){
   const i=inputFor(options);
   const existing=entries.get(i.key);
@@ -49,12 +73,16 @@ export function createSkuSessionCache({
    entries.delete(i.key);entries.set(i.key,existing);
    return existing;
   }
+  const baseline=baselineFor(i);
   const comparison=freezeDeep(replay({
    ...i.skuInputs,option:i.option,urgentArrivalDay:i.urgentArrivalDay,
-   purchaseCoveragePercent:i.purchaseCoveragePercent
+   purchaseCoveragePercent:i.purchaseCoveragePercent,baselineSnapshot:baseline
   }));
   if(comparison.recovered?.orders!==i.skuInputs.actualOrders
-   ||comparison.integrated?.plannedOrders!==i.contract.plannedSampleOrders){
+   ||comparison.integrated?.plannedOrders!==i.contract.plannedSampleOrders
+   ||comparison.baselineSnapshot!==baseline
+   ||comparison.integrated!==baseline.integrated
+   ||comparison.base!==baseline.integrated.actual){
    throw new Error('La ejecución SKU no corresponde a la campaña');
   }
   simulations++;
@@ -93,7 +121,7 @@ export function createSkuSessionCache({
  }
  return Object.freeze({
   getComparison,getProjection,
-  clear(){entries.clear();simulations=0;projections=0;serial=0},
+  clear(){entries.clear();baselines.clear();simulations=0;projections=0;serial=0},
   stats(){return Object.freeze({entries:entries.size,simulations,projections,maxEntries})}
  });
 }
