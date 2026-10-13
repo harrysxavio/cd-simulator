@@ -42,4 +42,8 @@ M5-21 introduce la modalidad de Picking/Transporte como **supuesto físico de pa
 3. Pages desplegado y verificación HTTP pública de **v11.50, revisión 159**.
 4. Android físico/TalkBack permanece pendiente para M7.
 
-**Evidencias finales:** pendientes de verificar tras abrir PR.
+**Cierre verificado (13 de octubre de 2026, Chile):** PR [#48](https://github.com/harrysxavio/cd-simulator/pull/48) fusionada en `main` mediante commit `d688d0b`. Versión funcional **v11.50, revisión 159**.
+- PR: [regresión Node #38453377223](https://github.com/harrysxavio/cd-simulator/actions/runs/38453377223) y [Chromium #38453377439](https://github.com/harrysxavio/cd-simulator/actions/runs/38453377439): **aprobados**.
+- `main`: [modelo #38453947047](https://github.com/harrysxavio/cd-simulator/actions/runs/38453947047), [navegador #38453946397](https://github.com/harrysxavio/cd-simulator/actions/runs/38453946397), [Pages #38453945793](https://github.com/harrysxavio/cd-simulator/actions/runs/38453945793) y [verificación HTTP #38453947375](https://github.com/harrysxavio/cd-simulator/actions/runs/38453947375): **todos aprobados**.
+- Se validaron identidad exacta de replay `wait===baseline.actual`, fechas y backlog de cada pedido, modalidades staging/camión, compra/recurso/traslado adicional cero y ninguna ETA inventada. Se corrigió el baseline anterior sin staging cuando la operación elegida sí tenía staging.
+- **Límite:** Chromium emula dispositivos móviles; Android físico y TalkBack siguen pendientes de M7. Siguiente fase: **M5-22** compra urgente por SKU desde esta base.
