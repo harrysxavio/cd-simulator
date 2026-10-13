@@ -81,4 +81,4 @@ escenarios extremos económicos.
    por HTTP público.
 4. Android físico/TalkBack continúa como validación M7.
 
-**Evidencia de cierre:** pendiente al crear este documento.
+**Cierre verificado (12 de octubre de 2026, hora de Chile):** PR [#44](https://github.com/harrysxavio/cd-simulator/pull/44) integrada en `main` (merge `5407119`). Regresión Node de rama [38336598571](https://github.com/harrysxavio/cd-simulator/actions/runs/38336598571), Chromium de rama [38336598698](https://github.com/harrysxavio/cd-simulator/actions/runs/38336598698), regresión Node de `main` [38336924290](https://github.com/harrysxavio/cd-simulator/actions/runs/38336924290), Chromium de `main` [38336924312](https://github.com/harrysxavio/cd-simulator/actions/runs/38336924312), despliegue Pages [38336924413](https://github.com/harrysxavio/cd-simulator/actions/runs/38336924413) y verificación HTTP [38336924292](https://github.com/harrysxavio/cd-simulator/actions/runs/38336924292): **todos aprobados**. Android físico/TalkBack sigue pendiente para M7.
