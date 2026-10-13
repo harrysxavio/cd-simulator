@@ -118,6 +118,32 @@ async function verify(mode){
     assert.ok(rect?.height>=44,'M4-16 purchase disclosure must be touch-friendly');
    }
   }
+  // M4-17: physically activated extra shifts, never invented payroll-hours.
+  const resource=page.locator('[data-operational-cost-scope="sku-cohort"]');
+  assert.equal(await resource.count(),1);
+  assert.equal(await resource.getAttribute('open'),null);
+  await resource.locator(':scope > summary').click();
+  assert.match(await resource.innerText(),/Jornadas de refuerzo activadas/);
+  assert.match(await resource.innerText(),/costo modelado CLP/);
+  assert.match(await resource.innerText(),/Cupos adicionales asignados/);
+  assert.match(await resource.innerText(),/ociosos/);
+  assert.match(await resource.innerText(),/no horas ni trabajadores comprobados/);
+  const resourceDays=resource.locator('details').first();
+  assert.equal(await resourceDays.getAttribute('open'),null);
+  await resourceDays.locator('summary').click();
+  assert.equal(await resource.locator('[data-operational-cost-day]').count(),13);
+  assert.match(await resourceDays.innerText(),/Día 12/);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const viewport=await page.evaluate(()=>({
+    width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(viewport.scroll<=viewport.width+2,'Operating cost phone overflow '+JSON.stringify(viewport));
+   for(const summary of [resource.locator(':scope > summary'),resourceDays.locator('summary')]){
+    const box=await summary.boundingBox();
+    assert.ok(box?.height>=44,'Operating cost control not touch friendly');
+   }
+  }
   await page.locator('#resultTabs [data-result-target="economics"]').click();
   assert.match(await page.locator('[data-result-page="economics"]').innerText(),/jornada agregada/);
   await page.locator('#resultTabs [data-result-target="improvement"]').click();
