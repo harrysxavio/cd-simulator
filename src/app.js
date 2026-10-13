@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=156';
-import {createSkuSessionCache} from './sku-session.js?v=156';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=156';
-import {aggregateFlowCsv} from './aggregate-export.js?v=156';
-import {campaignSkuContract} from './campaign-contract.js?v=156';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=156';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=156';
-import {campaignAreaReadModel} from './area-ledger.js?v=156';
-import {laborAudit} from './labor.js?v=156';
-import {skuAudit} from './audit.js?v=156';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=156';
-import {integratedDemand} from './integrated.js?v=156';
-import {eventSimulation} from './events.js?v=156';
-import {deliveryTimeline} from './timeline.js?v=156';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=156';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=156';
-import {demandJourney} from './journey.js?v=156';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=156';
-import {flow,diagnose,ACTIONS} from './flow.js?v=156';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=156';
-import {areaKpis} from './kpis.js?v=156';
-import {causalAudit} from './causal.js?v=156';
-import {managerDiagnosis} from './diagnosis-guide.js?v=156';
-import {skuServiceBrief} from './sku-service.js?v=156';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=156';
-import {attentionSignals} from './attention.js?v=156';
+import {supplyBridge} from './supply-bridge.js?v=157';
+import {createSkuSessionCache} from './sku-session.js?v=157';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=157';
+import {aggregateFlowCsv} from './aggregate-export.js?v=157';
+import {campaignSkuContract} from './campaign-contract.js?v=157';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=157';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=157';
+import {campaignAreaReadModel} from './area-ledger.js?v=157';
+import {laborAudit} from './labor.js?v=157';
+import {skuAudit} from './audit.js?v=157';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=157';
+import {integratedDemand} from './integrated.js?v=157';
+import {eventSimulation} from './events.js?v=157';
+import {deliveryTimeline} from './timeline.js?v=157';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=157';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=157';
+import {demandJourney} from './journey.js?v=157';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=157';
+import {flow,diagnose,ACTIONS} from './flow.js?v=157';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=157';
+import {areaKpis} from './kpis.js?v=157';
+import {causalAudit} from './causal.js?v=157';
+import {managerDiagnosis} from './diagnosis-guide.js?v=157';
+import {skuServiceBrief} from './sku-service.js?v=157';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=157';
+import {attentionSignals} from './attention.js?v=157';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -702,6 +702,45 @@ function renderSkuLab(contract=currentCampaignContract()){
    ': solo para comparar decisiones, no descontadas como gastos verificados.');
   add(excludedProxies,'p','manager-fineprint',
    'Sin datos de facturas de venta, cobro al cliente, pago al proveedor, dotación base, flete, impuestos, devoluciones ni depreciación. Expedición desde el CD no prueba entrega al cliente.');
+
+  // M4-19: a SECOND-LINE audit of the same receipt/shipment event sources.
+  // Distinct name from the existing legacy skuAudit() reading below.
+  const financialAudit=canonical.economicAudit;
+  const auditPanel=add(trace,'details','supply-trace-detail sku-economic-audit');
+  auditPanel.dataset.financialAuditScope='sku-cohort';
+  add(auditPanel,'summary','','✅ Auditoría: ¿los montos cuadran sin duplicarse?');
+  add(auditPanel,'p','manager-fineprint',
+   '✓ '+fmt(Object.values(financialAudit.checks).filter(Boolean).length)+' comprobaciones · '+
+   fmt(financialAudit.totals.completeShipments)+' pedidos expedidos · CLP '+
+   fmt(financialAudit.totals.partialContributionCLP)+' de contribución parcial conciliada.');
+  add(auditPanel,'p','manager-fineprint',
+   'Un solo origen por monto: pedidos realmente expedidos, costo de sus SKU y jornadas de refuerzo activadas.');
+  const auditIncluded=add(auditPanel,'details','supply-trace-detail');
+  add(auditIncluded,'summary','','Ver 3 conceptos del resultado');
+  for(const line of financialAudit.recognised){
+   const p=add(auditIncluded,'p','manager-fineprint');
+   p.dataset.auditIncluded=line.id;
+   add(p,'strong','',(line.signedFactor<0?'− ':'+ ')+line.meaning+': ');
+   add(p,'span','','CLP '+fmt(line.amountCLP)+'.');
+  }
+  const auditExcluded=add(auditPanel,'details','supply-trace-detail');
+  add(auditExcluded,'summary','','Ver 6 conceptos excluidos');
+  const auditLabels={
+   'original-purchase':'Compra original','urgent-purchase':'Compra urgente',
+   'urgent-surcharge':'Recargo urgente','closing-inventory':'Stock en bodega',
+   'backlog-proxy':'Retrasos hipotéticos','holding-proxy':'Tenencia hipotética'
+  };
+  for(const line of financialAudit.excluded){
+   const p=add(auditExcluded,'p','manager-fineprint');
+   p.dataset.auditExcluded=line.id;
+   add(p,'strong','',(auditLabels[line.id]||line.id)+' · ');
+   add(p,'span','','CLP '+fmt(line.amountCLP)+' · '+line.reason+'.');
+  }
+  add(auditPanel,'p','manager-fineprint',
+   'No se cobran nuevamente compras comprometidas ni stock aún guardado. Reserva, Calidad y staging son ubicaciones, no entradas de caja.');
+  add(auditPanel,'p','manager-fineprint',
+   'Importante: auditoría de simulación, no auditoría contable. Sin facturas, cobros, pagos ni entrega al cliente comprobados.');
+
 
 
   add(trace,'small','','Abastecimiento pendiente de ingresar: '+fmt(commitment.totals.originalInTransit+commitment.totals.urgentInTransit)+' unidades aún no arribadas · '+fmt(commitment.totals.waitingReceiving)+' en cola de Recepción · '+fmt(commitment.totals.originalSupplierShortfall)+' unidades incumplidas por proveedor.');

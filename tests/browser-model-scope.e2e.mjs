@@ -180,6 +180,37 @@ async function verify(mode){
     assert.ok(bounds?.height>=44,'Economics drilldown below touch-size minimum');
    }
   }
+  // M4-19: independent financial audit remains readable, optional, and SKU scoped.
+  const audit=page.locator('[data-financial-audit-scope="sku-cohort"]');
+  assert.equal(await audit.count(),1);
+  assert.equal(await audit.getAttribute('open'),null);
+  await audit.locator(':scope > summary').click();
+  assert.match(await audit.innerText(),/10 comprobaciones/);
+  assert.match(await audit.innerText(),/contribución parcial conciliada/);
+  assert.match(await audit.innerText(),/no auditoría contable/i);
+  const included=audit.locator('details').first();
+  const excluded=audit.locator('details').nth(1);
+  assert.equal(await included.getAttribute('open'),null);
+  assert.equal(await excluded.getAttribute('open'),null);
+  await included.locator('summary').click();
+  assert.equal(await audit.locator('[data-audit-included]').count(),3);
+  assert.match(await included.innerText(),/Pedidos completos expedidos/);
+  await excluded.locator('summary').click();
+  assert.equal(await audit.locator('[data-audit-excluded]').count(),6);
+  assert.match(await excluded.innerText(),/recargo supuesto sin factura/);
+  assert.match(await excluded.innerText(),/activo físico no despachado/);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const dimensions=await page.evaluate(()=>({
+    width:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(dimensions.scroll<=dimensions.width+2,'M4-19 audit overflow '+JSON.stringify(dimensions));
+   for(const summary of [audit.locator(':scope > summary'),included.locator('summary'),excluded.locator('summary')]){
+    const rect=await summary.boundingBox();
+    assert.ok(rect?.height>=44,'M4-19 audit controls need 44px touch targets');
+   }
+  }
   await page.locator('#resultTabs [data-result-target="economics"]').click();
   assert.match(await page.locator('[data-result-page="economics"]').innerText(),/jornada agregada/);
   await page.locator('#resultTabs [data-result-target="improvement"]').click();

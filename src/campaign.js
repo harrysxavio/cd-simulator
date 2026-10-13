@@ -9,6 +9,7 @@ import {physicalInventoryReadModel} from './inventory-ledger.js';
 import {skuInventoryValuationReadModel} from './inventory-valuation.js';
 import {skuPurchaseCostReadModel} from './sku-purchase-cost.js';
 import {skuPartialContributionReadModel} from './sku-economics.js';
+import {skuEconomicAuditReadModel} from './sku-economic-audit.js';
 import {pickingOrderReadModel} from './picking-ledger.js';
 
 /**
@@ -142,6 +143,12 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const economicResult=skuPartialContributionReadModel({
   shipments,inventoryValuation,purchaseCost,operationalCost,comparison
  });
+ // M4-19: independent event-level audit. No second simulation or booked cash.
+ const economicAudit=skuEconomicAuditReadModel({
+  campaignId,horizonDays:replay.days,comparison,catalog,
+  purchaseOrders,receipts,shipments,orders,inventoryLedger,
+  inventoryValuation,purchaseCost,operationalCost,economicResult
+ });
  const pickingLedger=pickingOrderReadModel({replay,shipments,orders});
  const pickedById=new Map(picks.map(p=>[p.pickId,p]));
  const receivedByPO=new Map(purchaseOrders.map(x=>[x.id,0]));
@@ -182,6 +189,13 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
    &&inventoryLedger.totals.shippedSkuUnits===Object.values(replay.consumed).reduce((a,b)=>a+b,0)
    &&inventoryLedger.totals.stagingSkuUnits===Object.values(replay.endingStagingStock??{}).reduce((a,b)=>a+b,0),
   operationalCost:operationalCost.passed&&operationalCost.totals.totalCostCLP===comparison.extraLabor,
+  economicAudit:economicAudit.passed&&economicAudit.scope==='sku-cohort'
+   &&economicAudit.campaignId===campaignId
+   &&economicAudit.horizonDays===replay.days
+   &&economicAudit.totals.completeShipments===shipments.length
+   &&economicAudit.totals.dispatchedMaterialsCLP===inventoryValuation.totals.shippedToDateCLP
+   &&economicAudit.totals.deployedReinforcementCLP===operationalCost.totals.totalCostCLP
+   &&economicAudit.totals.partialContributionCLP===economicResult.totals.partialContributionCLP,
   economicResult:economicResult.passed
    &&economicResult.scope==='sku-cohort'
    &&economicResult.horizonDays===replay.days
@@ -213,7 +227,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows,commercialPlanning:planningReading}, 
   demand:{actualOrders:replay.orders,revealed:true},
-  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,inventoryValuation,purchaseCost,operationalCost,economicResult,pickingLedger,stagingAudit:replay.separateTransport?pickingLedger.stagingAudit:null,orders,receipts,qualityLots,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,dailyEvents,
+  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,inventoryValuation,purchaseCost,operationalCost,economicResult,economicAudit,pickingLedger,stagingAudit:replay.separateTransport?pickingLedger.stagingAudit:null,orders,receipts,qualityLots,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingStaged:{...replay.endingStagingStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},staged:{...day.stagingStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones. Con separateTransport:true almacena pedidos completos en STAGING-CD hasta su expedición independiente.'
