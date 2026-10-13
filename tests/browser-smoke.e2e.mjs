@@ -75,7 +75,7 @@ async function verifyExperience(mode){
   const coverage=page.locator('#skuLab select[aria-label="Cobertura de compra urgente sobre faltante SKU"]');
   await coverage.selectOption('50');
   assert.equal(await coverage.inputValue(),'50');
-  const date=page.locator('#skuLab select[aria-label="Día de recepción de compra urgente"]');
+  const date=page.locator('#skuLab select[aria-label="Día previsto de llegada al muelle"]');
   await date.selectOption('13');
   assert.equal(await date.inputValue(),'13');
   await page.reload({waitUntil:'networkidle'});
@@ -85,7 +85,7 @@ async function verifyExperience(mode){
   await page.locator('#dashboardTab').click();
   await page.locator('#resultTabs [data-result-target="inventory"]').click();
   assert.equal(await page.locator('#skuLab select[aria-label="Cobertura de compra urgente sobre faltante SKU"]').inputValue(),'50','La cobertura no persistió');
-  assert.equal(await page.locator('#skuLab select[aria-label="Día de recepción de compra urgente"]').inputValue(),'13','El plazo no persistió');
+  assert.equal(await page.locator('#skuLab select[aria-label="Día previsto de llegada al muelle"]').inputValue(),'13','El plazo no persistió');
 
   if(mode==='desktop'){
    await page.locator('#resultTabs [data-result-target="improvement"]').click();
