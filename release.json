@@ -1,8 +1,8 @@
 {
-  "version": "11.48",
-  "assetRevision": 157,
-  "release": "v11.48 · M4-19 auditoría económica física de campaña SKU",
+  "version": "11.49",
+  "assetRevision": 158,
+  "release": "v11.49 · M5-20 baseline inmutable compartido en recuperación SKU",
   "date": "2026-10-13",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M4-19: auditoría independiente y reproducible desde órdenes, ingresos y expediciones físicos por SKU/día. Conciliación del compromiso de compra, estados de proveedor, stock por ubicación, costo estándar expedido, capacidad extra activada, valor potencial y contribución parcial; categorías incluidas/excluidas explícitas y rechazo de montos falsos, cobros, nóminas o facturas inventados. Vista móvil plegable sin doble conteo ni segundo replay."
+  "notes": "M5-20: una única base congelada con pronóstico, demanda revelada, compras originales, stock y capacidades físicas; todas las cinco alternativas comparten el mismo objeto preintervención por escenario. Los cambios de recuperación no reescriben la base; modificar demanda o supuestos físicos crea otra base compatible y auditable. Caché móvil acotada, pruebas de identidad/determinismo/aislamiento y explicación plegable del escenario común."
 }
