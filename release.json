@@ -1,8 +1,8 @@
 {
-  "version": "11.44",
-  "assetRevision": 153,
-  "release": "v11.44 · M4-15 valorización diaria del inventario físico SKU",
+  "version": "11.45",
+  "assetRevision": 154,
+  "release": "v11.45 · M4-16 compromisos de compras y recepción valorizada",
   "date": "2026-10-12",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M4-15: desde el único libro de eventos y saldos físicos SKU conciliados, valora por día y SKU aperturas, recepciones, expediciones y cierre en PICK-FACE, Calidad, RESERVA-CD y STAGING-CD; verificable/no verificable son subconjuntos de disponible. Auditoría de costo estándar CLP con pruebas de no duplicación, escenarios extremos y vista móvil plegada. No representa caja, ventas, ganancia ni economía de jornada agregada."
+  "notes": "M4-16: fuente canónica por orden de compra distingue compromiso original/urgente, cumplimiento de proveedor, unidades en tránsito, cola de Recepción, entrada valorizada y costo estándar de unidades expedidas. Aclara que el desembolso urgente es proxy ilustrativo, no factura ni pago verificado. Reutiliza el ledger SKU/CLP, sin modificar stock/eventos ni combinar la jornada agregada."
 }

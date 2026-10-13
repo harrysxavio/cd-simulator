@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=153';
-import {createSkuSessionCache} from './sku-session.js?v=153';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=153';
-import {aggregateFlowCsv} from './aggregate-export.js?v=153';
-import {campaignSkuContract} from './campaign-contract.js?v=153';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=153';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=153';
-import {campaignAreaReadModel} from './area-ledger.js?v=153';
-import {laborAudit} from './labor.js?v=153';
-import {skuAudit} from './audit.js?v=153';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=153';
-import {integratedDemand} from './integrated.js?v=153';
-import {eventSimulation} from './events.js?v=153';
-import {deliveryTimeline} from './timeline.js?v=153';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=153';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=153';
-import {demandJourney} from './journey.js?v=153';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=153';
-import {flow,diagnose,ACTIONS} from './flow.js?v=153';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=153';
-import {areaKpis} from './kpis.js?v=153';
-import {causalAudit} from './causal.js?v=153';
-import {managerDiagnosis} from './diagnosis-guide.js?v=153';
-import {skuServiceBrief} from './sku-service.js?v=153';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=153';
-import {attentionSignals} from './attention.js?v=153';
+import {supplyBridge} from './supply-bridge.js?v=154';
+import {createSkuSessionCache} from './sku-session.js?v=154';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=154';
+import {aggregateFlowCsv} from './aggregate-export.js?v=154';
+import {campaignSkuContract} from './campaign-contract.js?v=154';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=154';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=154';
+import {campaignAreaReadModel} from './area-ledger.js?v=154';
+import {laborAudit} from './labor.js?v=154';
+import {skuAudit} from './audit.js?v=154';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=154';
+import {integratedDemand} from './integrated.js?v=154';
+import {eventSimulation} from './events.js?v=154';
+import {deliveryTimeline} from './timeline.js?v=154';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=154';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=154';
+import {demandJourney} from './journey.js?v=154';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=154';
+import {flow,diagnose,ACTIONS} from './flow.js?v=154';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=154';
+import {areaKpis} from './kpis.js?v=154';
+import {causalAudit} from './causal.js?v=154';
+import {managerDiagnosis} from './diagnosis-guide.js?v=154';
+import {skuServiceBrief} from './sku-service.js?v=154';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=154';
+import {attentionSignals} from './attention.js?v=154';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -588,7 +588,50 @@ function renderSkuLab(contract=currentCampaignContract()){
   add(campaignCard,'small','',canonical.passed?'✓ Eventos por pedido, recepción, calidad y stock reconciliados':'⚠ Inconsistencias en los eventos detallados; revisar auditoría.');
   add(campaignCard,'small','','Las compras originales permanecen congeladas. Esta cohorte SKU todavía no sustituye el cálculo agregado del resultado final.');
   const commitment=chain.procurementLedger;
-  add(trace,'small','','Compromisos de compra SKU (no pagos): original CLP '+fmt(commitment.obligations.originalCommitment)+' + extraordinaria CLP '+fmt(commitment.obligations.urgentCommitment)+' + recargo CLP '+fmt(commitment.obligations.urgentSurcharge)+'. No sumar con el estado de resultados agregado.');
+  // M4-16: monetary states tied to the SAME canonical PO and receipt events.
+  const poCost=canonical.purchaseCost;
+  const poPanel=add(trace,'details','supply-trace-detail sku-purchase-cost');
+  poPanel.dataset.purchaseCostScope='sku-cohort';
+  add(poPanel,'summary','','💳 Compras: compromiso, recepción y caja (CLP)');
+  add(poPanel,'p','manager-fineprint',
+   'Compromiso original CLP '+fmt(poCost.totals.originalCommitmentCLP)+
+   ' · compra urgente CLP '+fmt(poCost.totals.urgentCommitmentCLP)+
+   ' · recargo supuesto CLP '+fmt(poCost.proxy.urgentSurchargeCLP)+'.');
+  add(poPanel,'p','manager-fineprint',
+   'Del valor comprado (sin recargo): proveedor incumple CLP '+fmt(poCost.totals.supplierShortfallCLP)+
+   ' · en tránsito CLP '+fmt(poCost.totals.inTransitCLP)+
+   ' · espera en Recepción CLP '+fmt(poCost.totals.waitingWarehouseCLP)+
+   ' · ingresado al CD CLP '+fmt(poCost.totals.warehouseReceivedCLP)+'.');
+  add(poPanel,'p','manager-fineprint',
+   'Material expedido a costo estándar CLP '+fmt(poCost.totals.shippedMaterialAtStandardCostCLP)+
+   '. Incluye stock inicial y no se puede atribuir completo a compras nuevas.');
+  add(poPanel,'p','manager-fineprint',
+   'Salida de caja supuesta por compra urgente y recargo: CLP '+
+    fmt(poCost.proxy.incrementalPurchaseOutflowAssumptionCLP)+
+   '. Pago real: sin comprobante. La compra original tampoco acredita pago, factura ni vencimiento.');
+  const poOrders=add(poPanel,'details','supply-trace-detail');
+  add(poOrders,'summary','','Ver cada orden y su estado en CLP');
+  for(const item of poCost.byPurchaseOrder){
+   const line=add(poOrders,'p','manager-fineprint');
+   line.dataset.purchaseOrderId=item.purchaseOrderId;
+   add(line,'strong','',(item.source==='original'?'Original':'Urgente')+' · SKU '+item.skuId+' · ');
+   add(line,'span','','comprometido CLP '+fmt(item.committedCLP)+
+    ' · faltante '+fmt(item.supplierShortfallCLP)+' · tránsito '+fmt(item.inTransitCLP)+
+    ' · cola '+fmt(item.waitingWarehouseCLP)+
+    ' · recibido '+fmt(item.warehouseReceivedCLP)+'.');
+  }
+  const poDays=add(poPanel,'details','supply-trace-detail');
+  add(poDays,'summary','','Ver recepción valorizada por día');
+  for(const day of poCost.daily){
+   const line=add(poDays,'p','manager-fineprint');
+   line.dataset.purchaseCostDay=String(day.day);
+   add(line,'strong','','Día '+day.day+' · ');
+   add(line,'span','','ingreso CLP '+fmt(day.receivedTodayCLP)+
+    ' · acumulado CLP '+fmt(day.receivedToDateCLP)+
+    ' · pago real no confirmado.');
+  }
+  add(poPanel,'p','manager-fineprint',
+   'Se valorizan solo las recepciones físicas. Compra comprometida, material expedido y salida de caja simulada son conceptos distintos; no sumar estos valores entre sí ni a la jornada agregada.');
   add(trace,'small','','Abastecimiento pendiente de ingresar: '+fmt(commitment.totals.originalInTransit+commitment.totals.urgentInTransit)+' unidades aún no arribadas · '+fmt(commitment.totals.waitingReceiving)+' en cola de Recepción · '+fmt(commitment.totals.originalSupplierShortfall)+' unidades incumplidas por proveedor.');
   const commitmentDetail=add(trace,'details','supply-trace-detail');
   add(commitmentDetail,'summary','','Ver conciliación de compras por SKU');

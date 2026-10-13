@@ -88,6 +88,36 @@ async function verify(mode){
     assert.ok(touch?.height>=44,'Valuation touch target below 44px');
    }
   }
+  // M4-16: canonical PO values come from the same receipt book as SKU stock.
+  const purchase=page.locator('[data-purchase-cost-scope="sku-cohort"]');
+  assert.equal(await purchase.count(),1);
+  assert.equal(await purchase.getAttribute('open'),null,'PO costing should start collapsed');
+  await purchase.locator(':scope > summary').click();
+  assert.match(await purchase.innerText(),/Compromiso original CLP/);
+  assert.match(await purchase.innerText(),/compra urgente CLP/);
+  assert.match(await purchase.innerText(),/en tránsito CLP/);
+  assert.match(await purchase.innerText(),/ingresado al CD CLP/);
+  assert.match(await purchase.innerText(),/Pago real: sin comprobante/);
+  assert.match(await purchase.innerText(),/Incluye stock inicial/);
+  const poOrders=purchase.locator('details').first();
+  const poDays=purchase.locator('details').nth(1);
+  assert.equal(await poOrders.getAttribute('open'),null);
+  assert.equal(await poDays.getAttribute('open'),null);
+  await poOrders.locator('summary').click();
+  assert.ok(await purchase.locator('[data-purchase-order-id]').count()>=3);
+  assert.match(await poOrders.innerText(),/Original · SKU A/);
+  await poDays.locator('summary').click();
+  assert.equal(await purchase.locator('[data-purchase-cost-day]').count(),13);
+  assert.match(await poDays.innerText(),/Día 12/);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const dimensions=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(dimensions.scroll<=dimensions.client+2,'M4-16 purchase panel overflow '+JSON.stringify(dimensions));
+   for(const summary of [purchase.locator(':scope > summary'),poOrders.locator('summary'),poDays.locator('summary')]){
+    const rect=await summary.boundingBox();
+    assert.ok(rect?.height>=44,'M4-16 purchase disclosure must be touch-friendly');
+   }
+  }
   await page.locator('#resultTabs [data-result-target="economics"]').click();
   assert.match(await page.locator('[data-result-page="economics"]').innerText(),/jornada agregada/);
   await page.locator('#resultTabs [data-result-target="improvement"]').click();
