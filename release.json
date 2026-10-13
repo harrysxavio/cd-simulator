@@ -1,8 +1,8 @@
 {
-  "version": "11.45",
-  "assetRevision": 154,
-  "release": "v11.45 · M4-16 compromisos de compras y recepción valorizada",
+  "version": "11.46",
+  "assetRevision": 155,
+  "release": "v11.46 · M4-17 costos operacionales del refuerzo según jornada activada",
   "date": "2026-10-12",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M4-16: fuente canónica por orden de compra distingue compromiso original/urgente, cumplimiento de proveedor, unidades en tránsito, cola de Recepción, entrada valorizada y costo estándar de unidades expedidas. Aclara que el desembolso urgente es proxy ilustrativo, no factura ni pago verificado. Reutiliza el ledger SKU/CLP, sin modificar stock/eventos ni combinar la jornada agregada."
+  "notes": "M4-17: costos de capacidad adicional SKU por jornadas con Picking o expedición efectivamente observados, sin cobrar días no activados. Una jornada contratada mantiene su tarifa aunque haya cupos ociosos; registra cupos asignados, usados y ociosos. No infiere horas ni trabajadores reales. Fuente única, conciliación con el comparador de recuperación, interfaz compacta y pruebas de extremos."
 }
