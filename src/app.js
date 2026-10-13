@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=155';
-import {createSkuSessionCache} from './sku-session.js?v=155';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=155';
-import {aggregateFlowCsv} from './aggregate-export.js?v=155';
-import {campaignSkuContract} from './campaign-contract.js?v=155';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=155';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=155';
-import {campaignAreaReadModel} from './area-ledger.js?v=155';
-import {laborAudit} from './labor.js?v=155';
-import {skuAudit} from './audit.js?v=155';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=155';
-import {integratedDemand} from './integrated.js?v=155';
-import {eventSimulation} from './events.js?v=155';
-import {deliveryTimeline} from './timeline.js?v=155';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=155';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=155';
-import {demandJourney} from './journey.js?v=155';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=155';
-import {flow,diagnose,ACTIONS} from './flow.js?v=155';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=155';
-import {areaKpis} from './kpis.js?v=155';
-import {causalAudit} from './causal.js?v=155';
-import {managerDiagnosis} from './diagnosis-guide.js?v=155';
-import {skuServiceBrief} from './sku-service.js?v=155';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=155';
-import {attentionSignals} from './attention.js?v=155';
+import {supplyBridge} from './supply-bridge.js?v=156';
+import {createSkuSessionCache} from './sku-session.js?v=156';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=156';
+import {aggregateFlowCsv} from './aggregate-export.js?v=156';
+import {campaignSkuContract} from './campaign-contract.js?v=156';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=156';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=156';
+import {campaignAreaReadModel} from './area-ledger.js?v=156';
+import {laborAudit} from './labor.js?v=156';
+import {skuAudit} from './audit.js?v=156';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=156';
+import {integratedDemand} from './integrated.js?v=156';
+import {eventSimulation} from './events.js?v=156';
+import {deliveryTimeline} from './timeline.js?v=156';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=156';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=156';
+import {demandJourney} from './journey.js?v=156';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=156';
+import {flow,diagnose,ACTIONS} from './flow.js?v=156';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=156';
+import {areaKpis} from './kpis.js?v=156';
+import {causalAudit} from './causal.js?v=156';
+import {managerDiagnosis} from './diagnosis-guide.js?v=156';
+import {skuServiceBrief} from './sku-service.js?v=156';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=156';
+import {attentionSignals} from './attention.js?v=156';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -522,7 +522,7 @@ function renderSkuLab(contract=currentCampaignContract()){
   add(trace,'small','','Exactitud de Inventario '+fmt(chain.inventory.accuracyPercent)+' % → stock verificable para picking: '+Object.entries(chain.inventory.pickable).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'.');
   add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
   add(trace,'small','',skuSeparateTransport?'Picking: '+fmt(physicalAreas.metrics.pickedOrders)+' preparados · '+fmt(physicalAreas.metrics.stagedOrders)+' en staging esperando Transporte · '+fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar.':'Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
-  add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
+  add(trace,'small','','Comparador incremental hipotético (no caja real): flujo proxy CLP '+fmt(chain.finance.incrementalCash)+' · efecto económico proxy CLP '+fmt(chain.finance.economicProxy)+'.');
   // M4-14: explain rates only on demand; never add them to the aggregate P&L.
   const costRates=skuCostCatalogReadModel({catalog:SKU_CATALOG});
   const costsPanel=add(trace,'details','supply-trace-detail sku-cost-catalog');
@@ -661,6 +661,48 @@ function renderSkuLab(contract=currentCampaignContract()){
   }
   add(laborPanel,'p','manager-fineprint',
    'Los cupos son capacidad máxima de pedidos, no horas ni trabajadores comprobados. Pago real y costos base por área: sin datos. Es un costo operativo ilustrativo, no nómina, ni venta ni inventario.');
+
+  // M4-18: illustrative partial contribution only, not a customer invoice or P&L.
+  const economics=canonical.economicResult;
+  const economicPanel=add(trace,'details','supply-trace-detail sku-campaign-economics');
+  economicPanel.dataset.economicScope='sku-cohort';
+  add(economicPanel,'summary','','📊 Resultado parcial de pedidos expedidos (CLP)');
+  add(economicPanel,'p','manager-fineprint',
+   'Pedidos completos expedidos '+fmt(economics.totals.shippedOrders)+
+   ' · valor ilustrativo por pedido CLP '+fmt(economics.revenueRateCLPPerCompleteShippedOrder)+'.');
+  add(economicPanel,'p','manager-fineprint',
+   'Valor potencial de expediciones CLP '+fmt(economics.totals.potentialDispatchValueCLP)+
+   ' − costo estándar de SKU expedidos CLP '+fmt(economics.totals.dispatchedMaterialCostCLP)+
+   ' − refuerzo activado CLP '+fmt(economics.totals.incrementalOperatingCostCLP)+'.');
+  add(economicPanel,'p','manager-fineprint',
+   'Contribución parcial estimada CLP '+fmt(economics.totals.partialContributionCLP)+
+   '. Puede ser negativa; NO es utilidad, EBITDA, venta cobrada ni caja real.');
+  add(economicPanel,'p','manager-fineprint',
+   'Excluidos de la resta: compras comprometidas (original CLP '+
+    fmt(economics.excludedCommitments.originalPurchaseCommitmentCLP)+
+   ', urgente CLP '+fmt(economics.excludedCommitments.urgentPurchaseCommitmentCLP)+
+   '), recargo sin factura CLP '+fmt(economics.excludedCommitments.urgentSurchargeCommitmentCLP)+
+   ' y existencias al cierre CLP '+fmt(economics.excludedCommitments.stockStillOnHandCLP)+'.');
+  const economicDays=add(economicPanel,'details','supply-trace-detail');
+  add(economicDays,'summary','','Ver ingresos potenciales y costos por día');
+  for(const day of economics.daily){
+   const line=add(economicDays,'p','manager-fineprint');
+   line.dataset.economicDay=String(day.day);
+   add(line,'strong','','Día '+day.day+' · ');
+   add(line,'span','',fmt(day.shippedOrders)+' pedidos · valor '+fmt(day.potentialDispatchValueCLP)+
+    ' − SKU '+fmt(day.dispatchedMaterialCostCLP)+
+    ' − refuerzo '+fmt(day.incrementalOperatingCostCLP)+
+    ' = contribución CLP '+fmt(day.partialContributionCLP)+'.');
+  }
+  const excludedProxies=add(economicPanel,'details','supply-trace-detail');
+  add(excludedProxies,'summary','','Qué cifras no son costos contables confirmados');
+  add(excludedProxies,'p','manager-fineprint',
+   'Penalidad hipotética por atraso CLP '+fmt(economics.decisionProxies.backlogPenaltyAssumptionCLP)+
+   ' y tenencia hipotética de stock CLP '+fmt(economics.decisionProxies.inventoryHoldingAssumptionCLP)+
+   ': solo para comparar decisiones, no descontadas como gastos verificados.');
+  add(excludedProxies,'p','manager-fineprint',
+   'Sin datos de facturas de venta, cobro al cliente, pago al proveedor, dotación base, flete, impuestos, devoluciones ni depreciación. Expedición desde el CD no prueba entrega al cliente.');
+
 
   add(trace,'small','','Abastecimiento pendiente de ingresar: '+fmt(commitment.totals.originalInTransit+commitment.totals.urgentInTransit)+' unidades aún no arribadas · '+fmt(commitment.totals.waitingReceiving)+' en cola de Recepción · '+fmt(commitment.totals.originalSupplierShortfall)+' unidades incumplidas por proveedor.');
   const commitmentDetail=add(trace,'details','supply-trace-detail');

@@ -144,6 +144,42 @@ async function verify(mode){
     assert.ok(box?.height>=44,'Operating cost control not touch friendly');
    }
   }
+  // M4-18: real SKU dispatch events drive the educational contribution.
+  const economics=page.locator('[data-economic-scope="sku-cohort"]');
+  assert.equal(await economics.count(),1);
+  assert.equal(await economics.getAttribute('open'),null);
+  await economics.locator(':scope > summary').click();
+  assert.match(await economics.innerText(),/Pedidos completos expedidos/);
+  assert.match(await economics.innerText(),/Valor potencial de expediciones CLP/);
+  assert.match(await economics.innerText(),/costo estándar de SKU expedidos CLP/);
+  assert.match(await economics.innerText(),/Contribución parcial estimada CLP/);
+  assert.match(await economics.innerText(),/NO es utilidad, EBITDA/);
+  assert.match(await economics.innerText(),/Excluidos de la resta: compras comprometidas/);
+  const economicDays=economics.locator('details').first();
+  const economicExclusions=economics.locator('details').nth(1);
+  assert.equal(await economicDays.getAttribute('open'),null);
+  assert.equal(await economicExclusions.getAttribute('open'),null);
+  await economicDays.locator('summary').click();
+  assert.equal(await economics.locator('[data-economic-day]').count(),13);
+  assert.match(await economicDays.innerText(),/Día 12/);
+  await economicExclusions.locator('summary').click();
+  assert.match(await economicExclusions.innerText(),/Penalidad hipotética/);
+  assert.match(await economicExclusions.innerText(),/expedición desde el CD/i);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const sizes=await page.evaluate(()=>({
+    width:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(sizes.scroll<=sizes.width+2,'SKU economics overflow '+JSON.stringify(sizes));
+   for(const summary of [
+    economics.locator(':scope > summary'),economicDays.locator('summary'),
+    economicExclusions.locator('summary')
+   ]){
+    const bounds=await summary.boundingBox();
+    assert.ok(bounds?.height>=44,'Economics drilldown below touch-size minimum');
+   }
+  }
   await page.locator('#resultTabs [data-result-target="economics"]').click();
   assert.match(await page.locator('[data-result-page="economics"]').innerText(),/jornada agregada/);
   await page.locator('#resultTabs [data-result-target="improvement"]').click();
