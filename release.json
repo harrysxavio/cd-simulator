@@ -1,8 +1,8 @@
 {
-  "version": "11.46",
-  "assetRevision": 155,
-  "release": "v11.46 · M4-17 costos operacionales del refuerzo según jornada activada",
-  "date": "2026-10-12",
+  "version": "11.47",
+  "assetRevision": 156,
+  "release": "v11.47 · M4-18 resultado económico parcial de la cohorte SKU",
+  "date": "2026-10-13",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M4-17: costos de capacidad adicional SKU por jornadas con Picking o expedición efectivamente observados, sin cobrar días no activados. Una jornada contratada mantiene su tarifa aunque haya cupos ociosos; registra cupos asignados, usados y ociosos. No infiere horas ni trabajadores reales. Fuente única, conciliación con el comparador de recuperación, interfaz compacta y pruebas de extremos."
+  "notes": "M4-18: lectura inmutable de expediciones completas SKU valorizadas con ingreso potencial ilustrativo menos costo estándar físico de material expedido y refuerzo operativo activado. Contribución parcial, nunca utilidad/EBITDA, ingreso facturado o caja. Compras pendientes, existencias, recargo sin factura, penalidades y tenencia proxy excluidos del resultado para evitar doble conteo. Pruebas de consistencia y vista móvil plegable."
 }
