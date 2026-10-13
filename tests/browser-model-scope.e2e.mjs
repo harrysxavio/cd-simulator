@@ -64,6 +64,35 @@ async function verify(mode){
    assert.ok(rect?.height>=44,'Baseline control must be at least 44px tall');
   }
 
+  // M5-21: the waiting option MUST reproduce the exact no-action baseline.
+  const wait=page.locator('[data-wait-scope="sku-cohort"]');
+  assert.equal(await wait.count(),1);
+  assert.equal(await wait.getAttribute('open'),null);
+  await wait.locator(':scope > summary').click();
+  assert.match(await wait.innerText(),/Esperar sin intervenir/);
+  assert.match(await wait.innerText(),/costo incremental CLP 0/);
+  assert.match(await wait.innerText(),/pendientes al cierre/);
+  assert.match(await wait.innerText(),/NO tienen fecha de salida prometida/);
+  const days=wait.locator('details').first();
+  assert.equal(await days.getAttribute('open'),null);
+  await days.locator('summary').click();
+  assert.equal(await wait.locator('[data-wait-day]').count(),13);
+  assert.match(await days.innerText(),/Día 0/);
+  assert.match(await days.innerText(),/Día 12/);
+  assert.match(await days.innerText(),/pendientes/);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const widths=await page.evaluate(()=>({
+    width:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(widths.scroll<=widths.width+2,'Wait option causes horizontal scroll '+JSON.stringify(widths));
+   for(const control of [wait.locator(':scope > summary'),days.locator('summary')]){
+    const rect=await control.boundingBox();
+    assert.ok(rect?.height>=44,'Wait disclosure below touch size');
+   }
+  }
+
   // M4-14: SKU cost rates are visible on demand, never masquerade as P&L.
   const costRates=page.locator('[data-cost-scope="sku-cohort"]');
   assert.equal(await costRates.count(),1);

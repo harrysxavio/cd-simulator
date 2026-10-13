@@ -74,7 +74,6 @@ test('M5-20: intervention-only amounts and modes never alter the baseline seed o
    latePenaltyPerOrderDay:1000,holdingRatePerDay:0,
    extraCapacityDailyCost:135000,
    urgentArrivalDay:13,purchaseCoveragePercent:10,
-   separateTransport:true
   });
   assert.equal(r.baselineSnapshot,baseline);
   assert.equal(r.base,baseline.integrated.actual);
@@ -106,7 +105,8 @@ test('M5-20: changing a real baseline premise invalidates any former shared seed
   {...scenario,receivingUnitCapacity:0},
   {...scenario,pickingUnitCapacity:0},
   {...scenario,transportUnitCapacity:2},
-  {...scenario,days:5}
+  {...scenario,days:5},
+  {...scenario,separateTransport:true}
  ];
  for(const changed of variants){
   assert.notEqual(recoveryBaselineKey(changed),baseline.scenarioKey);

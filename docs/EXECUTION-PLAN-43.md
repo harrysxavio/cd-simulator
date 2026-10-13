@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.49.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.50.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -103,6 +103,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 18 | **Completada** | PR #45 v11.47 integrada en `main` (3e03422); modelo #38342297015, Chromium #38342296935, Pages #38342297012 y HTTP #38342296927 aprobados. Contribución parcial SKU por pedido expedido, material consumido y refuerzo aplicable; compromisos/proxies excluidos, sin confundir caja, utilidad ni EBITDA. Ver STATUS-V11.47.md. |
 | 19 | **Completada** | PR #46 v11.48 integrada en `main` (7d8849c); Node #38386765739, Chromium #38386765814, Pages #38386765517 y HTTP #38386765720 aprobados. Auditoría SKU por evento/PO/día, 3 partidas incluidas y 6 excluidas sin doble conteo ni caja inventada; guardia de sintaxis JS nueva. Ver STATUS-V11.48.md. |
 | 20 | **Completada** | PR #47 v11.49 integrada en `main` (b9d6217); Node #38400327588, Chromium #38400327536, Pages #38400327324, HTTP #38400327630 aprobados. Una base congelada y compartida por cinco alternativas, rechazo de cambios físicos implícitos y caché acotada. Ver STATUS-V11.49.md. |
-| 21–42 | **Pendientes de cierre** | Siguiente M5-21: esperar sin intervenir, backlog y fechas respecto de la misma base. Continúa M5–M8 según plan. |
+| 21 | **En curso** | v11.50: esperar comparte exactamente el replay físico original, con staging como premisa común y sin compra/refuerzo/traslado extra; backlog y fechas por pedido, pendientes sin ETA. Node, Chromium, PR y Pages pendientes. Ver STATUS-V11.50.md. |
+| 22–42 | **Pendientes de cierre** | Siguiente M5-22: compra urgente por SKU, PO, plazo, recargo y recepción trazada desde baseline congelado; después M5–M8. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
