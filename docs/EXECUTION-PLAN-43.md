@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.46.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.47.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -100,6 +100,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 15 | **Completada** | PR #42 v11.44 fusionada en `main` (d132809). Modelo #38308500673, Chromium #38308500757, Pages #38308500685 y HTTP #38308500774 aprobados. Conciliación CLP del mismo libro físico SKU por día, zona y catálogo, sin doble conteo ni pagos inventados. Ver STATUS-V11.44.md. |
 | 16 | **Completada** | PR #43 v11.45 integrada en `main` (683fda8). Modelo #38335533678, Chromium #38335533680, Pages #38335533220 y HTTP #38335533663 aprobados. Compras SKU por PO: compromiso, proveedor, tránsito, muelle, ingreso físico valorizado y caja no comprobada. Ver STATUS-V11.45.md. |
 | 17 | **Completada** | PR #44 v11.46 integrada en `main` (5407119). Modelo #38336924290, Chromium #38336924312, Pages #38336924413 y HTTP #38336924292 aprobados. Costos de refuerzo cobrados solo por jornada operativa activada, con capacidad contratada/usada/ociosa auditada y sin inventar horas ni salarios. Ver STATUS-V11.46.md. |
-| 18–42 | **Pendientes de cierre** | Siguiente M4-18: estado económico SKU con ingresos potenciales, consumo de inventario y gastos sin doble conteo; M4-19 auditoría, después M5–M8. |
+| 18 | **En curso** | v11.47: contribución económica parcial SKU por pedido completo expedido, material consumido y refuerzo aplicado; compras/proxies excluidos de la resta, caja/EBITDA/utilidad sin respaldo. CI, PR y Pages pendientes. Ver STATUS-V11.47.md. |
+| 19–42 | **Pendientes de cierre** | Siguiente M4-19 auditoría económica integral; después M5–M8 según dependencias del plan. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
