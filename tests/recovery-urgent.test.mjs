@@ -42,7 +42,7 @@ test('M5-22: all urgent SKU POs reconcile to original stock and supplier shortag
  assert.equal(comparison.originalPurchaseOrders,
   comparison.baselineSnapshot.integrated.originalPurchaseOrders);
  assert.deepEqual(trace.bySku.map(x=>x.committedSkuUnits),
-  comparison.urgent.map(x=>x.qty));
+  trace.bySku.map(x=>comparison.urgent.find(u=>u.id===x.skuId)?.qty||0));
  assert.equal(trace.totals.committedSkuUnits,total(trace.bySku,'committedSkuUnits'));
  assert.equal(trace.totals.committedSkuUnits,comparison.urgent.reduce((n,r)=>n+r.qty,0));
  assert.equal(trace.totals.principalCommitmentCLP,comparison.urgentBase);
@@ -145,13 +145,13 @@ test('M5-22: 0% coverage or zero SKU shortage generates no purchase nor invented
 
 test('M5-22: waiting, reserve and overtime never create urgent PO; combined keeps reinforcement separate',()=>{
  for(const option of ['wait','reserve','overtime']){
-  const {campaign,trace}=build({option,reservePercent:20,urgentArrivalDay:2});
+  const {comparison,campaign,trace}=build({option,reservePercent:20,urgentArrivalDay:2});
   assert.equal(campaign.passed,true);
   assert.equal(trace.totals.committedSkuUnits,0);
   assert.equal(trace.totals.principalCommitmentCLP,0);
   assert.equal(trace.totals.surchargeAssumptionCLP,0);
   assert.equal(trace.totals.completedOrdersDeltaAgainstFrozenBaseline,
-   campaign.shipments.length-(campaign.demand.actualOrders-campaign.urgentPurchase.totals.completedOrdersDeltaAgainstFrozenBaseline));
+   comparison.recovered.completed-comparison.base.completed);
  }
  const {comparison,campaign,trace}=build({
   option:'combined',urgentArrivalDay:2,qualityReleasePercent:40
