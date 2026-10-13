@@ -42,6 +42,28 @@ async function verify(mode){
   assert.equal(await coverage.locator('[data-evidence-class="dated-simulation"]').count(),6);
   await coverage.locator('summary').click();
   assert.match(await coverage.innerText(),/capacidad|SKU|stock/i);
+  // M5-20: the five recovery options reuse the same pre-intervention base.
+  const commonBase=page.locator('[data-baseline-scope="sku-cohort"]');
+  assert.equal(await commonBase.count(),1);
+  assert.equal(await commonBase.getAttribute('open'),null);
+  await commonBase.locator(':scope > summary').click();
+  assert.match(await commonBase.innerText(),/Misma base para las 5 alternativas/);
+  assert.match(await commonBase.innerText(),/Demanda real:/);
+  assert.match(await commonBase.innerText(),/stock inicial:/);
+  assert.match(await commonBase.innerText(),/Compra original comprometida: CLP/);
+  assert.match(await commonBase.innerText(),/Cambiar solo la recuperación NO modifica esta base/);
+  assert.equal(await page.locator('.sku-advisor-option').count(),5);
+  if(mode==='phone')for(const width of [360,412]){
+   await page.setViewportSize({width,height:820});
+   const limits=await page.evaluate(()=>({
+    width:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(limits.scroll<=limits.width+2,'Shared baseline mobile overflow '+JSON.stringify(limits));
+   const rect=await commonBase.locator('summary').boundingBox();
+   assert.ok(rect?.height>=44,'Baseline control must be at least 44px tall');
+  }
+
   // M4-14: SKU cost rates are visible on demand, never masquerade as P&L.
   const costRates=page.locator('[data-cost-scope="sku-cohort"]');
   assert.equal(await costRates.count(),1);
