@@ -32,10 +32,11 @@ export function recoveryBaselineSeed({
  policy='service',plannedOrders=200,actualOrders=260,
  delayDays={},supplierFill={},dailyCapacity=200,days=12,
  receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,
- qualityReleasePercent=100,inventoryAccuracyPercent=100,
+ qualityReleasePercent=100,inventoryAccuracyPercent=100,separateTransport=false,
  plannedForecastPercent=100,planningCoveragePercent=100,
  stock=null,reservePercent=0
 }={}){
+ if(typeof separateTransport!=='boolean')fail('modalidad Picking/Transporte inválida');
  const openingState=skuOpeningState({stock,reservePercent});
  // Canonical field order: equality means the *same assumptions*, independent
  // of JS object key insertion order and unrelated recovery-only settings.
@@ -43,7 +44,7 @@ export function recoveryBaselineSeed({
   policy,plannedOrders,actualOrders,
   delayDays:sortedRecord(delayDays),supplierFill:sortedRecord(supplierFill),
   dailyCapacity,days,receivingUnitCapacity,pickingUnitCapacity,
-  transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,
+  transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,separateTransport,
   plannedForecastPercent,planningCoveragePercent,
   stock:openingState.openingBySku,reservePercent:openingState.reservePercent
  };
@@ -60,6 +61,8 @@ export function createRecoveryBaseline(options={}){
  if(integrated.actual.orders!==seed.actualOrders
   ||integrated.planned.orders!==seed.plannedOrders
   ||integrated.actual.days!==seed.days||integrated.planned.days!==seed.days
+  ||integrated.actual.separateTransport!==seed.separateTransport
+  ||integrated.planned.separateTransport!==seed.separateTransport
   ||integrated.actual.ledger.length!==seed.days+1
   ||integrated.planned.ledger.length!==seed.days+1
   ||integrated.actual.deliveries.length!==SKU_CATALOG.length
@@ -109,6 +112,8 @@ export function assertRecoveryBaseline(snapshot,options={}){
   ||snapshot.integrated.planned.orders!==snapshot.plannedOrders
   ||snapshot.integrated.actual.days!==snapshot.days
   ||snapshot.integrated.planned.days!==snapshot.days
+  ||snapshot.integrated.actual.separateTransport!==snapshot.seed.separateTransport
+  ||snapshot.integrated.planned.separateTransport!==snapshot.seed.separateTransport
   ||snapshot.integrated.originalPurchaseOrders?.commitmentStage!=='before-demand-reveal'
   ||SKU_CATALOG.some(({id})=>
    snapshot.openingState.openingBySku[id]!==opening.openingBySku[id]
