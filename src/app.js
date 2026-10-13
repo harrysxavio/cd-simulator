@@ -839,6 +839,38 @@ function renderSkuLab(contract=currentCampaignContract()){
   add(baseDisclosure,'p','manager-fineprint',
    'Cambiar demanda, política, abastecimiento, capacidad base o % inicial reservado '+
    'crea otro escenario de partida. Cambiar solo la recuperación NO modifica esta base.');
+  // M5-21: waiting is a deliberate ZERO-action result on the same frozen base.
+  const waitingTrial=comparisons.find(trial=>trial.option==='wait');
+  const waiting=waitingTrial?.waitEvidence;
+  if(!waiting?.passed||waitingTrial.recovered!==frozenBase.integrated.actual
+   ||waiting.totals.pendingAfterHorizon!==frozenBase.integrated.actual.pending){
+   throw new Error('Espera no reproduce exactamente el baseline sin intervenir');
+  }
+  const waitPanel=add(advisor,'details','supply-trace-detail sku-wait-evidence');
+  waitPanel.dataset.waitScope='sku-cohort';
+  add(waitPanel,'summary','','⏳ Esperar sin intervenir · ver pedidos y plazos');
+  add(waitPanel,'p','manager-fineprint',
+   'Sin nuevas compras, traslados ni refuerzos: costo incremental CLP 0. '+
+   fmt(waiting.totals.shippedCompleteOrders)+' pedidos expedidos · '+
+   fmt(waiting.totals.pendingAfterHorizon)+' pendientes al cierre.');
+  add(waitPanel,'p','manager-fineprint',
+   'Expedidos el día 0: '+fmt(waiting.totals.shippedOnDayZero)+
+   ' · expedidos después: '+fmt(waiting.totals.shippedAfterDayZero)+
+   ' · días-pedido de espera: '+fmt(waiting.totals.backlogOrderDaysBeforeFinalCutoff)+'.');
+  add(waitPanel,'p','manager-fineprint',
+   'Los pedidos pendientes NO tienen fecha de salida prometida fuera del período. '+
+   'La expedición desde el CD tampoco confirma entrega al cliente.');
+  const waitDaily=add(waitPanel,'details','supply-trace-detail');
+  add(waitDaily,'summary','','Ver backlog y expediciones por día');
+  for(const row of waiting.daily){
+   const p=add(waitDaily,'p','manager-fineprint');
+   p.dataset.waitDay=String(row.day);
+   add(p,'strong','','Día '+row.day+' · ');
+   add(p,'span','',fmt(row.shippedOrders)+' expedidos · '+
+    fmt(row.pendingAtDayEnd)+' pendientes'+
+    (waiting.transportMode==='picking-staging-transport'
+     ?' · '+fmt(row.stagedWaitingTransport)+' preparados esperando transporte':'')+'.');
+  }
   for(const trial of comparisons){
    const optionCard=add(advisor,'div','sku-advisor-option'+(trial.option===skuRecovery?' current':''));
    const headline=add(optionCard,'div','sku-advisor-head');
@@ -1028,7 +1060,12 @@ function renderSkuRecoveryMission(contract=null){
   if(preview.urgentArrivalDay>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ La nueva compra llega después del corte: genera compromiso, pero no recupera pedidos dentro de los 12 días.');
  }
  if(['emergency','reserve'].includes(selected)&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta intervención no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
- if(selected==='wait')add(previewCard,'p','manager-warning','Esperar mantiene los pedidos pendientes; no equivale a cancelarlos ni a prometer una fecha de entrega.');
+ if(selected==='wait'){
+  add(previewCard,'p','manager-warning',
+   'Esperar no agrega compras, personal ni traslados: costo incremental CLP 0. '+
+   fmt(preview.waitEvidence.totals.pendingAfterHorizon)+
+   ' pedidos seguirán pendientes al terminar la campaña y no tienen fecha de salida prometida.');
+ }
  const timeline=add(previewCard,'details','manager-po-detail');
  add(timeline,'summary','','¿Cuándo podrían salir los pedidos?');
  add(timeline,'p','manager-timeline-explain','Este calendario ayuda a ver cuándo avanza el trabajo y cuándo quedan pedidos esperando. No confirma su entrega al cliente.');
