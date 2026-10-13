@@ -1,4 +1,5 @@
 import {SKU_COST_DEFAULTS} from './sku-cost-catalog.js';
+import {operationalCapacityCostReadModel} from './sku-operational-cost.js';
 import {integratedDemand} from './integrated.js';
 import {eventSimulation} from './events.js';
 import {SKU_CATALOG,ORDER_TEMPLATES} from './sku.js';
@@ -55,7 +56,11 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  assertFrozenOriginalPurchases(base.originalPurchaseOrders,recovered);
  const urgentBase=urgent.reduce((n,d)=>n+d.qty*d.unitCost,0);
  const urgentSurcharge=urgentBase*emergencySurchargeRate;
- const extraLabor=choice.extraCapacity?extraCapacityDailyCost*(days+1):0;
+ const operationalCost=operationalCapacityCostReadModel({
+  recovered,baseline:base.actual,option,
+  extraCapacity:choice.extraCapacity,dailyCapacity,extraCapacityDailyCost
+ });
+ const extraLabor=operationalCost.totals.totalCostCLP;
  const incrementalRevenue=(recovered.completed-base.actual.completed)*unitRevenue;
  const incrementalExpense=urgentBase+urgentSurcharge+extraLabor;
  const backlogDays=r=>r.ledger.slice(0,-1).reduce((n,day)=>n+day.backlog,0);
@@ -74,6 +79,6 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
    if(observed[skuId]!==qty)throw new Error('La apertura SKU cambia entre escenarios');
   }
  }
- return {option,label:choice.label,separateTransport,urgentArrivalDay,purchaseCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,originalPurchaseOrders:base.originalPurchaseOrders,planningCommitment:base.planningCommitment,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
-  assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Se paga refuerzo por todas las jornadas, aun si queda ocioso. Compra urgente llega el día configurado y no mejora cumplimiento anterior a la recepción. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. Reserva interna: una partición del stock inicial ubicado en RESERVA-CD; un traslado la hace disponible para Picking en el día seleccionado, sin sumar inventario ni costo de compra. No hay devoluciones, IVA ni costos de transporte. El staging opt-in no añade una tasa de almacenamiento nueva; suma su stock físico al proxy de tenencia existente.'};
+ return {option,label:choice.label,separateTransport,urgentArrivalDay,purchaseCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,operationalCost,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,originalPurchaseOrders:base.originalPurchaseOrders,planningCommitment:base.planningCommitment,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
+  assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Refuerzo de capacidad de pedidos: se activa y cobra una jornada solo cuando existe Picking o expedición efectivamente simulada ese día; si se activa se cobra la tarifa diaria aun con cupos ociosos. No equivale a horas ni personas reales y no cubre tarifas operativas base no calibradas. Compra urgente llega el día configurado y no mejora cumplimiento anterior a la recepción. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. Reserva interna: una partición del stock inicial ubicado en RESERVA-CD; un traslado la hace disponible para Picking en el día seleccionado, sin sumar inventario ni costo de compra. No hay devoluciones, IVA ni costos de transporte. El staging opt-in no añade una tasa de almacenamiento nueva; suma su stock físico al proxy de tenencia existente.'};
 }
