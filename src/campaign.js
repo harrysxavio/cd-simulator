@@ -124,6 +124,17 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
  const inventoryLedger=physicalInventoryReadModel({replay,openingState,receipts,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,receivingLedger,qualityLedger,campaignId});
  // M4-15: value the SAME already reconciled daily SKU ledger; never replay it.
  const inventoryValuation=skuInventoryValuationReadModel({inventoryLedger,catalog});
+ // M4-17 resource ledger comes from this same recovered-day timeline.
+ const operationalCost=comparison.operationalCost;
+ if(operationalCost?.passed!==true||operationalCost.scope!=='sku-cohort'
+  ||operationalCost.horizonDays!==replay.days
+  ||operationalCost.daily.length!==replay.ledger.length
+  ||operationalCost.daily.some((item,i)=>item.day!==replay.ledger[i].day
+   ||item.pickedOrders!==replay.ledger[i].pickedOrders
+   ||item.shippedOrders!==replay.ledger[i].shipped)
+  ||operationalCost.totals.totalCostCLP!==comparison.extraLabor){
+  throw new Error('Costo operacional no coincide con la campaña física SKU');
+ }
  // M4-16: one cost-status reading of the SAME PO manifest, dock arrivals and receipts.
  const purchaseCost=skuPurchaseCostReadModel({purchaseOrders,supplierLedger,receipts,inventoryValuation,comparison,catalog});
  const pickingLedger=pickingOrderReadModel({replay,shipments,orders});
@@ -165,6 +176,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
    &&inventoryLedger.totals.qualityHeldSkuUnits===replay.waitingQuality
    &&inventoryLedger.totals.shippedSkuUnits===Object.values(replay.consumed).reduce((a,b)=>a+b,0)
    &&inventoryLedger.totals.stagingSkuUnits===Object.values(replay.endingStagingStock??{}).reduce((a,b)=>a+b,0),
+  operationalCost:operationalCost.passed&&operationalCost.totals.totalCostCLP===comparison.extraLabor,
   purchaseCost:purchaseCost.passed&&purchaseCost.scope==='sku-cohort'
    &&purchaseCost.totals.warehouseReceivedCLP===inventoryValuation.totals.receivedToDateCLP
    &&purchaseCost.totals.shippedMaterialAtStandardCostCLP===inventoryValuation.totals.shippedToDateCLP,
@@ -190,7 +202,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows,commercialPlanning:planningReading}, 
   demand:{actualOrders:replay.orders,revealed:true},
-  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,inventoryValuation,purchaseCost,pickingLedger,stagingAudit:replay.separateTransport?pickingLedger.stagingAudit:null,orders,receipts,qualityLots,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,dailyEvents,
+  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,inventoryValuation,purchaseCost,operationalCost,pickingLedger,stagingAudit:replay.separateTransport?pickingLedger.stagingAudit:null,orders,receipts,qualityLots,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingStaged:{...replay.endingStagingStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},staged:{...day.stagingStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones. Con separateTransport:true almacena pedidos completos en STAGING-CD hasta su expedición independiente.'
