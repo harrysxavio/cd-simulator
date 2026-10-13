@@ -1,6 +1,7 @@
 import {SKU_COST_DEFAULTS} from './sku-cost-catalog.js';
 import {operationalCapacityCostReadModel} from './sku-operational-cost.js';
 import {createRecoveryBaseline,assertRecoveryBaseline} from './recovery-baseline.js';
+import {waitWithoutInterventionReadModel} from './recovery-wait.js';
 import {eventSimulation} from './events.js';
 import {SKU_CATALOG,ORDER_TEMPLATES} from './sku.js';
 import {assertFrozenOriginalPurchases} from './original-purchase.js';
@@ -87,6 +88,8 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
    if(observed[skuId]!==qty)throw new Error('La apertura SKU cambia entre escenarios');
   }
  }
- return {option,label:choice.label,unitRevenue,baselineSnapshot:baseline,baselineKey:baseline.scenarioKey,separateTransport,urgentArrivalDay,purchaseCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,operationalCost,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,originalPurchaseOrders:base.originalPurchaseOrders,planningCommitment:base.planningCommitment,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
+ const comparison={option,label:choice.label,unitRevenue,baselineSnapshot:baseline,baselineKey:baseline.scenarioKey,separateTransport,urgentArrivalDay,purchaseCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,operationalCost,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,originalPurchaseOrders:base.originalPurchaseOrders,planningCommitment:base.planningCommitment,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
   assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Refuerzo de capacidad de pedidos: se activa y cobra una jornada solo cuando existe Picking o expedición efectivamente simulada ese día; si se activa se cobra la tarifa diaria aun con cupos ociosos. No equivale a horas ni personas reales y no cubre tarifas operativas base no calibradas. Compra urgente llega el día configurado y no mejora cumplimiento anterior a la recepción. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. Reserva interna: una partición del stock inicial ubicado en RESERVA-CD; un traslado la hace disponible para Picking en el día seleccionado, sin sumar inventario ni costo de compra. No hay devoluciones, IVA ni costos de transporte. El staging opt-in no añade una tasa de almacenamiento nueva; suma su stock físico al proxy de tenencia existente.'};
+ if(option==='wait')comparison.waitEvidence=waitWithoutInterventionReadModel({baseline,recovered,comparison});
+ return comparison;
 }
