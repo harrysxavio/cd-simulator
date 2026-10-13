@@ -1,8 +1,8 @@
 {
-  "version": "11.50",
-  "assetRevision": 159,
-  "release": "v11.50 · M5-21 esperar sin intervenir conserva baseline y backlog SKU",
+  "version": "11.51",
+  "assetRevision": 160,
+  "release": "v11.51 · M5-22 compra urgente SKU: plazo, muelle, recepción y Calidad",
   "date": "2026-10-13",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M5-21: esperar reutiliza exactamente el replay físico del baseline, incluso en modo staging, sin compras urgentes, traslado de reserva ni refuerzo. Picking/Transporte se incorpora a las premisas comunes para no atribuir diferencias de operación a decisiones. Conciliación pedido por pedido de expediciones/fechas, backlog diario, costo incremental cero y advertencia de pendientes sin ETA posterior al horizonte. Panel móvil plegable y pruebas de extremos."
+  "notes": "M5-22: trazabilidad independiente del faltante físico SKU y su cobertura de compra urgente desde baseline congelado, PO y costo comprometido, llegada al muelle, recepción por lotes, posible espera y liberación de Calidad. Distingue recargo hipotético y pago no confirmado; no inventa disponibilidad temprana ni atribuye todos los despachos a la compra. Vista móvil compacta y pruebas de escenarios extremos."
 }
