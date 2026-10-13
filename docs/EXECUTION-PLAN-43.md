@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.47.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.48.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -101,6 +101,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 16 | **Completada** | PR #43 v11.45 integrada en `main` (683fda8). Modelo #38335533678, Chromium #38335533680, Pages #38335533220 y HTTP #38335533663 aprobados. Compras SKU por PO: compromiso, proveedor, tránsito, muelle, ingreso físico valorizado y caja no comprobada. Ver STATUS-V11.45.md. |
 | 17 | **Completada** | PR #44 v11.46 integrada en `main` (5407119). Modelo #38336924290, Chromium #38336924312, Pages #38336924413 y HTTP #38336924292 aprobados. Costos de refuerzo cobrados solo por jornada operativa activada, con capacidad contratada/usada/ociosa auditada y sin inventar horas ni salarios. Ver STATUS-V11.46.md. |
 | 18 | **Completada** | PR #45 v11.47 integrada en `main` (3e03422); modelo #38342297015, Chromium #38342296935, Pages #38342297012 y HTTP #38342296927 aprobados. Contribución parcial SKU por pedido expedido, material consumido y refuerzo aplicable; compromisos/proxies excluidos, sin confundir caja, utilidad ni EBITDA. Ver STATUS-V11.47.md. |
-| 19–42 | **Pendientes de cierre** | Siguiente M4-19 auditoría económica integral; después M5–M8 según dependencias del plan. |
+| 19 | **En curso** | v11.48: auditoría cruzada por documento/PO/SKU/día, importes reconocidos y excluidos, conciliaciones independientes y rechazo de pruebas falsas; Node, Chromium y Pages pendientes. Ver STATUS-V11.48.md. |
+| 20–42 | **Pendientes de cierre** | Siguiente M5-20: baseline inmutable para todas las alternativas de recuperación; M5–M8 continúan en microfases según plan. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
