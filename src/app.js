@@ -522,7 +522,7 @@ function renderSkuLab(contract=currentCampaignContract()){
   add(trace,'small','','Exactitud de Inventario '+fmt(chain.inventory.accuracyPercent)+' % → stock verificable para picking: '+Object.entries(chain.inventory.pickable).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'.');
   add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
   add(trace,'small','',skuSeparateTransport?'Picking: '+fmt(physicalAreas.metrics.pickedOrders)+' preparados · '+fmt(physicalAreas.metrics.stagedOrders)+' en staging esperando Transporte · '+fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar.':'Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
-  add(trace,'small','','Economía incremental: caja CLP '+fmt(chain.finance.incrementalCash)+' · proxy CLP '+fmt(chain.finance.economicProxy));
+  add(trace,'small','','Comparador incremental hipotético (no caja real): flujo proxy CLP '+fmt(chain.finance.incrementalCash)+' · efecto económico proxy CLP '+fmt(chain.finance.economicProxy)+'.');
   // M4-14: explain rates only on demand; never add them to the aggregate P&L.
   const costRates=skuCostCatalogReadModel({catalog:SKU_CATALOG});
   const costsPanel=add(trace,'details','supply-trace-detail sku-cost-catalog');
@@ -661,6 +661,48 @@ function renderSkuLab(contract=currentCampaignContract()){
   }
   add(laborPanel,'p','manager-fineprint',
    'Los cupos son capacidad máxima de pedidos, no horas ni trabajadores comprobados. Pago real y costos base por área: sin datos. Es un costo operativo ilustrativo, no nómina, ni venta ni inventario.');
+
+  // M4-18: illustrative partial contribution only, not a customer invoice or P&L.
+  const economics=canonical.economicResult;
+  const economicPanel=add(trace,'details','supply-trace-detail sku-campaign-economics');
+  economicPanel.dataset.economicScope='sku-cohort';
+  add(economicPanel,'summary','','📊 Resultado parcial de pedidos expedidos (CLP)');
+  add(economicPanel,'p','manager-fineprint',
+   'Pedidos completos expedidos '+fmt(economics.totals.shippedOrders)+
+   ' · valor ilustrativo por pedido CLP '+fmt(economics.revenueRateCLPPerCompleteShippedOrder)+'.');
+  add(economicPanel,'p','manager-fineprint',
+   'Valor potencial de expediciones CLP '+fmt(economics.totals.potentialDispatchValueCLP)+
+   ' − costo estándar de SKU expedidos CLP '+fmt(economics.totals.dispatchedMaterialCostCLP)+
+   ' − refuerzo activado CLP '+fmt(economics.totals.incrementalOperatingCostCLP)+'.');
+  add(economicPanel,'p','manager-fineprint',
+   'Contribución parcial estimada CLP '+fmt(economics.totals.partialContributionCLP)+
+   '. Puede ser negativa; NO es utilidad, EBITDA, venta cobrada ni caja real.');
+  add(economicPanel,'p','manager-fineprint',
+   'Excluidos de la resta: compras comprometidas (original CLP '+
+    fmt(economics.excludedCommitments.originalPurchaseCommitmentCLP)+
+   ', urgente CLP '+fmt(economics.excludedCommitments.urgentPurchaseCommitmentCLP)+
+   '), recargo sin factura CLP '+fmt(economics.excludedCommitments.urgentSurchargeCommitmentCLP)+
+   ' y existencias al cierre CLP '+fmt(economics.excludedCommitments.stockStillOnHandCLP)+'.');
+  const economicDays=add(economicPanel,'details','supply-trace-detail');
+  add(economicDays,'summary','','Ver ingresos potenciales y costos por día');
+  for(const day of economics.daily){
+   const line=add(economicDays,'p','manager-fineprint');
+   line.dataset.economicDay=String(day.day);
+   add(line,'strong','','Día '+day.day+' · ');
+   add(line,'span','',fmt(day.shippedOrders)+' pedidos · valor '+fmt(day.potentialDispatchValueCLP)+
+    ' − SKU '+fmt(day.dispatchedMaterialCostCLP)+
+    ' − refuerzo '+fmt(day.incrementalOperatingCostCLP)+
+    ' = contribución CLP '+fmt(day.partialContributionCLP)+'.');
+  }
+  const excludedProxies=add(economicPanel,'details','supply-trace-detail');
+  add(excludedProxies,'summary','','Qué cifras no son costos contables confirmados');
+  add(excludedProxies,'p','manager-fineprint',
+   'Penalidad hipotética por atraso CLP '+fmt(economics.decisionProxies.backlogPenaltyAssumptionCLP)+
+   ' y tenencia hipotética de stock CLP '+fmt(economics.decisionProxies.inventoryHoldingAssumptionCLP)+
+   ': solo para comparar decisiones, no descontadas como gastos verificados.');
+  add(excludedProxies,'p','manager-fineprint',
+   'Sin datos de facturas de venta, cobro al cliente, pago al proveedor, dotación base, flete, impuestos, devoluciones ni depreciación. Expedición desde el CD no prueba entrega al cliente.');
+
 
   add(trace,'small','','Abastecimiento pendiente de ingresar: '+fmt(commitment.totals.originalInTransit+commitment.totals.urgentInTransit)+' unidades aún no arribadas · '+fmt(commitment.totals.waitingReceiving)+' en cola de Recepción · '+fmt(commitment.totals.originalSupplierShortfall)+' unidades incumplidas por proveedor.');
   const commitmentDetail=add(trace,'details','supply-trace-detail');
