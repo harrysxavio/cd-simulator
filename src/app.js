@@ -704,19 +704,20 @@ function renderSkuLab(contract=currentCampaignContract()){
    'Sin datos de facturas de venta, cobro al cliente, pago al proveedor, dotación base, flete, impuestos, devoluciones ni depreciación. Expedición desde el CD no prueba entrega al cliente.');
 
   // M4-19: a SECOND-LINE audit of the same receipt/shipment event sources.
-  const audit=canonical.economicAudit;
+  // Distinct name from the existing legacy skuAudit() reading below.
+  const financialAudit=canonical.economicAudit;
   const auditPanel=add(trace,'details','supply-trace-detail sku-economic-audit');
   auditPanel.dataset.financialAuditScope='sku-cohort';
   add(auditPanel,'summary','','✅ Auditoría: ¿los montos cuadran sin duplicarse?');
   add(auditPanel,'p','manager-fineprint',
-   '✓ '+fmt(Object.values(audit.checks).filter(Boolean).length)+' comprobaciones · '+
-   fmt(audit.totals.completeShipments)+' pedidos expedidos · CLP '+
-   fmt(audit.totals.partialContributionCLP)+' de contribución parcial conciliada.');
+   '✓ '+fmt(Object.values(financialAudit.checks).filter(Boolean).length)+' comprobaciones · '+
+   fmt(financialAudit.totals.completeShipments)+' pedidos expedidos · CLP '+
+   fmt(financialAudit.totals.partialContributionCLP)+' de contribución parcial conciliada.');
   add(auditPanel,'p','manager-fineprint',
    'Un solo origen por monto: pedidos realmente expedidos, costo de sus SKU y jornadas de refuerzo activadas.');
   const auditIncluded=add(auditPanel,'details','supply-trace-detail');
   add(auditIncluded,'summary','','Ver 3 conceptos del resultado');
-  for(const line of audit.recognised){
+  for(const line of financialAudit.recognised){
    const p=add(auditIncluded,'p','manager-fineprint');
    p.dataset.auditIncluded=line.id;
    add(p,'strong','',(line.signedFactor<0?'− ':'+ ')+line.meaning+': ');
@@ -729,7 +730,7 @@ function renderSkuLab(contract=currentCampaignContract()){
    'urgent-surcharge':'Recargo urgente','closing-inventory':'Stock en bodega',
    'backlog-proxy':'Retrasos hipotéticos','holding-proxy':'Tenencia hipotética'
   };
-  for(const line of audit.excluded){
+  for(const line of financialAudit.excluded){
    const p=add(auditExcluded,'p','manager-fineprint');
    p.dataset.auditExcluded=line.id;
    add(p,'strong','',(auditLabels[line.id]||line.id)+' · ');
