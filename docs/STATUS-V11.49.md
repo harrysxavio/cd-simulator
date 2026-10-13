@@ -46,4 +46,8 @@ Después M5-22 compra urgente, M5-23 reserva interna, M5-24 capacidad adicional,
 3. Pages y verificación HTTP pública de v11.49 r158 verdes.
 4. Android físico/TalkBack pendiente de validación M7.
 
-**Evidencia de cierre:** pendiente antes de completar las verificaciones.
+**Cierre verificado (13 de octubre de 2026, Chile):** PR [#47](https://github.com/harrysxavio/cd-simulator/pull/47) integrada en `main` (merge `b9d6217`), versión **v11.49 r158**.
+- PR: [Node #38399807930](https://github.com/harrysxavio/cd-simulator/actions/runs/38399807930) y [Chromium #38399807813](https://github.com/harrysxavio/cd-simulator/actions/runs/38399807813) aprobados.
+- `main`: [Node #38400327588](https://github.com/harrysxavio/cd-simulator/actions/runs/38400327588), [Chromium #38400327536](https://github.com/harrysxavio/cd-simulator/actions/runs/38400327536), [GitHub Pages #38400327324](https://github.com/harrysxavio/cd-simulator/actions/runs/38400327324) y [HTTP #38400327630](https://github.com/harrysxavio/cd-simulator/actions/runs/38400327630): **todos aprobados**.
+- Se verificó identidad de referencia del baseline congelado entre cinco alternativas, aislamiento ante demanda/política/proveedor/reserva/capacidades distintos, preservación de compras originales y auditabilidad del mismo inventario/costo SKU.
+- **Limitación:** el porcentaje inicial de reserva forma parte del estado físico base; cambiarlo crea una base nueva. La prueba real Android/TalkBack sigue pendiente de M7. **Siguiente M5-21:** esperar sin intervenir sobre esa base compartida.
