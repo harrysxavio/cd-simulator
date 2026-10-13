@@ -813,6 +813,32 @@ function renderSkuLab(contract=currentCampaignContract()){
   const advisor=add(bridge,'div','sku-advisor');
   add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
   add(advisor,'p','muted','Las alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
+  // M5-20: each alternative must reuse the very same frozen scenario object.
+  const frozenBase=recovery.baselineSnapshot;
+  if(!frozenBase||frozenBase.scope!=='sku-cohort'
+   ||comparisons.some(trial=>trial.baselineSnapshot!==frozenBase
+    ||trial.base!==frozenBase.integrated.actual
+    ||trial.integrated!==frozenBase.integrated)){
+   throw new Error('El comparador debe partir del mismo baseline SKU congelado');
+  }
+  const baseDisclosure=add(advisor,'details','supply-trace-detail sku-common-baseline');
+  baseDisclosure.dataset.baselineScope='sku-cohort';
+  add(baseDisclosure,'summary','','🔒 Misma base para las 5 alternativas');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Demanda real: '+fmt(frozenBase.actualOrders)+' pedidos · '+
+   'stock inicial: '+fmt(frozenBase.openingState.totals.physicalSkuUnits)+' SKU, de ellos '+
+   fmt(frozenBase.openingState.totals.reserveSkuUnits)+' en RESERVA-CD.');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Sin intervenir: '+fmt(frozenBase.integrated.actual.completed)+' pedidos expedidos y '+
+   fmt(frozenBase.integrated.actual.pending)+' pendientes en '+
+   fmt(frozenBase.days+1)+' días de simulación.');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Compra original comprometida: CLP '+
+   fmt(frozenBase.integrated.committedPurchaseValue)+
+   ' · no cambia al elegir compra urgente, espera, reserva o refuerzo.');
+  add(baseDisclosure,'p','manager-fineprint',
+   'Cambiar demanda, política, abastecimiento, capacidad base o % inicial reservado '+
+   'crea otro escenario de partida. Cambiar solo la recuperación NO modifica esta base.');
   for(const trial of comparisons){
    const optionCard=add(advisor,'div','sku-advisor-option'+(trial.option===skuRecovery?' current':''));
    const headline=add(optionCard,'div','sku-advisor-head');
