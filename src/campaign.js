@@ -9,6 +9,7 @@ import {physicalInventoryReadModel} from './inventory-ledger.js';
 import {skuInventoryValuationReadModel} from './inventory-valuation.js';
 import {skuPurchaseCostReadModel} from './sku-purchase-cost.js';
 import {urgentPurchaseTraceReadModel} from './recovery-urgent.js';
+import {reserveTransferTraceReadModel} from './recovery-reserve.js';
 import {skuPartialContributionReadModel} from './sku-economics.js';
 import {skuEconomicAuditReadModel} from './sku-economic-audit.js';
 import {pickingOrderReadModel} from './picking-ledger.js';
@@ -146,6 +147,9 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   comparison,purchaseOrders,supplierLedger,receivingLedger,qualityLedger,
   receipts,purchaseCost
  });
+ // M5-23: audit the SAME dated reserve relocation against physical and CLP ledgers.
+ const reserveTrace=reserveTransferTraceReadModel({comparison,reserveTransfers,
+  inventoryLedger,inventoryValuation,purchaseOrders});
  // M4-18: partial economics of SHIPPED complete orders, not payments or profit.
  const economicResult=skuPartialContributionReadModel({
   shipments,inventoryValuation,purchaseCost,operationalCost,comparison
@@ -209,6 +213,9 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
    &&economicResult.totals.shippedOrders===shipments.length
    &&economicResult.totals.dispatchedMaterialCostCLP===inventoryValuation.totals.shippedToDateCLP
    &&economicResult.totals.incrementalOperatingCostCLP===operationalCost.totals.totalCostCLP,
+  reserveTrace:reserveTrace.passed&&reserveTrace.scope==='sku-cohort'
+   &&reserveTrace.horizonDays===replay.days
+   &&reserveTrace.totals.transferredSkuUnits===inventoryLedger.totals.internalTransfersSkuUnits,
   urgentPurchase:urgentPurchase.passed&&urgentPurchase.scope==='sku-cohort'
    &&urgentPurchase.horizonDays===replay.days
    &&urgentPurchase.totals.principalCommitmentCLP===comparison.urgentBase
@@ -240,7 +247,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
   catalog,openingState,plan:{plannedOrders,forecastOrders:comparison.forecastOrders,plannedForecastPercent:comparison.plannedForecastPercent,
    planningCoveragePercent:comparison.planningCoveragePercent,originalPurchase,originalPurchaseOrders:purchasePlan.rows,commercialPlanning:planningReading}, 
   demand:{actualOrders:replay.orders,revealed:true},
-  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,inventoryValuation,purchaseCost,urgentPurchase,operationalCost,economicResult,economicAudit,pickingLedger,stagingAudit:replay.separateTransport?pickingLedger.stagingAudit:null,orders,receipts,qualityLots,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,dailyEvents,
+  purchaseOrders,supplierLedger,receivingLedger,qualityLedger,inventoryLedger,inventoryValuation,purchaseCost,urgentPurchase,reserveTrace,operationalCost,economicResult,economicAudit,pickingLedger,stagingAudit:replay.separateTransport?pickingLedger.stagingAudit:null,orders,receipts,qualityLots,qualityReleases,reserveTransfers,picks,shipments,inventoryMovements,dailyEvents,
   inventory:{bySku,accuracyPercent:replay.inventoryAccuracyPercent,initial:openingState.openingBySku,openingReserve:openingState.reserveBySku,closingReserved:{...replay.endingReserveStock},closingStaged:{...replay.endingStagingStock},closingAvailable:{...replay.endingStock},closingQuality:{...replay.heldQuality},closingPickable:{...replay.endingPickableStock},closingUnverified:{...replay.endingUnverifiedStock},daily:replay.ledger.map(day=>({day:day.day,physical:{...day.stock},reserved:{...day.reserveStock},staged:{...day.stagingStock},pickable:{...day.pickableStock},unverified:{...day.unverifiedStock}}))},
   checks,passed:Object.values(checks).every(Boolean),
   assumptions:'Lectura canónica y determinista de la cohorte SKU. La reserva del CD proviene del stock inicial ya contabilizado; su traslado es interno y no equivale a recepción de compras. No consolida ni sustituye aún el motor agregado de ocho áreas; no modela pagos reales, facturas, devoluciones ni cancelaciones. Con separateTransport:true almacena pedidos completos en STAGING-CD hasta su expedición independiente.'

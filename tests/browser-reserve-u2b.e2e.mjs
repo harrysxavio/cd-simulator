@@ -62,6 +62,20 @@ async function exercise(mobile,day){
   assert.match(await page.locator('#skuLab').innerText(),/Decisión SKU confirmada en simulación/);
   assert.match(await page.locator('#skuLab').innerText(),/Conciliación física y económica SKU correcta/);
   assert.equal(await page.locator('#skuLab .sku-purchase-decision select:not([disabled])').count(),0);
+  // M5-23: the compact transfer audit reads the same confirmed SKU book.
+  const reservePanel=page.locator('#skuLab .sku-reserve-transfer-trace');
+  assert.equal(await reservePanel.count(),1);
+  assert.equal(await reservePanel.getAttribute('open'),null,'Reserve trace should be folded by default');
+  await reservePanel.locator('summary').first().click();
+  assert.equal(await reservePanel.isVisible(),true);
+  const reserveText=await reservePanel.textContent();
+  assert.match(reserveText,/Costo operativo del traslado: sin tarifa calibrada/);
+  assert.match(reserveText,/No es compra ni gasto/);
+  assert.match(reserveText,/En RESERVA-CD al inicio 59/);
+  assert.match(reserveText,day===1?/trasladado 59/:/trasladado 0/);
+  assert.equal(await reservePanel.locator('[data-reserve-sku]').count(),3);
+  assert.equal(await reservePanel.locator('[data-reserve-day]').count(),13);
+  
   if(mobile)for(const width of [360,412]){
    await page.setViewportSize({width,height:820});
    const dim=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth}));
