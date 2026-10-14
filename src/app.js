@@ -1,29 +1,30 @@
-import {supplyBridge} from './supply-bridge.js?v=162';
-import {createSkuSessionCache} from './sku-session.js?v=162';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=162';
-import {aggregateFlowCsv} from './aggregate-export.js?v=162';
-import {campaignSkuContract} from './campaign-contract.js?v=162';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=162';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=162';
-import {campaignAreaReadModel} from './area-ledger.js?v=162';
-import {laborAudit} from './labor.js?v=162';
-import {skuAudit} from './audit.js?v=162';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=162';
-import {integratedDemand} from './integrated.js?v=162';
-import {eventSimulation} from './events.js?v=162';
-import {deliveryTimeline} from './timeline.js?v=162';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=162';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=162';
-import {demandJourney} from './journey.js?v=162';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=162';
-import {flow,diagnose,ACTIONS} from './flow.js?v=162';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=162';
-import {areaKpis} from './kpis.js?v=162';
-import {causalAudit} from './causal.js?v=162';
-import {managerDiagnosis} from './diagnosis-guide.js?v=162';
-import {skuServiceBrief} from './sku-service.js?v=162';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=162';
-import {attentionSignals} from './attention.js?v=162';
+import {supplyBridge} from './supply-bridge.js?v=163';
+import {createSkuSessionCache} from './sku-session.js?v=163';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=163';
+import {aggregateFlowCsv} from './aggregate-export.js?v=163';
+import {campaignSkuContract} from './campaign-contract.js?v=163';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=163';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=163';
+import {campaignAreaReadModel} from './area-ledger.js?v=163';
+import {laborAudit} from './labor.js?v=163';
+import {skuAudit} from './audit.js?v=163';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=163';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=163';
+import {integratedDemand} from './integrated.js?v=163';
+import {eventSimulation} from './events.js?v=163';
+import {deliveryTimeline} from './timeline.js?v=163';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=163';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=163';
+import {demandJourney} from './journey.js?v=163';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=163';
+import {flow,diagnose,ACTIONS} from './flow.js?v=163';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=163';
+import {areaKpis} from './kpis.js?v=163';
+import {causalAudit} from './causal.js?v=163';
+import {managerDiagnosis} from './diagnosis-guide.js?v=163';
+import {skuServiceBrief} from './sku-service.js?v=163';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=163';
+import {attentionSignals} from './attention.js?v=163';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -972,6 +973,46 @@ function renderSkuLab(contract=currentCampaignContract()){
     (waiting.transportMode==='picking-staging-transport'
      ?' · '+fmt(row.stagedWaitingTransport)+' preparados esperando transporte':'')+'.');
   }
+  // M5-25: reuse cached, independent counterfactuals, NEVER add shipments.
+  const jointEvidence=combinedInterventionReadModel({comparisons:
+   ['wait','emergency','overtime','combined'].map(option=>comparisons.find(x=>x.option===option))});
+  const jointPanel=add(advisor,'details','supply-trace-detail sku-combined-interaction');
+  jointPanel.dataset.interactionScope='sku-cohort';
+  add(jointPanel,'summary','','🔗 Compra + capacidad: ¿funcionan mejor juntas?');
+  const jt=jointEvidence.totals;
+  add(jointPanel,'p','manager-fineprint',
+   'Sin cambios '+fmt(jt.baselineDispatchedOrders)+' pedidos · solo compra '+
+   fmt(jt.urgentOnlyDispatchedOrders)+' · solo refuerzo '+
+   fmt(jt.capacityOnlyDispatchedOrders)+' · ambos juntos '+fmt(jt.combinedDispatchedOrders)+'.');
+  add(jointPanel,'p','manager-fineprint',
+   'Mejora conjunta '+(jt.actualCombinedGainOrders>=0?'+':'')+fmt(jt.actualCombinedGainOrders)+
+   ' pedidos. Sumar mejoras aisladas daría '+fmt(jt.hypotheticalSumOfIsolatedGainsOrders)+
+   ', pero NO representa pedidos realmente expedidos.');
+  add(jointPanel,'p','manager-fineprint',
+   'Interacción del modelo '+(jt.interactionOrders>=0?'+':'')+fmt(jt.interactionOrders)+
+   ' pedidos. '+(jt.interactionOrders>0?'Las acciones se potencian en esta simulación.':
+    jt.interactionOrders<0?'Las mejoras se superponen o compiten por restricciones.':
+    'Sin efecto neto de interacción en pedidos.'));
+  add(jointPanel,'p','manager-fineprint',
+   'Costo incremental conjunto CLP '+fmt(jt.combinedIncrementalExpenseCLP)+
+   ' · compra '+fmt(jt.urgentPrincipalCommitmentCLP)+
+   ' + recargo '+fmt(jt.urgentSurchargeAssumptionCLP)+
+   ' + refuerzo '+fmt(jt.activatedReinforcementCLP)+'. Se contabilizan una sola vez.');
+  const jointDays=add(jointPanel,'details','supply-trace-detail');
+  add(jointDays,'summary','','Ver expediciones e interacción por día');
+  for(const row of jointEvidence.daily){
+   const p=add(jointDays,'p','manager-fineprint');p.dataset.jointDay=String(row.day);
+   add(p,'strong','','Día '+row.day+' · ');
+   add(p,'span','','expedidos hoy '+fmt(row.actuallyDispatchedToday)+
+    ' · acumulados '+fmt(row.combinedDispatchedToDate)+
+    ' · pendientes '+fmt(row.pendingAtDayEnd)+
+    ' · interacción '+(row.interactionOrdersToDate>=0?'+':'')+
+    fmt(row.interactionOrdersToDate)+'.');
+  }
+  add(jointPanel,'p','manager-fineprint',
+   'Las alternativas comparten una base congelada y se simulan separadamente. '+
+   'La interacción NO es un pedido adicional ni causalidad real. '+
+   'El compromiso de compra no equivale a pago; expedir no garantiza entregar.');
   for(const trial of comparisons){
    const optionCard=add(advisor,'div','sku-advisor-option'+(trial.option===skuRecovery?' current':''));
    const headline=add(optionCard,'div','sku-advisor-head');
