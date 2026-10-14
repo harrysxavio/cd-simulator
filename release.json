@@ -1,8 +1,8 @@
 {
-  "version": "11.51",
-  "assetRevision": 160,
-  "release": "v11.51 · M5-22 compra urgente SKU: plazo, muelle, recepción y Calidad",
-  "date": "2026-10-13",
+  "version": "11.52",
+  "assetRevision": 161,
+  "release": "v11.52 · M5-23 traslado auditable de reserva interna SKU",
+  "date": "2026-10-14",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M5-22: trazabilidad independiente del faltante físico SKU y su cobertura de compra urgente desde baseline congelado, PO y costo comprometido, llegada al muelle, recepción por lotes, posible espera y liberación de Calidad. Distingue recargo hipotético y pago no confirmado; no inventa disponibilidad temprana ni atribuye todos los despachos a la compra. Vista móvil compacta y pruebas de escenarios extremos."
+  "notes": "M5-23: auditoría independiente del stock físico inicial en RESERVA-CD, movimientos fechados hacia PICK-FACE, inventario/valorización por SKU y día, conservación sin compras ni unidades ficticias. El valor estándar reclasificado no es gasto ni caja; la mano de obra de traslado no está tarifada. Interfaz móvil plegable y pruebas de casos extremos; Android físico/TalkBack aún pendiente."
 }
