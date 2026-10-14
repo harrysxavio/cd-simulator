@@ -1,6 +1,6 @@
 # Estado v11.52 · M5-23 · Traslado de reserva interna con conciliación física y CLP
 
-**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Microfase:** M5-23. **Estado:** en validación; no marcar completada sin checks de PR, main, Pages y HTTP públicos.
+**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Microfase:** M5-23. **Estado:** **completada** (2026-10-14, Chile); PR, main, Pages y HTTP públicos aprobados.
 
 ## Objetivo
 
@@ -27,8 +27,8 @@ La reserva no es stock nuevo ni una compra: es una ubicación dentro de la misma
 
 ## Puerta de cierre y siguientes pasos
 
-1. Node regresión y Chromium en PR: **pendiente de comprobar**.
-2. Merge aprobado en main y ambas suites de main: **pendiente**.
-3. GitHub Pages v11.52 revisión 161 y HTTP público: **pendiente**.
+1. PR [#50](https://github.com/harrysxavio/cd-simulator/pull/50), Node [#38641819921](https://github.com/harrysxavio/cd-simulator/actions/runs/38641819921) y Chromium [#38641819892](https://github.com/harrysxavio/cd-simulator/actions/runs/38641819892): **aprobados**.
+2. Merge funcional `038f382b` en `main`: Node [#38642335671](https://github.com/harrysxavio/cd-simulator/actions/runs/38642335671) y Chromium [#38642335909](https://github.com/harrysxavio/cd-simulator/actions/runs/38642335909): **aprobados**.
+3. GitHub Pages v11.52 revisión 161: [deploy #38642335694](https://github.com/harrysxavio/cd-simulator/actions/runs/38642335694) y [verificación HTTP #38642335619](https://github.com/harrysxavio/cd-simulator/actions/runs/38642335619): **aprobados**.
 4. Android físico y TalkBack: pendiente para M7; emulación no es sustituto.
 5. Siguiente microfase: **M5-24**, refuerzo de capacidad aplicado solo en jornadas operativas con capacidad útil y trazabilidad de costo/ociosidad.
