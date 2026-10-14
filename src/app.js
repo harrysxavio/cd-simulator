@@ -1,29 +1,29 @@
-import {supplyBridge} from './supply-bridge.js?v=161';
-import {createSkuSessionCache} from './sku-session.js?v=161';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=161';
-import {aggregateFlowCsv} from './aggregate-export.js?v=161';
-import {campaignSkuContract} from './campaign-contract.js?v=161';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=161';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=161';
-import {campaignAreaReadModel} from './area-ledger.js?v=161';
-import {laborAudit} from './labor.js?v=161';
-import {skuAudit} from './audit.js?v=161';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=161';
-import {integratedDemand} from './integrated.js?v=161';
-import {eventSimulation} from './events.js?v=161';
-import {deliveryTimeline} from './timeline.js?v=161';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=161';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=161';
-import {demandJourney} from './journey.js?v=161';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=161';
-import {flow,diagnose,ACTIONS} from './flow.js?v=161';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=161';
-import {areaKpis} from './kpis.js?v=161';
-import {causalAudit} from './causal.js?v=161';
-import {managerDiagnosis} from './diagnosis-guide.js?v=161';
-import {skuServiceBrief} from './sku-service.js?v=161';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=161';
-import {attentionSignals} from './attention.js?v=161';
+import {supplyBridge} from './supply-bridge.js?v=162';
+import {createSkuSessionCache} from './sku-session.js?v=162';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=162';
+import {aggregateFlowCsv} from './aggregate-export.js?v=162';
+import {campaignSkuContract} from './campaign-contract.js?v=162';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=162';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=162';
+import {campaignAreaReadModel} from './area-ledger.js?v=162';
+import {laborAudit} from './labor.js?v=162';
+import {skuAudit} from './audit.js?v=162';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=162';
+import {integratedDemand} from './integrated.js?v=162';
+import {eventSimulation} from './events.js?v=162';
+import {deliveryTimeline} from './timeline.js?v=162';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=162';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=162';
+import {demandJourney} from './journey.js?v=162';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=162';
+import {flow,diagnose,ACTIONS} from './flow.js?v=162';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=162';
+import {areaKpis} from './kpis.js?v=162';
+import {causalAudit} from './causal.js?v=162';
+import {managerDiagnosis} from './diagnosis-guide.js?v=162';
+import {skuServiceBrief} from './sku-service.js?v=162';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=162';
+import {attentionSignals} from './attention.js?v=162';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -717,7 +717,7 @@ function renderSkuLab(contract=currentCampaignContract()){
    }
 
    // M4-17: distinct from purchases, stock valuation and the aggregate day.
-  const labor=canonical.operationalCost;
+  const labor=canonical.operationalCost,resource=canonical.capacityTrace;
   const laborPanel=add(trace,'details','supply-trace-detail sku-operational-cost');
   laborPanel.dataset.operationalCostScope='sku-cohort';
   add(laborPanel,'summary','','🛠️ Refuerzo: jornadas y capacidad ociosa (CLP)');
@@ -729,6 +729,17 @@ function renderSkuLab(contract=currentCampaignContract()){
    'Cupos adicionales asignados '+fmt(labor.totals.assignedExtraSlots)+
    ' · utilizados sobre capacidad base '+fmt(labor.totals.utilizedExtraSlots)+
    ' · ociosos '+fmt(labor.totals.idleExtraSlots)+'.');
+  if(['overtime','combined'].includes(recovery.option)){
+   add(laborPanel,'p','manager-fineprint',
+    'Pedidos que salen del CD: '+fmt(resource.totals.baseDispatchedOrders)+
+    ' sin intervención → '+fmt(resource.totals.alternativeDispatchedOrders)+
+    ' con esta alternativa ('+(resource.totals.netDispatchChangeOrders>=0?'+':'')+
+    fmt(resource.totals.netDispatchChangeOrders)+').');
+   if(resource.totals.netDispatchChangeOrders<=0)add(laborPanel,'p','manager-warning',
+    '⚠ El refuerzo no aumenta los pedidos expedidos dentro del horizonte. Revisa inventario, Calidad, Picking y Transporte antes de contratar capacidad.');
+   if(recovery.option==='combined')add(laborPanel,'p','manager-fineprint',
+    'La alternativa también compra SKU urgentes: no atribuir todos los pedidos adicionales al refuerzo.');
+  }
   add(laborPanel,'p','manager-fineprint',
    labor.extraCapacityOrdersPerDay
     ?'Solo se activa refuerzo en días con picking o expedición. Si se activa, se paga la jornada incluso con cupos ociosos; días sin actividad no se contratan.'
@@ -739,12 +750,18 @@ function renderSkuLab(contract=currentCampaignContract()){
    const line=add(laborDays,'p','manager-fineprint');
    line.dataset.operationalCostDay=String(day.day);
    add(line,'strong','','Día '+day.day+' · ');
+   const evidence=resource.daily[day.day];
    add(line,'span','',(day.activated?'refuerzo activado':'sin refuerzo')+
-    ' · cupos ociosos '+fmt(day.idleExtraSlots)+
-    ' · CLP '+fmt(day.costCLP)+'.');
+    ' · usados '+fmt(evidence.extraOrderSlotsUsed)+
+    ' / '+fmt(evidence.extraOrderSlotsAssigned)+
+    ' · ociosos '+fmt(evidence.extraOrderSlotsIdle)+
+    ' · preparados '+fmt(evidence.pickedCompleteOrders)+
+    ' · expedidos '+fmt(evidence.dispatchedCompleteOrders)+
+    ' (base '+fmt(evidence.baselineDispatchedCompleteOrders)+')'+
+    ' · CLP '+fmt(evidence.dailyIncrementalCostCLP)+'.');
   }
   add(laborPanel,'p','manager-fineprint',
-   'Los cupos son capacidad máxima de pedidos, no horas ni trabajadores comprobados. Pago real y costos base por área: sin datos. Es un costo operativo ilustrativo, no nómina, ni venta ni inventario.');
+   'El refuerzo amplía un mismo límite didáctico de pedidos para Picking y salida del CD: no crea stock ni mejora automáticamente Recepción o Calidad. El turno se cobra cuando hubo actividad, incluso si no se superó la capacidad base. Los cupos utilizados NO son pedidos atribuibles al refuerzo: no horas ni trabajadores comprobados. Sin dotación por área ni nómina real verificadas.');
 
   // M4-18: illustrative partial contribution only, not a customer invoice or P&L.
   const economics=canonical.economicResult;
