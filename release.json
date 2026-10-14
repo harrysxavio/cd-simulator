@@ -1,8 +1,8 @@
 {
-  "version": "11.53",
-  "assetRevision": 162,
-  "release": "v11.53 · M5-24 auditoría de capacidad y costo de refuerzo SKU",
+  "version": "11.54",
+  "assetRevision": 163,
+  "release": "v11.54 · M5-25 compras y refuerzo combinados sin sumar resultados",
   "date": "2026-10-14",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M5-24 audita por día los eventos de Picking y expedición contra cupos base y extra, activación de refuerzo, ociosidad, gasto CLP y comparación de pedidos de la cohorte. Separa el refuerzo de las compras urgentes en acciones combinadas; los cupos no representan personas ni pedidos atribuibles causalmente. Panel compacto móvil y pruebas de regresión."
+  "notes": "M5-25: auditoría inmutable de escenarios esperar/compra/refuerzo/combinación sobre el mismo baseline SKU. El resultado de la combinación usa su propio libro físico real, cuantifica interacción no aditiva y concilia compra urgente, recargo y refuerzo una sola vez. Panel didáctico y pruebas móviles/extremos; sin atribución causal externa ni pagos confirmados."
 }
