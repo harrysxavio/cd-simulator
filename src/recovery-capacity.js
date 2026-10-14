@@ -128,7 +128,7 @@ export function capacityReinforcementTraceReadModel({
    chargedShiftsWithoutUse:daily.filter(d=>d.reinforcementActivated&&d.extraOrderSlotsUsed===0).length
   },
   checks:{frozenBaseline:true,physicalEventIdentity:true,
-   noAdditionalStockOrSupplierMovement:true,shiftCostsReconciled:true,
+   resourceDoesNotCreateInventory:true,shiftCostsReconciled:true,
    noDoubleCountingPickingAndTransportSlots:true,unusedCapacityVisible:true},
   actualWorkerCount:null,actualStaffHours:null,actualPayrollPaidCLP:null,
   separateAreaLaborCostsAvailable:false,
