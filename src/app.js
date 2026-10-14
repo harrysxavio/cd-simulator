@@ -679,7 +679,44 @@ function renderSkuLab(contract=currentCampaignContract()){
     'El compromiso y recargo NO acreditan factura ni pago. No asumir que cada pedido adicional usó material de esta compra.');
   }
 
-  // M4-17: distinct from purchases, stock valuation and the aggregate day.
+  // M5-23: physical RESERVA-CD → PICK-FACE; the value moved is not a fee.
+   if(recovery.option==='reserve'){
+    const reserve=canonical.reserveTrace;
+    const panel=add(trace,'details','supply-trace-detail sku-reserve-transfer-trace');
+    panel.dataset.reserveTraceScope='sku-cohort';
+    add(panel,'summary','','📦 Reserva interna: traslado por SKU');
+    add(panel,'p','manager-fineprint',
+     'En RESERVA-CD al inicio '+fmt(reserve.totals.openingReserveSkuUnits)+
+     ' · trasladado '+fmt(reserve.totals.transferredSkuUnits)+
+     ' · permanece reservado '+fmt(reserve.totals.remainingReserveSkuUnits)+' SKU.');
+    add(panel,'p','manager-fineprint',
+     'Valor estándar reclasificado CLP '+fmt(reserve.totals.standardInventoryValueReclassifiedCLP)+
+     '. No es compra ni gasto. Costo operativo del traslado: sin tarifa calibrada, NO equivale a CLP 0.');
+    const skus=add(panel,'details','supply-trace-detail');
+    add(skus,'summary','','Ver unidades y ubicación por SKU');
+    for(const row of reserve.bySku){
+     const line=add(skus,'p','manager-fineprint');
+     line.dataset.reserveSku=row.skuId;
+     add(line,'strong','','SKU '+row.skuId+' · ');
+     add(line,'span','',fmt(row.transferredSkuUnits)+' movidos'+
+      (row.effectiveTransferDay===null?' (sin traslado hasta el corte)':' día '+row.effectiveTransferDay)+
+      ' · quedan '+fmt(row.remainingReserveSkuUnits)+
+      ' en RESERVA-CD · CLP '+fmt(row.standardValueReclassifiedCLP)+' reclasificados.');
+    }
+    const days=add(panel,'details','supply-trace-detail');
+    add(days,'summary','','Ver traslado y reserva por día');
+    for(const day of reserve.daily){
+     const line=add(days,'p','manager-fineprint');
+     line.dataset.reserveDay=String(day.day);
+     add(line,'strong','','Día '+day.day+' · ');
+     add(line,'span','','trasladado '+fmt(day.transferredSkuUnits)+
+      ' · pendiente reserva '+fmt(day.remainingReserveSkuUnits)+' SKU.');
+    }
+    add(panel,'p','manager-fineprint',
+     'El inventario de apertura no tiene lote individual identificado. La reserva solo pasa a PICK-FACE en el día simulado; su uso requiere exactitud de inventario, Picking y Transporte. No equivale a una entrega confirmada al cliente.');
+   }
+
+   // M4-17: distinct from purchases, stock valuation and the aggregate day.
   const labor=canonical.operationalCost;
   const laborPanel=add(trace,'details','supply-trace-detail sku-operational-cost');
   laborPanel.dataset.operationalCostScope='sku-cohort';
