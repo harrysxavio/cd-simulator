@@ -761,7 +761,7 @@ function renderSkuLab(contract=currentCampaignContract()){
     ' · CLP '+fmt(evidence.dailyIncrementalCostCLP)+'.');
   }
   add(laborPanel,'p','manager-fineprint',
-   'El refuerzo amplía un mismo límite didáctico de pedidos para Picking y salida del CD: no crea stock ni mejora automáticamente Recepción o Calidad. El turno se cobra cuando hubo actividad, incluso si no se superó la capacidad base. Los cupos utilizados NO son pedidos atribuibles al refuerzo. Sin dotación, horas o nómina real verificadas.');
+   'El refuerzo amplía un mismo límite didáctico de pedidos para Picking y salida del CD: no crea stock ni mejora automáticamente Recepción o Calidad. El turno se cobra cuando hubo actividad, incluso si no se superó la capacidad base. Los cupos utilizados NO son pedidos atribuibles al refuerzo: no horas ni trabajadores comprobados. Sin dotación por área ni nómina real verificadas.');
 
   // M4-18: illustrative partial contribution only, not a customer invoice or P&L.
   const economics=canonical.economicResult;
