@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.52.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.53.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -106,7 +106,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 21 | **Completada** | PR #48 v11.50 integrada en `main` (d688d0b). Node #38453947047, Chromium #38453946397, Pages #38453945793 y HTTP #38453947375 aprobados. Esperar **reutiliza el replay físico original**, sin acción/costo incremental, con backlog y fechas exactas; staging en baseline evita deltas falsos. Ver STATUS-V11.50.md. |
 | 22 | **Completada** | PR #49 v11.51 integrada en `main` (5e0a180); Node #38473362127, Chromium #38473362124, Pages #38473360995 y HTTP #38473362204 aprobados. Auditoría SKU/PO de faltante, compra, muelle, recepción física y Calidad, recargo separado de pagos; corrección de fecha visible y pruebas móviles. Ver STATUS-V11.51.md. |
 | 23 | **Completada** | PR #50 v11.52 integrada a `main` (`038f382b`); Node #38642335671, Chromium #38642335909, Pages #38642335694 y HTTP #38642335619 aprobados. Reserva interna por SKU/día validada contra inventario y costo estándar sin inventar PO, stock ni gasto por traslado no tarifado. Ver STATUS-V11.52.md. |
-| 24 | **En curso** | Rama `feat/m5-24-capacity-trace`, v11.53: auditoría física de cupos/costo de refuerzo, ociosidad y límites de atribución. Cerrar solo tras Node, Chromium, merge, Pages y HTTP públicos verdes. Ver STATUS-V11.53.md. |
+| 24 | **Completada** | PR #51 v11.53 integrada en `main` (merge `3dca1a537`); Node #38648258802, Chromium #38648258763, Pages #38648258432 y HTTP #38648258841 aprobados. Trazabilidad de capacidad de pedidos por jornada, cupos utilizados/ociosos y costo único de refuerzo, sin atribución falsa en opción combinada. Ver STATUS-V11.53.md. |
 | 25–42 | **Pendientes de cierre** | Siguiente M5-25: acciones combinadas sin sumar beneficios individuales; después M5-26–M8. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
