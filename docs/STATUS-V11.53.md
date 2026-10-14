@@ -1,6 +1,6 @@
 # Estado v11.53 · M5-24 · Refuerzo de capacidad SKU y costo por jornada
 
-**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Estado inicial:** en validación. Esta fase requiere Node, Chromium, PR merge, Pages e inspección HTTP públicos aprobados antes de marcarse como completada.
+**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Estado:** **completada (14 de octubre de 2026, Chile)**. Node, Chromium, PR merge, Pages e inspección HTTP pública aprobados.
 
 ## Alcance real
 
@@ -25,9 +25,9 @@ El motor de eventos `eventSimulation()` ya aplica un límite máximo de pedidos 
 
 ## Evidencia y puerta de cierre
 
-- PR e identificador: pendiente de anotar.
-- Node regresión y Chromium PR: pendientes de comprobar.
-- CI de main posterior a merge: pendiente.
-- Pages versión **v11.53 revisión 162** y HTTP público: pendiente.
+- PR [#51](https://github.com/harrysxavio/cd-simulator/pull/51) integrada en `main` (merge funcional `3dca1a537`).
+- Pruebas PR: Node [#38647751731](https://github.com/harrysxavio/cd-simulator/actions/runs/38647751731) y Chromium [#38647751665](https://github.com/harrysxavio/cd-simulator/actions/runs/38647751665), **aprobados** (50/50 E2E). La primera ejecución Chromium falló por una expectativa de texto didáctico y se corrigió en `b6db8ebb` antes del merge.
+- Pruebas `main`: Node [#38648258802](https://github.com/harrysxavio/cd-simulator/actions/runs/38648258802) y Chromium [#38648258763](https://github.com/harrysxavio/cd-simulator/actions/runs/38648258763), **aprobados**.
+- GitHub Pages **v11.53 revisión 162** [#38648258432](https://github.com/harrysxavio/cd-simulator/actions/runs/38648258432) y HTTP público [#38648258841](https://github.com/harrysxavio/cd-simulator/actions/runs/38648258841), **aprobados**.
 - Android físico / TalkBack: fuera del alcance, pendiente para M7.
 - **Siguiente M5-25:** interacción de acciones combinadas sin sumar beneficios de decisiones independientes.
