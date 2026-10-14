@@ -717,7 +717,7 @@ function renderSkuLab(contract=currentCampaignContract()){
    }
 
    // M4-17: distinct from purchases, stock valuation and the aggregate day.
-  const labor=canonical.operationalCost;
+  const labor=canonical.operationalCost,resource=canonical.capacityTrace;
   const laborPanel=add(trace,'details','supply-trace-detail sku-operational-cost');
   laborPanel.dataset.operationalCostScope='sku-cohort';
   add(laborPanel,'summary','','🛠️ Refuerzo: jornadas y capacidad ociosa (CLP)');
@@ -729,6 +729,17 @@ function renderSkuLab(contract=currentCampaignContract()){
    'Cupos adicionales asignados '+fmt(labor.totals.assignedExtraSlots)+
    ' · utilizados sobre capacidad base '+fmt(labor.totals.utilizedExtraSlots)+
    ' · ociosos '+fmt(labor.totals.idleExtraSlots)+'.');
+  if(['overtime','combined'].includes(recovery.option)){
+   add(laborPanel,'p','manager-fineprint',
+    'Pedidos que salen del CD: '+fmt(resource.totals.baseDispatchedOrders)+
+    ' sin intervención → '+fmt(resource.totals.alternativeDispatchedOrders)+
+    ' con esta alternativa ('+(resource.totals.netDispatchChangeOrders>=0?'+':'')+
+    fmt(resource.totals.netDispatchChangeOrders)+').');
+   if(resource.totals.netDispatchChangeOrders<=0)add(laborPanel,'p','manager-warning',
+    '⚠ El refuerzo no aumenta los pedidos expedidos dentro del horizonte. Revisa inventario, Calidad, Picking y Transporte antes de contratar capacidad.');
+   if(recovery.option==='combined')add(laborPanel,'p','manager-fineprint',
+    'La alternativa también compra SKU urgentes: no atribuir todos los pedidos adicionales al refuerzo.');
+  }
   add(laborPanel,'p','manager-fineprint',
    labor.extraCapacityOrdersPerDay
     ?'Solo se activa refuerzo en días con picking o expedición. Si se activa, se paga la jornada incluso con cupos ociosos; días sin actividad no se contratan.'
@@ -739,12 +750,18 @@ function renderSkuLab(contract=currentCampaignContract()){
    const line=add(laborDays,'p','manager-fineprint');
    line.dataset.operationalCostDay=String(day.day);
    add(line,'strong','','Día '+day.day+' · ');
+   const evidence=resource.daily[day.day];
    add(line,'span','',(day.activated?'refuerzo activado':'sin refuerzo')+
-    ' · cupos ociosos '+fmt(day.idleExtraSlots)+
-    ' · CLP '+fmt(day.costCLP)+'.');
+    ' · usados '+fmt(evidence.extraOrderSlotsUsed)+
+    ' / '+fmt(evidence.extraOrderSlotsAssigned)+
+    ' · ociosos '+fmt(evidence.extraOrderSlotsIdle)+
+    ' · preparados '+fmt(evidence.pickedCompleteOrders)+
+    ' · expedidos '+fmt(evidence.dispatchedCompleteOrders)+
+    ' (base '+fmt(evidence.baselineDispatchedCompleteOrders)+')'+
+    ' · CLP '+fmt(evidence.dailyIncrementalCostCLP)+'.');
   }
   add(laborPanel,'p','manager-fineprint',
-   'Los cupos son capacidad máxima de pedidos, no horas ni trabajadores comprobados. Pago real y costos base por área: sin datos. Es un costo operativo ilustrativo, no nómina, ni venta ni inventario.');
+   'El refuerzo amplía un mismo límite didáctico de pedidos para Picking y salida del CD: no crea stock ni mejora automáticamente Recepción o Calidad. El turno se cobra cuando hubo actividad, incluso si no se superó la capacidad base. Los cupos utilizados NO son pedidos atribuibles al refuerzo. Sin dotación, horas o nómina real verificadas.');
 
   // M4-18: illustrative partial contribution only, not a customer invoice or P&L.
   const economics=canonical.economicResult;
