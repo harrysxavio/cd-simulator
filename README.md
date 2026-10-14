@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.53
+# Supply Chain Operations Lab · v11.54
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.53-r162) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.54-r163) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.53](docs/STATUS-V11.53.md).
+- [Estado verificable actualizado de v11.54](docs/STATUS-V11.54.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.53 (M5-24):** Auditoría de refuerzo de capacidad de pedidos por jornada: uso real de cupos, ociosidad, costo y comparación de expediciones frente al baseline. Sin asumir que los cupos adicionales equivalen a personas o a pedidos causados por el refuerzo. [Estado técnico y CI](docs/STATUS-V11.53.md).
+**Avance v11.54 (M5-25):** Compra urgente y refuerzo calculados juntos sobre el mismo flujo físico, sin sumar despachos aislados. Panel de interacción, backlog y costos únicos con pruebas móviles y de regresión. [Estado y evidencia de publicación](docs/STATUS-V11.54.md).
+
+**Histórico v11.53 (M5-24):** Auditoría de refuerzo de capacidad de pedidos por jornada: uso real de cupos, ociosidad, costo y comparación de expediciones frente al baseline. Sin asumir que los cupos adicionales equivalen a personas o a pedidos causados por el refuerzo. [Estado técnico y CI](docs/STATUS-V11.53.md).
 
 **Histórico v11.52 (M5-23):** Reserva interna SKU con traslado por ubicación y día, conciliado con stock físico y costo estándar CLP, sin crear una PO ni nuevas unidades. La tarifa de mover material no está calibrada; el valor trasladado no es un gasto. [Estado y evidencia de CI/Pages](docs/STATUS-V11.52.md).
 

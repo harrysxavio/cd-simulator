@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.53.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.54.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -107,7 +107,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 22 | **Completada** | PR #49 v11.51 integrada en `main` (5e0a180); Node #38473362127, Chromium #38473362124, Pages #38473360995 y HTTP #38473362204 aprobados. Auditoría SKU/PO de faltante, compra, muelle, recepción física y Calidad, recargo separado de pagos; corrección de fecha visible y pruebas móviles. Ver STATUS-V11.51.md. |
 | 23 | **Completada** | PR #50 v11.52 integrada a `main` (`038f382b`); Node #38642335671, Chromium #38642335909, Pages #38642335694 y HTTP #38642335619 aprobados. Reserva interna por SKU/día validada contra inventario y costo estándar sin inventar PO, stock ni gasto por traslado no tarifado. Ver STATUS-V11.52.md. |
 | 24 | **Completada** | PR #51 v11.53 integrada en `main` (merge `3dca1a537`); Node #38648258802, Chromium #38648258763, Pages #38648258432 y HTTP #38648258841 aprobados. Trazabilidad de capacidad de pedidos por jornada, cupos utilizados/ociosos y costo único de refuerzo, sin atribución falsa en opción combinada. Ver STATUS-V11.53.md. |
-| 25 | **En curso** | Rama `feat/m5-25-combined-interactions`, v11.54: cuatro contrafactuales con misma base, acciones combinadas con replay único, interacción no aditiva, costos conciliados. Cerrar solo tras Node, Chromium, merge, Pages y HTTP. Ver STATUS-V11.54.md. |
+| 25 | **Completada** | PR #52 v11.54 fusionada en `main` (merge `9f7663ff`); Node #38655484791, Chromium #38655484946, Pages #38655484338 y HTTP #38655484786 aprobados. Cuatro escenarios sobre baseline congelado, resultado conjunto del replay físico y efectos no aditivos/costos trazados. Ver STATUS-V11.54.md. |
 | 26–42 | **Pendientes de cierre** | Siguiente M5-26: comparador consolidado antes/alternativa/diferencia, pedidos/plazos/costos. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.

@@ -1,6 +1,6 @@
 # Estado v11.54 · M5-25 · Acciones combinadas sin suma ficticia
 
-**Estado de microfase:** en validación, pendiente CI PR y cierre formal. **Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md).
+**Estado de microfase:** **completada (2026-10-14)**. PR #52 fusionada, Node, Chromium, Pages y HTTP público aprobados. **Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md).
 
 ## Propósito
 
@@ -24,8 +24,9 @@ Comprar SKU urgente y reforzar capacidad son acciones que modifican simultáneam
 
 ## Puerta de cierre
 
-- PR con Node y Chromium: pendiente.
-- Merge main más Node y Chromium: pendiente.
-- Pages y HTTP reales v11.54 revisión 163: pendiente.
+- [PR #52](https://github.com/harrysxavio/cd-simulator/pull/52) fusionada en main (commit `9f7663ff`).
+- PR: Node [#38655077103](https://github.com/harrysxavio/cd-simulator/actions/runs/38655077103) y Chromium [#38655077283](https://github.com/harrysxavio/cd-simulator/actions/runs/38655077283) **aprobados**.
+- main: Node [#38655484791](https://github.com/harrysxavio/cd-simulator/actions/runs/38655484791) y Chromium [#38655484946](https://github.com/harrysxavio/cd-simulator/actions/runs/38655484946) **aprobados**.
+- Pages v11.54 r163 [#38655484338](https://github.com/harrysxavio/cd-simulator/actions/runs/38655484338) y HTTP público [#38655484786](https://github.com/harrysxavio/cd-simulator/actions/runs/38655484786) **aprobados**.
 - Android físico/TalkBack: pendiente M7.
 - **Siguiente M5-26:** comparador consolidado antes/alternativa/diferencia con órdenes, plazos, restricciones y costos.
