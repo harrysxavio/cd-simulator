@@ -1,31 +1,32 @@
-import {supplyBridge} from './supply-bridge.js?v=165';
-import {createSkuSessionCache} from './sku-session.js?v=165';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=165';
-import {aggregateFlowCsv} from './aggregate-export.js?v=165';
-import {campaignSkuContract} from './campaign-contract.js?v=165';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=165';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=165';
-import {campaignAreaReadModel} from './area-ledger.js?v=165';
-import {laborAudit} from './labor.js?v=165';
-import {skuAudit} from './audit.js?v=165';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=165';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=165';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=165';
-import {integratedDemand} from './integrated.js?v=165';
-import {eventSimulation} from './events.js?v=165';
-import {deliveryTimeline} from './timeline.js?v=165';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=165';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=165';
-import {demandJourney} from './journey.js?v=165';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=165';
-import {flow,diagnose,ACTIONS} from './flow.js?v=165';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=165';
-import {areaKpis} from './kpis.js?v=165';
-import {causalAudit} from './causal.js?v=165';
-import {managerDiagnosis} from './diagnosis-guide.js?v=165';
-import {skuServiceBrief} from './sku-service.js?v=165';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=165';
-import {attentionSignals} from './attention.js?v=165';
+import {supplyBridge} from './supply-bridge.js?v=166';
+import {createSkuSessionCache} from './sku-session.js?v=166';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=166';
+import {aggregateFlowCsv} from './aggregate-export.js?v=166';
+import {campaignSkuContract} from './campaign-contract.js?v=166';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=166';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=166';
+import {campaignAreaReadModel} from './area-ledger.js?v=166';
+import {laborAudit} from './labor.js?v=166';
+import {skuAudit} from './audit.js?v=166';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=166';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=166';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=166';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=166';
+import {integratedDemand} from './integrated.js?v=166';
+import {eventSimulation} from './events.js?v=166';
+import {deliveryTimeline} from './timeline.js?v=166';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=166';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=166';
+import {demandJourney} from './journey.js?v=166';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=166';
+import {flow,diagnose,ACTIONS} from './flow.js?v=166';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=166';
+import {areaKpis} from './kpis.js?v=166';
+import {causalAudit} from './causal.js?v=166';
+import {managerDiagnosis} from './diagnosis-guide.js?v=166';
+import {skuServiceBrief} from './sku-service.js?v=166';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=166';
+import {attentionSignals} from './attention.js?v=166';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -932,6 +933,51 @@ function renderSkuLab(contract=currentCampaignContract()){
   const advisor=add(bridge,'div','sku-advisor');
   add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
   add(advisor,'p','muted','Las alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
+  // M6-28: only observations from canonical physical book; NO causal ranks.
+  const signalEvidence=physicalConstraintSignalsReadModel({
+   comparison:recovery,campaign:chain.campaign
+  });
+  const diagnosis=add(advisor,'details','supply-trace-detail sku-constraint-diagnosis');
+  diagnosis.dataset.constraintScope='sku-cohort';
+  add(diagnosis,'summary','','🔎 Dónde se acumula trabajo · evidencia física');
+  add(diagnosis,'p','manager-fineprint',
+   'Al corte: '+fmt(signalEvidence.pendingOrders)+' pedidos sin expedir de '+
+   fmt(signalEvidence.orders)+' en día '+fmt(signalEvidence.horizonDays)+
+   '. Las unidades SKU y los pedidos no se suman.');
+  const areaSignals=add(diagnosis,'div','sku-constraint-signal-rows');
+  for(const signal of signalEvidence.signals){
+   const line=add(areaSignals,'p','manager-fineprint');
+   line.dataset.constraintArea=signal.id;
+   add(line,'strong','',signal.label+' · ');
+   add(line,'span','',signal.observable
+    ?fmt(signal.atCut)+' '+signal.unit+
+     ' al corte · máximo '+fmt(signal.peak)+
+     (signal.peakDay===null?'':' (día '+signal.peakDay+')')+
+     ' · '+fmt(signal.observedDays)+' días con cola'+
+     (signal.daysAtConfiguredLimit?' · '+fmt(signal.daysAtConfiguredLimit)+' días con límite alcanzado':'')
+    :'Sin cola independiente observable en el modo de despacho conjunto.');
+  }
+  add(diagnosis,'p','manager-fineprint',
+   signalEvidence.daysWithConcurrentObservations.length
+    ?'Días con señales simultáneas: '+signalEvidence.daysWithConcurrentObservations.join(', ')+
+     '. Un mismo pedido puede depender de varias áreas.'
+    :'No coinciden dos colas observadas en un mismo día; esto no descarta otras restricciones.');
+  const observationDays=add(diagnosis,'details','supply-trace-detail');
+  add(observationDays,'summary','','Ver señales y expediciones por día');
+  for(const d of signalEvidence.daily){
+   const p=add(observationDays,'p','manager-fineprint');
+   p.dataset.constraintDay=String(d.day);
+   add(p,'strong','','Día '+d.day+' · ');
+   add(p,'span','','Recepción '+fmt(d.receivingQueueSkuUnits)+' SKU · Calidad '+
+    fmt(d.qualityHeldSkuUnits)+' SKU · no verificable '+
+    fmt(d.unverifiedSkuUnits)+' SKU · sin preparar '+
+    fmt(d.unpickedOrders)+' pedidos · staging '+fmt(d.stagedOrders)+
+    ' pedidos · expedidos '+fmt(d.shippedToday)+'.');
+  }
+  add(diagnosis,'p','manager-fineprint',
+   'Una cola no prueba la causa principal. El stock no verificable sigue físicamente en el CD. '+
+   'Con Picking y despacho simultáneos no es posible separar ambos cuellos. '+
+   'Para demostrar impacto debe ensayarse una intervención con la misma base.');
   // M5-26: concise selected-vs-base snapshot, ALL figures from the
   // same cached physical replays, with no new orders, financial postings or ETAs.
   const compare=consolidatedRecoveryComparisonReadModel({

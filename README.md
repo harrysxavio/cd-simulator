@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.56
+# Supply Chain Operations Lab · v11.57
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.56-r165) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.57-r166) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.56](docs/STATUS-V11.56.md).
+- [Estado técnico de v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.56 (M5-27, cierre M5 8/8):** Confirmación de cinco alternativas de recuperación, persistencia compacta y reconcilable tras recarga, detección de registros inconsistentes y protección de duplicados. Se conservan sesiones previas. Node, Chromium, Pages y HTTP verificados. [Estado técnico](docs/STATUS-V11.56.md).
+**Avance candidato v11.57 (M6-28):** Señales de restricciones físicas desde el mismo libro SKU: colas, capacidad alcanzada y coincidencias en Recepción, Calidad, Inventario, Picking y Transporte; sin sumar unidades con pedidos ni afirmar causalidad. Pendiente de cierre según [informe técnico](docs/STATUS-V11.57.md).
+
+**Histórico v11.56 (M5-27, cierre M5 8/8):** Confirmación de cinco alternativas de recuperación, persistencia compacta y reconcilable tras recarga, detección de registros inconsistentes y protección de duplicados. Se conservan sesiones previas. Node, Chromium, Pages y HTTP verificados. [Estado técnico](docs/STATUS-V11.56.md).
 
 **Histórico v11.55 (M5-26):** Comparador compacto de antes / alternativa / diferencia para las cinco decisiones. Muestra pedidos expedidos, pendientes, días-pedido de espera, observaciones de colas y costos incrementales sin prometer entregas. Node, Chromium y GitHub Pages verificados. [Evidencias](docs/STATUS-V11.55.md).
 

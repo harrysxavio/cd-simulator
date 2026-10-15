@@ -1,8 +1,8 @@
 {
-  "version": "11.56",
-  "assetRevision": 165,
-  "release": "v11.56 · M5-27 confirmación SKU trazable y persistente",
+  "version": "11.57",
+  "assetRevision": 166,
+  "release": "v11.57 · M6-28 diagnóstico físico de restricciones SKU",
   "date": "2026-10-14",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M5-27: confirmar las cinco alternativas usando el replay físico seleccionado, guardar testigo compacto de consistencia y verificarlo tras recarga; compatibilidad con confirmaciones antiguas, invalidación al cambiar escenario, prevención de duplicados y manejo explícito de fallo de almacenamiento. No se guardan eventos de simulación ni se emiten compras reales."
+  "notes": "M6-28 identifica colas de Recepción y Calidad, stock no verificable, pedidos sin Picking y espera en staging desde el mismo libro físico auditado. Señala días coincidentes y límites efectivamente alcanzados sin atribuir pérdidas a una causa sin contrafactual; sin mezclar pedidos con unidades SKU."
 }
