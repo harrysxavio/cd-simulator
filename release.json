@@ -1,8 +1,8 @@
 {
-  "version": "11.55",
-  "assetRevision": 164,
-  "release": "v11.55 · M5-26 comparador antes, alternativa y diferencia",
+  "version": "11.56",
+  "assetRevision": 165,
+  "release": "v11.56 · M5-27 confirmación SKU trazable y persistente",
   "date": "2026-10-14",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "Vista compacta de cinco decisiones sobre baseline físico congelado: pedidos expedidos, pendientes, días-pedido de espera, primer/último día de salida, observaciones de colas, compromisos y costos incrementales, sin mezclar el agregado ni prometer fechas de entrega. Pruebas físicas Node y Chromium móvil."
+  "notes": "M5-27: confirmar las cinco alternativas usando el replay físico seleccionado, guardar testigo compacto de consistencia y verificarlo tras recarga; compatibilidad con confirmaciones antiguas, invalidación al cambiar escenario, prevención de duplicados y manejo explícito de fallo de almacenamiento. No se guardan eventos de simulación ni se emiten compras reales."
 }
