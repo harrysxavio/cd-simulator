@@ -81,6 +81,9 @@ test('M5-27: altered order count, real movement, date, price and scenario are re
   {operationalReinforcementCLP:decision.operationalReinforcementCLP+1},
   {urgentArrivalDay:3},
   {urgentPurchaseOrders:[]},
+  {receivedExtraUnits:decision.receivedExtraUnits+1},
+  {openingReserve:{A:999}},
+  {releasedReserveUnits:decision.releasedReserveUnits+1},
   {physicalWitness:{...decision.physicalWitness,scenarioDigest:'0000000000000000'}}
  ])assert.equal(skuDecisionStatus({decision:{...decision,...update},contract:c,comparison}),'invalid');
  const changed=recoveryComparison({...c.skuInputs,option:'combined',urgentArrivalDay:5,purchaseCoveragePercent:100});
