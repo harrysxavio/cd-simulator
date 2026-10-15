@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.55
+# Supply Chain Operations Lab · v11.56
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.55-r164) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.56-r165) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,12 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado verificable actualizado de v11.55](docs/STATUS-V11.55.md).
+- [Estado verificable actualizado de v11.56](docs/STATUS-V11.56.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance v11.55 (M5-26):** Comparador compacto de antes / alternativa / diferencia para las cinco decisiones. Muestra pedidos expedidos, pendientes, días-pedido de espera, observaciones de colas y costos incrementales sin prometer entregas. Node, Chromium y GitHub Pages verificados. [Evidencias](docs/STATUS-V11.55.md).
+**Avance v11.56 (M5-27, cierre M5 8/8):** Confirmación de cinco alternativas de recuperación, persistencia compacta y reconcilable tras recarga, detección de registros inconsistentes y protección de duplicados. Se conservan sesiones previas. Node, Chromium, Pages y HTTP verificados. [Estado técnico](docs/STATUS-V11.56.md).
+
+**Histórico v11.55 (M5-26):** Comparador compacto de antes / alternativa / diferencia para las cinco decisiones. Muestra pedidos expedidos, pendientes, días-pedido de espera, observaciones de colas y costos incrementales sin prometer entregas. Node, Chromium y GitHub Pages verificados. [Evidencias](docs/STATUS-V11.55.md).
 
 **Histórico v11.54 (M5-25):** Compra urgente y refuerzo calculados juntos sobre el mismo flujo físico, sin sumar despachos aislados. Panel de interacción, backlog y costos únicos con pruebas móviles y de regresión. [Estado y evidencia de publicación](docs/STATUS-V11.54.md).
 
@@ -478,4 +480,4 @@ Se amplían pruebas de regresión para detectar cambios indebidos en el manifies
 
 **Límites:** el plan SKU sigue usando una cohorte didáctica proporcional de 200 pedidos, no la escala directa de 1000 unidades del modelo agregado. Aún falta compartir el control de accesibilidad del inventario, reservas, y el libro contable/económico único. Los montos del laboratorio no se suman a los del reporte financiero de la campaña.
 
-**Estado de ejecución:** el seguimiento oficial se realiza por las 43 microfases del [plan maestro](docs/EXECUTION-PLAN-43.md), no mediante porcentajes orientativos heredados. M5-26 está verificada; sigue M5-27. La validación Android física y TalkBack sigue pendiente de M7.
+**Estado de ejecución:** el seguimiento oficial se realiza por las 43 microfases del [plan maestro](docs/EXECUTION-PLAN-43.md), no mediante porcentajes orientativos heredados. M5-20 a M5-27 están verificadas (8/8); sigue M6-28. La validación Android física y TalkBack sigue pendiente de M7.

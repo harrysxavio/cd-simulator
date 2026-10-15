@@ -1,6 +1,6 @@
 # Estado v11.56 · M5-27 · Confirmación y persistencia verificable
 
-**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Estado:** en validación; pendiente Node, Chromium, merge, Pages y HTTP antes del cierre.
+**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Estado:** **completada (14 de octubre de 2026, hora de Chile)**. M5-27 y M5 (8/8) verificadas en rama principal.
 
 ## Objetivo
 
@@ -25,7 +25,7 @@ Cerrar M5 asegurando que la alternativa confirmada en Recuperación corresponda 
 
 ## Evidencia de cierre
 
-- PR y CI: **pendientes**.
-- Merge en main + Node/Chromium: **pendientes**.
-- Pages v11.56 revisión 165 y HTTP público: **pendientes**.
+- [PR #54](https://github.com/harrysxavio/cd-simulator/pull/54), Node [#38661749829](https://github.com/harrysxavio/cd-simulator/actions/runs/38661749829) y Chromium [#38661749911](https://github.com/harrysxavio/cd-simulator/actions/runs/38661749911): **aprobados**. Correcciones registradas antes del merge: ID canónico de PO urgente y texto didáctico de reserva.
+- Merge funcional en `main` `9fada009`: Node [#38662180974](https://github.com/harrysxavio/cd-simulator/actions/runs/38662180974) y Chromium [#38662180944](https://github.com/harrysxavio/cd-simulator/actions/runs/38662180944): **aprobados**.
+- Pages público v11.56 r165 [#38662180719](https://github.com/harrysxavio/cd-simulator/actions/runs/38662180719) y verificación HTTP [#38662180825](https://github.com/harrysxavio/cd-simulator/actions/runs/38662180825): **aprobados**.
 - **Próxima M6-28:** diagnóstico de cuello de botella físico a partir del libro SKU real, no de causalidad supuesta.
