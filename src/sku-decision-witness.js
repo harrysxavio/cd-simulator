@@ -111,10 +111,11 @@ export function verifySkuDecisionWitness({decision,comparison}={}){
     ||typeof y.id!=='string'
     ||!y.id.startsWith(decision.campaignId+'-EVT-');
   })
-  ||decision.urgentPurchaseOrders?.some(x=>{
+  ||decision.urgentPurchaseOrders?.some((x,i)=>{
    const po=purchaseById.get(x.skuId);
-   return !po||x.eventPurchaseOrderId!=='URG-'+x.skuId
-    ||x.id!==decision.campaignId+'-'+x.eventPurchaseOrderId
+   const expectedId='URG-'+String(i+1).padStart(3,'0')+'-'+x.skuId;
+   return !po||x.eventPurchaseOrderId!==expectedId
+    ||x.id!==decision.campaignId+'-'+expectedId
     ||x.supplier!=='Proveedor extraordinario hipotético — no confirmado'
     ||x.status!=='comprometida en simulación';
   }))return false;
