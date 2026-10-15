@@ -85,6 +85,39 @@ export function skuDecisionPhysicalWitness({comparison}={}){
  });
 }
 export function verifySkuDecisionWitness({decision,comparison}={}){
+ const books=comparison?.recovered?.ledger;
+ if(!Array.isArray(books)||!Array.isArray(decision?.reserveTransfers))return false;
+ const moves=books.flatMap(d=>d.reserveEvents||[]);
+ const received=books.flatMap(d=>Object.entries(d.receivedUrgent||{})
+  .filter(([,qty])=>qty>0).map(([skuId,qty])=>({skuId,qty,day:d.day})));
+ const purchaseById=new Map((comparison.urgent||[]).map(po=>[po.id,po]));
+ const receivedQty=received.reduce((n,r)=>n+r.qty,0);
+ const firstReceived=received.length?Math.min(...received.map(x=>x.day)):null;
+ const firstMoved=moves.length?Math.min(...moves.map(x=>x.day)):null;
+ if(decision.horizonDays!==comparison.recovered.days
+  ||decision.reservePercent!==(comparison.reservePercent??0)
+  ||decision.receivedExtraUnits!==receivedQty
+  ||decision.firstReceivedDay!==firstReceived
+  ||decision.releasedReserveUnits!==moves.reduce((n,m)=>n+m.qty,0)
+  ||decision.firstReserveTransferDay!==firstMoved
+  ||JSON.stringify(decision.openingReserve)!==JSON.stringify(comparison.recovered.openingReserve)
+  ||JSON.stringify(decision.closingReserve)!==JSON.stringify(comparison.recovered.endingReserveStock)
+  ||decision.reserveTransfers.length!==moves.length
+  ||moves.some((x,i)=>{
+   const y=decision.reserveTransfers[i];
+   return y?.day!==x.day||y.skuId!==x.skuId||y.qty!==x.qty
+    ||y.from!==x.from||y.to!==x.to||y.verified!==x.verified
+    ||y.type!=='reserve_transfer'
+    ||typeof y.id!=='string'
+    ||!y.id.startsWith(decision.campaignId+'-EVT-');
+  })
+  ||decision.urgentPurchaseOrders?.some(x=>{
+   const po=purchaseById.get(x.skuId);
+   return !po||x.eventPurchaseOrderId!=='URG-'+x.skuId
+    ||x.id!==decision.campaignId+'-'+x.eventPurchaseOrderId
+    ||x.supplier!=='Proveedor extraordinario hipotético — no confirmado'
+    ||x.status!=='comprometida en simulación';
+  }))return false;
  if(!decision||decision.version!==2||comparison?.option!==decision.option
   ||comparison.urgentArrivalDay!==decision.urgentArrivalDay
   ||comparison.purchaseCoveragePercent!==decision.purchaseCoveragePercent
