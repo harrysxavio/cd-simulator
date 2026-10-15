@@ -125,7 +125,7 @@ export function physicalConstraintSignalsReadModel({comparison,campaign}={}){
   ||last.pendingOrders!==replay.pending
   ||last.receivingQueueSkuUnits!==campaign.receivingLedger.totals.closingWaitingSkuUnits
   ||last.qualityHeldSkuUnits!==campaign.qualityLedger.totals.closingHeldSkuUnits
-  ||last.unverifiedSkuUnits!==campaign.inventoryLedger.totals.closingUnverifiedSkuUnits
+  ||last.unverifiedSkuUnits!==campaign.inventoryLedger.totals.unverifiedSkuUnits
   ||last.stagedOrders!==campaign.pickingLedger.totals.awaitingTransportOrders
   ||last.unpickedOrders!==campaign.pickingLedger.totals.pendingUnpickedOrders){
   fail('lecturas de áreas y corte físico no concilian');
