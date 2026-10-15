@@ -1,30 +1,31 @@
-import {supplyBridge} from './supply-bridge.js?v=163';
-import {createSkuSessionCache} from './sku-session.js?v=163';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=163';
-import {aggregateFlowCsv} from './aggregate-export.js?v=163';
-import {campaignSkuContract} from './campaign-contract.js?v=163';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=163';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=163';
-import {campaignAreaReadModel} from './area-ledger.js?v=163';
-import {laborAudit} from './labor.js?v=163';
-import {skuAudit} from './audit.js?v=163';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=163';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=163';
-import {integratedDemand} from './integrated.js?v=163';
-import {eventSimulation} from './events.js?v=163';
-import {deliveryTimeline} from './timeline.js?v=163';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=163';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=163';
-import {demandJourney} from './journey.js?v=163';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=163';
-import {flow,diagnose,ACTIONS} from './flow.js?v=163';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=163';
-import {areaKpis} from './kpis.js?v=163';
-import {causalAudit} from './causal.js?v=163';
-import {managerDiagnosis} from './diagnosis-guide.js?v=163';
-import {skuServiceBrief} from './sku-service.js?v=163';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=163';
-import {attentionSignals} from './attention.js?v=163';
+import {supplyBridge} from './supply-bridge.js?v=164';
+import {createSkuSessionCache} from './sku-session.js?v=164';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=164';
+import {aggregateFlowCsv} from './aggregate-export.js?v=164';
+import {campaignSkuContract} from './campaign-contract.js?v=164';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=164';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=164';
+import {campaignAreaReadModel} from './area-ledger.js?v=164';
+import {laborAudit} from './labor.js?v=164';
+import {skuAudit} from './audit.js?v=164';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=164';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=164';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=164';
+import {integratedDemand} from './integrated.js?v=164';
+import {eventSimulation} from './events.js?v=164';
+import {deliveryTimeline} from './timeline.js?v=164';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=164';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=164';
+import {demandJourney} from './journey.js?v=164';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=164';
+import {flow,diagnose,ACTIONS} from './flow.js?v=164';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=164';
+import {areaKpis} from './kpis.js?v=164';
+import {causalAudit} from './causal.js?v=164';
+import {managerDiagnosis} from './diagnosis-guide.js?v=164';
+import {skuServiceBrief} from './sku-service.js?v=164';
+import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=164';
+import {attentionSignals} from './attention.js?v=164';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -915,6 +916,82 @@ function renderSkuLab(contract=currentCampaignContract()){
   const advisor=add(bridge,'div','sku-advisor');
   add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
   add(advisor,'p','muted','Las alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
+  // M5-26: concise selected-vs-base snapshot, ALL figures from the
+  // same cached physical replays, with no new orders, financial postings or ETAs.
+  const compare=consolidatedRecoveryComparisonReadModel({
+   comparisons,selectedOption:skuRecovery
+  });
+  const cmpBase=compare.baseline,cmpChosen=compare.selected,cmpDelta=compare.differences;
+  const overview=add(advisor,'section','sku-consolidated-compare');
+  overview.dataset.compareScope='sku-cohort';
+  add(overview,'strong','','📋 Tu decisión frente a no intervenir');
+  add(overview,'p','manager-fineprint','Alternativa: '+cmpChosen.label+
+   ' · mismos '+fmt(compare.demandOrders)+' pedidos de muestra en '+
+   fmt(compare.horizonDays+1)+' días (día 0 a '+compare.horizonDays+').');
+  const totalRow=add(overview,'p','manager-fineprint');
+  totalRow.dataset.compareMetric='shipped';
+  add(totalRow,'strong','','Pedidos expedidos · ');
+  add(totalRow,'span','',fmt(cmpBase.completed)+' → '+fmt(cmpChosen.shippedOrders)+
+   ' ('+(cmpDelta.dispatchedOrders>=0?'+':'')+fmt(cmpDelta.dispatchedOrders)+')');
+  const pendingRow=add(overview,'p','manager-fineprint');
+  pendingRow.dataset.compareMetric='pending';
+  add(pendingRow,'strong','','Pendientes al corte · ');
+  add(pendingRow,'span','',fmt(cmpBase.pending)+' → '+fmt(cmpChosen.pendingOrders)+
+   ' ('+(cmpDelta.pendingOrders>=0?'+':'')+fmt(cmpDelta.pendingOrders)+')');
+  const daysRow=add(overview,'p','manager-fineprint');
+  daysRow.dataset.compareMetric='backlog-days';
+  add(daysRow,'strong','','Días-pedido de espera · ');
+  add(daysRow,'span','',fmt(cmpBase.backlogOrderDays)+' → '+fmt(cmpChosen.backlogOrderDays)+
+   ' ('+(cmpDelta.backlogOrderDays>=0?'+':'')+fmt(cmpDelta.backlogOrderDays)+')');
+  const moneyRow=add(overview,'p','manager-fineprint');
+  moneyRow.dataset.compareMetric='incremental-cost';
+  add(moneyRow,'strong','','Costo/compromiso incremental supuesto · ');
+  add(moneyRow,'span','','CLP '+fmt(cmpDelta.incrementalExpenseCLP)+
+   ' · cambio de valor de expediciones CLP '+fmt(cmpDelta.potentialDispatchValueDeltaCLP)+'.');
+  const details=add(overview,'details','supply-trace-detail sku-consolidated-details');
+  add(details,'summary','','Ver fechas, restricciones y costos comparados');
+  add(details,'p','manager-fineprint',
+   'Primer despacho desde el CD: '+(cmpBase.firstDispatchDay===null?'ninguno':'día '+cmpBase.firstDispatchDay)+
+   ' → '+(cmpChosen.firstDispatchDay===null?'ninguno':'día '+cmpChosen.firstDispatchDay)+
+   ' · último despacho: '+(cmpBase.lastDispatchDay===null?'ninguno':'día '+cmpBase.lastDispatchDay)+
+   ' → '+(cmpChosen.lastDispatchDay===null?'ninguno':'día '+cmpChosen.lastDispatchDay)+'.');
+  add(details,'p','manager-fineprint',
+   'Expedidos día 0: '+fmt(cmpBase.shippedOnDayZero)+' → '+fmt(cmpChosen.onDayZero)+
+   ' · pedidos aún sin día de salida confirmado: '+fmt(cmpChosen.pendingOrders)+'.');
+  add(details,'p','manager-fineprint',
+   'Compra urgente comprometida CLP '+fmt(cmpChosen.urgentPurchasePrincipalCLP)+
+   ' · recargo supuesto CLP '+fmt(cmpChosen.urgentSurchargeCLP)+
+   ' · turnos extra CLP '+fmt(cmpChosen.addedCapacityCostCLP)+'.');
+  add(details,'p','manager-fineprint',
+   'Resultado simplificado de decisión CLP '+fmt(cmpDelta.simplifiedNetDeltaCLP)+
+   ' · proxy económico CLP '+fmt(cmpDelta.economicDecisionProxyDeltaCLP)+
+   '. No es caja cobrada ni utilidad contable.');
+  const constraints=add(details,'details','supply-trace-detail');
+  add(constraints,'summary','','Ver lo que sigue detenido al corte');
+  for(const observation of compare.observations){
+   const line=add(constraints,'p','manager-fineprint');
+   line.dataset.compareObservation=observation.id;
+   add(line,'span','',observation.label+': '+fmt(observation.quantity)+'.');
+  }
+  const days=add(details,'details','supply-trace-detail');
+  add(days,'summary','','Ver pedidos y pendientes día a día');
+  for(const d of compare.daily){
+   const line=add(days,'p','manager-fineprint');
+   line.dataset.compareDay=String(d.day);
+   add(line,'strong','','Día '+d.day+' · ');
+   add(line,'span','','expedidos '+fmt(d.baselineShipped)+' → '+
+    fmt(d.alternativeShipped)+' · acumulados '+fmt(d.baselineCumulative)+
+    ' → '+fmt(d.alternativeCumulative)+' · pendientes '+fmt(d.baselinePending)+
+    ' → '+fmt(d.alternativePending)+'.');
+  }
+  add(details,'p','manager-fineprint',
+   'Las colas indican dónde queda trabajo, no prueban por sí solas el cuello de botella principal. '+
+   'Plazos expresados en días simulados de salida del CD, no fechas prometidas de entrega. '+
+   'Compromisos y costos son hipótesis de la cohorte SKU; no se suman al turno agregado.');
+  if(cmpDelta.dispatchedOrders<=0&&cmpDelta.incrementalExpenseCLP>0){
+   add(overview,'p','manager-warning',
+    '⚠ Esta alternativa agrega costo o compromiso sin aumentar expediciones dentro del horizonte.');
+  }
   // M5-20: each alternative must reuse the very same frozen scenario object.
   const frozenBase=recovery.baselineSnapshot;
   if(!frozenBase||frozenBase.scope!=='sku-cohort'
