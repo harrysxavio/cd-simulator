@@ -109,6 +109,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 24 | **Completada** | PR #51 v11.53 integrada en `main` (merge `3dca1a537`); Node #38648258802, Chromium #38648258763, Pages #38648258432 y HTTP #38648258841 aprobados. Trazabilidad de capacidad de pedidos por jornada, cupos utilizados/ociosos y costo único de refuerzo, sin atribución falsa en opción combinada. Ver STATUS-V11.53.md. |
 | 25 | **Completada** | PR #52 v11.54 fusionada en `main` (merge `9f7663ff`); Node #38655484791, Chromium #38655484946, Pages #38655484338 y HTTP #38655484786 aprobados. Cuatro escenarios sobre baseline congelado, resultado conjunto del replay físico y efectos no aditivos/costos trazados. Ver STATUS-V11.54.md. |
 | 26 | **Completada** | PR #53 v11.55 fusionada en `main` (`10028b30`); Node #38659081568, Chromium #38659081577, Pages #38659081984 y HTTP #38659081564 aprobados. Cinco escenarios comparados con mismo baseline, días, pedidos, colas y costos, en panel compacto móvil. Ver STATUS-V11.55.md. |
-| 27–42 | **Pendientes de cierre** | Siguiente M5-27: confirmación/persistencia de decisión; después M6–M8. |
+| 27 | **En curso** | Rama `feat/m5-27-confirm-persist` v11.56: confirmar 5 opciones con testigo físico compacto, comprobar al recargar, rechazar decisiones alteradas y conservar v1; cerrar solo tras PR/main Node/Chromium + Pages/HTTP. Ver STATUS-V11.56.md. |
+| 28–42 | **Pendientes de cierre** | Siguiente M6-28: diagnóstico de cuellos físicos con datos de eventos, sin inventar causalidad; M6–M8 continúan. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
