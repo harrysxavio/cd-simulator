@@ -108,6 +108,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 23 | **Completada** | PR #50 v11.52 integrada a `main` (`038f382b`); Node #38642335671, Chromium #38642335909, Pages #38642335694 y HTTP #38642335619 aprobados. Reserva interna por SKU/día validada contra inventario y costo estándar sin inventar PO, stock ni gasto por traslado no tarifado. Ver STATUS-V11.52.md. |
 | 24 | **Completada** | PR #51 v11.53 integrada en `main` (merge `3dca1a537`); Node #38648258802, Chromium #38648258763, Pages #38648258432 y HTTP #38648258841 aprobados. Trazabilidad de capacidad de pedidos por jornada, cupos utilizados/ociosos y costo único de refuerzo, sin atribución falsa en opción combinada. Ver STATUS-V11.53.md. |
 | 25 | **Completada** | PR #52 v11.54 fusionada en `main` (merge `9f7663ff`); Node #38655484791, Chromium #38655484946, Pages #38655484338 y HTTP #38655484786 aprobados. Cuatro escenarios sobre baseline congelado, resultado conjunto del replay físico y efectos no aditivos/costos trazados. Ver STATUS-V11.54.md. |
-| 26–42 | **Pendientes de cierre** | Siguiente M5-26: comparador consolidado antes/alternativa/diferencia, pedidos/plazos/costos. |
+| 26 | **En curso** | Rama `feat/m5-26-unified-compare` v11.55: comparador común antes / seleccionado / delta de pedidos, días, colas y costos. Solo cerrar tras Node + Chromium PR/main y Pages + HTTP. Ver STATUS-V11.55.md. |
+| 27–42 | **Pendientes de cierre** | Siguiente M5-27: confirmación/persistencia de decisión; después M6–M8. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
