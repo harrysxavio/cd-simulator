@@ -1,6 +1,6 @@
 # Estado v11.57 · M6-28 · Diagnóstico físico a partir de eventos SKU
 
-**Estado:** En validación (Node, Chromium, integración main, Pages y HTTP pendientes para el cierre). **Plan vigente:** [43 microfases](EXECUTION-PLAN-43.md).
+**Estado:** **completada (14 de octubre de 2026, Chile)**. PR, Node, Chromium, Pages y HTTP públicos aprobados. **Plan vigente:** [43 microfases](EXECUTION-PLAN-43.md).
 
 ## Alcance comprobable
 
@@ -26,7 +26,7 @@
 
 ## Puerta de cierre
 
-- PR con Node y Chromium: pendiente.
-- Merge main con Node y Chromium: pendiente.
-- Pages y HTTP público v11.57 revisión 166: pendiente.
+- [PR #55](https://github.com/harrysxavio/cd-simulator/pull/55): Node [#38664288714](https://github.com/harrysxavio/cd-simulator/actions/runs/38664288714) y Chromium [#38664288735](https://github.com/harrysxavio/cd-simulator/actions/runs/38664288735) **aprobados**.
+- Merge funcional en `main` `cb30f53a`: Node [#38664748313](https://github.com/harrysxavio/cd-simulator/actions/runs/38664748313) y Chromium [#38664748355](https://github.com/harrysxavio/cd-simulator/actions/runs/38664748355) **aprobados**.
+- GitHub Pages público v11.57 r166 [#38664747840](https://github.com/harrysxavio/cd-simulator/actions/runs/38664747840) y HTTP real [#38664748269](https://github.com/harrysxavio/cd-simulator/actions/runs/38664748269) **aprobados**.
 - Siguiente: **M6-29**, contrafactual simple con una sola variable y condiciones físicas fijas.

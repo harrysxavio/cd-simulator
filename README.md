@@ -18,7 +18,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Estado técnico de v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance candidato v11.57 (M6-28):** Señales de restricciones físicas desde el mismo libro SKU: colas, capacidad alcanzada y coincidencias en Recepción, Calidad, Inventario, Picking y Transporte; sin sumar unidades con pedidos ni afirmar causalidad. Pendiente de cierre según [informe técnico](docs/STATUS-V11.57.md).
+**Avance verificado v11.57 (M6-28):** Señales de restricciones físicas desde el mismo libro SKU: colas, capacidad alcanzada y coincidencias en Recepción, Calidad, Inventario, Picking y Transporte; sin sumar unidades con pedidos ni afirmar causalidad. Node, Chromium, Pages y HTTP aprobados; evidencia en [informe técnico](docs/STATUS-V11.57.md).
 
 **Histórico v11.56 (M5-27, cierre M5 8/8):** Confirmación de cinco alternativas de recuperación, persistencia compacta y reconcilable tras recarga, detección de registros inconsistentes y protección de duplicados. Se conservan sesiones previas. Node, Chromium, Pages y HTTP verificados. [Estado técnico](docs/STATUS-V11.56.md).
 
@@ -482,4 +482,4 @@ Se amplían pruebas de regresión para detectar cambios indebidos en el manifies
 
 **Límites:** el plan SKU sigue usando una cohorte didáctica proporcional de 200 pedidos, no la escala directa de 1000 unidades del modelo agregado. Aún falta compartir el control de accesibilidad del inventario, reservas, y el libro contable/económico único. Los montos del laboratorio no se suman a los del reporte financiero de la campaña.
 
-**Estado de ejecución:** el seguimiento oficial se realiza por las 43 microfases del [plan maestro](docs/EXECUTION-PLAN-43.md), no mediante porcentajes orientativos heredados. M5-20 a M5-27 están verificadas (8/8); sigue M6-28. La validación Android física y TalkBack sigue pendiente de M7.
+**Estado de ejecución:** el seguimiento oficial se realiza por las 43 microfases del [plan maestro](docs/EXECUTION-PLAN-43.md), no mediante porcentajes orientativos heredados. M5-20 a M5-27 están verificadas (8/8), M6-28 está completada; sigue M6-29. La validación Android física y TalkBack sigue pendiente de M7.
