@@ -1,10 +1,12 @@
 import {recoveryComparison} from './recovery.js';
 import {campaignSnapshot} from './campaign.js';
+import {skuDecisionPhysicalWitness,verifySkuDecisionWitness} from './sku-decision-witness.js';
 
 // U2a: the management decision is an explicit, frozen simulation commitment,
 // not a monetary payment nor a supplier-confirmed real-world purchase.
 // The replay is the same event ledger used by purchase/receipt/Quality/shipment.
-export const DECISION_OPTIONS=Object.freeze(['wait','emergency','reserve']);
+export const DECISION_OPTIONS=Object.freeze(['wait','emergency','reserve','overtime','combined']);
+const LEGACY_DECISION_OPTIONS=Object.freeze(['wait','emergency','reserve']);
 const freezeDeep=value=>{
  if(value&&typeof value==='object'&&!Object.isFrozen(value)){
   for(const item of Object.values(value))freezeDeep(item);
@@ -17,8 +19,10 @@ export function skuDecisionSignature({campaignId,skuInputs}={}){
  if(!skuInputs||typeof skuInputs!=='object'||!Number.isSafeInteger(skuInputs.actualOrders)||skuInputs.actualOrders<1)throw new Error('Contrato SKU inválido');
  return JSON.stringify({campaignId,skuInputs});
 }
-export function createSkuRecoveryDecision({campaignId,skuInputs,option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,comparisonResult=null}={}){
- if(!DECISION_OPTIONS.includes(option))throw new Error('Acción de recuperación aún no soportada en U2');
+export function createSkuRecoveryDecision({campaignId,skuInputs,option='wait',urgentArrivalDay=1,purchaseCoveragePercent=100,comparisonResult=null,confirmationVersion=1}={}){
+ if(!DECISION_OPTIONS.includes(option)||![1,2].includes(confirmationVersion)
+  ||(confirmationVersion===1&&!LEGACY_DECISION_OPTIONS.includes(option)))throw new Error('Acción de recuperación aún no soportada en U2');
+ if(confirmationVersion===2&&!comparisonResult)throw new Error('M5-27 exige una vista física previa exacta');
  const signature=skuDecisionSignature({campaignId,skuInputs});
  const comparison=comparisonResult??recoveryComparison({...skuInputs,option,urgentArrivalDay,purchaseCoveragePercent});
  if(comparison.option!==option||comparison.urgentArrivalDay!==urgentArrivalDay||comparison.purchaseCoveragePercent!==purchaseCoveragePercent||
@@ -40,13 +44,14 @@ export function createSkuRecoveryDecision({campaignId,skuInputs,option='wait',ur
  const totalUrgent=urgentPurchaseOrders.reduce((n,p)=>n+p.quantity,0);
  const receivedUrgent=snapshot.receipts.filter(r=>urgentPurchaseOrders.some(p=>p.eventPurchaseOrderId===r.purchaseOrderId));
  const receivedUnits=receivedUrgent.reduce((n,r)=>n+r.qty,0);
- if(option!=='emergency'&&(totalUrgent||receivedUnits))throw new Error('Una acción interna o espera no puede contener una compra extraordinaria');
+ if(!['emergency','combined'].includes(option)&&(totalUrgent||receivedUnits))throw new Error('Una acción interna o espera no puede contener una compra extraordinaria');
  if(option!=='reserve'&&reserveTransfers.length)throw new Error('Solo la habilitación de reserva puede generar traslados internos');
- if(option==='emergency'&&totalUrgent!==comparison.urgent.reduce((n,p)=>n+p.qty,0))throw new Error('Cantidades de compra extraordinaria incoherentes');
+ if(['emergency','combined'].includes(option)&&totalUrgent!==comparison.urgent.reduce((n,p)=>n+p.qty,0))throw new Error('Cantidades de compra extraordinaria incoherentes');
  const extraOrdersCompleted=comparison.recovered.completed-comparison.base.completed;
+ const witness=confirmationVersion===2?skuDecisionPhysicalWitness({comparison}):null;
  return freezeDeep({
-  version:1,scope:'sku-cohort',status:'confirmed-in-simulator',campaignId,scenarioSignature:signature,
-  action:option==='wait'?'wait-without-purchase':option==='reserve'?'release-on-site-reserve':'extraordinary-purchase',option,urgentArrivalDay,purchaseCoveragePercent,reservePercent:skuInputs.reservePercent??0,
+  version:confirmationVersion,scope:'sku-cohort',status:'confirmed-in-simulator',campaignId,scenarioSignature:signature,
+  action:option==='wait'?'wait-without-purchase':option==='reserve'?'release-on-site-reserve':option==='overtime'?'capacity-reinforcement':option==='combined'?'urgent-purchase-plus-reinforcement':'extraordinary-purchase',option,urgentArrivalDay,purchaseCoveragePercent,reservePercent:skuInputs.reservePercent??0,
   // Persist PO identity, original quantity, due day and unit valuation with
   // a confirmed decision; older v1 confirmations without this array remain valid.
   originalPurchase:{...comparison.originalPurchase},
@@ -62,13 +67,19 @@ export function createSkuRecoveryDecision({campaignId,skuInputs,option='wait',ur
   completedBefore:comparison.base.completed,completedAfter:comparison.recovered.completed,
   pendingBefore:comparison.base.pending,pendingAfter:comparison.recovered.pending,
   recoveredOrders:extraOrdersCompleted,horizonDays:comparison.recovered.days,
+  ...(confirmationVersion===2?{
+   physicalWitness:witness,incrementalExpenseCLP:comparison.incrementalExpense,
+   netCashDeltaCLP:comparison.netCashDelta,
+   economicProxyDeltaCLP:comparison.economicProxyDelta}:{}),
   firstReceivedDay:receivedUrgent.length?Math.min(...receivedUrgent.map(x=>x.day)):null,
   note:'Confirmación pedagógica dentro de la campaña SKU: proveedor y fecha son supuestos; no se ha pagado ni emitido una orden real. No modifica el resultado agregado de una jornada.'
  });
 }
-export function skuDecisionStatus({decision,contract}={}){
+export function skuDecisionStatus({decision,contract,comparison}={}){
  if(!decision)return 'none';
- if(!decision||decision.version!==1||decision.status!=='confirmed-in-simulator'||!DECISION_OPTIONS.includes(decision.option))return 'invalid';
+ if(!decision||![1,2].includes(decision.version)||decision.status!=='confirmed-in-simulator'
+  ||!DECISION_OPTIONS.includes(decision.option)
+  ||(decision.version===1&&!LEGACY_DECISION_OPTIONS.includes(decision.option)))return 'invalid';
  let signature;
  try{signature=skuDecisionSignature({campaignId:contract?.campaignId,skuInputs:contract?.skuInputs});}catch{return 'invalid'}
  if(decision.campaignId!==contract.campaignId||decision.scenarioSignature!==signature)return 'stale';
@@ -77,7 +88,7 @@ export function skuDecisionStatus({decision,contract}={}){
   !Number.isSafeInteger(decision.pendingAfter)||!Number.isSafeInteger(decision.urgentArrivalDay)||
   !Number.isInteger(decision.purchaseCoveragePercent)||!Number.isFinite(decision.urgentOrderCommitmentCLP)||
   decision.urgentOrderCommitmentCLP<0)return 'invalid';
- if(decision.option!=='emergency'&&decision.urgentPurchaseOrders.length)return 'invalid';
+ if(!['emergency','combined'].includes(decision.option)&&decision.urgentPurchaseOrders.length)return 'invalid';
  if(decision.originalPurchaseOrders!==undefined){
   if(!Array.isArray(decision.originalPurchaseOrders)||decision.originalPurchaseOrders.length===0
    ||new Set(decision.originalPurchaseOrders.map(po=>po?.skuId)).size!==decision.originalPurchaseOrders.length
@@ -88,5 +99,8 @@ export function skuDecisionStatus({decision,contract}={}){
     ||!Number.isSafeInteger(po.unitCost)||po.unitCost<0))return 'invalid';
  }
  if(decision.reserveTransfers!==undefined&&(!Array.isArray(decision.reserveTransfers)||decision.reserveTransfers.some(x=>!Number.isSafeInteger(x.qty)||x.qty<1)))return 'invalid';
+ if(decision.version===2){
+  if(!comparison||!verifySkuDecisionWitness({decision,comparison}))return 'invalid';
+ }
  return 'current';
 }

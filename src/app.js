@@ -1,31 +1,31 @@
-import {supplyBridge} from './supply-bridge.js?v=164';
-import {createSkuSessionCache} from './sku-session.js?v=164';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=164';
-import {aggregateFlowCsv} from './aggregate-export.js?v=164';
-import {campaignSkuContract} from './campaign-contract.js?v=164';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=164';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=164';
-import {campaignAreaReadModel} from './area-ledger.js?v=164';
-import {laborAudit} from './labor.js?v=164';
-import {skuAudit} from './audit.js?v=164';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=164';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=164';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=164';
-import {integratedDemand} from './integrated.js?v=164';
-import {eventSimulation} from './events.js?v=164';
-import {deliveryTimeline} from './timeline.js?v=164';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=164';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=164';
-import {demandJourney} from './journey.js?v=164';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=164';
-import {flow,diagnose,ACTIONS} from './flow.js?v=164';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=164';
-import {areaKpis} from './kpis.js?v=164';
-import {causalAudit} from './causal.js?v=164';
-import {managerDiagnosis} from './diagnosis-guide.js?v=164';
-import {skuServiceBrief} from './sku-service.js?v=164';
-import {createSkuRecoveryDecision,skuDecisionStatus} from './sku-decision.js?v=164';
-import {attentionSignals} from './attention.js?v=164';
+import {supplyBridge} from './supply-bridge.js?v=165';
+import {createSkuSessionCache} from './sku-session.js?v=165';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=165';
+import {aggregateFlowCsv} from './aggregate-export.js?v=165';
+import {campaignSkuContract} from './campaign-contract.js?v=165';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=165';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=165';
+import {campaignAreaReadModel} from './area-ledger.js?v=165';
+import {laborAudit} from './labor.js?v=165';
+import {skuAudit} from './audit.js?v=165';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=165';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=165';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=165';
+import {integratedDemand} from './integrated.js?v=165';
+import {eventSimulation} from './events.js?v=165';
+import {deliveryTimeline} from './timeline.js?v=165';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=165';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=165';
+import {demandJourney} from './journey.js?v=165';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=165';
+import {flow,diagnose,ACTIONS} from './flow.js?v=165';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=165';
+import {areaKpis} from './kpis.js?v=165';
+import {causalAudit} from './causal.js?v=165';
+import {managerDiagnosis} from './diagnosis-guide.js?v=165';
+import {skuServiceBrief} from './sku-service.js?v=165';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=165';
+import {attentionSignals} from './attention.js?v=165';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -40,7 +40,20 @@ const skuContractInputs=contract=>{
  // The legacy signature stays identical when staging is not selected.
  return skuSeparateTransport?{...stock,separateTransport:true}:stock;
 };
-const activeSkuDecision=contract=>skuDecisions.findLast(d=>skuDecisionStatus({decision:d,contract:{...contract,skuInputs:skuContractInputs(contract)}})==='current')||null;
+const activeSkuDecision=contract=>{
+ const skuInputs=skuContractInputs(contract),c={...contract,skuInputs};
+ const signature=skuDecisionSignature({campaignId:contract.campaignId,skuInputs});
+ return skuDecisions.findLast(d=>{
+  if(d?.version===2){
+   if(d.campaignId!==contract.campaignId||d.scenarioSignature!==signature)return false;
+   if(!['wait','reserve','overtime','emergency','combined'].includes(d.option))return false;
+   const comparison=skuSession.getComparison({contract,skuInputs,option:d.option,
+    urgentArrivalDay:d.urgentArrivalDay,purchaseCoveragePercent:d.purchaseCoveragePercent});
+   return skuDecisionStatus({decision:d,contract:c,comparison})==='current';
+  }
+  return skuDecisionStatus({decision:d,contract:c})==='current';
+ })||null;
+};
 // M2-04d: one input adapter for all screens; only SKU events are physical.
 // Individual SKU controls can request a fresh contract, while a full render
 // passes the identical frozen contract to Results and Recovery.
@@ -53,10 +66,13 @@ function save(){
  try{
   const data={campaignId,currentSection,decisions,actions,active,phase,scenario,strategy,revealed,shockDirection,
    skuPolicy,skuSupplierDelay,skuSeparateTransport,skuRecovery,skuUrgentArrival,skuPurchaseCoverage,skuReservePercent,skuDecisions};
-  localStorage.setItem(KEY,serializeSession(data));
+  const encoded=serializeSession(data);
+  localStorage.setItem(KEY,encoded);
+  return localStorage.getItem(KEY)===encoded;
  }catch{
   // Browser privacy mode or exhausted storage must not break the exercise.
   // New physical SKU ledgers are deliberately never stored in localStorage.
+  return false;
  }
 }
 function load(){
@@ -1172,11 +1188,14 @@ function renderSkuRecoveryMission(contract=null){
  if(confirmed){
   const success=add(root,'div','manager-po-confirmed');
   add(success,'strong','','✓ Decisión confirmada para esta cohorte SKU');
-  add(success,'p','',confirmed.action==='extraordinary-purchase'?'Nueva orden de compra extraordinaria, separada de la orden original.':confirmed.action==='release-on-site-reserve'?'Se autorizó el traslado de stock ubicado en RESERVA-CD. No es una compra.':'Se ha decidido continuar sin compra extraordinaria.');
+  add(success,'p','',confirmed.action==='extraordinary-purchase'?'Nueva orden de compra extraordinaria, separada de la original.':confirmed.action==='urgent-purchase-plus-reinforcement'?'Compra urgente y refuerzo aplicados conjuntamente en la simulación.':confirmed.action==='capacity-reinforcement'?'Refuerzo de capacidad sin compra adicional.':confirmed.action==='release-on-site-reserve'?'Traslado de stock de RESERVA-CD, sin compra.':'Continuar sin cambios al abastecimiento original.');
   add(success,'p','manager-confirmed-impact','Pedidos que salen del CD: '+fmt(confirmed.completedBefore)+' → '+fmt(confirmed.completedAfter)+' · siguen pendientes '+fmt(confirmed.pendingAfter)+'.');
   const commitDetails=add(success,'details','manager-po-detail');
   add(commitDetails,'summary','','Ver costos y cantidades confirmadas en el simulador');
   add(commitDetails,'p','','Compra prevista: CLP '+fmt(confirmed.urgentOrderCommitmentCLP)+' (sin pago real). Cantidad comprada: '+fmt(confirmed.orderedExtraUnits)+' productos; recibidos durante el ejercicio: '+fmt(confirmed.receivedExtraUnits)+'.');
+  add(commitDetails,'p','manager-fineprint','Refuerzo operacional supuesto CLP '+fmt(confirmed.operationalReinforcementCLP)+
+   (confirmed.version===2?' · costo/compromiso incremental CLP '+fmt(confirmed.incrementalExpenseCLP)+
+    ' · saldo simplificado CLP '+fmt(confirmed.netCashDeltaCLP):'')+'.');
   if(confirmed.action==='release-on-site-reserve'){
    add(success,'p','','Traslado interno de '+fmt(confirmed.releasedReserveUnits)+' unidades SKU desde el día '+(confirmed.firstReserveTransferDay??'no realizado')+'. Reserva pendiente al corte '+fmt(Object.values(confirmed.closingReserve).reduce((a,b)=>a+b,0))+'.');
    const moveDetail=add(success,'details','manager-po-detail');add(moveDetail,'summary','','Ver movimientos internos identificados por SKU');
@@ -1190,13 +1209,15 @@ function renderSkuRecoveryMission(contract=null){
     add(item,'p','','Costo estándar CLP '+fmt(po.orderCommitmentCLP)+' · llegada supuesta día '+po.expectedArrivalDay+'. '+po.supplier);
    }
   }
-  add(success,'p','manager-fineprint','Decisión guardada para esta campaña de práctica. La compra original no cambia. Para ensayar otra alternativa, inicia una nueva campaña.');
+  add(success,'p','manager-fineprint','Decisión guardada para esta campaña de práctica. '+
+   (confirmed.version===2?'El resultado se verifica con el escenario físico tras recarga. ':'')+
+   'La compra original no cambia. Para ensayar otra alternativa, inicia una nueva campaña.');
   const resultBtn=add(root,'button','btn manager-primary','Ver resultado y trazabilidad SKU →');
   resultBtn.type='button';resultBtn.onclick=()=>{showSection('dashboard');showResultView('inventory',true)};
   return;
  }
- if(skuDecisions.length)add(root,'p','manager-warning','Hay una decisión registrada para una configuración anterior. Se conserva como histórica, pero no se aplica a este escenario actualizado. Puedes confirmar una decisión nueva sin modificar la anterior.');
- const selected=['emergency','reserve'].includes(skuRecovery)?skuRecovery:'wait';
+ if(skuDecisions.length)add(root,'p','manager-warning','Una decisión histórica pertenece a otra configuración o no supera la validación actual. No se aplica a esta cohorte. Puedes confirmar otra.');
+ const selected=skuRecovery;
  const preview=skuSession.getComparison({contract,skuInputs:input,option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage});
  const initial=preview.base.initial;
  const stockBox=add(root,'section','manager-inventory-review');
@@ -1222,14 +1243,16 @@ function renderSkuRecoveryMission(contract=null){
  for(const [option,title,note] of [
   ['wait','Mantener compras originales','No cambiar el plan; esperar.'],
   ['emergency','Solicitar reposición extraordinaria','Comprar productos faltantes.'],
-  ['reserve','Habilitar reserva ubicada en el CD','Usar productos guardados en el CD.']
+  ['reserve','Habilitar reserva ubicada en el CD','Usar productos guardados en el CD.'],
+  ['overtime','Refuerzo operacional','Agregar cupos por jornada; se cobra al activarlo.'],
+  ['combined','Compra urgente + refuerzo','Comprar SKU y reforzar capacidad conjuntamente.']
  ]){
   const button=add(cards,'button','manager-option-btn'+(selected===option?' chosen':''));
   button.type='button';button.setAttribute('aria-pressed',String(selected===option));
   add(button,'strong','',title);add(button,'span','',note);
   button.onclick=()=>{skuRecovery=option;if(option==='reserve'&&skuReservePercent===0)skuReservePercent=20;save();render()};
  }
- add(decide,'p','manager-selected-meaning',selected==='emergency'?'Vas a evaluar una compra nueva. Los productos deben llegar y pasar por Calidad antes de usarlos.':selected==='reserve'?'Vas a trasladar productos que ya están en otra ubicación de este mismo centro. No es una compra.':'Mantienes el abastecimiento original. Los pedidos que falten seguirán pendientes.');
+ add(decide,'p','manager-selected-meaning',selected==='emergency'||selected==='combined'?'La compra debe llegar y pasar Calidad. El refuerzo solo amplía capacidad de pedidos y tiene un costo si se activa.':selected==='overtime'?'Agregas capacidad de Picking y expedición; no inventas stock.':selected==='reserve'?'Vas a trasladar productos que ya están en otra ubicación de este mismo centro. No es una compra.':'Mantienes el abastecimiento original y la espera.');
  if(selected==='reserve'){
   const reserveRow=add(decide,'div','manager-purchase-settings');
   add(reserveRow,'label','','¿Cuánto stock inicial está en la reserva del CD?');
@@ -1237,9 +1260,9 @@ function renderSkuRecoveryMission(contract=null){
   for(const n of [0,10,20,30]){const op=add(reserveControl,'option','',n===0?'0 % · sin reserva interna':n+' % del stock en reserva');op.value=String(n)}
   reserveControl.value=String(skuReservePercent);reserveControl.onchange=()=>{skuReservePercent=Number(reserveControl.value);if(skuReservePercent===0&&skuRecovery==='reserve')skuRecovery='wait';save();render()};
  }
- if(selected==='emergency'||selected==='reserve'){
+ if(['emergency','combined','reserve'].includes(selected)){
   const row=add(decide,'div','manager-purchase-settings');
-  if(selected==='emergency'){
+  if(['emergency','combined'].includes(selected)){
   const qty=add(row,'label','','¿Qué fracción del faltante físico comprar?');
   const coverage=add(row,'select','numeric-input');coverage.setAttribute('aria-label','Porcentaje de reposición extraordinaria en Recuperación');
   for(const n of [0,25,50,75,100]){const op=add(coverage,'option','',n+' % del faltante por SKU');op.value=String(n)}
@@ -1278,7 +1301,7 @@ function renderSkuRecoveryMission(contract=null){
   add(previewCard,'p','','Costo previsto de la compra: CLP '+fmt(preview.urgentBase+preview.urgentSurcharge)+' (sin pago real).');
   if(preview.urgentArrivalDay>preview.recovered.days)add(previewCard,'p','manager-warning','⚠ La nueva compra llega después del corte: genera compromiso, pero no recupera pedidos dentro de los 12 días.');
  }
- if(['emergency','reserve'].includes(selected)&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta intervención no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
+ if(selected!=='wait'&&preview.recovered.completed<=preview.base.completed)add(previewCard,'p','manager-warning','⚠ Esta intervención no rescata pedidos en el horizonte actual. Revisa fecha, Recepción, Calidad, Picking y Transporte antes de comprometer recursos.');
  if(selected==='wait'){
   add(previewCard,'p','manager-warning',
    'Esperar no agrega compras, personal ni traslados: costo incremental CLP 0. '+
@@ -1306,11 +1329,28 @@ function renderSkuRecoveryMission(contract=null){
  confirmBtn.disabled=(selected==='emergency'&&!preview.urgent.length)||(selected==='reserve'&&skuReservePercent===0);
  confirmBtn.onclick=()=>{
   if(activeSkuDecision(contract))return;
-  const extra=selected==='emergency'&&preview.recovered.completed<=preview.base.completed?' ATENCIÓN: esta compra tiene costo y no recupera pedidos dentro del período.':selected==='reserve'&&preview.recovered.completed<=preview.base.completed?' ATENCIÓN: este traslado no recupera pedidos dentro del período.':'';
+  const extra=selected!=='wait'&&preview.recovered.completed<=preview.base.completed?' ATENCIÓN: esta intervención no recupera pedidos dentro del período y puede generar costos o compromisos.':'';
   if(!confirm('¿Registrar esta decisión en la campaña SKU? La orden original no cambiará y la acción quedará confirmada en esta simulación.'+extra))return;
-  const record=createSkuRecoveryDecision({campaignId,skuInputs:input,option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,comparisonResult:preview});
+  const record=createSkuRecoveryDecision({campaignId,skuInputs:input,
+   option:selected,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage,
+   comparisonResult:preview,confirmationVersion:2});
+  const previous=skuDecisions,priorOption=skuRecovery;
   skuDecisions=[...skuDecisions,record].slice(-25);
-  skuRecovery=selected;save();render();
+  skuRecovery=selected;
+  if(!save()){
+   skuDecisions=previous;skuRecovery=priorOption;
+   alert('No se pudo guardar la confirmación. No se registró la decisión; revisa almacenamiento o modo privado.');
+   return;
+  }
+  const restored=deserializeSession(localStorage.getItem(KEY),{fallbackCampaignId:campaignId});
+  if(!restored.state?.skuDecisions.some(d=>d.version===2
+   &&d.scenarioSignature===record.scenarioSignature
+   &&d.physicalWitness?.scenarioDigest===record.physicalWitness.scenarioDigest)){
+   skuDecisions=previous;skuRecovery=priorOption;
+   alert('No se pudo verificar la confirmación persistida. La acción no quedó validada.');
+   return;
+  }
+  render();
  };
  const limits=add(root,'details','manager-scope-detail');
  add(limits,'summary','','Qué supone este ejercicio · detalles técnicos');

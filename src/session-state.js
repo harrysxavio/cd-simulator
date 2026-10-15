@@ -44,7 +44,7 @@ function safeActions(raw){
 function safeConfirmedDecisions(raw,campaignId){
  if(!Array.isArray(raw))return [];
  return raw.slice(-25).filter(d=>{
-  if(!isRecord(d)||d.version!==1||d.campaignId!==campaignId||d.status!=='confirmed-in-simulator'
+  if(!isRecord(d)||![1,2].includes(d.version)||d.campaignId!==campaignId||d.status!=='confirmed-in-simulator'
    ||!DECISION_OPTIONS.includes(d.option)
    ||typeof d.scenarioSignature!=='string'||d.scenarioSignature.length>30000
    ||!Number.isSafeInteger(d.completedAfter)||d.completedAfter<0
@@ -52,6 +52,18 @@ function safeConfirmedDecisions(raw,campaignId){
    ||!Number.isSafeInteger(d.orderedExtraUnits)||d.orderedExtraUnits<0
    ||!Array.isArray(d.urgentPurchaseOrders)||d.urgentPurchaseOrders.length>50
    ||!isRecord(d.originalPurchase))return false;
+  if(d.version===1&&!['wait','emergency','reserve'].includes(d.option))return false;
+  if(d.version===2&&(!isRecord(d.physicalWitness)
+   ||d.physicalWitness.version!==1
+   ||typeof d.physicalWitness.baselineKey!=='string'
+   ||d.physicalWitness.baselineKey.length>10000
+   ||typeof d.physicalWitness.scenarioDigest!=='string'
+   ||!/^[a-f0-9]{16}$/.test(d.physicalWitness.scenarioDigest)
+   ||!Number.isSafeInteger(d.physicalWitness.completedOrders)
+   ||!Number.isSafeInteger(d.physicalWitness.pendingOrders)
+   ||typeof d.incrementalExpenseCLP!=='number'||!Number.isFinite(d.incrementalExpenseCLP)
+   ||typeof d.netCashDeltaCLP!=='number'||!Number.isFinite(d.netCashDeltaCLP)
+   ||typeof d.economicProxyDeltaCLP!=='number'||!Number.isFinite(d.economicProxyDeltaCLP)))return false;
   // Only selected, structurally valid decisions are retained here. Their
   // scenario signature is checked again at use via skuDecisionStatus.
   if(d.originalPurchaseOrders!==undefined){
