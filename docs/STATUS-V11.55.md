@@ -1,6 +1,6 @@
 # Estado v11.55 · M5-26 · Comparación consolidada antes / alternativa / diferencia
 
-**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Estado:** en validación, pendiente de Node, Chromium, merge, Pages y HTTP reales antes de marcar cierre.
+**Plan maestro:** [43 microfases](EXECUTION-PLAN-43.md). **Estado:** **completada (2026-10-14, horario de Chile)**. PR, Node, Chromium, Pages y HTTP reales aprobados.
 
 ## Objetivo
 
@@ -26,8 +26,8 @@ Permitir a una persona que aprende gestión de centros de distribución decidir 
 
 ## Puerta de cierre
 
-- PR Node y Chromium: **pendientes**.
-- Merge y CI `main`: **pendientes**.
-- Pages público v11.55 revisión 164 y HTTP: **pendientes**.
+- [PR #53](https://github.com/harrysxavio/cd-simulator/pull/53), Node [#38658672092](https://github.com/harrysxavio/cd-simulator/actions/runs/38658672092) y Chromium [#38658672078](https://github.com/harrysxavio/cd-simulator/actions/runs/38658672078): **aprobados**.
+- Merge en `main` commit `10028b30`; Node [#38659081568](https://github.com/harrysxavio/cd-simulator/actions/runs/38659081568) y Chromium [#38659081577](https://github.com/harrysxavio/cd-simulator/actions/runs/38659081577): **aprobados**.
+- Pages v11.55 r164 [#38659081984](https://github.com/harrysxavio/cd-simulator/actions/runs/38659081984) y HTTP real [#38659081564](https://github.com/harrysxavio/cd-simulator/actions/runs/38659081564): **aprobados**.
 - Android físico/TalkBack: sigue pendiente de M7.
 - **Siguiente M5-27:** confirmar/persistir la decisión de forma consistente con las comparaciones y sus controles de integridad.
