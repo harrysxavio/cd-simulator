@@ -1252,7 +1252,7 @@ function renderSkuRecoveryMission(contract=null){
   add(button,'strong','',title);add(button,'span','',note);
   button.onclick=()=>{skuRecovery=option;if(option==='reserve'&&skuReservePercent===0)skuReservePercent=20;save();render()};
  }
- add(decide,'p','manager-selected-meaning',selected==='emergency'||selected==='combined'?'La compra debe llegar y pasar Calidad. El refuerzo solo amplía capacidad de pedidos y tiene un costo si se activa.':selected==='overtime'?'Agregas capacidad de Picking y expedición; no inventas stock.':selected==='reserve'?'Trasladarás stock de RESERVA-CD, sin comprarlo.':'Mantienes el abastecimiento original y la espera.');
+ add(decide,'p','manager-selected-meaning',selected==='emergency'||selected==='combined'?'La compra debe llegar y pasar Calidad. El refuerzo solo amplía capacidad de pedidos y tiene un costo si se activa.':selected==='overtime'?'Agregas capacidad de Picking y expedición; no inventas stock.':selected==='reserve'?'Vas a trasladar productos que ya están en otra ubicación de este mismo centro. No es una compra.':'Mantienes el abastecimiento original y la espera.');
  if(selected==='reserve'){
   const reserveRow=add(decide,'div','manager-purchase-settings');
   add(reserveRow,'label','','¿Cuánto stock inicial está en la reserva del CD?');
