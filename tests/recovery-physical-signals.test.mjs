@@ -82,7 +82,7 @@ test('M6-28: staging creates real picked/unshipped transport queue, while same-d
 test('M6-28: concurrent constraints are evidence of overlap, never additive lost orders',()=>{
  const {signals}=make({separateTransport:true,
   receivingUnitCapacity:0,qualityReleasePercent:0,
-  stock:{A:1000,B:1000,C:1000},transportUnitCapacity:0},'wait');
+  stock:{A:1000,B:0,C:0},transportUnitCapacity:0},'wait');
  assert.ok(signals.daysWithConcurrentObservations.length>=1);
  for(const d of signals.daily){
   assert.equal(d.ordersRequested,d.shippedToDate+d.pendingOrders);
