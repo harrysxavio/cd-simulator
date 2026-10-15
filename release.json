@@ -1,8 +1,8 @@
 {
-  "version": "11.54",
-  "assetRevision": 163,
-  "release": "v11.54 · M5-25 compras y refuerzo combinados sin sumar resultados",
+  "version": "11.55",
+  "assetRevision": 164,
+  "release": "v11.55 · M5-26 comparador antes, alternativa y diferencia",
   "date": "2026-10-14",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M5-25: auditoría inmutable de escenarios esperar/compra/refuerzo/combinación sobre el mismo baseline SKU. El resultado de la combinación usa su propio libro físico real, cuantifica interacción no aditiva y concilia compra urgente, recargo y refuerzo una sola vez. Panel didáctico y pruebas móviles/extremos; sin atribución causal externa ni pagos confirmados."
+  "notes": "Vista compacta de cinco decisiones sobre baseline físico congelado: pedidos expedidos, pendientes, días-pedido de espera, primer/último día de salida, observaciones de colas, compromisos y costos incrementales, sin mezclar el agregado ni prometer fechas de entrega. Pruebas físicas Node y Chromium móvil."
 }
