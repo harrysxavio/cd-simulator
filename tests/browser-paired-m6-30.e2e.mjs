@@ -46,7 +46,7 @@ async function verify(phone){
    'Two changes must remain independent');
   assert.equal(await panel.locator('[data-paired-interaction="orders"]').count(),1);
   assert.match(await panel.textContent(),/Costo adicional no calibrado/);
-  assert.match(await panel.textContent(),/no modifica ni confirma/i);
+  assert.match(await panel.textContent(),/no cambia ni confirma/i);
   assert.equal(await panel.locator('[data-paired-cost="unpriced"]').count(),1);
   await a.selectOption('qualityReleasePercent');
   await b.selectOption('inventoryAccuracyPercent');
