@@ -1,6 +1,6 @@
 # Estado v11.59 · M6-30 · Restricciones simultáneas sobre la misma cohorte SKU
 
-**Estado:** EN CURSO (candidato en `feat/m6-30-paired-counterfactual`). Cierre sujeto a CI/merge/Pages/HTTP. Plan maestro: [43 microfases](EXECUTION-PLAN-43.md).
+**Estado:** **COMPLETADA (16 de octubre de 2026, Chile)**. PR, Node, Chromium, merge, Pages y HTTP público aprobados. Plan maestro: [43 microfases](EXECUTION-PLAN-43.md).
 
 ## Entrega funcional
 - `src/recovery-paired-factors.js`: base original + solo A + solo B + ambas A+B sobre el mismo escenario SKU congelado. Usa los controles individuales de M6-29 y hace un replay **físico conjunto propio**, nunca suma pedidos simulados de dos corridas distintas.
@@ -13,12 +13,12 @@
 ## Pruebas
 - `tests/recovery-paired-factors.test.mjs`: sinergia recepción-calidad, picking-transporte con staging, conservación por día, bloqueos de parámetros, cero mutación del baseline y determinismo.
 - `tests/browser-paired-m6-30.e2e.mjs`: UI desktop/móvil 360/412px, ejecución perezosa, selección de A/B diferentes, lectura 13 días y ausencia de overflow/errores.
-- Regresión Node y Chromium: pendiente de ejecución en CI.
+- Regresión Node y Chromium: aprobada en el PR y después de integrar en `main`.
 
 ## Puerta de cierre
-- [ ] PR con Node y Chromium aprobados.
-- [ ] Merge `main` y Node/Chromium aprobados.
-- [ ] Pages desplegado v11.59 r168 y HTTP real de manifest, HTML, CSS y JS aprobado.
-- [ ] README y plan maestro cierran M6-30 e identifican **M6-31** como siguiente.
+- [x] [PR #57](https://github.com/harrysxavio/cd-simulator/pull/57) aprobado: [Node #38995771982](https://github.com/harrysxavio/cd-simulator/actions/runs/38995771982) y [Chromium #38995771998](https://github.com/harrysxavio/cd-simulator/actions/runs/38995771998); se corrigió una expectativa de texto en E2E antes de fusionar.
+- [x] [Merge `9ec918be`](https://github.com/harrysxavio/cd-simulator/commit/9ec918be0a91f6dbc15d7d0b73d6a11ce50d787e), [Node #38996096100](https://github.com/harrysxavio/cd-simulator/actions/runs/38996096100) y [Chromium #38996096074](https://github.com/harrysxavio/cd-simulator/actions/runs/38996096074) de `main` aprobados.
+- [x] [Pages #38996095929](https://github.com/harrysxavio/cd-simulator/actions/runs/38996095929) desplegó v11.59 r168 y [HTTP público #38996096082](https://github.com/harrysxavio/cd-simulator/actions/runs/38996096082) aprobó manifiesto, HTML, CSS y JS.
+- [x] README y plan maestro cierran M6-30. **Siguiente: M6-31**, recomendaciones con evidencia, costo y viabilidad explícitos.
 
 **Alcance:** simulación educativa determinista, no auditoría de operación real, forecast de entrega ni costo calibrado. Android físico/TalkBack pendiente de M7.
