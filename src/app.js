@@ -1,33 +1,34 @@
-import {supplyBridge} from './supply-bridge.js?v=167';
-import {createSkuSessionCache} from './sku-session.js?v=167';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=167';
-import {aggregateFlowCsv} from './aggregate-export.js?v=167';
-import {campaignSkuContract} from './campaign-contract.js?v=167';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=167';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=167';
-import {campaignAreaReadModel} from './area-ledger.js?v=167';
-import {laborAudit} from './labor.js?v=167';
-import {skuAudit} from './audit.js?v=167';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=167';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=167';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=167';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=167';
-import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=167';
-import {integratedDemand} from './integrated.js?v=167';
-import {eventSimulation} from './events.js?v=167';
-import {deliveryTimeline} from './timeline.js?v=167';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=167';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=167';
-import {demandJourney} from './journey.js?v=167';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=167';
-import {flow,diagnose,ACTIONS} from './flow.js?v=167';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=167';
-import {areaKpis} from './kpis.js?v=167';
-import {causalAudit} from './causal.js?v=167';
-import {managerDiagnosis} from './diagnosis-guide.js?v=167';
-import {skuServiceBrief} from './sku-service.js?v=167';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=167';
-import {attentionSignals} from './attention.js?v=167';
+import {supplyBridge} from './supply-bridge.js?v=168';
+import {createSkuSessionCache} from './sku-session.js?v=168';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=168';
+import {aggregateFlowCsv} from './aggregate-export.js?v=168';
+import {campaignSkuContract} from './campaign-contract.js?v=168';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=168';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=168';
+import {campaignAreaReadModel} from './area-ledger.js?v=168';
+import {laborAudit} from './labor.js?v=168';
+import {skuAudit} from './audit.js?v=168';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=168';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=168';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=168';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=168';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=168';
+import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=168';
+import {integratedDemand} from './integrated.js?v=168';
+import {eventSimulation} from './events.js?v=168';
+import {deliveryTimeline} from './timeline.js?v=168';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=168';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=168';
+import {demandJourney} from './journey.js?v=168';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=168';
+import {flow,diagnose,ACTIONS} from './flow.js?v=168';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=168';
+import {areaKpis} from './kpis.js?v=168';
+import {causalAudit} from './causal.js?v=168';
+import {managerDiagnosis} from './diagnosis-guide.js?v=168';
+import {skuServiceBrief} from './sku-service.js?v=168';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=168';
+import {attentionSignals} from './attention.js?v=168';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -1045,6 +1046,116 @@ function renderSkuLab(contract=currentCampaignContract()){
    };
    factorSelect.onchange=paintExperiment;
    paintExperiment();
+  }
+  // M6-30: paired sensitivity is kept separate from intervention decisions.
+  // Four PHYSICAL replay results share the frozen baseline, never a sum of orders.
+  const pairOptions=availablePairedFactorTrials(recovery.baselineSnapshot);
+  const paired=add(advisor,'details','supply-trace-detail sku-paired-counterfactual');
+  paired.dataset.pairedScope='sku-cohort';
+  add(paired,'summary','','🔬 ¿Y si cambiamos dos restricciones juntas?');
+  add(paired,'p','manager-fineprint',
+   'Compara la base original, cada intervención por separado y ambas aplicadas '+
+   'al mismo tiempo. No cambia ni confirma la recuperación que elegiste.');
+  if(pairOptions.length<2){
+   add(paired,'p','manager-fineprint',
+    'Este escenario solo permite '+fmt(pairOptions.length)+
+    ' factor(es) con margen de mejora. Para comparar dos, configura al menos '+
+    'dos restricciones físicas finitas; no se inventan límites.');
+  }else{
+   const pairControls=add(paired,'div','buttons');
+   const selectFactor=(name)=>{
+    const field=add(pairControls,'label','','Mejora '+name);
+    const selector=add(field,'select','numeric-input');
+    selector.dataset.pairedSelector=name;
+    selector.setAttribute('aria-label','Restricción '+name+' para comparar conjuntamente');
+    for(const opt of pairOptions){
+     const el=add(selector,'option','',opt.label+' · '+fmt(opt.before)+
+      ' → '+fmt(opt.suggestedValue)+' '+opt.unit);
+     el.value=opt.factor;
+    }
+    return selector;
+   };
+   const factorA=selectFactor('A'),factorB=selectFactor('B');
+   factorB.selectedIndex=1;
+   const output=add(paired,'div','sku-paired-result');
+   let hasRendered=false;
+   const paintPair=()=>{
+    if(factorA.value===factorB.value){
+     // Preserve two distinct changes; do not simulate duplicate factors.
+     const other=pairOptions.find(x=>x.factor!==factorA.value);
+     factorB.value=other.factor;
+    }
+    output.replaceChildren();
+    const evidence=pairedCounterfactualReadModel({
+     baselineSnapshot:recovery.baselineSnapshot,
+     factorA:factorA.value,factorB:factorB.value
+    });
+    output.dataset.pairedFactors=evidence.factors.map(x=>x.factor).join(',');
+    for(const [i,factor] of evidence.factors.entries()){
+     const line=add(output,'p','manager-fineprint');
+     line.dataset.pairedInput=i===0?'A':'B';
+     add(line,'strong','',factor.label+' · ');
+     add(line,'span','',fmt(factor.before)+' → '+fmt(factor.after)+' '+factor.unit);
+    }
+    add(output,'p','manager-fineprint',
+     'Pedidos expedidos del CD al corte, misma cohorte de '+fmt(evidence.orders)+':');
+    const variants=[
+     ['base','Base',evidence.baseline],
+     ['A','Solo A',evidence.onlyA],
+     ['B','Solo B',evidence.onlyB],
+     ['joint','A+B reales',evidence.joint]
+    ];
+    for(const [key,label,actual] of variants){
+     const line=add(output,'p','manager-fineprint');
+     line.dataset.pairedVariant=key;
+     add(line,'strong','',label+' · ');
+     add(line,'span','',fmt(actual.dispatched)+' expedidos / '+
+      fmt(actual.pending)+' pendientes.');
+    }
+    const comparison=add(output,'p','manager-fineprint');
+    comparison.dataset.pairedInteraction='orders';
+    add(comparison,'strong','','Interacción · ');
+    add(comparison,'span','',
+     (evidence.interactionOrders>0?'+':'')+fmt(evidence.interactionOrders)+
+     ' pedidos respecto de sumar las mejoras aisladas.');
+    add(output,'p','manager-fineprint',
+     'Mejora de A '+(evidence.onlyA.deltaDispatched>=0?'+':'')+
+      fmt(evidence.onlyA.deltaDispatched)+
+      ' · de B '+(evidence.onlyB.deltaDispatched>=0?'+':'')+
+      fmt(evidence.onlyB.deltaDispatched)+
+      ' · mejora conjunta '+(evidence.joint.deltaDispatched>=0?'+':'')+
+      fmt(evidence.joint.deltaDispatched)+'.');
+    add(output,'p','manager-fineprint',
+     evidence.interactionOrders>0
+      ?'Interacción positiva: juntas superan la suma de mejoras aisladas en este modelo.'
+      :evidence.interactionOrders<0
+       ?'Interacción negativa: la suma individual sobreestima la mejora conjunta.'
+       :'Interacción nula: la mejora conjunta coincide con la suma individual en este escenario.');
+    const daily=add(output,'details','supply-trace-detail');
+    add(daily,'summary','','Ver '+fmt(evidence.horizonDays+1)+' días · base, A, B y juntas');
+    for(const day of evidence.daily){
+     const line=add(daily,'p','manager-fineprint');
+     line.dataset.pairedDay=String(day.day);
+     add(line,'strong','','Día '+day.day+' · ');
+     add(line,'span','','expedidos acumulados '+
+      fmt(day.baselineCompleted)+' / '+fmt(day.onlyACompleted)+
+      ' / '+fmt(day.onlyBCompleted)+' / '+fmt(day.jointCompleted)+
+      ' (base/A/B/juntas) · pendientes juntas '+fmt(day.jointPending)+'.');
+    }
+    const cost=add(output,'p','manager-fineprint');
+    cost.dataset.pairedCost='unpriced';
+    add(cost,'span','',
+     'Costo adicional no calibrado (no equivale a CLP 0). '+
+     'La interacción es matemática entre cuatro simulaciones, no causa raíz '+ 
+     'exclusiva ni entrega confirmada al cliente.');
+    hasRendered=true;
+   };
+   // No gastar 3 replays extras si la persona no abre este panel.
+   paired.addEventListener('toggle',()=>{
+    if(paired.open&&!hasRendered)paintPair();
+   });
+   factorA.onchange=()=>{if(paired.open)paintPair();else hasRendered=false};
+   factorB.onchange=()=>{if(paired.open)paintPair();else hasRendered=false};
   }
   // M5-26: concise selected-vs-base snapshot, ALL figures from the
   // same cached physical replays, with no new orders, financial postings or ETAs.
