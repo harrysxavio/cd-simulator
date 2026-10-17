@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.57
+# Supply Chain Operations Lab · v11.58
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.57-r166) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.58-r167) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -15,10 +15,13 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Escenarios de aceptación de negocio y cifras verificadas](docs/SCENARIO-BUSINESS-ACCEPTANCE.md).
 - [Plan UX móvil, ejemplos de pantallas y criterios de aprendizaje](docs/UX-MOBILE-DIDACTIC-PLAN.md).
 - **[Plan maestro vigente: 43 microfases verificables (00–42)](docs/EXECUTION-PLAN-43.md)**. Es la fuente de verdad para las siguientes sesiones y reemplaza el orden de ejecución del roadmap histórico.
-- [Estado técnico de v11.57](docs/STATUS-V11.57.md).
+- [Estado técnico de v11.58](docs/STATUS-V11.58.md).
+- [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance verificado v11.57 (M6-28):** Señales de restricciones físicas desde el mismo libro SKU: colas, capacidad alcanzada y coincidencias en Recepción, Calidad, Inventario, Picking y Transporte; sin sumar unidades con pedidos ni afirmar causalidad. Node, Chromium, Pages y HTTP aprobados; evidencia en [informe técnico](docs/STATUS-V11.57.md).
+**Candidato v11.58 (M6-29):** Prueba contrafactual SKU de un parámetro sobre la misma demanda, PO y stock inicial: capacidad de Recepción, Calidad, Inventario, Picking, Transporte separado o tope compartido de pedidos. Comparación de despachos y pendientes por día; nunca se infiere costo cero si no hay una tarifa modelada. **El cierre depende de Node, Chromium, merge, Pages y HTTP.** [Evidencia](docs/STATUS-V11.58.md).
+
+**Histórico verificado v11.57 (M6-28):** Señales de restricciones físicas desde el mismo libro SKU: colas, capacidad alcanzada y coincidencias en Recepción, Calidad, Inventario, Picking y Transporte; sin sumar unidades con pedidos ni afirmar causalidad. Node, Chromium, Pages y HTTP aprobados; evidencia en [informe técnico](docs/STATUS-V11.57.md).
 
 **Histórico v11.56 (M5-27, cierre M5 8/8):** Confirmación de cinco alternativas de recuperación, persistencia compacta y reconcilable tras recarga, detección de registros inconsistentes y protección de duplicados. Se conservan sesiones previas. Node, Chromium, Pages y HTTP verificados. [Estado técnico](docs/STATUS-V11.56.md).
 

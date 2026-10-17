@@ -1,8 +1,8 @@
 {
-  "version": "11.57",
-  "assetRevision": 166,
-  "release": "v11.57 · M6-28 diagnóstico físico de restricciones SKU",
-  "date": "2026-10-14",
+  "version": "11.58",
+  "assetRevision": 167,
+  "release": "v11.58 · M6-29 contrafactual SKU de variable única",
+  "date": "2026-10-16",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M6-28 identifica colas de Recepción y Calidad, stock no verificable, pedidos sin Picking y espera en staging desde el mismo libro físico auditado. Señala días coincidentes y límites efectivamente alcanzados sin atribuir pérdidas a una causa sin contrafactual; sin mezclar pedidos con unidades SKU."
+  "notes": "M6-29 compara un único parámetro operativo frente al baseline físico SKU congelado. Conserva demanda, aperturas, PO originales y días; presenta diferencias de despacho y backlog sin atribuir causalidad exclusiva ni costo incremental no calibrado."
 }
