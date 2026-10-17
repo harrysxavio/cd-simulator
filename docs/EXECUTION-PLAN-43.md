@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.57.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.58.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -111,6 +111,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 26 | **Completada** | PR #53 v11.55 fusionada en `main` (`10028b30`); Node #38659081568, Chromium #38659081577, Pages #38659081984 y HTTP #38659081564 aprobados. Cinco escenarios comparados con mismo baseline, días, pedidos, colas y costos, en panel compacto móvil. Ver STATUS-V11.55.md. |
 | 27 | **Completada** | PR #54 v11.56 fusionada en `main` (`9fada009`); Node #38662180974, Chromium #38662180944, Pages #38662180719 y HTTP #38662180825 aprobados. Confirmación de las 5 acciones con testigo de consistencia física, persistencia, control de corrupción, compatibilidad v1 y prevención de duplicados. **M5-20 a M5-27: 8/8 completadas.** Ver STATUS-V11.56.md. |
 | 28 | **Completada** | PR #55 v11.57 fusionada en `main` (`cb30f53a`); Node #38664748313, Chromium #38664748355, Pages #38664747840 y HTTP #38664748269 aprobados. Cinco áreas con colas físicas/limitación observada, cronología y coincidencias sin inventar causa raíz. Ver STATUS-V11.57.md. |
-| 29–42 | **Pendientes de cierre** | Siguiente M6-29: contrafactual simple con factor único y baseline inmóvil; M6–M8 posteriores. |
+| 29 | **En curso** | Contrafactual de un parámetro y cohorte SKU fija; PR y verificación de rama/principal/publicación pendientes. Ver STATUS-V11.58.md. |
+| 30–42 | **Pendientes de cierre** | Siguiente después de M6-29: contrafactual conjunto M6-30, sin sumar beneficios de restricciones simultáneas. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
