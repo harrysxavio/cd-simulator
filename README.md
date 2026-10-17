@@ -19,7 +19,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.58 (M6-29):** Prueba contrafactual SKU de un parámetro sobre la misma demanda, PO y stock inicial: capacidad de Recepción, Calidad, Inventario, Picking, Transporte separado o tope compartido de pedidos. Comparación de despachos y pendientes por día; nunca se infiere costo cero si no hay una tarifa modelada. **El cierre depende de Node, Chromium, merge, Pages y HTTP.** [Evidencia](docs/STATUS-V11.58.md).
+**Avance verificado v11.58 (M6-29):** Prueba contrafactual SKU de un parámetro sobre la misma demanda, PO y stock inicial: capacidad de Recepción, Calidad, Inventario, Picking, Transporte separado o tope compartido de pedidos. Comparación de despachos y pendientes por día; nunca se infiere costo cero si no hay una tarifa modelada. Node, Chromium, merge, Pages y HTTP público aprobados. [Evidencia](docs/STATUS-V11.58.md).
 
 **Histórico verificado v11.57 (M6-28):** Señales de restricciones físicas desde el mismo libro SKU: colas, capacidad alcanzada y coincidencias en Recepción, Calidad, Inventario, Picking y Transporte; sin sumar unidades con pedidos ni afirmar causalidad. Node, Chromium, Pages y HTTP aprobados; evidencia en [informe técnico](docs/STATUS-V11.57.md).
 
