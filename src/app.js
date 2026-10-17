@@ -1,32 +1,33 @@
-import {supplyBridge} from './supply-bridge.js?v=166';
-import {createSkuSessionCache} from './sku-session.js?v=166';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=166';
-import {aggregateFlowCsv} from './aggregate-export.js?v=166';
-import {campaignSkuContract} from './campaign-contract.js?v=166';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=166';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=166';
-import {campaignAreaReadModel} from './area-ledger.js?v=166';
-import {laborAudit} from './labor.js?v=166';
-import {skuAudit} from './audit.js?v=166';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=166';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=166';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=166';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=166';
-import {integratedDemand} from './integrated.js?v=166';
-import {eventSimulation} from './events.js?v=166';
-import {deliveryTimeline} from './timeline.js?v=166';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=166';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=166';
-import {demandJourney} from './journey.js?v=166';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=166';
-import {flow,diagnose,ACTIONS} from './flow.js?v=166';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=166';
-import {areaKpis} from './kpis.js?v=166';
-import {causalAudit} from './causal.js?v=166';
-import {managerDiagnosis} from './diagnosis-guide.js?v=166';
-import {skuServiceBrief} from './sku-service.js?v=166';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=166';
-import {attentionSignals} from './attention.js?v=166';
+import {supplyBridge} from './supply-bridge.js?v=167';
+import {createSkuSessionCache} from './sku-session.js?v=167';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=167';
+import {aggregateFlowCsv} from './aggregate-export.js?v=167';
+import {campaignSkuContract} from './campaign-contract.js?v=167';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=167';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=167';
+import {campaignAreaReadModel} from './area-ledger.js?v=167';
+import {laborAudit} from './labor.js?v=167';
+import {skuAudit} from './audit.js?v=167';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=167';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=167';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=167';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=167';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=167';
+import {integratedDemand} from './integrated.js?v=167';
+import {eventSimulation} from './events.js?v=167';
+import {deliveryTimeline} from './timeline.js?v=167';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=167';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=167';
+import {demandJourney} from './journey.js?v=167';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=167';
+import {flow,diagnose,ACTIONS} from './flow.js?v=167';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=167';
+import {areaKpis} from './kpis.js?v=167';
+import {causalAudit} from './causal.js?v=167';
+import {managerDiagnosis} from './diagnosis-guide.js?v=167';
+import {skuServiceBrief} from './sku-service.js?v=167';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=167';
+import {attentionSignals} from './attention.js?v=167';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -978,6 +979,73 @@ function renderSkuLab(contract=currentCampaignContract()){
    'Una cola no prueba la causa principal. El stock no verificable sigue físicamente en el CD. '+
    'Con Picking y despacho simultáneos no es posible separar ambos cuellos. '+
    'Para demostrar impacto debe ensayarse una intervención con la misma base.');
+  // M6-29: one explicit physical input changed against the SAME frozen
+  // pre-recovery cohort, never against a previously recovered alternative.
+  const factorTrials=availableSingleFactorTrials(recovery.baselineSnapshot);
+  const experiment=add(advisor,'details','supply-trace-detail sku-single-factor-trial');
+  experiment.dataset.counterfactualScope='sku-cohort';
+  add(experiment,'summary','','🧪 ¿Y si mejoramos una sola capacidad?');
+  add(experiment,'p','manager-fineprint',
+   'Prueba de sensibilidad: elige un cambio aislado sobre la operación SIN intervenir. '+
+   'Demanda, compras originales, stock inicial y calendario permanecen iguales. '+
+   'No modifica ni confirma tu decisión de recuperación.');
+  if(!factorTrials.length){
+   add(experiment,'p','manager-fineprint',
+    'No hay un parámetro con margen de mejora verificable en esta configuración.');
+  }else{
+   const factorLabel=add(experiment,'label','','Parámetro que cambia');
+   const factorSelect=add(experiment,'select','numeric-input');
+   factorSelect.dataset.counterfactualSelector='one-factor';
+   factorSelect.setAttribute('aria-label','Elegir una sola variable para comparar');
+   for(const item of factorTrials){
+    const opt=add(factorSelect,'option','',item.label+' · '+item.before+' → '+item.suggestedValue+' '+item.unit);
+    opt.value=item.factor;
+   }
+   const experimentOutput=add(experiment,'div','sku-single-factor-result');
+   const paintExperiment=()=>{
+    experimentOutput.replaceChildren();
+    const observed=singleFactorCounterfactualReadModel({
+     baselineSnapshot:recovery.baselineSnapshot,factor:factorSelect.value
+    });
+    experimentOutput.dataset.counterfactualFactor=observed.factor;
+    add(experimentOutput,'p','manager-fineprint',
+     'Solo cambia '+observed.label+': '+fmt(observed.beforeValue)+' → '+
+     fmt(observed.afterValue)+' '+observed.unit+'. Los otros factores siguen fijos.');
+    const metric=add(experimentOutput,'p','manager-fineprint');
+    metric.dataset.counterfactualMetric='dispatched';
+    add(metric,'strong','','Pedidos expedidos del CD · ');
+    add(metric,'span','',fmt(observed.baseline.dispatched)+' → '+
+     fmt(observed.alternative.dispatched)+' ('+
+     (observed.delta.dispatched>=0?'+':'')+fmt(observed.delta.dispatched)+').');
+    const waiting=add(experimentOutput,'p','manager-fineprint');
+    waiting.dataset.counterfactualMetric='pending';
+    add(waiting,'strong','','Pendientes al corte · ');
+    add(waiting,'span','',fmt(observed.baseline.pending)+' → '+
+     fmt(observed.alternative.pending)+' ('+
+     (observed.delta.pending>=0?'+':'')+fmt(observed.delta.pending)+').');
+    add(experimentOutput,'p','manager-fineprint',
+     observed.improvementObserved
+      ?'Hay más expediciones simuladas bajo este único cambio; esto no demuestra una causa raíz exclusiva.'
+      :'Este cambio aislado NO recupera pedidos adicionales dentro del horizonte. Otra restricción puede seguir activa.');
+    const byDay=add(experimentOutput,'details','supply-trace-detail');
+    add(byDay,'summary','','Ver comparación de los '+fmt(observed.days+1)+' días');
+    for(const day of observed.daily){
+     const line=add(byDay,'p','manager-fineprint');
+     line.dataset.counterfactualDay=String(day.day);
+     add(line,'strong','','Día '+day.day+' · ');
+     add(line,'span','','salidas '+fmt(day.beforeShipped)+' → '+fmt(day.afterShipped)+
+      ' · acumulado '+fmt(day.beforeCumulative)+' → '+fmt(day.afterCumulative)+
+      ' · pendientes '+fmt(day.beforePending)+' → '+fmt(day.afterPending)+'.');
+    }
+    const pricing=add(experimentOutput,'p','manager-fineprint');
+    pricing.dataset.counterfactualCost='unpriced';
+    add(pricing,'span','',
+     'Costo incremental: no calibrado. No es CLP 0. '+
+     'La expedición del CD tampoco prueba entrega al cliente.');
+   };
+   factorSelect.onchange=paintExperiment;
+   paintExperiment();
+  }
   // M5-26: concise selected-vs-base snapshot, ALL figures from the
   // same cached physical replays, with no new orders, financial postings or ETAs.
   const compare=consolidatedRecoveryComparisonReadModel({
