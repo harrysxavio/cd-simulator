@@ -32,7 +32,9 @@ async function verify(mobile){
   await trial.locator('summary').first().click();
   const factors=trial.locator('[data-counterfactual-selector="one-factor"]');
   assert.ok(await factors.count());
-  assert.equal(await factors.inputValue(),'dailyCapacity');
+  assert.ok(await factors.locator('option').count()>=1);
+  await factors.selectOption('dailyCapacity');
+  assert.equal(await trial.locator('[data-counterfactual-factor="dailyCapacity"]').count(),1);
   assert.equal(await trial.locator('[data-counterfactual-metric="dispatched"]').count(),1);
   assert.equal(await trial.locator('[data-counterfactual-metric="pending"]').count(),1);
   assert.match(await trial.textContent(),/Costo incremental: no calibrado/);
