@@ -1,8 +1,8 @@
 {
-  "version": "11.58",
-  "assetRevision": 167,
-  "release": "v11.58 · M6-29 contrafactual SKU de variable única",
+  "version": "11.59",
+  "assetRevision": 168,
+  "release": "v11.59 · M6-30 restricciones simultáneas SKU",
   "date": "2026-10-16",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M6-29 compara un único parámetro operativo frente al baseline físico SKU congelado. Conserva demanda, aperturas, PO originales y días; presenta diferencias de despacho y backlog sin atribuir causalidad exclusiva ni costo incremental no calibrado."
+  "notes": "M6-30 contrasta sobre el mismo baseline las intervenciones A y B por separado y juntas; mide interacciones sin sumar como físicas las expediciones individuales ni atribuir causalidad, dinero o recursos no calibrados."
 }
