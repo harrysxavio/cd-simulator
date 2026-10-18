@@ -1,8 +1,8 @@
 {
-  "version": "11.66",
-  "assetRevision": 175,
-  "release": "v11.66 · M7-37 interpretación de resultados",
+  "version": "11.67",
+  "assetRevision": 176,
+  "release": "v11.67 · M7-38 accesibilidad móvil automatizada",
   "date": "2026-10-18",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M7-37 añade tres señales compactas basadas en el mismo ledger SKU: expediciones mejor/igual/peor, espera días-pedido y compromisos parciales o desconocidos. Sin alterar motor, recomendaciones ni decisiones guardadas."
+  "notes": "M7-38 mejora semántica de pestañas, teclado, foco tras reconstruir áreas/opciones, objetivos táctiles, enlace para saltar a contenido y contraste medido. La validación manual Android físico/TalkBack/comprensión sigue pendiente y bloquea el cierre formal de M7."
 }
