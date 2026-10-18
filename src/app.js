@@ -1,38 +1,39 @@
-import {supplyBridge} from './supply-bridge.js?v=173';
-import {createSkuSessionCache} from './sku-session.js?v=173';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=173';
-import {aggregateFlowCsv} from './aggregate-export.js?v=173';
-import {campaignSkuContract} from './campaign-contract.js?v=173';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=173';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=173';
-import {campaignAreaReadModel} from './area-ledger.js?v=173';
-import {laborAudit} from './labor.js?v=173';
-import {skuAudit} from './audit.js?v=173';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=173';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=173';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=173';
-import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=173';
-import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=173';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=173';
-import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=173';
-import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=173';
-import {integratedDemand} from './integrated.js?v=173';
-import {eventSimulation} from './events.js?v=173';
-import {deliveryTimeline} from './timeline.js?v=173';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=173';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=173';
-import {demandJourney} from './journey.js?v=173';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=173';
-import {flow,diagnose,ACTIONS} from './flow.js?v=173';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=173';
-import {areaKpis} from './kpis.js?v=173';
-import {causalAudit} from './causal.js?v=173';
-import {managerDiagnosis} from './diagnosis-guide.js?v=173';
-import {skuServiceBrief} from './sku-service.js?v=173';
-import {firstCampaignGuideReadModel} from './first-campaign-guide.js?v=173';
-import {explainOperationalAlert,explainAreaDecision} from './decision-alert-literacy.js?v=173';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=173';
-import {attentionSignals} from './attention.js?v=173';
+import {supplyBridge} from './supply-bridge.js?v=174';
+import {createSkuSessionCache} from './sku-session.js?v=174';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=174';
+import {aggregateFlowCsv} from './aggregate-export.js?v=174';
+import {campaignSkuContract} from './campaign-contract.js?v=174';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=174';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=174';
+import {campaignAreaReadModel} from './area-ledger.js?v=174';
+import {laborAudit} from './labor.js?v=174';
+import {skuAudit} from './audit.js?v=174';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=174';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=174';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=174';
+import {readableRecoveryResultsReadModel,READABLE_RESULT_MODES} from './recovery-readable-results.js?v=174';
+import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=174';
+import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=174';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=174';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=174';
+import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=174';
+import {integratedDemand} from './integrated.js?v=174';
+import {eventSimulation} from './events.js?v=174';
+import {deliveryTimeline} from './timeline.js?v=174';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=174';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=174';
+import {demandJourney} from './journey.js?v=174';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=174';
+import {flow,diagnose,ACTIONS} from './flow.js?v=174';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=174';
+import {areaKpis} from './kpis.js?v=174';
+import {causalAudit} from './causal.js?v=174';
+import {managerDiagnosis} from './diagnosis-guide.js?v=174';
+import {skuServiceBrief} from './sku-service.js?v=174';
+import {firstCampaignGuideReadModel} from './first-campaign-guide.js?v=174';
+import {explainOperationalAlert,explainAreaDecision} from './decision-alert-literacy.js?v=174';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=174';
+import {attentionSignals} from './attention.js?v=174';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -1316,6 +1317,71 @@ function renderSkuLab(contract=currentCampaignContract()){
   };
   prioritySelect.onchange=renderGuidance;
   renderGuidance();
+  // M7-36: a five-row comparison grounded in the same audited SKU cohort.
+  // A presentation-only selector switches orders vs partial commitments.
+  const comparisonPanel=add(advisor,'details','supply-trace-detail sku-readable-results');
+  comparisonPanel.dataset.readableScope='sku-cohort';
+  add(comparisonPanel,'summary','','📊 Comparar las cinco opciones · mismo escenario');
+  add(comparisonPanel,'p','manager-fineprint',
+   'Misma demanda, stock inicial, compras y horizonte. Solo cambia la recuperación. '+
+   'Esta comparación NO elige ni confirma una intervención.');
+  const viewLabel=add(comparisonPanel,'label','sku-readable-view-label',
+   'Qué quieres comparar');
+  const viewSelect=add(viewLabel,'select','numeric-input');
+  viewSelect.setAttribute('aria-label','Magnitud comparable de las cinco recuperaciones SKU');
+  viewSelect.dataset.readableView='selector';
+  for(const [key,label] of Object.entries(READABLE_RESULT_MODES)){
+   const op=add(viewSelect,'option','',label);op.value=key;
+  }
+  const comparisonBody=add(comparisonPanel,'div','sku-readable-comparison-body');
+  const drawReadable=()=>{
+   comparisonBody.replaceChildren();
+   const model=readableRecoveryResultsReadModel({
+    comparison:compare,view:viewSelect.value
+   });
+   comparisonBody.dataset.readableMode=model.view;
+   comparisonBody.dataset.readableSelected=model.selectedOption;
+   const scope=add(comparisonBody,'p','manager-fineprint');
+   scope.dataset.readableCohort='fixed';
+   add(scope,'span','',
+    fmt(model.orders)+' pedidos · días 0–'+model.horizonDays+
+    ' · base: '+fmt(model.baseline.dispatched)+' expedidos');
+   const header=add(comparisonBody,'div','sku-readable-header');
+   add(header,'span','','Recuperación');
+   add(header,'span','',model.view==='service'?'Expedidos':'Compromiso*');
+   add(header,'span','',model.view==='service'?'Pendientes':'Cobertura');
+   const list=add(comparisonBody,'div','sku-readable-list');
+   for(const item of model.rows){
+    const entry=add(list,'div','sku-readable-row'+(item.selected?' selected':''));
+    entry.dataset.readableOption=item.option;
+    entry.dataset.readableSelected=String(item.selected);
+    const name=add(entry,'span','sku-readable-option',item.label);
+    if(item.selected)name.textContent+=' · actual';
+    if(model.view==='service'){
+     add(entry,'strong','sku-readable-value',fmt(item.dispatched));
+     add(entry,'span','sku-readable-secondary',fmt(item.pending));
+    }else{
+     const priced=item.visibleCommitmentCLP!==null;
+     const amount=add(entry,'strong','sku-readable-value',
+      priced?'CLP '+fmt(item.visibleCommitmentCLP):'Sin tarifa');
+     amount.dataset.readableUnpriced=priced?'false':'true';
+     add(entry,'span','sku-readable-secondary',
+      item.costStatus==='unknown-reserve-transfer'
+       ?'Traslado N/D':item.costStatus==='no-new-modeled-action'
+       ?'Sin acción':'Parcial');
+    }
+   }
+   add(comparisonBody,'p','sku-readable-footnote',model.explanation);
+   const note=add(comparisonBody,'p','sku-readable-footnote');
+   note.dataset.readableBoundary='sku-only';
+   add(note,'span','','* El costo de traslado en reserva NO está tarifado. '+ 
+    'Costo real total desconocido en las cinco opciones; no sumar con el modelo agregado de una jornada.');
+  };
+  viewSelect.onchange=drawReadable;
+  // Only generate five small rows when the user wants to compare.
+  comparisonPanel.addEventListener('toggle',()=>{
+   if(comparisonPanel.open)drawReadable();
+  });
   const overview=add(advisor,'section','sku-consolidated-compare');
   overview.dataset.compareScope='sku-cohort';
   add(overview,'strong','','📋 Tu decisión frente a no intervenir');
