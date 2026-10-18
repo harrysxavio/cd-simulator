@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.60.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.61.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -114,6 +114,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 29 | **Completada** | PR #56 v11.58 integrada en `main` (`85627952`); Node #38994383724, Chromium #38994383607, Pages #38994383039 y HTTP #38994383562 aprobados. Contrafactual de una sola variable sobre cohorte, PO y apertura inmutables; costos no calibrados y ninguna causa raíz exclusiva inventada. Ver STATUS-V11.58.md. |
 | 30 | **Completada** | PR #57 v11.59 integrado en `main` (`9ec918be`); Node #38996096100, Chromium #38996096074, Pages #38996095929 y HTTP #38996096082 aprobados. Cuatro replays comparables base/A/B/A+B, interacción no aditiva, cohortes y PO conciliadas, sin costo ni causalidad falsos. Ver STATUS-V11.59.md. |
 | 31 | **Completada** | PR #58 v11.60 integrada en `main` (`27045ba`); Node #39086330289, Chromium #39086330318, Pages #39086330099 y HTTP #39086330310 aprobados. Dos criterios explícitos sobre cinco recuperaciones auditadas, no confundir costo parcial con total, reserva sin tarifa ni viabilidad real supuesta. Ver STATUS-V11.60.md. |
-| 32–42 | **Pendientes de cierre** | Tras M6-31: M6-32 Situación → Acción → Efecto → evidencia con límites explícitos. |
+| 32 | **En curso** | M6-32 explica Situación → Acción → Efecto → Evidencia y límites para cinco recuperaciones sobre la misma cohorte; PR, Node, Chromium, Pages y HTTP por validar. Ver STATUS-V11.61.md. |
+| 33–42 | **Pendientes de cierre** | Tras M6-32, comienza M7-33: experiencia didáctica y comprensión guiada. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
