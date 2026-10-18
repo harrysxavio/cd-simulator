@@ -29,7 +29,7 @@ export function firstCampaignGuideReadModel({
   areaIndex,areaCount});
  if(role==='preliminary')return freeze({...base,section:role,
   title:'Entender la demanda sorpresa',
-  instruction:'Revisa los pedidos que faltan y la principal señal de alerta. Después pulsa «Explorar decisiones de recuperación».',
+  instruction:'La demanda sorpresa cambió el escenario. Revisa los pedidos que faltan y la principal señal de alerta. Después pulsa «Explorar decisiones de recuperación».',
   why:'La demanda real se revela al cerrar el plan y no recalcula las compras originales. La alerta señala qué investigar, no prueba una causa exclusiva.',
   next:'Explorar decisiones de recuperación'});
  if(role==='recovery')return freeze({...base,section:role,
