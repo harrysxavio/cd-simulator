@@ -1,8 +1,8 @@
 {
-  "version": "11.59",
-  "assetRevision": 168,
-  "release": "v11.59 · M6-30 restricciones simultáneas SKU",
-  "date": "2026-10-16",
+  "version": "11.60",
+  "assetRevision": 169,
+  "release": "v11.60 · M6-31 recomendaciones gerenciales SKU",
+  "date": "2026-10-17",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M6-30 contrasta sobre el mismo baseline las intervenciones A y B por separado y juntas; mide interacciones sin sumar como físicas las expediciones individuales ni atribuir causalidad, dinero o recursos no calibrados."
+  "notes": "M6-31 propone orientaciones condicionales de servicio y compromisos supuestos a partir de cinco resultados físicos auditados. Reserva con costo desconocido no es opción gratuita; viabilidad real y entrega al cliente sin verificar."
 }
