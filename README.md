@@ -20,7 +20,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.66 (M7-37):** Interpretación visual y didáctica de la recuperación: pedidos expedidos, espera acumulada y compromisos parciales se clasifican por su efecto frente a no intervenir. Reserva con traslado no tarifado y límites de entrega/costo explícitos; no replays ni cambios guardados. Cierre sujeto a Node, Chromium, merge, Pages y HTTP públicos. [Estado](docs/STATUS-V11.66.md).
+**Avance verificado v11.66 (M7-37):** Interpretación visual y didáctica de la recuperación: pedidos expedidos, espera acumulada y compromisos parciales se clasifican por su efecto frente a no intervenir. Reserva con traslado no tarifado y límites de entrega/costo explícitos; no replays ni cambios guardados. Node, Chromium, merge, Pages y HTTP públicos aprobados. **M7: 5/6; siguiente M7-38.** [Estado](docs/STATUS-V11.66.md).
 
 **Histórico verificado v11.65 (M7-36):** Comparador SKU de cinco recuperaciones sobre la misma base, con dos lecturas compactas en móvil: expedidos/pendientes y compromisos/costos parciales. Reserva sin tarifa = costo desconocido, nunca gratis; sin guardar ni ejecutar decisiones y sin mezclar unidades de la jornada agregada. PR, Node, Chromium, Pages y HTTP público aprobados. **M7: 4/6; siguiente M7-37.** [Estado](docs/STATUS-V11.65.md).
 
