@@ -822,3 +822,44 @@ html,body{max-width:100%;overflow-x:clip}
  .alert-literacy-body,.decision-learning-body{padding:4px 8px 9px}
  .alert-literacy>summary,.decision-learning>summary{font-size:.8rem}
 }
+
+/* M7-36 · Five physically comparable recoveries. No horizontal table scroll
+   and no "CLP 0" for the unknown cost of moving reserve stock. */
+.sku-readable-results{min-width:0;margin:8px 0}
+.sku-readable-results>summary{min-height:44px}
+.sku-readable-view-label{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0;font-size:.85rem}
+.sku-readable-view-label select{min-width:0;max-width:100%;font-size:.85rem}
+.sku-readable-comparison-body{min-width:0;display:grid;gap:5px;padding-top:6px}
+.sku-readable-header,.sku-readable-row{
+ display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;
+ align-items:center;min-width:0;
+}
+.sku-readable-header{font-size:.76rem;color:#bbd3de;padding:5px 8px}
+.sku-readable-header>span:not(:first-child){text-align:right}
+.sku-readable-list{display:grid;gap:4px;min-width:0}
+.sku-readable-row{
+ min-height:44px;padding:7px 8px;border:1px solid #355e68;border-radius:9px;
+ font-size:.81rem;line-height:1.3;
+}
+.sku-readable-row.selected{border-color:#69bcae;background:#173d45}
+.sku-readable-option{min-width:0;overflow-wrap:anywhere}
+.sku-readable-value{font-size:.93rem;text-align:right;white-space:nowrap;
+ font-variant-numeric:tabular-nums}
+.sku-readable-secondary{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sku-readable-footnote{font-size:.76rem;line-height:1.45;color:#afcbd0;margin:3px 0}
+.sku-readable-comparison-body[data-readable-mode="commitments"] .sku-readable-header,
+.sku-readable-comparison-body[data-readable-mode="commitments"] .sku-readable-row{
+ grid-template-columns:minmax(0,1fr) auto;
+}
+.sku-readable-comparison-body[data-readable-mode="commitments"] .sku-readable-header>span:last-child{display:none}
+.sku-readable-comparison-body[data-readable-mode="commitments"] .sku-readable-option{grid-column:1;grid-row:1 / span 2}
+.sku-readable-comparison-body[data-readable-mode="commitments"] .sku-readable-value{grid-column:2;grid-row:1}
+.sku-readable-comparison-body[data-readable-mode="commitments"] .sku-readable-secondary{
+ grid-column:2;grid-row:2;font-size:.75rem;color:#b4d2d6;
+}
+@media(max-width:680px){
+ .sku-readable-row{gap:6px;min-height:44px;padding:7px 8px;font-size:.77rem}
+ .sku-readable-value{font-size:.84rem}
+ .sku-readable-header{font-size:.7rem;gap:6px}
+ .sku-readable-footnote{font-size:.73rem}
+}
