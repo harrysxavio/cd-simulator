@@ -20,7 +20,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.63 (M7-34):** Microguía opcional para completar una primera campaña en cuatro etapas, con instrucciones breves por área, explicación gradual de sorpresa de demanda, recuperación y resultados. Se puede ocultar sin afectar decisiones ni compras, y se mantiene el recorrido original. Cierre sujeto a Node, Chromium, merge, Pages y HTTP públicos. [Estado](docs/STATUS-V11.63.md).
+**Avance verificado v11.63 (M7-34):** Microguía opcional para completar una primera campaña en cuatro etapas, con instrucciones breves por área, explicación gradual de sorpresa de demanda, recuperación y resultados. Se puede ocultar sin afectar decisiones ni compras, y se mantiene el recorrido original. Node, Chromium, merge, Pages y HTTP públicos aprobados. **M7: 2/6; siguiente M7-35.** [Estado](docs/STATUS-V11.63.md).
 
 **Histórico verificado v11.62 (M7-33):** KPIs físicos de pedidos completos en tres filas breves de etiqueta/valor en 360/412 px, sin repetir unidades y con supuestos técnicos de Inventario bajo detalle expandible. Se mantienen los mismos movimientos, 8 áreas, 5 recuperaciones y resultados de las fases anteriores. **Node, Chromium, Pages y HTTP público aprobados; M7: 1/6.** [Registro](docs/STATUS-V11.62.md).
 
