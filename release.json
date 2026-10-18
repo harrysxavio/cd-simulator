@@ -1,8 +1,8 @@
 {
-  "version": "11.65",
-  "assetRevision": 174,
-  "release": "v11.65 · M7-36 comparabilidad y legibilidad de resultados",
+  "version": "11.66",
+  "assetRevision": 175,
+  "release": "v11.66 · M7-37 interpretación de resultados",
   "date": "2026-10-18",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M7-36 incorpora una comparación compacta de cinco recuperaciones con misma cohorte SKU y dos vistas de lectura: expedidos/pendientes y compromisos económicos parciales. Reserva tiene costo de traslado no tarifado; no se inventan resultados físicos ni rentabilidad."
+  "notes": "M7-37 añade tres señales compactas basadas en el mismo ledger SKU: expediciones mejor/igual/peor, espera días-pedido y compromisos parciales o desconocidos. Sin alterar motor, recomendaciones ni decisiones guardadas."
 }
