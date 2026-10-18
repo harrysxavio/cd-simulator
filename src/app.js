@@ -396,7 +396,7 @@ function renderCanonicalAreasFromSku(model){
  const intro=add(host,'div','canonical-area-heading');
  add(intro,'span','canonical-kicker','MISIÓN 4 DE 4 · ENTENDER EL IMPACTO');
  add(intro,'h2','','🔗 Cómo operaron las ocho áreas');
- add(intro,'p','','Una campaña de '+fmt(model.metrics.actualOrders)+' pedidos. Recorre las ocho áreas del mismo modelo físico, sin sumar resultados diferentes.');
+ add(intro,'p','','Una campaña de '+fmt(model.metrics.actualOrders)+' pedidos y '+model.horizonDays+' días. Recorre las ocho áreas del mismo modelo físico.');
  const numbers=add(host,'div','canonical-area-numbers');
  numbers.dataset.mobileKpiScope='sku-areas';
  numbers.setAttribute('aria-label','Indicadores de pedidos completos');
@@ -548,7 +548,7 @@ function renderSkuLab(contract=currentCampaignContract()){
    add(line,'strong','',title);
    add(line,'span','',': '+item.explanation+'. '+(item.evidenceClass==='managerial-plan'?'Compromiso de planificación.':'Evento simulado por SKU/día.'));
   }
-  add(contextBody,'small','','Manifiesto SKU comprometido: '+Object.entries(chain.purchasing.originalPurchase).map(([id,qty])=>'SKU '+id+' '+fmt(qty)).join(' · ')+'.');
+  add(trace,'small','sku-manifest-compact','Manifiesto SKU comprometido: '+Object.entries(chain.purchasing.originalPurchase).map(([id,qty])=>'SKU '+id+' '+fmt(qty)).join(' · ')+'.');
   add(contextBody,'small','','Compras: proveedor cumple '+supplierRate.toFixed(1)+' % de las unidades de compra ordinaria. Solicitadas SKU '+fmt(chain.purchasing.originalOrdered)+' · entregadas '+fmt(chain.purchasing.originalDelivered)+' · faltantes definitivos '+fmt(chain.purchasing.originalUnfilled)+'.');
   add(contextBody,'small','','Calidad: libera '+fmt(chain.quality.releasePercent)+' % diario del stock retenido · quedan '+fmt(chain.quality.waiting)+' unidades pendientes de liberar.');
   add(contextBody,'small','','Límites SKU/día asumidos desde la jornada agregada (sin calibrar): Recepción '+fmt(area.receivingCapacity)+' · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'. '+(skuSeparateTransport?'Staging independiente habilitado.':'Picking y Transporte despachan el mismo día.'));
