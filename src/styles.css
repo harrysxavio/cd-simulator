@@ -794,3 +794,31 @@ html,body{max-width:100%;overflow-x:clip}
  .first-campaign-guide-body>p{font-size:.83rem;line-height:1.4}
  .first-guide-toggle{font-size:.75rem;padding:7px 9px}
 }
+
+/* M7-35 · Expand explanations only when wanted: one short title and one action. */
+.alert-literacy,.decision-learning{margin-top:5px;min-width:0}
+.alert-literacy>summary,.decision-learning>summary{
+ cursor:pointer;min-height:44px;display:flex;align-items:center;
+ color:#b6ecdc;font-size:.82rem;line-height:1.35;
+}
+.alert-literacy>summary:focus-visible,.decision-learning>summary:focus-visible{
+ outline:3px solid #7bedd1;outline-offset:2px;
+}
+.alert-literacy-body,.decision-learning-body{
+ display:grid;gap:5px;min-width:0;padding:5px 9px 10px;
+ border-left:2px solid #428a83;
+}
+.alert-literacy-body strong,.decision-learning-body strong{
+ display:block;font-size:.83rem;line-height:1.3;
+}
+.alert-literacy-body p,.decision-learning-body p{
+ margin:0;font-size:.83rem;line-height:1.43;
+ overflow-wrap:anywhere;
+}
+.alert-literacy-body .alert-learning-boundary,.decision-learning-body small{
+ display:block;font-size:.76rem;line-height:1.45;color:#aac1ce;margin:4px 0 0;
+}
+@media(max-width:680px){
+ .alert-literacy-body,.decision-learning-body{padding:4px 8px 9px}
+ .alert-literacy>summary,.decision-learning>summary{font-size:.8rem}
+}
