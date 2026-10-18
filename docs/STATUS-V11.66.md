@@ -1,6 +1,6 @@
 # Estado v11.66 · M7-37 · ¿Qué mejoró y qué empeoró?
 
-**Estado:** EN CURSO. Rama `feat/m7-37-readable-result-insights`. Cierre sujeto a Node, Chromium, merge a `main`, Pages y HTTP público. [Plan de 43 microfases](EXECUTION-PLAN-43.md).
+**Estado:** **COMPLETADA (18 de octubre de 2026, Chile)**. PR, Node, Chromium, merge, Pages y HTTP público aprobados. **M7: 5/6 completadas.** [Plan de 43 microfases](EXECUTION-PLAN-43.md).
 
 ## Alcance
 - `src/recovery-outcome-insights.js`: read-model puro e inmutable, reutiliza `readableRecoveryResultsReadModel` sobre el comparador físico SKU M5-26 ya auditado. No duplica eventos, modificaciones, órdenes ni decisiones.
@@ -14,12 +14,12 @@
 ## Pruebas
 - `tests/recovery-outcome-insights.test.mjs`: coherencia física y espera, casos con mejora/igual/peor, espera sin intervención, reserva sin tarifa, compra sin recuperación, corrupción y congelamiento.
 - `tests/browser-outcome-insights-m7-37.e2e.mjs`: Chromium móvil y escritorio, tres señales, límites, caso de reserva, persistencia intacta y no desbordamiento a 360/412 px.
-- Regresión completa Node/Chromium: **pendiente**.
+- Regresión completa Node/Chromium: **aprobada en PR y después del merge a `main`**.
 
 ## Puertas obligatorias
-- [ ] Node y Chromium de PR aprobados.
-- [ ] Merge a `main`, Node y Chromium de `main` aprobados.
-- [ ] Pages v11.66 r175 publicado y HTTP HTML/CSS/JS/release.json aprobado.
-- [ ] README y plan maestro cerrados con evidencia; siguiente **M7-38**.
+- [x] [PR #64](https://github.com/harrysxavio/cd-simulator/pull/64) aprobado: [Node #39165474167](https://github.com/harrysxavio/cd-simulator/actions/runs/39165474167) y [Chromium #39165474064](https://github.com/harrysxavio/cd-simulator/actions/runs/39165474064).
+- [x] [Merge `9b7a6e3`](https://github.com/harrysxavio/cd-simulator/commit/9b7a6e3e546a5ad86ae60d017ce03420bdbb2f51) a `main`; [Node #39165978235](https://github.com/harrysxavio/cd-simulator/actions/runs/39165978235) y [Chromium #39165978256](https://github.com/harrysxavio/cd-simulator/actions/runs/39165978256) aprobados.
+- [x] [Pages v11.66 r175 #39165978170](https://github.com/harrysxavio/cd-simulator/actions/runs/39165978170) publicado y [HTTP público #39165978230](https://github.com/harrysxavio/cd-simulator/actions/runs/39165978230) aprobó HTML, CSS, JS y release.json.
+- [x] README y plan maestro cerrados con evidencia; siguiente **M7-38**, accesibilidad móvil y uso táctil.
 
 **Límites:** laboratorio determinista con costos incompletos; no incluye costos reales, entregas ni WMS productivo. Accesibilidad/TalkBack en dispositivo físico corresponde a M7-38.
