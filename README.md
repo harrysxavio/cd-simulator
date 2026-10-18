@@ -20,7 +20,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.64 (M7-35):** Aprendizaje en contexto para cada alerta operacional y decisión por área: qué significa, qué revisar y qué no demuestra el modelo. Paneles plegables para móvil, sin alterar motor, stock, compras, decisiones ni costos. Cierre condicionado a Node, Chromium, merge, Pages y HTTP. [Estado](docs/STATUS-V11.64.md).
+**Avance verificado v11.64 (M7-35):** Aprendizaje en contexto para cada alerta operacional y decisión por área: qué significa, qué revisar y qué no demuestra el modelo. Paneles plegables para móvil, sin alterar motor, stock, compras, decisiones ni costos. Node, Chromium, merge, Pages y HTTP público aprobados. **M7: 3/6; siguiente M7-36.** [Estado](docs/STATUS-V11.64.md).
 
 **Histórico verificado v11.63 (M7-34):** Microguía opcional para completar una primera campaña en cuatro etapas, con instrucciones breves por área, explicación gradual de sorpresa de demanda, recuperación y resultados. Se puede ocultar sin afectar decisiones ni compras, y se mantiene el recorrido original. Node, Chromium, merge, Pages y HTTP públicos aprobados. **M7: 2/6; siguiente M7-35.** [Estado](docs/STATUS-V11.63.md).
 
