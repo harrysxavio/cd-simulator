@@ -1,8 +1,8 @@
 {
-  "version": "11.63",
-  "assetRevision": 172,
-  "release": "v11.63 · M7-34 primera campaña guiada",
+  "version": "11.64",
+  "assetRevision": 173,
+  "release": "v11.64 · M7-35 alfabetización de alertas y decisiones",
   "date": "2026-10-18",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M7-34 incorpora una microguía opcional de cuatro etapas, ayuda breve por área durante planificación, sorpresa de demanda, recuperación y resultados. No altera decisiones, compras, inventario, motor SKU ni persistencia de campaña."
+  "notes": "M7-35 agrega explicaciones plegables a alertas operacionales y a cada decisión por área: significado, siguiente verificación y límites del motor agregado de una jornada. Mantiene cifras, decisiones, modelos SKU y persistencia originales."
 }
