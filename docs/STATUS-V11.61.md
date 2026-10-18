@@ -1,6 +1,6 @@
 # Estado técnico v11.61 — M6-32 · Explicación didáctica y evidencia
 
-**Estado:** EN CURSO. Rama `feat/m6-32-decision-explanations`. **No marcar cerrada hasta Node, Chromium, merge, Pages y HTTP público**. Fuente de verdad: [43 microfases](EXECUTION-PLAN-43.md).
+**Estado:** **COMPLETADA (17 de octubre de 2026, Chile)**. PR, Node, Chromium, merge, Pages y HTTP público verificados. **M6-28 a M6-32: 5/5 completadas.** Fuente de verdad: [43 microfases](EXECUTION-PLAN-43.md).
 
 ## Cambio funcional
 - `src/recovery-decision-explanation.js`: modelo inmutable de solo lectura conectado a `consolidatedRecoveryComparisonReadModel`, sin repetir simulaciones, compras, movimientos ni costes.
@@ -11,14 +11,14 @@
 - `src/app.js`: guía compacta plegada, selección independiente de las cinco opciones y subpaneles de evidencia/límites. Cambiar la lectura no reescribe decisiones de recuperación ni datos persistidos. La pantalla inicial no se llena de tarjetas extensas.
 
 ## Pruebas añadidas
-- `tests/recovery-decision-explanation.test.mjs`: cinco opciones auditadas, evidencia y conservation, reserva no tarifada, costo ilustrativo, urgencia fuera de horizonte, validación fail-closed y determinismo del baseline.
+- `tests/recovery-decision-explanation.test.mjs`: cinco opciones auditadas, evidencia y conservación, reserva no tarifada, costo ilustrativo, urgencia fuera de horizonte, validación fail-closed y determinismo del baseline.
 - `tests/browser-decision-explanation-m6-32.e2e.mjs`: Android emulado 360/412px y escritorio, selectores reales de opción, paneles plegados, verificación de datos, advertencias, ninguna escritura de recuperación y sin overflow.
-- Regresiones completas Node y Chromium: **pendientes de CI**.
+- Regresiones completas Node y Chromium: **aprobadas en el PR y en `main`**.
 
 ## Cierre
-- [ ] PR: Node y Chromium aprobados.
-- [ ] Merge a `main`, regresiones Node/Chromium de `main` aprobadas.
-- [ ] Publicación Pages v11.61 r170 y verificación HTTP (HTML, CSS, JS, release.json) aprobadas.
-- [ ] README y plan maestro actualizados con pruebas y **M7-33** como fase siguiente.
+- [x] [PR #59](https://github.com/harrysxavio/cd-simulator/pull/59): [Node #39087797451](https://github.com/harrysxavio/cd-simulator/actions/runs/39087797451) y [Chromium #39087797456](https://github.com/harrysxavio/cd-simulator/actions/runs/39087797456) aprobados.
+- [x] [Merge `66508633`](https://github.com/harrysxavio/cd-simulator/commit/6650863364d31264d3a5e9015a1bc1da971045c3) a `main`; [Node #39088085201](https://github.com/harrysxavio/cd-simulator/actions/runs/39088085201) y [Chromium #39088086296](https://github.com/harrysxavio/cd-simulator/actions/runs/39088086296) aprobados.
+- [x] [Pages #39088085229](https://github.com/harrysxavio/cd-simulator/actions/runs/39088085229) publicó v11.61 r170 y [HTTP público #39088085226](https://github.com/harrysxavio/cd-simulator/actions/runs/39088085226) validó HTML, CSS, JS y release.json.
+- [x] README y plan maestro actualizados con evidencias de cierre. Siguiente: **M7-33, jerarquía móvil compacta**.
 
 **Límite:** prototipo pedagógico sintético/determinista, no WMS, conciliación de cobros, dotación real, ruta de transporte ni resultados prometidos al cliente. Android físico/TalkBack quedan pendientes para M7.
