@@ -863,3 +863,31 @@ html,body{max-width:100%;overflow-x:clip}
  .sku-readable-header{font-size:.7rem;gap:6px}
  .sku-readable-footnote{font-size:.73rem}
 }
+
+/* M7-37 · Readable outcome interpretation, separate service, wait and costs. */
+.sku-outcome-insights{
+ display:grid;gap:6px;min-width:0;margin:11px 0 9px;
+ border:1px solid #437675;border-radius:10px;padding:10px;
+}
+.sku-outcome-insights>strong{font-size:.95rem;line-height:1.3}
+.sku-outcome-headline{font-size:.84rem;line-height:1.4;margin:0;color:#ccf0e6}
+.sku-outcome-signals{display:grid;gap:5px;min-width:0}
+.sku-outcome-signal{
+ display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr);
+ align-items:start;gap:8px;min-width:0;padding:7px 9px;
+ border-radius:8px;background:#173441;
+}
+.sku-outcome-label{font-size:.8rem;line-height:1.35}
+.sku-outcome-explanation{font-size:.8rem;line-height:1.43;margin:0;overflow-wrap:anywhere}
+.sku-outcome-signal[data-outcome-status="better"]{border-left:3px solid #63ba96}
+.sku-outcome-signal[data-outcome-status="worse"],
+.sku-outcome-signal[data-outcome-status="unknown"]{border-left:3px solid #e2af65}
+.sku-outcome-signal[data-outcome-status="partial"]{border-left:3px solid #769bc9}
+.sku-outcome-caution{font-size:.8rem;line-height:1.4;margin:1px 0;color:#f0d1ab}
+.sku-outcome-boundaries>summary{min-height:44px;font-size:.8rem}
+@media(max-width:680px){
+ .sku-outcome-insights{padding:8px;gap:5px}
+ .sku-outcome-signal{grid-template-columns:minmax(0,1fr);gap:3px;padding:7px 9px}
+ .sku-outcome-label{font-size:.79rem}
+ .sku-outcome-explanation,.sku-outcome-caution{font-size:.78rem}
+}
