@@ -414,7 +414,7 @@ function renderCanonicalAreasFromSku(model){
   tile.dataset.compactKpi='sku-order';
   add(tile,'span','',name);add(tile,'strong','',fmt(value));
  }
- const info=add(host,'p','canonical-boundary','Solo pedidos del CD: no son entregas al cliente. Unidades SKU y CLP se consultan por área; no se suman al turno agregado.');
+ const info=add(host,'p','canonical-boundary','Solo pedidos del CD, no entregas al cliente. Las unidades SKU, los pedidos y CLP no se suman a los indicadores agregados de una jornada.');
  add(host,'h3','canonical-list-title','Recorrido entre áreas');
  const grid=add(host,'div','canonical-area-stages');
  for(const [index,stage] of model.stages.entries()){
