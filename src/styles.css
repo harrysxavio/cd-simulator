@@ -758,3 +758,6 @@ html,body{max-width:100%;overflow-x:clip}
   font-size:.81rem;line-height:1.42;margin:0;
  }
 }
+
+/* M7-33: keep the original PO manifest visible for quick auditing, without a tall info card. */
+#skuLab .supply-trace>.sku-manifest-compact{display:block;margin:0;padding:7px 10px;border-radius:8px;background:#173248;color:#c9dce8;font-size:.8rem;line-height:1.38}
