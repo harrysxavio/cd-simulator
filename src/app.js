@@ -1,40 +1,41 @@
-import {supplyBridge} from './supply-bridge.js?v=175';
-import {createSkuSessionCache} from './sku-session.js?v=175';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=175';
-import {aggregateFlowCsv} from './aggregate-export.js?v=175';
-import {campaignSkuContract} from './campaign-contract.js?v=175';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=175';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=175';
-import {campaignAreaReadModel} from './area-ledger.js?v=175';
-import {laborAudit} from './labor.js?v=175';
-import {skuAudit} from './audit.js?v=175';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=175';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=175';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=175';
-import {readableRecoveryResultsReadModel,READABLE_RESULT_MODES} from './recovery-readable-results.js?v=175';
-import {interpretRecoveryOutcomeReadModel} from './recovery-outcome-insights.js?v=175';
-import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=175';
-import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=175';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=175';
-import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=175';
-import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=175';
-import {integratedDemand} from './integrated.js?v=175';
-import {eventSimulation} from './events.js?v=175';
-import {deliveryTimeline} from './timeline.js?v=175';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=175';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=175';
-import {demandJourney} from './journey.js?v=175';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=175';
-import {flow,diagnose,ACTIONS} from './flow.js?v=175';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=175';
-import {areaKpis} from './kpis.js?v=175';
-import {causalAudit} from './causal.js?v=175';
-import {managerDiagnosis} from './diagnosis-guide.js?v=175';
-import {skuServiceBrief} from './sku-service.js?v=175';
-import {firstCampaignGuideReadModel} from './first-campaign-guide.js?v=175';
-import {explainOperationalAlert,explainAreaDecision} from './decision-alert-literacy.js?v=175';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=175';
-import {attentionSignals} from './attention.js?v=175';
+import {supplyBridge} from './supply-bridge.js?v=176';
+import {createSkuSessionCache} from './sku-session.js?v=176';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=176';
+import {aggregateFlowCsv} from './aggregate-export.js?v=176';
+import {campaignSkuContract} from './campaign-contract.js?v=176';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=176';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=176';
+import {campaignAreaReadModel} from './area-ledger.js?v=176';
+import {laborAudit} from './labor.js?v=176';
+import {skuAudit} from './audit.js?v=176';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=176';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=176';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=176';
+import {readableRecoveryResultsReadModel,READABLE_RESULT_MODES} from './recovery-readable-results.js?v=176';
+import {interpretRecoveryOutcomeReadModel} from './recovery-outcome-insights.js?v=176';
+import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=176';
+import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=176';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=176';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=176';
+import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=176';
+import {integratedDemand} from './integrated.js?v=176';
+import {eventSimulation} from './events.js?v=176';
+import {deliveryTimeline} from './timeline.js?v=176';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=176';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=176';
+import {demandJourney} from './journey.js?v=176';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=176';
+import {flow,diagnose,ACTIONS} from './flow.js?v=176';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=176';
+import {areaKpis} from './kpis.js?v=176';
+import {causalAudit} from './causal.js?v=176';
+import {managerDiagnosis} from './diagnosis-guide.js?v=176';
+import {skuServiceBrief} from './sku-service.js?v=176';
+import {firstCampaignGuideReadModel} from './first-campaign-guide.js?v=176';
+import {keyboardTabDestination} from './accessibility-keyboard.js?v=176';
+import {explainOperationalAlert,explainAreaDecision} from './decision-alert-literacy.js?v=176';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=176';
+import {attentionSignals} from './attention.js?v=176';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -102,7 +103,12 @@ function load(){
   // Leave the current fresh campaign unchanged.
  }
 }
-function nav(i){active=i;save();render();$('mission').scrollIntoView({behavior:'smooth',block:'start'})}
+function nav(i){
+ const fromMap=Boolean(document.activeElement?.closest('#roadmap'));
+ active=i;save();render();
+ if(fromMap)$('roadmap').querySelectorAll('button.node')[i]?.focus({preventScroll:true});
+ $('mission').scrollIntoView({behavior:'smooth',block:'start'});
+}
 function revealSurprise(){
  if(revealed)return;
  shockDirection=Math.random()<0.5?-1:1;
@@ -118,7 +124,16 @@ function showSection(name){
 if((name==='recovery'||name==='dashboard')&&!revealed){name='preliminary'}
 if(name==='preliminary'&&!revealed)revealSurprise();
 currentSection=name;
-for(const x of ['setup','operations','preliminary','recovery','dashboard']){$(x+'Section').hidden=x!==name;$(x+'Tab').setAttribute('aria-selected',String(x===name))}
+for(const x of ['setup','operations','preliminary','recovery','dashboard']){
+  $(x+'Section').hidden=x!==name;
+  if(x==='setup'){
+   $('setupTab').setAttribute('aria-current',name==='setup'?'page':'false');
+  }else{
+   const tab=$(x+'Tab'),selected=x===name;
+   tab.setAttribute('aria-selected',String(selected));
+   tab.tabIndex=(name==='setup'?x==='operations':selected)?0:-1;
+  }
+ }
 if(name==='dashboard')showResultView($('dashboardSection').getAttribute('data-result-view')||'overview');
 if(name==='recovery'){$('recoveryHost').append($('mission'));phase='recover'}
 if(name==='operations'){$('operationHost').append($('mission'));phase='plan'}
@@ -133,8 +148,11 @@ function showResultView(view,scroll=false){
  for(const button of $('resultTabs').children){
   const selected=button.getAttribute('data-result-target')===view;
   button.setAttribute('aria-selected',String(selected));
-  button.setAttribute('aria-pressed',String(selected));
+  button.tabIndex=selected?0:-1;
  }
+ for(const panel of section.querySelectorAll('.result-view')){
+   panel.hidden=panel.dataset.resultPage!==view;
+  }
  if(scroll&&typeof window!=='undefined')$('resultTabs').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function setup(){
@@ -1893,11 +1911,11 @@ $('completed').textContent=fmt(r.dispatched);$('pending').textContent=fmt(r.pend
 $('forecastNotice').textContent='Resultado simulado con los datos y decisiones actuales. No representa entregas confirmadas.';
 $('progressText').textContent=NODES.filter(x=>decisions[x.id]).length+' de 8 áreas planificadas · '+(phase==='plan'?(revealed?'Plan cerrado · consulta':'Planificación'):'Recuperación');
 $('progressFill').style.width=NODES.filter(x=>decisions[x.id]).length/8*100+'%';
-const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));add(b,'span','node-icon',x.icon);const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');add(b,'span','node-state',i===active?'●':'→');b.setAttribute('aria-current',i===active?'step':'false');b.onclick=()=>nav(i)});
+const map=$('roadmap');map.replaceChildren();NODES.forEach((x,i)=>{const b=add(map,'button','node '+(i===active?'current':decisions[x.id]?'done':''));b.setAttribute('aria-label','Área '+(i+1)+' de '+NODES.length+': '+x.title+' · '+(i===active?'seleccionada':decisions[x.id]?'planificada':'pendiente'));const graphic=add(b,'span','node-icon',x.icon);graphic.setAttribute('aria-hidden','true');const c=add(b,'span','node-content');add(c,'strong','',String(i+1).padStart(2,'0')+' · '+x.title);add(c,'small','',actions[x.id]?'Recuperación aplicada: '+actions[x.id]+' '+ACTIONS[x.id][1]:decisions[x.id]?'Planificado':'Pendiente');const mark=add(b,'span','node-state',i===active?'●':'→');mark.setAttribute('aria-hidden','true');b.setAttribute('aria-current',i===active?'step':'false');b.onclick=()=>nav(i)});
 $('missionNumber').textContent=(phase==='plan'?(revealed?'PLAN ORIGINAL · SOLO LECTURA':'PLANIFICAR'):'RECUPERAR')+' · '+(active+1)+' / 8';$('missionTitle').textContent=n.icon+' '+n.title;$('missionDescription').textContent=n.desc;$('missionKpi').textContent='Área '+(active+1)+' de 8';
 const choices=$('choices');choices.replaceChildren();const planFrozen=phase==='plan'&&revealed;
 if(planFrozen)add(choices,'p','diagnosis-note','Decisiones originales cerradas tras conocer la demanda real. Puedes revisar todas las áreas sin modificar el plan ni sus compras. Los KPI muestran la demanda revelada y las recuperaciones que ya hayas aplicado. Para cambiar el plan, pulsa «Nueva campaña»; para intervenir, entra en Recuperación.');
-if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach(c=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.setAttribute('aria-pressed',String((decisions[n.id]??DEFAULTS[n.id])===c.id));b.disabled=planFrozen;b.onclick=()=>{if(planFrozen)return;decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render()}});
+if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach((c,choiceIndex)=>{const b=add(choices,'button','choice '+((decisions[n.id]??DEFAULTS[n.id])===c.id?'selected':''));add(b,'strong','',c.label);add(b,'small','',c.note);b.setAttribute('aria-pressed',String((decisions[n.id]??DEFAULTS[n.id])===c.id));b.disabled=planFrozen;b.onclick=()=>{if(planFrozen)return;decisions[n.id]=c.id;decisions.values[n.id]=c[PARAMETERS[n.id].key];save();render();choices.querySelectorAll('button.choice')[choiceIndex]?.focus({preventScroll:true})}});
 const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.setAttribute('aria-label',p.label+' ('+p.unit.trim()+')');input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.disabled=planFrozen;input.onchange=()=>{if(planFrozen)return;const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
 }const box=add(choices,'div','flow-summary compact-flow');
  add(box,'strong','',phase==='plan'?'Resultado de tu elección':'Efecto de las decisiones');
@@ -1933,7 +1951,7 @@ if(phase==='recover'&&!['commercial','planning','purchasing'].includes(n.id)){
  ['Mejora equilibrada',Math.round(cfg[2]*.6/cfg[3])*cfg[3],'Refuerzo intermedio.'],
  ['Intervención intensiva',cfg[2],'Mayor esfuerzo disponible; puede tener costo sin beneficio global.']
  ];
- for(const [title,value,description] of opts){
+ for(const [choiceIndex,[title,value,description]] of opts.entries()){ 
  const trial=flow(decisions,{...actions,[n.id]:value},effectiveScenario());
  const difference=trial.dispatched-before.dispatched;
  const extraCost=finance(trial,effectiveScenario()).total-baseCost;
@@ -1942,7 +1960,7 @@ if(phase==='recover'&&!['commercial','planning','purchasing'].includes(n.id)){
  add(button,'small','',description);
  add(button,'small','','Cambio vs. ahora: '+(difference>=0?'+':'')+fmt(difference)+' unidades expedibles · costo '+(extraCost>=0?'+':'')+fmt(extraCost)+' CLP.');
  button.setAttribute('aria-pressed',String(selected===value));
- button.onclick=()=>{actions[n.id]=value;save();render()};
+ button.onclick=()=>{actions[n.id]=value;save();render();choices.querySelectorAll('button.recovery-option')[choiceIndex]?.focus({preventScroll:true})};
  }
  const control=add(choices,'div','numeric-control');
  add(control,'label','','O define una cantidad propia ('+cfg[1]+')');
@@ -2039,6 +2057,19 @@ $('skipRecovery').onclick=()=>{actions={};phase='recover';save();showSection('da
 $('recoveryTab').onclick=()=>showSection('recovery');
 $('dashboardTab').onclick=()=>showSection('dashboard');
 for(const button of $('resultTabs').children)button.onclick=()=>showResultView(button.getAttribute('data-result-target'),true);
+for(const container of [document.querySelector('.section-tabs'),$('resultTabs')]){
+ container.addEventListener('keydown',event=>{
+  const tabs=[...container.querySelectorAll('[role="tab"]')];
+  const index=tabs.indexOf(event.target);
+  if(index<0)return;
+  const next=keyboardTabDestination({key:event.key,index,count:tabs.length});
+  if(next===null)return;
+  event.preventDefault();
+  tabs[next].click();
+  (tabs.find(tab=>tab.getAttribute('aria-selected')==='true')??tabs[next])
+   .focus({preventScroll:true});
+ });
+}
 $('primaryToAreas').onclick=()=>showResultView('areas',true);
 for(const [id,view] of [['overviewToAreas','areas'],['areasToInventory','inventory'],['inventoryToEconomics','economics'],['economicsToImprovement','improvement']])$(id).onclick=()=>showResultView(view,true);
 $('improvementToRecovery').onclick=()=>{showSection('recovery');$('recoverySection').scrollIntoView({behavior:'smooth',block:'start'})};
