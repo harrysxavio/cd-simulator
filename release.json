@@ -1,8 +1,8 @@
 {
-  "version": "11.64",
-  "assetRevision": 173,
-  "release": "v11.64 · M7-35 alfabetización de alertas y decisiones",
+  "version": "11.65",
+  "assetRevision": 174,
+  "release": "v11.65 · M7-36 comparabilidad y legibilidad de resultados",
   "date": "2026-10-18",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M7-35 agrega explicaciones plegables a alertas operacionales y a cada decisión por área: significado, siguiente verificación y límites del motor agregado de una jornada. Mantiene cifras, decisiones, modelos SKU y persistencia originales."
+  "notes": "M7-36 incorpora una comparación compacta de cinco recuperaciones con misma cohorte SKU y dos vistas de lectura: expedidos/pendientes y compromisos económicos parciales. Reserva tiene costo de traslado no tarifado; no se inventan resultados físicos ni rentabilidad."
 }
