@@ -1,34 +1,35 @@
-import {supplyBridge} from './supply-bridge.js?v=168';
-import {createSkuSessionCache} from './sku-session.js?v=168';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=168';
-import {aggregateFlowCsv} from './aggregate-export.js?v=168';
-import {campaignSkuContract} from './campaign-contract.js?v=168';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=168';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=168';
-import {campaignAreaReadModel} from './area-ledger.js?v=168';
-import {laborAudit} from './labor.js?v=168';
-import {skuAudit} from './audit.js?v=168';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=168';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=168';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=168';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=168';
-import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=168';
-import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=168';
-import {integratedDemand} from './integrated.js?v=168';
-import {eventSimulation} from './events.js?v=168';
-import {deliveryTimeline} from './timeline.js?v=168';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=168';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=168';
-import {demandJourney} from './journey.js?v=168';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=168';
-import {flow,diagnose,ACTIONS} from './flow.js?v=168';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=168';
-import {areaKpis} from './kpis.js?v=168';
-import {causalAudit} from './causal.js?v=168';
-import {managerDiagnosis} from './diagnosis-guide.js?v=168';
-import {skuServiceBrief} from './sku-service.js?v=168';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=168';
-import {attentionSignals} from './attention.js?v=168';
+import {supplyBridge} from './supply-bridge.js?v=169';
+import {createSkuSessionCache} from './sku-session.js?v=169';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=169';
+import {aggregateFlowCsv} from './aggregate-export.js?v=169';
+import {campaignSkuContract} from './campaign-contract.js?v=169';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=169';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=169';
+import {campaignAreaReadModel} from './area-ledger.js?v=169';
+import {laborAudit} from './labor.js?v=169';
+import {skuAudit} from './audit.js?v=169';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=169';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=169';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=169';
+import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=169';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=169';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=169';
+import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=169';
+import {integratedDemand} from './integrated.js?v=169';
+import {eventSimulation} from './events.js?v=169';
+import {deliveryTimeline} from './timeline.js?v=169';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=169';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=169';
+import {demandJourney} from './journey.js?v=169';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=169';
+import {flow,diagnose,ACTIONS} from './flow.js?v=169';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=169';
+import {areaKpis} from './kpis.js?v=169';
+import {causalAudit} from './causal.js?v=169';
+import {managerDiagnosis} from './diagnosis-guide.js?v=169';
+import {skuServiceBrief} from './sku-service.js?v=169';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=169';
+import {attentionSignals} from './attention.js?v=169';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -930,8 +931,7 @@ function renderSkuLab(contract=currentCampaignContract()){
     if(recovery.recovered.completed===recovery.base.completed)add(arrivalRow,'small','','⚠ La compra no mejora los pedidos completos dentro del horizonte. Revisa plazo de llegada, capacidad de picking y stock remanente antes de comprometer el gasto.');
   }
   const comparisons=Object.keys(RECOVERY_OPTIONS).map(id=>id===skuRecovery?recovery:skuSession.getComparison({contract,skuInputs:input,option:id,urgentArrivalDay:skuUrgentArrival,purchaseCoveragePercent:skuPurchaseCoverage}));
-  const candidates=comparisons.filter(x=>x.recovered.completed>recovery.base.completed);
-  const recommended=[...candidates].sort((a,b)=>b.economicProxyDelta-a.economicProxyDelta||b.recovered.completed-a.recovered.completed)[0]||null;
+  // M6-31 supersedes proxy-max ranking with auditable conditional guidance.
   const advisor=add(bridge,'div','sku-advisor');
   add(advisor,'strong','','Comparador de decisiones · Compras, Inventario y capacidad');
   add(advisor,'p','muted','Las alternativas comparten demanda, compras originales, fecha de llegada y cobertura del faltante. Se comparan pedidos completos y caja incremental, no margen contable.');
@@ -1163,6 +1163,75 @@ function renderSkuLab(contract=currentCampaignContract()){
    comparisons,selectedOption:skuRecovery
   });
   const cmpBase=compare.baseline,cmpChosen=compare.selected,cmpDelta=compare.differences;
+  // M6-31: Recommendations reuse ONLY the five already-audited outcomes.
+  // Changing the advisory lens never replays the warehouse or saves a decision.
+  const defaultGuidance=evidenceBasedRecoveryRecommendationsReadModel({
+   comparison:compare,priority:'service'
+  });
+  const guidancePanel=add(advisor,'details','supply-trace-detail sku-recovery-guidance');
+  guidancePanel.dataset.guidanceScope='sku-cohort';
+  add(guidancePanel,'summary','','🧭 ¿Qué decisión conviene explorar primero?');
+  add(guidancePanel,'p','manager-fineprint',
+   'Orientación según la evidencia del modelo, no una instrucción para ejecutar. '+
+   'Se distinguen pedidos despachados del CD, compromisos supuestos y viabilidad real aún no validada.');
+  const priorityLabel=add(guidancePanel,'label','','Prioridad de gestión');
+  const prioritySelect=add(priorityLabel,'select','numeric-input');
+  prioritySelect.dataset.guidancePriority='selector';
+  prioritySelect.setAttribute('aria-label','Prioridad gerencial para recomendar recuperación');
+  for(const [id,rule] of Object.entries(RECOVERY_RECOMMENDATION_PRIORITIES)){
+   const option=add(prioritySelect,'option','',rule.label);
+   option.value=id;
+  }
+  const guidanceOutput=add(guidancePanel,'div','sku-guidance-result');
+  const renderGuidance=()=>{
+   guidanceOutput.replaceChildren();
+   const guidance=evidenceBasedRecoveryRecommendationsReadModel({
+    comparison:compare,priority:prioritySelect.value
+   });
+   guidanceOutput.dataset.guidanceOutcome=guidance.outcome;
+   guidanceOutput.dataset.guidanceOption=guidance.recommendedOption??'none';
+   const heading=add(guidanceOutput,'p','manager-fineprint');
+   heading.dataset.guidanceSummary='conditional';
+   add(heading,'strong','',
+    guidance.recommended?'Para evaluar: '+guidance.recommended.label:
+     'Sin alternativa de costo comparable.');
+   add(guidanceOutput,'p','manager-fineprint',guidance.why);
+   if(guidance.recommended){
+    const info=add(guidanceOutput,'p','manager-fineprint');
+    info.dataset.guidanceEvidence='shipments';
+    add(info,'span','',
+     'Pedidos expedidos '+fmt(guidance.baseline.dispatched)+' → '+
+     fmt(guidance.recommended.dispatched)+' (mejora '+
+     (guidance.recommended.gainedOrders>=0?'+':'')+
+     fmt(guidance.recommended.gainedOrders)+'); pendientes '+
+     fmt(guidance.recommended.pending)+'.');
+   }
+   const options=add(guidanceOutput,'details','supply-trace-detail');
+   add(options,'summary','','Comparar las cinco opciones y su evidencia');
+   for(const item of guidance.alternatives){
+    const row=add(options,'p','manager-fineprint');
+    row.dataset.guidanceAlternative=item.option;
+    add(row,'strong','',item.label+' · ');
+    add(row,'span','','+'+fmt(item.gainedOrders)+' pedidos frente a esperar · ');
+    add(row,'span','',item.costCoverage==='unpriced-reserve-transfer'
+     ?'costo de traslado no calibrado'
+     :item.costCoverage==='no-new-modeled-intervention'
+      ?'sin nuevo compromiso modelado'
+      :'CLP '+fmt(item.modeledCommitmentCLP)+' en compromisos/costos supuestos');
+   }
+   const caution=add(guidanceOutput,'p','manager-fineprint');
+   caution.dataset.guidanceViability='unverified';
+   add(caution,'span','',
+    'Viabilidad: flujos físicos conciliados en simulación; proveedor, recursos, '+ 
+    'precios reales y entrega al cliente NO verificados. '+ 
+    'El costo total es desconocido, incluso si una partida del modelo muestra CLP 0.');
+   const before=add(guidanceOutput,'details','supply-trace-detail');
+   add(before,'summary','','Validaciones necesarias antes de ejecutar');
+   for(const action of guidance.guardrails.requiredBeforeExecuting)
+    add(before,'p','manager-fineprint','• '+action+'.');
+  };
+  prioritySelect.onchange=renderGuidance;
+  renderGuidance();
   const overview=add(advisor,'section','sku-consolidated-compare');
   overview.dataset.compareScope='sku-cohort';
   add(overview,'strong','','📋 Tu decisión frente a no intervenir');
@@ -1341,7 +1410,10 @@ function renderSkuLab(contract=currentCampaignContract()){
    const choose=add(optionCard,'button',trial.option===skuRecovery?'btn':'btn secondary',trial.option===skuRecovery?'Alternativa actual':'Comparar esta alternativa');
    choose.type='button';choose.disabled=skuLocked||trial.option===skuRecovery;choose.onclick=()=>{skuRecovery=trial.option;save();renderSkuLab()};
   }
-  add(advisor,'p','sku-advisor-insight',recommended?'Mayor resultado económico proxy entre opciones que mejoran servicio: '+recommended.label+' · CLP '+fmt(recommended.economicProxyDelta)+'. Revisa también la caja y el plazo antes de decidir.':'Ninguna intervención mejora pedidos completados dentro del horizonte. Evita comprometer compras solo por aumentar stock.');
+  add(advisor,'p','sku-advisor-insight',defaultGuidance.recommended?
+   'Orientación por servicio: explorar '+defaultGuidance.recommended.label+
+   ' · '+fmt(defaultGuidance.recommended.gainedOrders)+' pedidos adicionales simulados. '+ 
+   'Revisar costos y viabilidad antes de confirmar.':defaultGuidance.why);
   add(bridge,'strong','','Recuperación: '+recovery.label);
   add(bridge,'small','','Pedidos finales '+fmt(recovery.recovered.completed)+' / '+fmt(actualOrders)+' · pendientes '+fmt(recovery.recovered.pending)+' · mejora '+fmt(recovery.recovered.completed-recovery.base.completed));
   if(skuRecovery==='reserve')add(bridge,'small','','Reserva ubicada: '+fmt(Object.values(recovery.reserveStock).reduce((n,x)=>n+x,0))+' unidades del stock inicial · traslado en día '+skuUrgentArrival+'.');
