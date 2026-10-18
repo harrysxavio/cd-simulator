@@ -761,3 +761,36 @@ html,body{max-width:100%;overflow-x:clip}
 
 /* M7-33: keep the original PO manifest visible for quick auditing, without a tall info card. */
 #skuLab .supply-trace>.sku-manifest-compact{display:block;margin:0;padding:7px 10px;border-radius:8px;background:#173248;color:#c9dce8;font-size:.8rem;line-height:1.38}
+
+/* M7-34 · Four-step on-ramp for new learners. No overlay, no intercept. */
+.first-campaign-guide{
+ border:1px solid #37746f;background:#112f3d;border-radius:12px;
+ padding:10px 13px;margin:0 0 13px;min-width:0;
+}
+.first-campaign-guide[hidden],.first-campaign-guide-body[hidden]{display:none!important}
+.first-campaign-guide-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.first-guide-step{color:#a4f2db;font-size:.79rem;line-height:1.4;font-weight:750}
+.first-guide-toggle{
+ background:transparent;border:1px solid #54847c;color:#d6f7ef;
+ border-radius:8px;min-height:44px;padding:8px 11px;font-size:.79rem;
+ font-weight:700;white-space:nowrap;touch-action:manipulation;
+}
+.first-guide-toggle:focus-visible,.first-guide-learn>summary:focus-visible{
+ outline:3px solid #7bedd1;outline-offset:2px;
+}
+.first-campaign-guide-body{display:grid;gap:3px;min-width:0;padding-top:2px}
+.first-campaign-guide-body>strong{font-size:.96rem;line-height:1.35;color:#f0fff9}
+.first-campaign-guide-body>p{font-size:.88rem;line-height:1.45;margin:3px 0;color:#cbdfe9}
+.first-guide-learn{margin:2px 0 0;min-width:0}
+.first-guide-learn>summary{
+ cursor:pointer;min-height:44px;display:flex;align-items:center;
+ color:#a8dece;font-size:.83rem;line-height:1.35;
+}
+.first-guide-learn>p{font-size:.84rem;line-height:1.5;margin:0 0 7px}
+@media(max-width:680px){
+ .first-campaign-guide{padding:8px 11px;margin:0 0 10px}
+ .first-guide-step{font-size:.76rem}
+ .first-campaign-guide-body>strong{font-size:.91rem}
+ .first-campaign-guide-body>p{font-size:.83rem;line-height:1.4}
+ .first-guide-toggle{font-size:.75rem;padding:7px 9px}
+}

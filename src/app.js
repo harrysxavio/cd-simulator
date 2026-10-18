@@ -1,36 +1,37 @@
-import {supplyBridge} from './supply-bridge.js?v=171';
-import {createSkuSessionCache} from './sku-session.js?v=171';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=171';
-import {aggregateFlowCsv} from './aggregate-export.js?v=171';
-import {campaignSkuContract} from './campaign-contract.js?v=171';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=171';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=171';
-import {campaignAreaReadModel} from './area-ledger.js?v=171';
-import {laborAudit} from './labor.js?v=171';
-import {skuAudit} from './audit.js?v=171';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=171';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=171';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=171';
-import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=171';
-import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=171';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=171';
-import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=171';
-import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=171';
-import {integratedDemand} from './integrated.js?v=171';
-import {eventSimulation} from './events.js?v=171';
-import {deliveryTimeline} from './timeline.js?v=171';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=171';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=171';
-import {demandJourney} from './journey.js?v=171';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=171';
-import {flow,diagnose,ACTIONS} from './flow.js?v=171';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=171';
-import {areaKpis} from './kpis.js?v=171';
-import {causalAudit} from './causal.js?v=171';
-import {managerDiagnosis} from './diagnosis-guide.js?v=171';
-import {skuServiceBrief} from './sku-service.js?v=171';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=171';
-import {attentionSignals} from './attention.js?v=171';
+import {supplyBridge} from './supply-bridge.js?v=172';
+import {createSkuSessionCache} from './sku-session.js?v=172';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=172';
+import {aggregateFlowCsv} from './aggregate-export.js?v=172';
+import {campaignSkuContract} from './campaign-contract.js?v=172';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=172';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=172';
+import {campaignAreaReadModel} from './area-ledger.js?v=172';
+import {laborAudit} from './labor.js?v=172';
+import {skuAudit} from './audit.js?v=172';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=172';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=172';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=172';
+import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=172';
+import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=172';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=172';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=172';
+import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=172';
+import {integratedDemand} from './integrated.js?v=172';
+import {eventSimulation} from './events.js?v=172';
+import {deliveryTimeline} from './timeline.js?v=172';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=172';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=172';
+import {demandJourney} from './journey.js?v=172';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=172';
+import {flow,diagnose,ACTIONS} from './flow.js?v=172';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=172';
+import {areaKpis} from './kpis.js?v=172';
+import {causalAudit} from './causal.js?v=172';
+import {managerDiagnosis} from './diagnosis-guide.js?v=172';
+import {skuServiceBrief} from './sku-service.js?v=172';
+import {firstCampaignGuideReadModel} from './first-campaign-guide.js?v=172';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=172';
+import {attentionSignals} from './attention.js?v=172';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -38,6 +39,7 @@ let decisions={...START,values:{}},actions={},active=0,phase='plan',scenario={..
 // One session-scoped, bounded physical SKU replay reused by all screens.
 const skuSession=createSkuSessionCache();
 let currentSkuAreaModel=null,currentSkuProjection=null;
+let firstGuideExpanded=true; // Viewing preference only; never part of the campaign ledger.
 const effectiveScenario=()=>({...scenario,lockUpstream:revealed,actualDemand:revealed?Math.max(1,Math.round(scenario.demand*(1+(shockDirection||1)*scenario.demandShockPercent/100))):scenario.demand});
 const fmt=n=>Math.round(n).toLocaleString('es-CL');
 const skuContractInputs=contract=>{
@@ -1753,7 +1755,34 @@ function renderAttention(){
  }
  add(root,'small','','Referencia flexible: dotación estándar más gastos variables ajustados al volumen efectivamente procesado. La diferencia contra la referencia fija se muestra como efecto volumen. Incluye dotación base y gastos variables asignables; excluye costos fijos compartidos y costo de mercancía para evitar asignaciones arbitrarias. Tolerancia configurable: '+scenario.areaCostTolerance+' %. Un gasto menor por bajo volumen no se considera ahorro de eficiencia.');
 }
+
+function renderFirstCampaignGuide(){
+ const panel=$('firstCampaignGuide');
+ // Configuration is optional and already has its own controls; guide covers the 4 missions.
+ panel.hidden=currentSection==='setup';
+ if(panel.hidden)return;
+ const guide=firstCampaignGuideReadModel({
+  section:currentSection,areaIndex:active,areaTitle:NODES[active].title,
+  areaCount:NODES.length,revealed
+ });
+ panel.dataset.guideStep=String(guide.step);
+ panel.dataset.guideSection=guide.section;
+ panel.dataset.guideNext=guide.next;
+ $('firstGuideStep').textContent='🧭 Primera campaña · '+guide.step+' / '+guide.totalSteps;
+ $('firstGuideTitle').textContent=guide.title;
+ $('firstGuideInstruction').textContent=guide.instruction;
+ $('firstGuideWhy').textContent=guide.why;
+ $('firstGuideBody').hidden=!firstGuideExpanded;
+ $('firstGuideToggle').textContent=firstGuideExpanded?'Ocultar ayuda':'Mostrar ayuda';
+ $('firstGuideToggle').setAttribute('aria-expanded',String(firstGuideExpanded));
+}
+$('firstGuideToggle').onclick=()=>{
+ firstGuideExpanded=!firstGuideExpanded;
+ renderFirstCampaignGuide();
+};
+
 function render(){
+renderFirstCampaignGuide();
 $('sessionStatus').textContent='Campaña '+campaignId+' · '+({setup:'Configuración',operations:revealed?'Plan original':'Operación',preliminary:'Diagnóstico',recovery:'Recuperación',dashboard:'Resultados'}[currentSection]);
 $('strategyCurrent').textContent='Estrategia: '+({service:'servicio',balanced:'equilibrio',cost:'eficiencia económica'}[strategy])+' · meta de cumplimiento '+scenario.targetFulfillment+' %';
 // One aggregate read (as decision input), one frozen SKU contract for this UI render.
