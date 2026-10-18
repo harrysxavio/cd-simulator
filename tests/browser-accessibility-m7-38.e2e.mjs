@@ -93,7 +93,7 @@ async function verify(mobile){
    const colors=await page.locator('.section-tabs [role="tab"],.result-tabs [role="tab"]')
     .evaluateAll(nodes=>nodes.map(n=>{
      const st=getComputedStyle(n);
-     const rgb=text=>(text.match(/[\\d.]+/g)||[]).slice(0,3).map(Number);
+     const rgb=text=>(text.match(/[0-9.]+/g)||[]).slice(0,3).map(Number);
      const linear=v=>{
       const c=v/255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
      };
