@@ -20,7 +20,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.60 (M6-31):** Guía condicional según servicio o compromisos modelados, usando las cinco alternativas ya conciliadas sin nueva simulación. Diferencia costo parcial, costo de reserva desconocido y viabilidad operacional no acreditada; no propone utilidad ni entregas ficticias. Pendiente validar Node, Chromium, main y Pages HTTP. [Evidencia](docs/STATUS-V11.60.md).
+**Avance verificado v11.60 (M6-31):** Guía condicional según servicio o compromisos modelados, usando las cinco alternativas ya conciliadas sin nueva simulación. Diferencia costo parcial, costo de reserva desconocido y viabilidad operacional no acreditada; no propone utilidad ni entregas ficticias. Node, Chromium, main, Pages y HTTP públicos aprobados. [Evidencia](docs/STATUS-V11.60.md).
 
 **Histórico verificado v11.59 (M6-30):** Dos cambios físicos A y B ensayados solos y juntos sobre la misma cohorte SKU congelada. Compara cuatro escenarios y calcula la interacción no aditiva del resultado; costo no calibrado, sin atribución exclusiva. Node, Chromium, merge, Pages y HTTP público aprobados. [Alcance y evidencia](docs/STATUS-V11.59.md).
 
