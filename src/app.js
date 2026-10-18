@@ -1,36 +1,36 @@
-import {supplyBridge} from './supply-bridge.js?v=170';
-import {createSkuSessionCache} from './sku-session.js?v=170';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=170';
-import {aggregateFlowCsv} from './aggregate-export.js?v=170';
-import {campaignSkuContract} from './campaign-contract.js?v=170';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=170';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=170';
-import {campaignAreaReadModel} from './area-ledger.js?v=170';
-import {laborAudit} from './labor.js?v=170';
-import {skuAudit} from './audit.js?v=170';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=170';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=170';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=170';
-import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=170';
-import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=170';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=170';
-import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=170';
-import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=170';
-import {integratedDemand} from './integrated.js?v=170';
-import {eventSimulation} from './events.js?v=170';
-import {deliveryTimeline} from './timeline.js?v=170';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=170';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=170';
-import {demandJourney} from './journey.js?v=170';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=170';
-import {flow,diagnose,ACTIONS} from './flow.js?v=170';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=170';
-import {areaKpis} from './kpis.js?v=170';
-import {causalAudit} from './causal.js?v=170';
-import {managerDiagnosis} from './diagnosis-guide.js?v=170';
-import {skuServiceBrief} from './sku-service.js?v=170';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=170';
-import {attentionSignals} from './attention.js?v=170';
+import {supplyBridge} from './supply-bridge.js?v=171';
+import {createSkuSessionCache} from './sku-session.js?v=171';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=171';
+import {aggregateFlowCsv} from './aggregate-export.js?v=171';
+import {campaignSkuContract} from './campaign-contract.js?v=171';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=171';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=171';
+import {campaignAreaReadModel} from './area-ledger.js?v=171';
+import {laborAudit} from './labor.js?v=171';
+import {skuAudit} from './audit.js?v=171';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=171';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=171';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=171';
+import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=171';
+import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=171';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=171';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=171';
+import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=171';
+import {integratedDemand} from './integrated.js?v=171';
+import {eventSimulation} from './events.js?v=171';
+import {deliveryTimeline} from './timeline.js?v=171';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=171';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=171';
+import {demandJourney} from './journey.js?v=171';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=171';
+import {flow,diagnose,ACTIONS} from './flow.js?v=171';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=171';
+import {areaKpis} from './kpis.js?v=171';
+import {causalAudit} from './causal.js?v=171';
+import {managerDiagnosis} from './diagnosis-guide.js?v=171';
+import {skuServiceBrief} from './sku-service.js?v=171';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=171';
+import {attentionSignals} from './attention.js?v=171';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -396,8 +396,10 @@ function renderCanonicalAreasFromSku(model){
  const intro=add(host,'div','canonical-area-heading');
  add(intro,'span','canonical-kicker','MISIÓN 4 DE 4 · ENTENDER EL IMPACTO');
  add(intro,'h2','','🔗 Cómo operaron las ocho áreas');
- add(intro,'p','','Una misma campaña SKU, con '+fmt(model.metrics.actualOrders)+' pedidos y '+model.horizonDays+' días. Cada área explica su papel usando los mismos pedidos, compras, recepciones, lotes e inventario; no son ocho simulaciones diferentes.');
+ add(intro,'p','','Una campaña de '+fmt(model.metrics.actualOrders)+' pedidos. Recorre las ocho áreas del mismo modelo físico, sin sumar resultados diferentes.');
  const numbers=add(host,'div','canonical-area-numbers');
+ numbers.dataset.mobileKpiScope='sku-areas';
+ numbers.setAttribute('aria-label','Indicadores de pedidos completos');
  const areaCounts=stageActive?[
   ['Sin preparar',model.metrics.unpickedOrders,'pedidos'],
   ['En staging',model.metrics.stagedOrders,'pedidos preparados'],
@@ -407,11 +409,12 @@ function renderCanonicalAreasFromSku(model){
   ['Salieron del CD',model.metrics.shippedOrders,'pedidos completos'],
   ['Pendientes al cierre',model.metrics.pendingOrders,'pedidos sin fecha confirmada']
  ];
- for(const [name,value,unit] of areaCounts){
+ for(const [name,value] of areaCounts){
   const tile=add(numbers,'div','canonical-area-stat');
-  add(tile,'span','',name);add(tile,'strong','',fmt(value));add(tile,'small','',unit);
+  tile.dataset.compactKpi='sku-order';
+  add(tile,'span','',name);add(tile,'strong','',fmt(value));
  }
- const info=add(host,'p','canonical-boundary','Esta vista pertenece al libro físico SKU de '+model.horizonDays+' días. Las unidades SKU, pedidos completos y CLP no se suman a los indicadores agregados de una jornada. Tampoco acredita entrega al cliente.');
+ const info=add(host,'p','canonical-boundary','Solo pedidos del CD: no son entregas al cliente. Unidades SKU y CLP se consultan por área; no se suman al turno agregado.');
  add(host,'h3','canonical-list-title','Recorrido entre áreas');
  const grid=add(host,'div','canonical-area-stages');
  for(const [index,stage] of model.stages.entries()){
@@ -452,7 +455,7 @@ function renderPrimarySkuSummary(model){
  const stageActive=model.pickingLedger?.stage==='independent-staging';
  const percent=total?100*shipped/total:100;
  $('primarySkuHeading').textContent=stageActive&&model.metrics.stagedOrders?'📦 Pedidos preparados esperan Transporte':pending?'📦 Aún quedan pedidos pendientes':'📦 La cohorte de pedidos fue expedida';
- $('primarySkuIntro').textContent='Resultado de '+fmt(total)+' pedidos completos de la cohorte SKU, observados del día 0 al '+model.horizonDays+'. La misma información alimenta las ocho áreas.';
+ $('primarySkuIntro').textContent='Una cohorte de '+fmt(total)+' pedidos completos · días 0–'+model.horizonDays+'. Expedición simulada desde el CD.';
  const summaryCounts=stageActive?[
   ['Sin preparar',model.metrics.unpickedOrders,'pedidos completos'],
   ['En staging',model.metrics.stagedOrders,'pedidos preparados'],
@@ -462,9 +465,12 @@ function renderPrimarySkuSummary(model){
   ['Despachados desde CD',shipped,percent.toFixed(1).replace('.',',')+' % de la cohorte'],
   ['Pendientes al corte',pending,'sin fecha de entrega confirmada']
  ];
- for(const [title,n,unit] of summaryCounts){
+ metrics.dataset.mobileKpiScope='sku-overview';
+ metrics.setAttribute('aria-label','Indicadores de pedidos completos de la cohorte SKU');
+ for(const [title,n] of summaryCounts){
   const tile=add(metrics,'div','canonical-area-stat');
-  add(tile,'span','',title);add(tile,'strong','',fmt(n));add(tile,'small','',unit);
+  tile.dataset.compactKpi='sku-order';
+  add(tile,'span','',title);add(tile,'strong','',fmt(n));
  }
  add(insight,'strong','',pending?'Prioridad de gerencia: recuperar pedidos sin inventar existencias':'Prioridad de gerencia: sostener el servicio y revisar el costo');
  add(insight,'p','',stageActive&&model.metrics.stagedOrders?'Hay '+fmt(model.metrics.stagedOrders)+' pedidos listos en staging y '+fmt(model.metrics.unpickedOrders)+' sin preparar. Revisa la capacidad de Transporte antes de comprar más: preparar no equivale a despachar ni a entregar al cliente.':pending
@@ -516,12 +522,21 @@ function renderSkuLab(contract=currentCampaignContract()){
   currentSkuAreaModel=physicalAreas;
   renderPrimarySkuSummary(physicalAreas);
   const trace=add(root,'div','area-kpi-tile supply-trace');
-  add(trace,'strong','','🔗 Cómo se conectan las áreas');
-  add(trace,'small','','Comercial → Planeación: pronóstico '+commercialForecast.toFixed(1)+' % de 200 pedidos · cobertura planificada '+planningCoverage.toFixed(1)+' %. La orden de compra SKU original queda congelada y la demanda sorpresa no la recalcula.');
-  add(trace,'small','','La cohorte de '+fmt(contract.plannedSampleOrders)+' pedidos SKU representa solo una muestra; la campaña principal trabaja con '+fmt(contract.trace.plannedCampaignUnits)+' unidades agregadas. Stock y costos todavía no son intercambiables entre motores.');
+  add(trace,'strong','','🔗 Compras → despachos');
+  const digest=add(trace,'p','sku-trace-digest',
+   fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+
+   fmt(physicalAreas.metrics.pendingOrders)+' pendientes en la cohorte SKU. '+
+   'Abre solo el detalle que necesites.');
+  digest.dataset.traceDigest='sku-physical';
+  const context=add(trace,'details','supply-trace-detail sku-operational-context');
+  context.dataset.operationalContext='sku-assumptions';
+  add(context,'summary','','ℹ️ Ver supuestos y recorrido físico');
+  const contextBody=add(context,'div','sku-operational-context-body');
+  add(contextBody,'small','','Comercial → Planeación: pronóstico '+commercialForecast.toFixed(1)+' % de 200 pedidos · cobertura planificada '+planningCoverage.toFixed(1)+' %. La orden de compra SKU original queda congelada y la demanda sorpresa no la recalcula.');
+  add(contextBody,'small','','La cohorte de '+fmt(contract.plannedSampleOrders)+' pedidos SKU representa solo una muestra; la campaña principal trabaja con '+fmt(contract.trace.plannedCampaignUnits)+' unidades agregadas. Stock y costos todavía no son intercambiables entre motores.');
   // Trace only existing ledger outcomes; never recompute their physical events.
   const coverage=decisionPhysicalCoverage({boundaryAudit:contract.boundaryAudit,areaModel:physicalAreas});
-  add(trace,'small','','Decisiones: supuestos didácticos. Movimientos: registro físico SKU simulado; capacidad SKU/día todavía sin calibración independiente.');
+  add(contextBody,'small','','Decisiones: supuestos didácticos. Movimientos: registro físico SKU simulado; capacidad SKU/día todavía sin calibración independiente.');
   const evidencePanel=add(trace,'details','manager-po-detail');
   evidencePanel.dataset.decisionCoverage='sku-events';
   add(evidencePanel,'summary','','Ver origen de decisiones y evidencia de las ocho áreas');
@@ -533,19 +548,19 @@ function renderSkuLab(contract=currentCampaignContract()){
    add(line,'strong','',title);
    add(line,'span','',': '+item.explanation+'. '+(item.evidenceClass==='managerial-plan'?'Compromiso de planificación.':'Evento simulado por SKU/día.'));
   }
-  add(trace,'small','','Manifiesto SKU comprometido: '+Object.entries(chain.purchasing.originalPurchase).map(([id,qty])=>'SKU '+id+' '+fmt(qty)).join(' · ')+'.');
-  add(trace,'small','','Compras: proveedor cumple '+supplierRate.toFixed(1)+' % de las unidades de compra ordinaria. Solicitadas SKU '+fmt(chain.purchasing.originalOrdered)+' · entregadas '+fmt(chain.purchasing.originalDelivered)+' · faltantes definitivos '+fmt(chain.purchasing.originalUnfilled)+'.');
-  add(trace,'small','','Calidad: libera '+fmt(chain.quality.releasePercent)+' % diario del stock retenido · quedan '+fmt(chain.quality.waiting)+' unidades pendientes de liberar.');
-  add(trace,'small','','Límites SKU/día asumidos desde la jornada agregada (sin calibrar): Recepción '+fmt(area.receivingCapacity)+' · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'. '+(skuSeparateTransport?'Staging independiente habilitado.':'Picking y Transporte despachan el mismo día.'));
-  if(chain.receiving.waitingReceiving)add(trace,'small','','⚠ Quedan '+fmt(chain.receiving.waitingReceiving)+' unidades por ingresar al término del horizonte por restricciones de recepción.');
-  add(trace,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
-  add(trace,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' no ingresadas al corte');
-  add(trace,'small','','Reserva interna sin habilitar: '+Object.entries(chain.inventory.reserved).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. Es stock inicial separado, no una compra.');
-  add(trace,'small','','Inventario físico después de Calidad: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
-  add(trace,'small','','Exactitud de Inventario '+fmt(chain.inventory.accuracyPercent)+' % → stock verificable para picking: '+Object.entries(chain.inventory.pickable).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'.');
-  add(trace,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
-  add(trace,'small','',skuSeparateTransport?'Picking: '+fmt(physicalAreas.metrics.pickedOrders)+' preparados · '+fmt(physicalAreas.metrics.stagedOrders)+' en staging esperando Transporte · '+fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar.':'Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
-  add(trace,'small','','Comparador incremental hipotético (no caja real): flujo proxy CLP '+fmt(chain.finance.incrementalCash)+' · efecto económico proxy CLP '+fmt(chain.finance.economicProxy)+'.');
+  add(contextBody,'small','','Manifiesto SKU comprometido: '+Object.entries(chain.purchasing.originalPurchase).map(([id,qty])=>'SKU '+id+' '+fmt(qty)).join(' · ')+'.');
+  add(contextBody,'small','','Compras: proveedor cumple '+supplierRate.toFixed(1)+' % de las unidades de compra ordinaria. Solicitadas SKU '+fmt(chain.purchasing.originalOrdered)+' · entregadas '+fmt(chain.purchasing.originalDelivered)+' · faltantes definitivos '+fmt(chain.purchasing.originalUnfilled)+'.');
+  add(contextBody,'small','','Calidad: libera '+fmt(chain.quality.releasePercent)+' % diario del stock retenido · quedan '+fmt(chain.quality.waiting)+' unidades pendientes de liberar.');
+  add(contextBody,'small','','Límites SKU/día asumidos desde la jornada agregada (sin calibrar): Recepción '+fmt(area.receivingCapacity)+' · Picking '+fmt(area.pickingCapacity)+' · Transporte '+fmt(area.stages[7].capacity)+'. '+(skuSeparateTransport?'Staging independiente habilitado.':'Picking y Transporte despachan el mismo día.'));
+  if(chain.receiving.waitingReceiving)add(contextBody,'small','','⚠ Quedan '+fmt(chain.receiving.waitingReceiving)+' unidades por ingresar al término del horizonte por restricciones de recepción.');
+  add(contextBody,'small','','Compras: '+fmt(chain.purchasing.extraUnits)+' unidades extraordinarias · costo CLP '+fmt(chain.purchasing.extraCost));
+  add(contextBody,'small','','Recepción: '+fmt(chain.receiving.receivedExtraUnits)+' unidades llegan dentro de 12 días · '+fmt(chain.receiving.outsideHorizonUnits)+' no ingresadas al corte');
+  add(contextBody,'small','','Reserva interna sin habilitar: '+Object.entries(chain.inventory.reserved).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. Es stock inicial separado, no una compra.');
+  add(contextBody,'small','','Inventario físico después de Calidad: '+Object.entries(chain.inventory.ending).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · '));
+  add(contextBody,'small','','Exactitud de Inventario '+fmt(chain.inventory.accuracyPercent)+' % → stock verificable para picking: '+Object.entries(chain.inventory.pickable).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'.');
+  add(contextBody,'small','','Stock físico no verificable: '+Object.entries(chain.inventory.unverified).map(([id,n])=>'SKU '+id+' '+fmt(n)).join(' · ')+'. No es pérdida ni rechazo de Calidad. La acción de reserva de la campaña agregada aún no modifica la muestra SKU.');
+  add(contextBody,'small','',skuSeparateTransport?'Picking: '+fmt(physicalAreas.metrics.pickedOrders)+' preparados · '+fmt(physicalAreas.metrics.stagedOrders)+' en staging esperando Transporte · '+fmt(physicalAreas.metrics.shippedOrders)+' expedidos · '+fmt(physicalAreas.metrics.unpickedOrders)+' sin preparar.':'Picking y despacho: '+fmt(chain.picking.completed)+' pedidos completos · '+fmt(chain.picking.pending)+' pendientes · mejora '+fmt(chain.picking.improvement));
+  add(contextBody,'small','','Comparador incremental hipotético (no caja real): flujo proxy CLP '+fmt(chain.finance.incrementalCash)+' · efecto económico proxy CLP '+fmt(chain.finance.economicProxy)+'.');
   // M4-14: explain rates only on demand; never add them to the aggregate P&L.
   const costRates=skuCostCatalogReadModel({catalog:SKU_CATALOG});
   const costsPanel=add(trace,'details','supply-trace-detail sku-cost-catalog');
