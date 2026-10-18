@@ -1,35 +1,36 @@
-import {supplyBridge} from './supply-bridge.js?v=169';
-import {createSkuSessionCache} from './sku-session.js?v=169';
-import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=169';
-import {aggregateFlowCsv} from './aggregate-export.js?v=169';
-import {campaignSkuContract} from './campaign-contract.js?v=169';
-import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=169';
-import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=169';
-import {campaignAreaReadModel} from './area-ledger.js?v=169';
-import {laborAudit} from './labor.js?v=169';
-import {skuAudit} from './audit.js?v=169';
-import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=169';
-import {combinedInterventionReadModel} from './recovery-combined.js?v=169';
-import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=169';
-import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=169';
-import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=169';
-import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=169';
-import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=169';
-import {integratedDemand} from './integrated.js?v=169';
-import {eventSimulation} from './events.js?v=169';
-import {deliveryTimeline} from './timeline.js?v=169';
-import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=169';
-import {skuOrderLab,SKU_CATALOG} from './sku.js?v=169';
-import {demandJourney} from './journey.js?v=169';
-import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=169';
-import {flow,diagnose,ACTIONS} from './flow.js?v=169';
-import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=169';
-import {areaKpis} from './kpis.js?v=169';
-import {causalAudit} from './causal.js?v=169';
-import {managerDiagnosis} from './diagnosis-guide.js?v=169';
-import {skuServiceBrief} from './sku-service.js?v=169';
-import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=169';
-import {attentionSignals} from './attention.js?v=169';
+import {supplyBridge} from './supply-bridge.js?v=170';
+import {createSkuSessionCache} from './sku-session.js?v=170';
+import {SESSION_STORAGE_KEY,deserializeSession,serializeSession} from './session-state.js?v=170';
+import {aggregateFlowCsv} from './aggregate-export.js?v=170';
+import {campaignSkuContract} from './campaign-contract.js?v=170';
+import {decisionPhysicalCoverage} from './decision-physical-coverage.js?v=170';
+import {skuCostCatalogReadModel} from './sku-cost-catalog.js?v=170';
+import {campaignAreaReadModel} from './area-ledger.js?v=170';
+import {laborAudit} from './labor.js?v=170';
+import {skuAudit} from './audit.js?v=170';
+import {recoveryComparison,RECOVERY_OPTIONS} from './recovery.js?v=170';
+import {combinedInterventionReadModel} from './recovery-combined.js?v=170';
+import {consolidatedRecoveryComparisonReadModel} from './recovery-consolidated.js?v=170';
+import {evidenceBasedRecoveryRecommendationsReadModel,RECOVERY_RECOMMENDATION_PRIORITIES} from './recovery-recommendations.js?v=170';
+import {decisionExplanationReadModel} from './recovery-decision-explanation.js?v=170';
+import {physicalConstraintSignalsReadModel} from './recovery-physical-signals.js?v=170';
+import {availableSingleFactorTrials,singleFactorCounterfactualReadModel} from './recovery-single-factor.js?v=170';
+import {availablePairedFactorTrials,pairedCounterfactualReadModel} from './recovery-paired-factors.js?v=170';
+import {integratedDemand} from './integrated.js?v=170';
+import {eventSimulation} from './events.js?v=170';
+import {deliveryTimeline} from './timeline.js?v=170';
+import {inventoryPolicy,POLICY_PRESETS} from './policy.js?v=170';
+import {skuOrderLab,SKU_CATALOG} from './sku.js?v=170';
+import {demandJourney} from './journey.js?v=170';
+import {NODES,DEFAULTS,START,PARAMETERS,numericValue} from './engine.js?v=170';
+import {flow,diagnose,ACTIONS} from './flow.js?v=170';
+import {DEFAULT_SCENARIO,FIELDS,cleanScenario,finance,strategyAssessment} from './scenario.js?v=170';
+import {areaKpis} from './kpis.js?v=170';
+import {causalAudit} from './causal.js?v=170';
+import {managerDiagnosis} from './diagnosis-guide.js?v=170';
+import {skuServiceBrief} from './sku-service.js?v=170';
+import {createSkuRecoveryDecision,skuDecisionSignature,skuDecisionStatus} from './sku-decision.js?v=170';
+import {attentionSignals} from './attention.js?v=170';
 const $=id=>document.getElementById(id),KEY=SESSION_STORAGE_KEY;
 // An ID remains stable on reload; a new campaign receives a new ID.
 const createCampaignId=()=> 'CD-'+(globalThis.crypto?.randomUUID?.()||Math.random().toString(36).slice(2));
@@ -1163,6 +1164,71 @@ function renderSkuLab(contract=currentCampaignContract()){
    comparisons,selectedOption:skuRecovery
   });
   const cmpBase=compare.baseline,cmpChosen=compare.selected,cmpDelta=compare.differences;
+  // M6-32 · Explicación didáctica por decisión. Reutiliza el comparador M5-26,
+  // sin correr simulaciones nuevas ni cambiar la recuperación guardada.
+  const learn=add(advisor,'details','supply-trace-detail sku-decision-explanation');
+  learn.dataset.explanationScope='sku-cohort';
+  add(learn,'summary','','📘 ¿Qué pasó con esta decisión?');
+  add(learn,'p','manager-fineprint',
+   'Explora la misma cohorte con cuatro preguntas sencillas. '+
+   'La opción que lees aquí no modifica tu decisión ni los resultados.');
+  const learningLabel=add(learn,'label','','Decisión que quieres entender');
+  const learningSelect=add(learningLabel,'select','numeric-input');
+  learningSelect.dataset.explanationSelector='recovery';
+  learningSelect.setAttribute('aria-label','Decisión de recuperación para explicar');
+  for(const id of ['wait','reserve','overtime','emergency','combined']){
+   const op=add(learningSelect,'option','',RECOVERY_OPTIONS[id].label);
+   op.value=id;
+  }
+  learningSelect.value=skuRecovery;
+  const learnContent=add(learn,'div','sku-decision-explanation-content');
+  const paintExplanation=()=>{
+   learnContent.replaceChildren();
+   const reading=decisionExplanationReadModel({
+    comparison:compare,option:learningSelect.value
+   });
+   learnContent.dataset.explanationOption=reading.option;
+   learnContent.dataset.explanationStatus=reading.status;
+   const stages=[
+    ['situation','1. Situación',reading.situation],
+    ['action','2. Acción',reading.action],
+    ['effect','3. Efecto observado',reading.effect]
+   ];
+   for(const [key,label,message] of stages){
+    const line=add(learnContent,'p','manager-fineprint');
+    line.dataset.explanationStage=key;
+    add(line,'strong','',label+' · ');
+    add(line,'span','',message);
+   }
+   const evidence=add(learnContent,'details','supply-trace-detail');
+   evidence.dataset.explanationStage='evidence';
+   add(evidence,'summary','','4. Evidencia: ¿cómo sabemos lo que pasó?');
+   for(const metric of reading.evidence.rows){
+    const line=add(evidence,'p','manager-fineprint');
+    line.dataset.explanationMetric=metric.id;
+    add(line,'strong','',metric.label+' · ');
+    add(line,'span','',fmt(metric.baseline)+' → '+
+     fmt(metric.observed)+' '+metric.unit+'.');
+   }
+   add(evidence,'p','manager-fineprint',reading.evidence.atCut);
+   add(evidence,'p','manager-fineprint',reading.evidence.dates);
+   const cost=add(evidence,'p','manager-fineprint');
+   cost.dataset.explanationCost='qualified';
+   add(cost,'span','',reading.evidence.costExplanation);
+   const caution=add(learnContent,'p','manager-fineprint');
+   caution.dataset.explanationInterpretation=reading.status;
+   add(caution,'strong','','Cómo interpretarlo · ');
+   add(caution,'span','',reading.interpretation);
+   const limits=add(learnContent,'details','supply-trace-detail');
+   add(limits,'summary','','Qué NO podemos concluir todavía');
+   for(const warning of reading.limits){
+    const row=add(limits,'p','manager-fineprint');
+    row.dataset.explanationLimit='explicit';
+    add(row,'span','','• '+warning);
+   }
+  };
+  learningSelect.onchange=paintExplanation;
+  paintExplanation();
   // M6-31: Recommendations reuse ONLY the five already-audited outcomes.
   // Changing the advisory lens never replays the warehouse or saves a decision.
   const defaultGuidance=evidenceBasedRecoveryRecommendationsReadModel({

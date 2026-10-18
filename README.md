@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.60
+# Supply Chain Operations Lab · v11.61
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.60-r169) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.61-r170) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -20,7 +20,9 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance verificado v11.60 (M6-31):** Guía condicional según servicio o compromisos modelados, usando las cinco alternativas ya conciliadas sin nueva simulación. Diferencia costo parcial, costo de reserva desconocido y viabilidad operacional no acreditada; no propone utilidad ni entregas ficticias. Node, Chromium, main, Pages y HTTP públicos aprobados. [Evidencia](docs/STATUS-V11.60.md).
+**Candidato v11.61 (M6-32):** Nueva lectura didáctica por recuperación: Situación → Acción → Efecto → Evidencia y límites. Datos tomados del comparador físico original para 5 opciones, costo desconocido en reserva, promesas de entrega no comprobadas y sin reescribir decisiones. Cierre sujeto a PR/Node/Chromium/Pages/HTTP. [Estado](docs/STATUS-V11.61.md).
+
+**Histórico verificado v11.60 (M6-31):** Guía condicional según servicio o compromisos modelados, usando las cinco alternativas ya conciliadas sin nueva simulación. Diferencia costo parcial, costo de reserva desconocido y viabilidad operacional no acreditada; no propone utilidad ni entregas ficticias. Node, Chromium, main, Pages y HTTP públicos aprobados. [Evidencia](docs/STATUS-V11.60.md).
 
 **Histórico verificado v11.59 (M6-30):** Dos cambios físicos A y B ensayados solos y juntos sobre la misma cohorte SKU congelada. Compara cuatro escenarios y calcula la interacción no aditiva del resultado; costo no calibrado, sin atribución exclusiva. Node, Chromium, merge, Pages y HTTP público aprobados. [Alcance y evidencia](docs/STATUS-V11.59.md).
 
