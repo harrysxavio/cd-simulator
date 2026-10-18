@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.62
+# Supply Chain Operations Lab · v11.63
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.62-r171) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.63-r172) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -20,7 +20,9 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance verificado v11.62 (M7-33):** KPIs físicos de pedidos completos en tres filas breves de etiqueta/valor en 360/412 px, sin repetir unidades y con supuestos técnicos de Inventario bajo detalle expandible. Se mantienen los mismos movimientos, 8 áreas, 5 recuperaciones y resultados de las fases anteriores. **Node, Chromium, Pages y HTTP público aprobados; M7: 1/6.** [Registro](docs/STATUS-V11.62.md).
+**Candidato v11.63 (M7-34):** Microguía opcional para completar una primera campaña en cuatro etapas, con instrucciones breves por área, explicación gradual de sorpresa de demanda, recuperación y resultados. Se puede ocultar sin afectar decisiones ni compras, y se mantiene el recorrido original. Cierre sujeto a Node, Chromium, merge, Pages y HTTP públicos. [Estado](docs/STATUS-V11.63.md).
+
+**Histórico verificado v11.62 (M7-33):** KPIs físicos de pedidos completos en tres filas breves de etiqueta/valor en 360/412 px, sin repetir unidades y con supuestos técnicos de Inventario bajo detalle expandible. Se mantienen los mismos movimientos, 8 áreas, 5 recuperaciones y resultados de las fases anteriores. **Node, Chromium, Pages y HTTP público aprobados; M7: 1/6.** [Registro](docs/STATUS-V11.62.md).
 
 **Histórico verificado v11.61 (M6-32):** Nueva lectura didáctica por recuperación: Situación → Acción → Efecto → Evidencia y límites. Datos tomados del comparador físico original para 5 opciones, costo desconocido en reserva, promesas de entrega no comprobadas y sin reescribir decisiones. PR, Node, Chromium, Pages y HTTP público aprobados. **M6 5/5 cerrada; siguiente M7-33.** [Estado](docs/STATUS-V11.61.md).
 
