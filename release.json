@@ -1,8 +1,8 @@
 {
-  "version": "11.62",
-  "assetRevision": 171,
-  "release": "v11.62 · M7-33 jerarquía móvil compacta",
-  "date": "2026-10-17",
+  "version": "11.63",
+  "assetRevision": 172,
+  "release": "v11.63 · M7-34 primera campaña guiada",
+  "date": "2026-10-18",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M7-33 muestra KPI SKU compactos en una sola fila por indicador en móvil, reduce textos duplicados y agrupa los supuestos operativos extensos bajo un detalle accesible. Mantiene cinco comparadores, ocho áreas y modelos físicos/económicos sin modificar."
+  "notes": "M7-34 incorpora una microguía opcional de cuatro etapas, ayuda breve por área durante planificación, sorpresa de demanda, recuperación y resultados. No altera decisiones, compras, inventario, motor SKU ni persistencia de campaña."
 }
