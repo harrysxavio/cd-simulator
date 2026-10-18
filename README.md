@@ -20,7 +20,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.65 (M7-36):** Comparador SKU de cinco recuperaciones sobre la misma base, con dos lecturas compactas en móvil: expedidos/pendientes y compromisos/costos parciales. Reserva sin tarifa = costo desconocido, nunca gratis; sin guardar ni ejecutar decisiones y sin mezclar unidades de la jornada agregada. Cierre condicionado a PR, Node, Chromium, Pages y HTTP público. [Estado](docs/STATUS-V11.65.md).
+**Avance verificado v11.65 (M7-36):** Comparador SKU de cinco recuperaciones sobre la misma base, con dos lecturas compactas en móvil: expedidos/pendientes y compromisos/costos parciales. Reserva sin tarifa = costo desconocido, nunca gratis; sin guardar ni ejecutar decisiones y sin mezclar unidades de la jornada agregada. PR, Node, Chromium, Pages y HTTP público aprobados. **M7: 4/6; siguiente M7-37.** [Estado](docs/STATUS-V11.65.md).
 
 **Histórico verificado v11.64 (M7-35):** Aprendizaje en contexto para cada alerta operacional y decisión por área: qué significa, qué revisar y qué no demuestra el modelo. Paneles plegables para móvil, sin alterar motor, stock, compras, decisiones ni costos. Node, Chromium, merge, Pages y HTTP público aprobados. **M7: 3/6; siguiente M7-36.** [Estado](docs/STATUS-V11.64.md).
 
