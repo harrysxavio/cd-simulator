@@ -20,7 +20,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.67 (M7-38):** Accesibilidad móvil: pestañas semánticas, flechas/Inicio/Fin, foco conservado al cambiar área u opción, enlace «Saltar al contenido», controles táctiles y contraste. La validación automática se realiza con Chromium móvil 360/412 px; la **prueba manual en Android físico con TalkBack y comprensión sigue pendiente**, condición obligatoria para cerrar M7. [Estado](docs/STATUS-V11.67.md) · [Lista de prueba física](docs/M7-38-ANDROID-A11Y-CHECKLIST.md).
+**Código publicado y validación automática aprobada v11.67 (M7-38):** Accesibilidad móvil: pestañas semánticas, flechas/Inicio/Fin, foco conservado al cambiar área u opción, enlace «Saltar al contenido», controles táctiles y contraste. Node y Chromium en PR y `main`, despliegue Pages y HTTP públicos aprobados, incluido contraste WCAG AA calculado en Chromium móvil 360/412 px. **La prueba manual en Android físico con TalkBack y comprensión sigue pendiente; M7 permanece 5/6**, condición obligatoria para cerrar M7. [Estado](docs/STATUS-V11.67.md) · [Lista de prueba física](docs/M7-38-ANDROID-A11Y-CHECKLIST.md).
 
 **Histórico verificado v11.66 (M7-37):** Interpretación visual y didáctica de la recuperación: pedidos expedidos, espera acumulada y compromisos parciales se clasifican por su efecto frente a no intervenir. Reserva con traslado no tarifado y límites de entrega/costo explícitos; no replays ni cambios guardados. Node, Chromium, merge, Pages y HTTP públicos aprobados. **M7: 5/6; siguiente M7-38.** [Estado](docs/STATUS-V11.66.md).
 
