@@ -89,6 +89,20 @@ async function verify(mobile){
     assert.ok(touch.length&&touch.every(r=>r.height>=44&&r.width>=36),
      'Small touch target '+selector+' at '+width+': '+JSON.stringify(touch));
    }
+   // WCAG AA normal text contrast (4.5:1), computed from the actual UI.
+   const colors=await page.locator('.section-tabs [role="tab"],.result-tabs [role="tab"]')
+    .evaluateAll(nodes=>nodes.map(n=>{
+     const st=getComputedStyle(n);
+     const rgb=text=>(text.match(/[\\d.]+/g)||[]).slice(0,3).map(Number);
+     const linear=v=>{
+      const c=v/255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);
+     };
+     const lum=values=>values.reduce((sum,value,i)=>sum+linear(value)*[.2126,.7152,.0722][i],0);
+     const a=lum(rgb(st.color)),b=lum(rgb(st.backgroundColor));
+     return {text:n.textContent,ratio:(Math.max(a,b)+.05)/(Math.min(a,b)+.05)};
+    }));
+   assert.ok(colors.every(x=>x.ratio>=4.5),
+    'Normal text contrast below WCAG AA: '+JSON.stringify({width,colors}));
    const geometry=await page.evaluate(()=>({
     width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
    }));
