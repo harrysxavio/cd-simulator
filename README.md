@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.59
+# Supply Chain Operations Lab · v11.60
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.59-r168) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.60-r169) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -20,7 +20,9 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Avance verificado v11.59 (M6-30):** Dos cambios físicos A y B ensayados solos y juntos sobre la misma cohorte SKU congelada. Compara cuatro escenarios y calcula la interacción no aditiva del resultado; costo no calibrado, sin atribución exclusiva. Node, Chromium, merge, Pages y HTTP público aprobados. [Alcance y evidencia](docs/STATUS-V11.59.md).
+**Candidato v11.60 (M6-31):** Guía condicional según servicio o compromisos modelados, usando las cinco alternativas ya conciliadas sin nueva simulación. Diferencia costo parcial, costo de reserva desconocido y viabilidad operacional no acreditada; no propone utilidad ni entregas ficticias. Pendiente validar Node, Chromium, main y Pages HTTP. [Evidencia](docs/STATUS-V11.60.md).
+
+**Histórico verificado v11.59 (M6-30):** Dos cambios físicos A y B ensayados solos y juntos sobre la misma cohorte SKU congelada. Compara cuatro escenarios y calcula la interacción no aditiva del resultado; costo no calibrado, sin atribución exclusiva. Node, Chromium, merge, Pages y HTTP público aprobados. [Alcance y evidencia](docs/STATUS-V11.59.md).
 
 **Histórico verificado v11.58 (M6-29):** Prueba contrafactual SKU de un parámetro sobre la misma demanda, PO y stock inicial: capacidad de Recepción, Calidad, Inventario, Picking, Transporte separado o tope compartido de pedidos. Comparación de despachos y pendientes por día; nunca se infiere costo cero si no hay una tarifa modelada. Node, Chromium, merge, Pages y HTTP público aprobados. [Evidencia](docs/STATUS-V11.58.md).
 
