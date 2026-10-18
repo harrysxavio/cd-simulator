@@ -20,7 +20,7 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Cierre previo verificado v11.57](docs/STATUS-V11.57.md).
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
-**Candidato v11.62 (M7-33):** KPIs físicos de pedidos completos en tres filas breves de etiqueta/valor en 360/412 px, sin repetir unidades y con supuestos técnicos de Inventario bajo detalle expandible. Se mantienen los mismos movimientos, 8 áreas, 5 recuperaciones y resultados de las fases anteriores. **Pendiente cierre Node/Chromium/Pages/HTTP.** [Registro](docs/STATUS-V11.62.md).
+**Avance verificado v11.62 (M7-33):** KPIs físicos de pedidos completos en tres filas breves de etiqueta/valor en 360/412 px, sin repetir unidades y con supuestos técnicos de Inventario bajo detalle expandible. Se mantienen los mismos movimientos, 8 áreas, 5 recuperaciones y resultados de las fases anteriores. **Node, Chromium, Pages y HTTP público aprobados; M7: 1/6.** [Registro](docs/STATUS-V11.62.md).
 
 **Histórico verificado v11.61 (M6-32):** Nueva lectura didáctica por recuperación: Situación → Acción → Efecto → Evidencia y límites. Datos tomados del comparador físico original para 5 opciones, costo desconocido en reserva, promesas de entrega no comprobadas y sin reescribir decisiones. PR, Node, Chromium, Pages y HTTP público aprobados. **M6 5/5 cerrada; siguiente M7-33.** [Estado](docs/STATUS-V11.61.md).
 
