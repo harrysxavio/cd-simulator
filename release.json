@@ -1,8 +1,8 @@
 {
-  "version": "11.60",
-  "assetRevision": 169,
-  "release": "v11.60 · M6-31 recomendaciones gerenciales SKU",
+  "version": "11.61",
+  "assetRevision": 170,
+  "release": "v11.61 · M6-32 explicación didáctica de decisiones SKU",
   "date": "2026-10-17",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M6-31 propone orientaciones condicionales de servicio y compromisos supuestos a partir de cinco resultados físicos auditados. Reserva con costo desconocido no es opción gratuita; viabilidad real y entrega al cliente sin verificar."
+  "notes": "M6-32 explica situación, acción, efecto observado, evidencia y límites para las cinco recuperaciones sobre una única cohorte física SKU auditada. Costos incompletos, proveedor, plazos y entregas al cliente no se presentan como comprobados."
 }
