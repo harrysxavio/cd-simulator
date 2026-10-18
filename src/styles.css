@@ -891,3 +891,39 @@ html,body{max-width:100%;overflow-x:clip}
  .sku-outcome-label{font-size:.79rem}
  .sku-outcome-explanation,.sku-outcome-caution{font-size:.78rem}
 }
+
+
+/* M7-38 · Accessible focus, touch targets and truly hidden inactive panels.
+   Keyboard navigation works with the same native buttons as Android touch. */
+.skip-to-main{
+ position:absolute;left:12px;top:-90px;z-index:10000;
+ padding:12px 17px;min-height:48px;border-radius:10px;
+ background:#c9fff2;color:#092b2a;font-weight:800;
+ border:3px solid #15554c;
+}
+.skip-to-main:focus,.skip-to-main:focus-visible{top:12px}
+:where(button,select,input,textarea,a,summary,[tabindex]):focus-visible{
+ outline:3px solid #80ffe2;outline-offset:3px;
+}
+.section-tabs [role="tab"],.result-tabs [role="tab"]{
+ min-height:48px;touch-action:manipulation;
+}
+.section-tabs [role="tab"][aria-selected="true"],
+.result-tabs [role="tab"][aria-selected="true"]{
+ border-width:2px;
+}
+.result-view[hidden]{display:none!important}
+#mainContent:focus{outline:none}
+#roadmap button.node:focus-visible,
+#choices button.choice:focus-visible{
+ outline:3px solid #a0ffe7;outline-offset:-3px;
+}
+@media(max-width:680px){
+ .section-tabs [role="tab"],.result-tabs [role="tab"]{min-height:48px}
+ .sku-readable-view-label select,[data-guidance-priority="selector"],
+ [data-explanation-selector="recovery"]{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ :where(html,body,.roadmap,.session-controls){scroll-behavior:auto}
+ .node:hover{transform:none}
+}
