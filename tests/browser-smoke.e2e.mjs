@@ -63,6 +63,10 @@ async function verifyExperience(mode){
   assert.ok(await page.locator('#skuLab .supply-trace').count()>0,'No aparece trazabilidad SKU');
   assert.match(await page.locator('#skuLab .supply-trace').innerText(),/Manifiesto SKU comprometido/);
   assert.match(await page.locator('#skuLab').innerText(),/Conciliación física y económica SKU correcta/);
+  // M7-33: open the intentionally collapsed trace before auditing technical values.
+  const operationalDetails=page.locator('#skuLab .sku-operational-context');
+  assert.equal(await operationalDetails.getAttribute('open'),null);
+  await operationalDetails.locator('summary').click();
   assert.match(await page.locator('#skuLab .supply-trace').innerText(),/Exactitud de Inventario/);
   assert.match(await page.locator('#skuLab .supply-trace').innerText(),/Stock físico no verificable/);
   await page.locator('#skuLab .supply-trace summary').filter({hasText:'Ver conciliación de compras por SKU'}).click();

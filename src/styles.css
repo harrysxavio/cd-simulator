@@ -704,3 +704,60 @@ html,body{max-width:100%;overflow-x:clip}
 /* M3-12c: staging is a real mobile decision, not a small decorative chip. */
 #skuPolicyControls button{min-height:44px}
 #skuPolicyControls>small{display:block;width:100%;grid-column:1/-1;min-width:0;line-height:1.45;font-size:.8rem}
+
+
+/* M7-33 · Hierarchy first on Android. SKU data are unchanged; these are
+   compact presentational rows rather than giant stacked numeric cards.
+   Units ('pedidos completos') are stated once by the container and intro. */
+.sku-trace-digest{
+ margin:0 0 4px;color:#d8edeb;font-size:.89rem;line-height:1.4;
+}
+.sku-operational-context{margin:3px 0 7px;min-width:0}
+.sku-operational-context>summary{min-height:44px}
+.sku-operational-context-body{
+ display:grid;gap:7px;padding:6px 11px 12px;min-width:0;
+}
+.sku-operational-context-body small{
+ display:block;min-width:0;font-size:.82rem;line-height:1.47;
+ overflow-wrap:anywhere;
+}
+.canonical-area-numbers[data-mobile-kpi-scope]>.canonical-area-stat{
+ min-width:0;
+}
+.canonical-area-numbers[data-mobile-kpi-scope="sku-areas"]>.canonical-area-stat:last-child strong{
+ color:#baffee;
+}
+@media(max-width:680px){
+ .canonical-area-numbers[data-mobile-kpi-scope]{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:5px;margin:8px 0 11px;
+ }
+ .canonical-area-numbers[data-mobile-kpi-scope]>.canonical-area-stat,
+ .canonical-area-numbers[data-mobile-kpi-scope]>.canonical-area-stat:first-child{
+  grid-column:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;gap:10px;min-height:44px;padding:8px 12px;
+  border-radius:9px;
+ }
+ .canonical-area-numbers[data-mobile-kpi-scope]>.canonical-area-stat span{
+  font-size:.83rem;line-height:1.28;overflow-wrap:normal;
+ }
+ .canonical-area-numbers[data-mobile-kpi-scope]>.canonical-area-stat strong{
+  font-size:1.12rem;line-height:1.2;text-align:right;
+  white-space:nowrap;overflow-wrap:normal;font-variant-numeric:tabular-nums;
+ }
+ #primarySkuIntro{font-size:.86rem;line-height:1.42;margin-bottom:10px}
+ #primarySkuSummary .canonical-overview-insight{margin-top:9px;padding:10px 11px}
+ #primarySkuSummary .canonical-overview-insight strong{font-size:.91rem;line-height:1.35}
+ #primarySkuSummary .canonical-overview-insight p{font-size:.84rem;line-height:1.44;margin-top:5px}
+ #primarySkuSummary .canonical-boundary{font-size:.78rem;line-height:1.42;margin:9px 0}
+ #canonicalAreaView .canonical-area-heading{gap:5px;margin-bottom:10px}
+ #canonicalAreaView .canonical-area-heading p{font-size:.86rem;line-height:1.42}
+ #canonicalAreaView .canonical-boundary{font-size:.79rem;line-height:1.43;margin:8px 0}
+ #canonicalAreaView .canonical-list-title{font-size:1rem;margin:12px 0 9px}
+ #skuLab .supply-trace{gap:7px;padding:11px}
+ #skuLab .sku-operational-context-body small{
+  font-size:.81rem;line-height:1.42;margin:0;
+ }
+}
+
+/* M7-33: keep the original PO manifest visible for quick auditing, without a tall info card. */
+#skuLab .supply-trace>.sku-manifest-compact{display:block;margin:0;padding:7px 10px;border-radius:8px;background:#173248;color:#c9dce8;font-size:.8rem;line-height:1.38}
