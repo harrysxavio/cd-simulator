@@ -44,7 +44,8 @@ async function verify(mobile){
    /costo de traslado no calibrado/);
   const old=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).skuRecovery,KEY);
   await priority.selectOption('commitments');
-  assert.equal(await panel.locator('.sku-guidance-result [data-guidance-outcome]').count(),0);
+  assert.ok(['conditional-recommendation','cost-information-insufficient','no-observed-gain']
+   .includes(await panel.locator('.sku-guidance-result').getAttribute('data-guidance-outcome')));
   assert.match(await panel.textContent(),/compromisos modelados|compromisos comparables/i);
   const recommended=await panel.locator('.sku-guidance-result').getAttribute('data-guidance-option');
   assert.notEqual(recommended,'reserve','Unpriced reserve must not lead by financial exposure');
