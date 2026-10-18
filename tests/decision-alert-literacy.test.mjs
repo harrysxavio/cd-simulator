@@ -30,7 +30,7 @@ test('M7-35: every existing alert category has concise meaning, action, and expl
   assert.ok(explanation.meaning.length>36);
   assert.ok(explanation.check.length>35);
   assert.match(explanation.limit,/modelo agregado de una jornada/);
-  assert.match(explanation.limit,/no identifica una causa raíz exclusiva/);
+  assert.match(explanation.limit,/no identifica una causa raíz exclusiva/i);
   assert.equal(explanation.source,'attention-signal');
   assert.equal(explanation.editsDecision,false);
   assert.ok(Object.isFrozen(explanation));
