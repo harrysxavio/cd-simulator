@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.59.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-V11.60.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -113,6 +113,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 28 | **Completada** | PR #55 v11.57 fusionada en `main` (`cb30f53a`); Node #38664748313, Chromium #38664748355, Pages #38664747840 y HTTP #38664748269 aprobados. Cinco áreas con colas físicas/limitación observada, cronología y coincidencias sin inventar causa raíz. Ver STATUS-V11.57.md. |
 | 29 | **Completada** | PR #56 v11.58 integrada en `main` (`85627952`); Node #38994383724, Chromium #38994383607, Pages #38994383039 y HTTP #38994383562 aprobados. Contrafactual de una sola variable sobre cohorte, PO y apertura inmutables; costos no calibrados y ninguna causa raíz exclusiva inventada. Ver STATUS-V11.58.md. |
 | 30 | **Completada** | PR #57 v11.59 integrado en `main` (`9ec918be`); Node #38996096100, Chromium #38996096074, Pages #38996095929 y HTTP #38996096082 aprobados. Cuatro replays comparables base/A/B/A+B, interacción no aditiva, cohortes y PO conciliadas, sin costo ni causalidad falsos. Ver STATUS-V11.59.md. |
-| 31–42 | **Pendientes de cierre** | Tras M6-30: M6-31 recomendaciones con evidencia, costo y viabilidad explícitos. |
+| 31 | **En curso** | Recomendación condicional por servicio o compromisos modelados, cinco recuperaciones y costo de reserva desconocido; PR, Node, Chromium, Pages y HTTP pendientes. Ver STATUS-V11.60.md. |
+| 32–42 | **Pendientes de cierre** | Tras M6-31: M6-32 Situación → Acción → Efecto → evidencia con límites explícitos. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
