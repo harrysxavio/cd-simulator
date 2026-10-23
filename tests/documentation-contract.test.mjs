@@ -36,7 +36,7 @@ test('M8-41: relative Markdown links resolve to real repository files',()=>{
  for(const path of docs){
   const markdown=file(path);
   // Ignore absolute HTTP links and hash-only anchors; verify file destinations.
-  const links=[...markdown.matchAll(/\\[[^\\]]+\\]\\(([^)]+)\\)/g)].map(m=>m[1]);
+  const links=[...markdown.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(m=>m[1]);
   assert.ok(links.length>3,'Sin rutas de navegación suficientes: '+path);
   for(const href of links){
    if(/^(https?:|mailto:|#)/i.test(href))continue;
@@ -64,9 +64,9 @@ test('M8-41: technical distinctions, manual blocker and business exercises remai
  assert.match(cases,/Escenario 6/);
  assert.match(cases,/día 13/i);
  assert.match(tech,/mermaid/);
- assert.match(tech,/campaign-contract\\.js/);
- assert.match(tech,/src\\/campaign\\.js/);
- assert.match(tech,/src\\/session-state\\.js/);
+ assert.match(tech,/campaign-contract\.js/);
+ assert.match(tech,/src\/campaign\.js/);
+ assert.match(tech,/src\/session-state\.js/);
  assert.match(glossary,/no tarifado/i);
  assert.match(glossary,/pedido completo/i);
  assert.match(glossary,/despacho|expedición/i);
