@@ -8,6 +8,18 @@
 
 **Estado:** prototipo funcional en desarrollo, con datos sintéticos y modelos deterministas. **No es un WMS, ERP ni un optimizador listo para producción.** No requiere cuenta, backend ni instalación: funciona como aplicación estática en GitHub Pages.
 
+## Implementación 2 · Misión CD (auditoría y plan de juego móvil)
+
+**Nueva propuesta, todavía no implementada como modo de juego.** Se conserva este simulador como laboratorio V1; el objetivo de I2 es una ruta aparte que permita **dirigir un CD en escenas compactas, con guía opcional, decisiones claras y navegación de teléfono cómoda**, estética naranja y el mismo motor de pedidos SKU. El botón «Jugar» se añadirá cuando la ruta correspondiente funcione; **no existe todavía** y no hay que prometerlo como disponible.
+
+- [**Plan maestro I2: 41 microfases pequeñas y verificables**](docs/I2-PLAN-MAESTRO.md) (fuente de verdad).
+- [Auditoría de V1 v11.68: botones, móvil, densidad y limitaciones](docs/I2-AUDITORIA-BASE-V11.68.md).
+- [Guion y pantallas móviles de Misión CD](docs/I2-EXPERIENCIA-MOVIL.md).
+- [Arquitectura I2, reutilización del motor y matriz de pruebas](docs/I2-ARQUITECTURA-Y-PRUEBAS.md).
+- [**Estado vigente y próximos pasos I2**](docs/I2-STATUS.md).
+
+**Límite de la auditoría:** inspección de código y suites reales Chromium; no equivale a una prueba visual/manual certificada en Android físico. Los bloqueos de V1 M7-38/M8-42 continúan separados.
+
 ## Documentación vigente · M8-41
 
 **Para comenzar:** [guía paso a paso](docs/GUIA-USUARIO.md) → [seis ejercicios de aprendizaje](docs/ESCENARIOS-DE-APRENDIZAJE.md) → [glosario e indicadores](docs/GLOSARIO-Y-LIMITES.md).
