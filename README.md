@@ -1,8 +1,8 @@
-# Supply Chain Operations Lab · v11.67
+# Supply Chain Operations Lab · v11.68
 
 **Simulador educativo de operaciones, inventario, decisiones y costos para un centro de distribución ficticio.**
 
-[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.67-r176) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
+[▶ Abrir simulador](https://harrysxavio.github.io/cd-simulator/?release=11.68-r177) · [Código fuente](https://github.com/harrysxavio/cd-simulator)
 
 > **Idea central:** mejorar un área de manera aislada no garantiza mejorar el servicio, la productividad ni la rentabilidad del negocio. El objetivo es experimentar, identificar restricciones y aprender a decidir con datos.
 
@@ -21,6 +21,8 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
 **Código publicado y validación automática aprobada v11.67 (M7-38):** Accesibilidad móvil: pestañas semánticas, flechas/Inicio/Fin, foco conservado al cambiar área u opción, enlace «Saltar al contenido», controles táctiles y contraste. Node y Chromium en PR y `main`, despliegue Pages y HTTP públicos aprobados, incluido contraste WCAG AA calculado en Chromium móvil 360/412 px. **La prueba manual en Android físico con TalkBack y comprensión sigue pendiente; M7 permanece 5/6**, condición obligatoria para cerrar M7. [Estado](docs/STATUS-V11.67.md) · [Lista de prueba física](docs/M7-38-ANDROID-A11Y-CHECKLIST.md).
+
+**M8-40 en auditoría (candidato v11.68):** se revisan verificaciones de versión, persistencia, navegación y accesibilidad automatizada. Corrección de comparación semántica, enlace de actualización en fallas HTTP/manifiesto y mantenimiento de CI. **No se declara cerrado hasta verificar PR, `main`, Pages y HTTP.** M7-38 permanece pendiente en Android real.
 
 **M8-39 completada (regresión integral, sin cambio funcional de v11.67):** 8 escenarios físicos/económicos × 5 recuperaciones, más pruebas de compras fuera del horizonte, staging bloqueado y rechazo de base incompatible. PR #66 fusionada (`b7d4039`), **441/441 pruebas Node** y **78/78 pruebas Chromium** aprobadas en `main`; Pages y verificación HTTP aprobadas. **M8: 1/4; M7: 5/6**, sigue pendiente Android real/TalkBack y prueba de comprensión (issue #67). [Acta de regresión M8-39](docs/STATUS-M8-39.md).
 
