@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-M8-40.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-M8-41.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -123,6 +123,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 38 | **Código y publicación verificados; cierre manual pendiente** | PR #65 v11.67 fusionada a `main` (`c1bd97e`); Node #39169066636, Chromium #39169066625, Pages #39169066324 y HTTP #39169066595 aprobados. Teclado, foco, tabpanels, objetivo táctil, contraste 4,5:1 y emulación móvil 360/412 px verificados. **M7 sigue 5/6: faltan Android físico, TalkBack y prueba de comprensión.** Ver STATUS-V11.67.md y M7-38-ANDROID-A11Y-CHECKLIST.md. |
 | 39 | **Completada** | PR #66 fusionada a `main` (`b7d4039`). Node #39880836671 **441/441**, Chromium #39880836685 **78/78**, Pages #39880836542 y HTTP #39880836725 aprobados. Matriz de 8 escenarios × 5 decisiones, conciliación física/CLP y extremos; **M8: 1/4**. Ver STATUS-M8-39.md. La aceptación manual M7-38 continúa pendiente (issue #67). |
 | 40 | **Completada en alcance automatizado** | PR #68 integrada en `main` (merge `a980824`), versión v11.68 r177. Node #39884537160 **442/442**, Chromium #39884537098 **80/80**, Pages #39884537044 y HTTP #39884537144 aprobados; revisión de versiones, enlaces seguros ante error y CI modernizado. **M8: 2/4**. Ver STATUS-M8-40.md. Android físico/TalkBack M7-38 sigue pendiente (issue #67). |
-| 41–42 | **Pendientes** | M8-41: documentación final de usuarios y arquitectura; M8-42: entrega estable y certificación. No afirmar lanzamiento final mientras M7-38 continúe sin aceptación Android real/TalkBack. |
+| 41 | **Completada** | PR #69 integrada a `main` (merge `8fb6d34`) con cinco manuales y prueba contractual documental: guía usuario, seis escenarios, arquitectura con diagramas, glosario KPI y soporte. Node #39900135229 **445/445**, Chromium #39900135151 **80/80**, Pages #39900135035 y HTTP #39900135361 aprobados. Versión funcional sigue v11.68 r177. **M8: 3/4**. Ver STATUS-M8-41.md. |
+| 42 | **Pendiente/bloqueada para cierre estable** | Preparar validación final, etiqueta y evidencia de release, pero no cerrar ni llamar estable mientras M7-38 (Android físico, TalkBack y comprensión del principiante, issue #67) siga sin verificación; regularizar también deuda histórica 00 si hay evidencia. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.
