@@ -22,6 +22,24 @@ El dolor reportado por un usuario que ya recorrió el teléfono es coherente con
 
 **Evidencia histórica previa:** main a7a8e7b: [Node #39938138781](https://github.com/harrysxavio/cd-simulator/actions/runs/39938138781), [Chromium #39938138911](https://github.com/harrysxavio/cd-simulator/actions/runs/39938138911), [Pages #39938139142](https://github.com/harrysxavio/cd-simulator/actions/runs/39938139142) y [HTTP #39938138747](https://github.com/harrysxavio/cd-simulator/actions/runs/39938138747), todos aprobados. Los resultados de nuevas pruebas de auditoría deben registrarse por su PR/run después de ejecutarse.
 
+## 1.1 Mediciones reales de interfaz en Chromium emulado
+
+La ejecución inicial de auditoría [#40014905513](https://github.com/harrysxavio/cd-simulator/actions/runs/40014905513) registró en un teléfono Chromium emulado con **viewport CSS 360×760**:
+
+| Región | Posición / tamaño |
+|---|---:|
+| Altura útil del viewport | **760 px** |
+| Altura completa del documento | **3.134 px** |
+| Inicio del mapa de áreas | 1.399 px |
+| Inicio de la misión | 1.656 px |
+| Inicio de opciones | 1.975 px |
+| Altura del bloque de opciones | 709 px |
+| Inicio del botón «Continuar» | **2.769 px** |
+
+**Relación: 3.134 / 760 ≈ 4,12 pantallas** de alto. El botón de continuación se encuentra dentro de un flujo que exige desplazarse significativamente; se trata de **evidencia cuantificada** del problema de ergonomía, no una falla de cálculo. Estos valores son del estado inicial concreto del test, no de todos los teléfonos o escenarios.
+
+En esa ejecución, **82/83 pruebas de Chromium pasaron**. La prueba nueva intentó pulsar \`#primaryToAreas\`, botón perteneciente a **Resumen**, estando aún en **Mejoras**. El DOM lo ocultaba correctamente. **Fue un error de preparación de la prueba, no evidencia de botón roto**. Se corrigió la secuencia para activar Resumen antes del clic y se volvió a solicitar CI. La redundancia de dos CTA en la vista Resumen (UX-07) sigue siendo un hallazgo de arquitectura de información, no de funcionalidad rota.
+
 ## 2. Hallazgos ordenados por impacto
 
 | ID / Prioridad | Hallazgo sustentado | Evidencia | Acción recomendada |

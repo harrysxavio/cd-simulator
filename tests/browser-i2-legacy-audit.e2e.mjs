@@ -62,6 +62,7 @@ test('I2 AUDIT legacy mobile: setup, planning 8 areas, diagnosis, recovery and a
  await tap(page,'economicsToImprovement');assert.equal(await page.locator('#dashboardSection').getAttribute('data-result-view'),'improvement');
  await tap(page,'improvementToRecovery');await section(page,'recovery');
  await tap(page,'dashboardTab');await section(page,'dashboard');
+ await page.locator('#resultTabOverview').click(); // the CTA belongs to Resumen, not Mejoras
  await tap(page,'primaryToAreas');assert.equal(await page.locator('#dashboardSection').getAttribute('data-result-view'),'areas');
  await tap(page,'dashboardTab');
  await page.locator('#resultTabs [data-result-target="improvement"]').click();
