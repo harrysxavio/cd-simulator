@@ -3,6 +3,8 @@
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
 **Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-M8-42-PREPARACION.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
+> **Nota 2026-10-23:** el proyecto abrió la **Implementación 2 · Misión CD**, un nuevo modo gamificado móvil que reutiliza el motor sin modificar el alcance V1. Su ejecución y estado se llevan por separado en [I2-PLAN-MAESTRO.md](I2-PLAN-MAESTRO.md) y [I2-STATUS.md](I2-STATUS.md). Este registro 00–42 sigue siendo el historial de V1 y no debe contarse dentro de I2.
+
 ## Objetivo y principios
 
 Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0/U1 completos en su alcance inicial. Priorizar integridad física, después resultados económicos, recuperación, causalidad, didáctica y estabilización. Los cambios funcionales deben reutilizar el código existente y no rehacer módulos ya operativos.
