@@ -1,8 +1,8 @@
 {
-  "version": "11.67",
-  "assetRevision": 176,
-  "release": "v11.67 · M7-38 accesibilidad móvil automatizada",
-  "date": "2026-10-18",
+  "version": "11.68",
+  "assetRevision": 177,
+  "release": "v11.68 · M8-40 corrección de verificación de versiones y auditoría funcional",
+  "date": "2026-10-22",
   "scope": "GitHub Pages cd-simulator",
-  "notes": "M7-38 mejora semántica de pestañas, teclado, foco tras reconstruir áreas/opciones, objetivos táctiles, enlace para saltar a contenido y contraste medido. La validación manual Android físico/TalkBack/comprensión sigue pendiente y bloquea el cierre formal de M7."
+  "notes": "M8-40 corrige orden semántico de versiones y evita enlaces de actualización obsoletos si el manifiesto falla. Pruebas de UI y persistencia; continúa pendiente la aceptación manual Android físico/TalkBack de M7-38."
 }

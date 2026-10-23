@@ -927,3 +927,6 @@ html,body{max-width:100%;overflow-x:clip}
  :where(html,body,.roadmap,.session-controls){scroll-behavior:auto}
  .node:hover{transform:none}
 }
+
+/* M8-40: the action must disappear when the manifest cannot be trusted. */
+.release-open[hidden]{display:none!important}

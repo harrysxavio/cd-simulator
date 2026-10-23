@@ -60,3 +60,22 @@ test('canonical 12-day SKU result is first in overview, legacy aggregate is coll
  assert.ok(app.includes('manager-preview-hint'));
  assert.ok(app.includes('manager-zero-days'));
 });
+
+test('M8-40: compare semantic version first, even when revision counters cross',()=>{
+ // A minor/major update must never be misread as an older cached release.
+ const [major,minor]=RELEASE.version.split('.').map(Number);
+ assert.equal(compareRelease({version:(major+1)+'.0',assetRevision:1}),'newer');
+ assert.equal(compareRelease({version:major+'.'+(minor+1),assetRevision:0}),'newer');
+ assert.equal(compareRelease({version:major+'.'+Math.max(0,minor-1),assetRevision:999999}),'older-server');
+ if(major>0)assert.equal(compareRelease({version:(major-1)+'.999',assetRevision:999999}),'older-server');
+ assert.equal(compareRelease({version:RELEASE.version,assetRevision:RELEASE.assetRevision+1}),'newer');
+ assert.equal(compareRelease({version:RELEASE.version,assetRevision:RELEASE.assetRevision-1}),'older-server');
+ for(const bad of [
+  {version:RELEASE.version,assetRevision:-1},
+  {version:RELEASE.version,assetRevision:1.5},
+  {version:RELEASE.version,assetRevision:Number.MAX_SAFE_INTEGER+1},
+  {version:'9999999999999999999999.0',assetRevision:1},
+  {version:RELEASE.version,assetRevision:'177'},
+  {version:RELEASE.version,assetRevision:177,extra:true}
+ ].slice(0,-1))assert.equal(compareRelease(bad),'invalid');
+});

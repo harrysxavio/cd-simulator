@@ -78,3 +78,34 @@ test('browser warns when public manifest is newer than cached HTML', {timeout:90
   assert.ok((await page.locator('#forceCurrentRelease').getAttribute('href')).includes(NEXT_RELEASE+'-r'+(RELEASE.assetRevision+1)));
  }finally{await browser.close()}
 });
+
+test('M8-40: stale-manifest error hides unsafe update link; valid retry restores it', {timeout:90000},async()=>{
+ // Test real DOM behavior after a failed server response, not just comparison.
+ const b=await chromium.launch({headless:true,executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
+ const page=await b.newPage();
+ try{
+  await page.goto(BASE+'/?release-audit=invalid',{waitUntil:'networkidle'});
+  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',
+   body:JSON.stringify({version:'bad',assetRevision:RELEASE.assetRevision})}));
+  await page.locator('#checkRelease').click();
+  await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('no es válida'));
+  assert.equal(await page.locator('#forceCurrentRelease').isVisible(),false,'Invalid manifest cannot retain an old update link');
+  await page.unroute('**/release.json*');
+  await page.locator('#checkRelease').click();
+  await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('verificada'));
+  assert.equal(await page.locator('#forceCurrentRelease').isVisible(),true,'Good retry should restore the link');
+ }finally{await b.close()}
+});
+
+test('M8-40: newer semantic version wins over a lower asset revision in the DOM', {timeout:90000},async()=>{
+ const b=await chromium.launch({headless:true,executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
+ const page=await b.newPage();
+ try{
+  await page.goto(BASE+'/?release-audit=semantic',{waitUntil:'networkidle'});
+  await page.route('**/release.json*',r=>r.fulfill({status:200,contentType:'application/json',
+   body:JSON.stringify({version:NEXT_RELEASE,assetRevision:1})}));
+  await page.locator('#checkRelease').click();
+  await page.waitForFunction(()=>document.getElementById('releaseStatus')?.textContent.includes('versión nueva'));
+  assert.ok((await page.locator('#forceCurrentRelease').getAttribute('href')).includes(NEXT_RELEASE+'-r1'));
+ }finally{await b.close()}
+});
