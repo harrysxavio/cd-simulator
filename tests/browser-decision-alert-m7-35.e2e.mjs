@@ -48,7 +48,7 @@ async function verify(phone){
   assert.equal(await lesson.getAttribute('open'),null);
   await lesson.locator('summary').click();
   assert.match(await lesson.textContent(),/Antes de continuar/);
-  assert.match(await lesson.textContent(),/Flujo agregado de una jornada/);
+  assert.match(await lesson.textContent(),/modelo agregado de una jornada/i);
   await page.locator('#roadmap button').nth(5).click();
   assert.equal(await mission.locator('[data-decision-learning]').count(),1);
   assert.equal(await mission.locator('[data-decision-learning]').getAttribute('data-decision-learning'),'inventory');
