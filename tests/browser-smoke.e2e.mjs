@@ -25,7 +25,7 @@ async function verifyExperience(mode){
   assert.equal(await page.locator('#operationsSection').isVisible(),true,'La campaña inicial debe mostrarse');
   assert.match(await page.locator('#missionTitle').innerText(),/Comercial/,'La misión debe renderizarse');
   assert.ok(await page.locator('#choices .choice').count()>=3,'Faltan decisiones del área inicial');
-  assert.match(await page.locator('#choices .compact-flow').innerText(),/Llegan.*siguen/s,'Falta consecuencia visible de la elección');
+  assert.match(await page.locator('#choices .compact-flow').innerText(),/Demanda base.*pronóstico/s,'Falta consecuencia visible de la elección');
   assert.equal(await page.locator('.mission-impact-details').getAttribute('open'),null,'Detalle técnico debe iniciar plegado');
   await page.locator('.mission-impact-details summary').click();
   assert.match(await page.locator('#nodeResult').innerText(),/Antes de esta área/,'Consecuencia técnica debe seguir disponible');
