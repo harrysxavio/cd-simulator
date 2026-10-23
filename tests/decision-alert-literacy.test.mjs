@@ -75,6 +75,26 @@ test('M7-35: input/output decision teaching is scenario-specific but never equat
  assert.match(explainAreaDecision(cases[0]).meaning,/60 quedan detenidas/);
  assert.match(explainAreaDecision(cases[1]).meaning,/No llegaron/);
 });
+// Regresión issue #73: pronosticar o comprar más que la base es una decisión
+// permitida en Comercial y Planning, pero nunca una creación física de stock.
+test('V1 #73: optimistic forecast and 110% purchase coverage are valid planned quantities',()=>{
+ const stages=flow({...DEFAULTS,commercial:'over',planning:'buffer'},{},DEFAULT_SCENARIO).stages;
+ for(const [id,title] of [['commercial','Comercial'],['planning','Planning']]){
+  const stage=stages.find(s=>s.id===id);
+  assert.ok(stage.output>stage.input,id+' expands its planned reference');
+  for(const phase of ['plan','recover']){
+   const lesson=explainAreaDecision({area:title,input:stage.input,output:stage.output,capacity:stage.capacity,phase});
+   assert.equal(lesson.passed,true);
+   assert.equal(lesson.editsDecision,false);
+   assert.match(lesson.limit,/no equivale a recibir/);
+   assert.doesNotMatch(lesson.meaning,/siguen adelante|quedan detenidas/);
+   assert.ok(Object.isFrozen(lesson));
+  }
+ }
+ // El resto del circuito mantiene la restricción de conservación física.
+ assert.throws(()=>explainAreaDecision({area:'Recepción',input:5,output:6,capacity:9,phase:'plan'}),/flujo inválido/);
+});
+
 test('M7-35: invalid or unknown signals and corrupt stage values fail closed',()=>{
  for(const m of [
   {level:'warning',title:'Unknown title',description:'any'},
