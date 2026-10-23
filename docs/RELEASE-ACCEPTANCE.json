@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "release": {
+    "version": "11.68",
+    "assetRevision": 177
+  },
+  "status": "candidate-blocked-manual",
+  "stableTag": null,
+  "manualGates": {
+    "androidPhysical": {
+      "status": "pending",
+      "evidence": null
+    },
+    "talkback": {
+      "status": "pending",
+      "evidence": null
+    },
+    "beginnerComprehension": {
+      "status": "pending",
+      "evidence": null
+    }
+  },
+  "remarks": "No se han ejecutado las validaciones humanas de M7-38. Este archivo NO autoriza release estable. La evidencia física se registra solo después de ejecutarla."
+}
