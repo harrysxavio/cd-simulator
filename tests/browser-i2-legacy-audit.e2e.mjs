@@ -105,6 +105,7 @@ test('I2 AUDIT legacy mobile: recover options, no premature physical PO and safe
  assert.equal(await page.locator('#confirmSkuDecision').count(),0,'Confirmation button is replaced by recorded decision');
  await page.locator('#skuRecoveryDecision button').filter({hasText:'Ver resultado y trazabilidad SKU'}).click();
  await section(page,'dashboard');
+ await page.locator('#resultTabImprovement').click();
  page.once('dialog',d=>d.accept());await tap(page,'restartFinal');
  await section(page,'operations');
 }));
