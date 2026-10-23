@@ -8,6 +8,14 @@
 
 **Estado:** prototipo funcional en desarrollo, con datos sintéticos y modelos deterministas. **No es un WMS, ERP ni un optimizador listo para producción.** No requiere cuenta, backend ni instalación: funciona como aplicación estática en GitHub Pages.
 
+## Documentación vigente · M8-41
+
+**Para comenzar:** [guía paso a paso](docs/GUIA-USUARIO.md) → [seis ejercicios de aprendizaje](docs/ESCENARIOS-DE-APRENDIZAJE.md) → [glosario e indicadores](docs/GLOSARIO-Y-LIMITES.md).
+
+**Para mantener el proyecto:** [arquitectura y flujos de eventos](docs/ARQUITECTURA-Y-DATOS.md) · [soporte y verificación de publicación](docs/SOPORTE-Y-VERIFICACION.md) · [plan de 43 microfases](docs/EXECUTION-PLAN-43.md).
+
+Estas referencias describen la interfaz **v11.68 r177**. La campaña de pedidos SKU tiene horizonte de 12 días; el modelo agregado económico de una jornada sigue presentado aparte y **sus unidades y montos no se suman a los SKU**. “Salió del CD” no significa “entregado al cliente”; un costo no tarifado es desconocido, no cero. **No se ha certificado Android físico/TalkBack (M7-38)**, ni se debe llamar estable a la versión hasta completar M8-42.
+
 ## Base de escenarios de negocio y rediseño didáctico (histórico v11.16)
 
 Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcompra, compras extraordinarias a distintas fechas, restricciones físicas y sorpresa de demanda menor. **Esta sección describe el hito histórico de v11.16; la interfaz se modernizó en U1 (v11.17) y Recuperación (v11.18–v11.19).**
@@ -21,6 +29,8 @@ Se incorporó una batería reproducible de sobredemanda, sobredemanda con subcom
 - [Roadmap técnico histórico M1–M8/U0–U5](docs/ROADMAP.md).
 
 **Código publicado y validación automática aprobada v11.67 (M7-38):** Accesibilidad móvil: pestañas semánticas, flechas/Inicio/Fin, foco conservado al cambiar área u opción, enlace «Saltar al contenido», controles táctiles y contraste. Node y Chromium en PR y `main`, despliegue Pages y HTTP públicos aprobados, incluido contraste WCAG AA calculado en Chromium móvil 360/412 px. **La prueba manual en Android físico con TalkBack y comprensión sigue pendiente; M7 permanece 5/6**, condición obligatoria para cerrar M7. [Estado](docs/STATUS-V11.67.md) · [Lista de prueba física](docs/M7-38-ANDROID-A11Y-CHECKLIST.md).
+
+**M8-41 · paquete de documentación en revisión:** guía de uso, casos básicos/intermedios/avanzados, diagramas de arquitectura, glosario de KPI y playbook de soporte. No se modifica el motor ni se incrementa el release; el cierre formal depende de PR, revisión de enlaces, pruebas y registro en el plan. M7-38 continúa pendiente.
 
 **M8-40 verificada (v11.68 r177):** auditoría funcional automatizada; corregidos el orden semántico de versiones y el enlace obsoleto tras error de manifiesto. Acciones GitHub modernizadas (`checkout/setup-node@v5`) con permisos mínimos. PR #68 y cuatro verificaciones posteriores al merge aprobadas en `main`: **442/442 Node** y **80/80 Chromium**, Pages y comprobación HTTP. **M8: 2/4; M7: 5/6**: pendiente Android físico/TalkBack/prueba de comprensión (issue #67). [Acta M8-40](docs/STATUS-M8-40.md).
 
