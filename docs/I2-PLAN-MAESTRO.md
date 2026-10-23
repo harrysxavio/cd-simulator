@@ -1,6 +1,6 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
-**Estado:** propuesta ejecutable y persistente, adoptada a partir de la auditoría de v11.68 r177.  
+**Estado:** plan técnico vigente de 41 microfases, adoptado a partir de v11.68 r177. **Corte 23-10-2026:** I2-00 integrado técnicamente por PR #71 con Node, Chromium, Pages y HTTP aprobados; I2-01–I2-40 pendientes. **1/41** (entregas, no esfuerzo). Android físico/TalkBack/usuario aún pendiente y defecto semántico V1 #73 en tratamiento separado. El [roadmap ejecutivo rebaselado de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md) define hitos, UX, dependencias, métricas y orden de ejecución, sin cambiar estos IDs.  
 **Objetivo:** desarrollar **Misión CD**, una interfaz alternativa y gamificada, prioritaria en teléfono, dentro del MISMO sitio del simulador.  
 **Regla principal:** **V1 debe permanecer funcional y accesible**, con su motor de eventos, 3 SKU, 8 áreas, 5 recuperaciones y economía auditada. I2 reutiliza lógica y contratos, no los duplica. El ingreso a la ruta I2 solo será visible cuando tenga destino real, prueba de navegación y regreso al laboratorio.
 
@@ -70,7 +70,7 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 | **I2-39** | QA | Regresión integral y auditoría económica | 38 | reconciliaciones y escenarios extremos |
 | **I2-40** | Release | Publicación I2 verificable, guía y versionado | 39 | Pages/HTTP/versión, criterios humanos y V1 intacta |
 
-**Total:** 41 microfases (00–40). **Inicio:** I2-00; I2-01 puede comenzar solo después de que la auditoría esté integrada/verificada. **No se han implementado por el solo hecho de escribir el plan.**
+**Total:** 41 microfases (00–40). **I2-00 se completó e integró en PR #71; I2-01 es la siguiente microfase.** Las demás no están implementadas por haber escrito el plan. Consulte el [estado con evidencia](I2-STATUS.md) y el [roadmap rebaselado](I2-ROADMAP-EJECUCION-2026-10-23.md).
 
 ## C. Criterios detallados de fases, organizados por paquetes pequeños
 
