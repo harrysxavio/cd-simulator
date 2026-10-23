@@ -1,7 +1,7 @@
 # Plan maestro operativo · 43 microfases
 
 **Adoptado por el responsable del proyecto:** 2026-10-09. **Versión base:** v11.23. **Estado:** vigente hasta reemplazo documentado.  
-**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-M8-41.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
+**Este documento es la fuente de verdad del plan para futuras conversaciones, agentes y sesiones**. Leerlo junto al estado verificable más reciente (`docs/STATUS-M8-42-PREPARACION.md`) y la evidencia de GitHub Actions; no asumir que un commit o una PR verde demuestran una publicación pública.
 
 ## Objetivo y principios
 
@@ -76,7 +76,7 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 
 | ID | Estado al adoptar | Evidencia y próximo control |
 |---|---|---|
-| 00 | **En curso** | v11.23 PR #19 aprobó `Model regression tests` y `Browser end-to-end smoke`; falta confirmar ejecución de Pages **y respuesta HTTP pública**. |
+| 00 | **Técnica comprobada; evidencia física histórica pendiente** | PR #19 merge `4845a48db` para v11.23; se recuperaron runs de `main`: Node #37999868254, Chromium #37999868172, Pages #37999867958 y HTTP #37999868127, todos aprobados el 09-10-2026 UTC. **No cerrar 00**: el criterio de revisión Android físico de este hito no cuenta con acta; la validación actual M7-38 también continúa pendiente. Ver M00-EVIDENCIA-HISTORICA.md. |
 | 01 | **CI y merge aprobados** | PR #20 fusionado en `main`; el HTTP público todavía requiere validación separada. |
 | 02 | **Código, CI y merge aprobados** | PR #22 fusionado en main; falta verificación HTTP pública de v11.25. |
 | 03 | **Código/CI/merge aprobados** | PR #23 integrado en main con v11.26; falta certificación HTTP pública. |
@@ -124,6 +124,6 @@ Cerrar M2–M8 mediante **43 entregas pequeñas (00–42)**, conservando M1 y U0
 | 39 | **Completada** | PR #66 fusionada a `main` (`b7d4039`). Node #39880836671 **441/441**, Chromium #39880836685 **78/78**, Pages #39880836542 y HTTP #39880836725 aprobados. Matriz de 8 escenarios × 5 decisiones, conciliación física/CLP y extremos; **M8: 1/4**. Ver STATUS-M8-39.md. La aceptación manual M7-38 continúa pendiente (issue #67). |
 | 40 | **Completada en alcance automatizado** | PR #68 integrada en `main` (merge `a980824`), versión v11.68 r177. Node #39884537160 **442/442**, Chromium #39884537098 **80/80**, Pages #39884537044 y HTTP #39884537144 aprobados; revisión de versiones, enlaces seguros ante error y CI modernizado. **M8: 2/4**. Ver STATUS-M8-40.md. Android físico/TalkBack M7-38 sigue pendiente (issue #67). |
 | 41 | **Completada** | PR #69 integrada a `main` (merge `8fb6d34`) con cinco manuales y prueba contractual documental: guía usuario, seis escenarios, arquitectura con diagramas, glosario KPI y soporte. Node #39900135229 **445/445**, Chromium #39900135151 **80/80**, Pages #39900135035 y HTTP #39900135361 aprobados. Versión funcional sigue v11.68 r177. **M8: 3/4**. Ver STATUS-M8-41.md. |
-| 42 | **Pendiente/bloqueada para cierre estable** | Preparar validación final, etiqueta y evidencia de release, pero no cerrar ni llamar estable mientras M7-38 (Android físico, TalkBack y comprensión del principiante, issue #67) siga sin verificación; regularizar también deuda histórica 00 si hay evidencia. |
+| 42 | **Preparación técnica integrada; cierre estable BLOQUEADO** | PR #70 merge `37b604a`: preflight de release, validación de manifiesto/HTML/imports, comprobación de guía Android v11.68 r177, registro manual pendiente y pruebas de rechazo de evidencia falsa; PR Node **449/449**, Chromium **80/80** aprobados. Falta verificar los cuatro checks del último `main` y, **obligatoriamente**, Android real, TalkBack, comprensión y revisión humana de release antes de crear tag estable. Ver STATUS-M8-42-PREPARACION.md. **M8 continúa 3/4**. |
 
 **Actualización operativa obligatoria:** cambiar solo las filas afectadas, incluir enlace PR/commit, checks y nota de bloqueo; jamás suponer que un cierre hecho en otra conversación se produjo sin evidencias en GitHub.

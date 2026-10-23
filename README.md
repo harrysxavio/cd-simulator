@@ -16,7 +16,7 @@
 
 Estas referencias describen la interfaz **v11.68 r177**. La campaña de pedidos SKU tiene horizonte de 12 días; el modelo agregado económico de una jornada sigue presentado aparte y **sus unidades y montos no se suman a los SKU**. “Salió del CD” no significa “entregado al cliente”; un costo no tarifado es desconocido, no cero. **No se ha certificado Android físico/TalkBack (M7-38)**, ni se debe llamar estable a la versión hasta completar M8-42.
 
-**M8-42 · Preparación de release candidata:** [matriz de verificación técnica y bloqueos](docs/RELEASE-CANDIDATE-M8-42.md) · [registro de puertas manuales](docs/RELEASE-ACCEPTANCE.json). La preparación automatizada puede aprobar aunque la **entrega estable siga bloqueada** por M7-38. No se ha creado etiqueta ni release estable. Se conserva v11.68 r177 hasta que exista una nueva entrega funcional verificada.
+**M8-42 · Preparación técnica integrada, release estable BLOQUEADO:** [matriz de verificación técnica y bloqueos](docs/RELEASE-CANDIDATE-M8-42.md) · [registro de puertas manuales](docs/RELEASE-ACCEPTANCE.json). PR #70 (`37b604a`) fusionado a `main`, Node 449/449 y Chromium 80/80 aprobados en PR. La preparación automatizada puede aprobar aunque la **entrega estable siga bloqueada** por M7-38. No se ha creado etiqueta ni release estable. Se conserva v11.68 r177 hasta que exista una nueva entrega funcional verificada.
 
 ## Base de escenarios de negocio y rediseño didáctico (histórico v11.16)
 
