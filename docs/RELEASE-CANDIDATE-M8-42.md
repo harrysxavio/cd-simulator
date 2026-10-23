@@ -5,7 +5,7 @@
 
 ## 1. Fuentes de evidencia automatizada previas
 
-El cierre documental M8-41 quedó publicado en el commit \`016b18c\`. GitHub verificó (23 octubre 2026 UTC):
+El cierre documental M8-41 quedó publicado en el commit `016b18c`. GitHub verificó (23 octubre 2026 UTC):
 
 | Puerta | Evidencia real | Estado histórico |
 |---|---|---|
@@ -18,12 +18,12 @@ El cierre documental M8-41 quedó publicado en el commit \`016b18c\`. GitHub ver
 
 ## 2. Preflight automatizado incorporado
 
-\`node scripts/release-readiness.mjs\` inspecciona la versión y revisión de \`release.json\`, cabecera e imports de HTML/JS, verificador de release, pauta de Android y el archivo estructurado [RELEASE-ACCEPTANCE.json](RELEASE-ACCEPTANCE.json).
+`node scripts/release-readiness.mjs` inspecciona la versión y revisión de `release.json`, cabecera e imports de HTML/JS, verificador de release, pauta de Android y el archivo estructurado [RELEASE-ACCEPTANCE.json](RELEASE-ACCEPTANCE.json).
 
 - Si hay desalineación técnica, retorna error y el job Node falla.
-- Si todo está consistente pero faltan pruebas humanas, retorna \`technicalContract: passed\` con \`decision: blocked-manual\`. **El CI termina verde en esta situación por diseño**, sin etiquetar estable.
-- Si en el futuro se incorporan evidencias manuales válidas, retorna \`requires-final-human-and-ci-review\`; nunca \`stable\` ni autoriza crear tags.
-- La prueba \`tests/release-readiness.test.mjs\` protege estos casos extremos y el bloqueo explícito.
+- Si todo está consistente pero faltan pruebas humanas, retorna `technicalContract: passed` con `decision: blocked-manual`. **El CI termina verde en esta situación por diseño**, sin etiquetar estable.
+- Si en el futuro se incorporan evidencias manuales válidas, retorna `requires-final-human-and-ci-review`; nunca `stable` ni autoriza crear tags.
+- La prueba `tests/release-readiness.test.mjs` protege estos casos extremos y el bloqueo explícito.
 - El script no llama APIs, no verifica el teléfono, no prueba que los datos cargados en una evidencia sean genuinos y **no crea releases o tags**.
 
 ## 3. Puertas de aceptación física pendientes
@@ -34,15 +34,15 @@ El cierre documental M8-41 quedó publicado en el commit \`016b18c\`. GitHub ver
 | TalkBack real | **Pendiente** | Android/Chrome/lector, anuncios de pestañas, foco, controles, orden de lectura, defectos y retest |
 | Comprensión de persona principiante | **Pendiente** | Interpretación de «expedidos» y «costo no tarifado»; resultados, dificultades y cambios necesarios |
 
-La única fuente de resultados manuales actualmente es **ninguna**: la pauta [M7-38](M7-38-ANDROID-A11Y-CHECKLIST.md) permanece sin ejecutar y el [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67) sigue abierto. No marcar estos tres campos como \`passed\` mediante inferencia o emulación.
+La única fuente de resultados manuales actualmente es **ninguna**: la pauta [M7-38](M7-38-ANDROID-A11Y-CHECKLIST.md) permanece sin ejecutar y el [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67) sigue abierto. No marcar estos tres campos como `passed` mediante inferencia o emulación.
 
 ## 4. Qué falta para M8-42
 
-- [ ] Incorporar PR de preflight técnico y verificar Node, Chromium, Pages y HTTP públicos en \`main\`.
+- [ ] Incorporar PR de preflight técnico y verificar Node, Chromium, Pages y HTTP públicos en `main`.
 - [ ] Ejecutar Android físico v11.68 r177 en modo normal y con TalkBack, registrar hallazgos.
 - [ ] Ejecutar evaluación de comprensión y documentar los resultados.
 - [ ] Corregir defectos con PR y repetir pruebas físicas necesarias.
-- [ ] Confirmar \`main\`, coherencia de todos los activos y **nuevos** runs.
+- [ ] Confirmar `main`, coherencia de todos los activos y **nuevos** runs.
 - [ ] Confirmar estado administrativo del hito histórico **00**, sin afirmar cierre sin fuente.
 - [ ] **Solo entonces** efectuar revisión humana de salida, seleccionar un tag final y, si corresponde, crear release estable con su evidencia.
 
@@ -50,6 +50,6 @@ La única fuente de resultados manuales actualmente es **ninguna**: la pauta [M7
 
 ## 5. Cómo retomar después de otra conversación
 
-Consultar [plan maestro](EXECUTION-PLAN-43.md) y este documento, obtener en vivo \`main\`, los últimos cuatro runs y el issue #67. Continuar por la validación física; no crear otra versión ni iniciar subfases nuevas para reetiquetar una tarea manual pendiente como completada.
+Consultar [plan maestro](EXECUTION-PLAN-43.md) y este documento, obtener en vivo `main`, los últimos cuatro runs y el issue #67. Continuar por la validación física; no crear otra versión ni iniciar subfases nuevas para reetiquetar una tarea manual pendiente como completada.
 
 El último trabajo técnico de M8-42 puede adelantarse, pero **el proyecto sigue sin certificación estable**.
