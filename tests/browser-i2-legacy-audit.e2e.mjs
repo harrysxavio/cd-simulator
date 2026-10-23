@@ -54,6 +54,7 @@ test('I2 AUDIT legacy mobile: setup, planning 8 areas, diagnosis, recovery and a
   assert.equal(await page.locator('#dashboardSection').getAttribute('data-result-view'),view);
   await noXOverflow(page);
  }
+ await page.locator('#resultTabOverview').click();
  await tap(page,'overviewToAreas');await section(page,'dashboard');
  assert.equal(await page.locator('#dashboardSection').getAttribute('data-result-view'),'areas');
  await tap(page,'areasToInventory');assert.equal(await page.locator('#dashboardSection').getAttribute('data-result-view'),'inventory');
@@ -101,7 +102,7 @@ test('I2 AUDIT legacy mobile: recover options, no premature physical PO and safe
  page.once('dialog',d=>d.accept());
  await tap(page,'confirmSkuDecision');
  assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).skuDecisions.length,KEY),1);
- await tap(page,'confirmSkuDecision').catch(()=>{}); // button removed by confirmed state; no repeat
+ assert.equal(await page.locator('#confirmSkuDecision').count(),0,'Confirmation button is replaced by recorded decision');
  await page.locator('#skuRecoveryDecision button').filter({hasText:'Ver resultado y trazabilidad SKU'}).click();
  await section(page,'dashboard');
  page.once('dialog',d=>d.accept());await tap(page,'restartFinal');
