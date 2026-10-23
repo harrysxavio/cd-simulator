@@ -2,7 +2,7 @@
 
 **Estado:** **SIN EJECUTAR EN DISPOSITIVO REAL**. Este documento es un protocolo de aceptación, **no evidencia de resultados**. Aunque Node, Chromium y Pages aprueben, **M7-38/M7 NO se cerrará** hasta registrar una sesión física y una prueba de comprensión.
 
-**Versión a probar:** [CD Simulator v11.67 r176](https://harrysxavio.github.io/cd-simulator/?release=11.67-r176). Utilizar Chrome actualizado en un **teléfono Android real**. Registrar fecha, modelo/versión de Android, versión de Chrome, estado de TalkBack y evidencias visibles (capturas o notas sin información personal).
+**Versión a probar:** [CD Simulator v11.68 r177](https://harrysxavio.github.io/cd-simulator/?release=11.68-r177). **Actualización M8-42:** la pauta original se creó para v11.67; utilizar la versión actualmente publicada y documentar en el resultado la revisión exacta que se probó. La evidencia de Chromium sobre v11.67 y v11.68 no reemplaza la evaluación física. Utilizar Chrome actualizado en un **teléfono Android real**. Registrar fecha, modelo/versión de Android, versión de Chrome, estado de TalkBack y evidencias visibles (capturas o notas sin información personal).
 
 | Nº | Acceso/prueba | Criterio observable | Resultado |
 |---|---|---|---|
