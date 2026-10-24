@@ -23,7 +23,7 @@ test('I2-14: configure score thresholds without modifying the game simulation or
   const saved=await page.evaluate(([g,k])=>[localStorage.getItem(g),localStorage.getItem(k)],[goalsKey,gameKey]);
   assert.equal(JSON.parse(saved[0]).goal,'service');
   assert.equal(JSON.parse(saved[0]).incrementalBudgetCLP,0);
-  assert.equal(JSON.parse(saved[1]).phase,'intro');
+  assert.equal(saved[1],null,'Changing goals must not write or simulate the I2 campaign');
   await page.reload({waitUntil:'networkidle'});
   await page.locator('.management-settings summary').click();
   assert.equal(await page.locator('#gameGoal').inputValue(),'service');
