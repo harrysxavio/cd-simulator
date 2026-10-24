@@ -44,7 +44,12 @@ export const I2_AREAS=freezeDeep(NODES.map((node,index)=>({
  title:node.title,
  question:QUESTIONS[node.id],
  readModel:'campaignAreaReadModel.rows',
+ // The canonical row is derived from the actual-demand replay; never
+ // surface its headline before the player explicitly reveals the surprise.
+ // Before reveal, I2-04 must provide a separate planning-only projection.
  primarySignal:'headline',
+ primarySignalVisibleAfter:'demand-reveal',
+ preRevealSignal:'planning-only',
  secondarySignal:null,
  visibleKpiLimit:2,
  choices:node.choices.map(choice=>({
@@ -79,7 +84,8 @@ export const I2_PRODUCT_SCOPE=freezeDeep({
  },
  // This is an instructional simulation, not actual purchasing.
  costBoundary:'CLP modelado y parcial; costo desconocido no equivale a cero',
- serviceBoundary:'Expedido desde CD no significa entregado al cliente'
+ serviceBoundary:'Expedido desde CD no significa entregado al cliente',
+ revealBoundary:'Ninguna métrica del replay de demanda real se muestra antes del evento explícito de revelación'
 });
 
 /**
