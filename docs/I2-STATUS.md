@@ -16,14 +16,15 @@
 
 - **V1 #73:** el PR [#74](https://github.com/harrysxavio/cd-simulator/pull/74) corrigió la explicación de Comercial/Planning, fue fusionado a `main` con regresión Node/Chromium verde (merge `0af11689d6e697e355d856061fe4ef1dada2dab3`). El issue #73 requiere cierre administrativo tras los controles de `main`.
 - **I2-01 — EN REVISIÓN, NO COMPLETADA:** archivo `src/i2-product-contract.js`, pruebas `tests/i2-product-contract.test.mjs` y especificación `docs/I2-CONTRATO-FUNCIONAL.md`. Equivalencia de 8 áreas, 3 SKU, 5 recuperaciones, alcance y confirmación. **No hay ruta `/juego/` ni nuevo botón**. El contador permanece en 1/41 hasta merge y pruebas verificadas.
-- **Próxima dependencia:** I2-02 crea una ruta `/juego/` realmente servible antes de que I2-03 habilite el botón `Jugar`.
+- **I2-02 — EN REVISIÓN, DEPENDE DE I2-01:** ruta estática `/juego/` con `juego/index.html`, `juego/styles.css` y prueba Chromium `tests/browser-i2-game-route.e2e.mjs`. Aún no fue fusionada ni validada en Pages; no es jugable.
+- **Próxima dependencia:** I2-03 solo habilitará el botón `Jugar` después de demostrar que `/juego/` es servible directamente, permite regresar a V1 y no altera su sesión.
 
 ## Tabla de trabajo vigente
 
 | Fase | IDs | Estado a 23-10 | Evidencia / siguiente acción |
 | --- | --- | --- | --- |
 | F0 Auditoría base | **I2-00** | **Completada técnicamente** | PR #71 + cuatro jobs verdes |
-| F1 Doble modo | I2-01–03 | I2-01 en revisión; 02–03 pendientes | I2-01 contrato y tests; I2-02 ruta; I2-03 botón con destino real |
+| F1 Doble modo | I2-01–03 | I2-01/I2-02 en revisión; 03 pendiente | I2-01 contrato y tests; I2-02 ruta; I2-03 botón con destino real |
 | F2 Datos e independencia | I2-04–06 | Pendiente | Igualdad física V1/I2, storage separado, privacidad |
 | F3 Shell e interacción móvil | I2-07–12 | Pendiente | 0 scroll externo para confirmar; CTA persistente |
 | F4 Onboarding y primera decisión | I2-13–17 | Pendiente | Guía opcional y microescena reutilizable |
