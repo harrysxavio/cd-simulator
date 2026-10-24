@@ -5,6 +5,7 @@ import {I2_AREAS,I2_RECOVERIES} from '../src/i2-product-contract.js';
 import {i2MvpPhysicalResult,I2_MVP_CASE} from '../src/i2-mvp-adapter.js';
 import {newI2GameState,loadI2GameState,saveI2GameState} from '../src/i2-game-state.js';
 import {i2SafeScorecard} from '../src/i2-result-boundary.js';
+import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -58,6 +59,28 @@ function replace(children){
  if(title)title.focus({preventScroll:true});
 }
 function saveAndRender(){persist();render();}
+function gameTransition(action){
+ try{
+  state=navigateI2GameState(state,action);
+  preview=null;
+  saveAndRender();
+ }catch(e){showError(e)}
+}
+/** Single canonical footer contract for all six scene states. */
+function updateFooter({beforeAdvance=null}={}){
+ const labels=i2FooterLabels(state);
+ setActions({
+  next:labels.primary,
+  onNext:()=>{
+   if(beforeAdvance){
+    try{beforeAdvance()}catch(e){showError(e);return}
+   }
+   gameTransition(labels.action);
+  },
+  back:labels.secondary??'',
+  onBack:labels.back?()=>gameTransition(labels.back):null
+ });
+}
 function choiceList(area){
  const locked=state.confirmedAreas.includes(area.id);
  const cards=area.choices.map(c=>{
@@ -85,7 +108,7 @@ function intro(){
   ]),
   p('Las decisiones son educativas: no generan órdenes de compra ni costos reales.','footnote')
  ]);
- setActions({next:'Comenzar misión →',onNext:()=>{state.phase='area';state.index=0;saveAndRender()}});
+ updateFooter();
 }
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
@@ -113,17 +136,7 @@ function areaScene(){
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),lesson,consequence
  ]);
- const back=state.index>0?()=>{state.index--;saveAndRender()}:()=>{state.phase='intro';saveAndRender()};
- setActions({
-  next:state.index===7?'Cerrar planificación →':'Confirmar y siguiente →',
-  onNext:()=>{
-   if(!state.confirmedAreas.includes(area.id))state.confirmedAreas.push(area.id);
-   if(state.index<7)state.index++;
-   else state.phase='reveal';
-   saveAndRender();
-  },
-  back:'← Atrás',onBack:back
- });
+ updateFooter();
 }
 function revealScene(){
  stage.textContent='Diagnóstico · Sorpresa';progress.style.width='84%';
@@ -137,13 +150,7 @@ function revealScene(){
   ]),
   p('La sorpresa se revela solo cuando tú lo decides.','note')
  ]);
- setActions({
-  next:'Revelar demanda →',onNext:()=>{
-   // Explicit reveal is the first permitted calculation of actual-demand KPI.
-   state.reveal=true;state.phase='recover';preview=null;saveAndRender();
-  },
-  back:'← Revisar Transporte',onBack:()=>{state.phase='area';state.index=7;saveAndRender()}
- });
+ updateFooter();
 }
 function resultFor(option){
  return i2MvpPhysicalResult({
@@ -196,13 +203,30 @@ function recoveryScene(){
    impact.disabled=true;
   }catch(e){showError(e)}
  });
- setActions({
-  next:'Confirmar intervención →',
-  onNext:()=>{
-   try{i2SafeScorecard(resultFor());state.phase='result';saveAndRender()}
-   catch(e){showError(e)}
-  }
+ updateFooter({beforeAdvance:()=>i2SafeScorecard(resultFor())});
+}
+/** After revealing, the manager can review decisions without revising the sealed plan. */
+function reviewScene(){
+ if(!state.reveal||state.confirmedAreas.length!==I2_AREAS.length){
+  showError(new Error('No hay un plan confirmado para revisar'));
+  return;
+ }
+ stage.textContent='Crisis · Plan confirmado';progress.style.width='92%';
+ const chosen=I2_AREAS.map(area=>{
+  const decision=area.choices.find(choice=>choice.optionId===state.choices[area.id]);
+  return section('area-detail',[
+   node('strong',{text:area.title}),
+   p(decision?.label??'Decisión no disponible','note')
+  ]);
  });
+ replace([
+  p('PLAN ORIGINAL · SOLO LECTURA','eyebrow'),
+  heading('Estas fueron tus ocho decisiones.'),
+  p('La demanda real ya fue revelada. Puedes revisar el plan, pero no modificarlo ni cambiar las compras originales retroactivamente.','lead'),
+  section('guide-box',[node('strong',{text:'Resumen de planificación'}),...chosen]),
+  p('Volverás a la misma estrategia de recuperación con los valores que habías seleccionado.','footnote')
+ ]);
+ updateFooter();
 }
 function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
@@ -237,7 +261,7 @@ function resultsScene(){
   detail,
   p('Simulación educativa, no operación real ni contabilidad completa.','footnote')
  ]);
- setActions({next:'Jugar de nuevo ↻',onNext:()=>{state=init();preview=null;saveAndRender()}});
+ updateFooter();
 }
 function showError(e){
  console.error('Misión CD:',e);
@@ -250,6 +274,7 @@ function render(){
  else if(state.phase==='area')areaScene();
  else if(state.phase==='reveal')revealScene();
  else if(state.phase==='recover')recoveryScene();
+ else if(state.phase==='review')reviewScene();
  else if(state.phase==='result')resultsScene();
 }
 reset.addEventListener('click',()=>{
