@@ -8,6 +8,7 @@ import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
+import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -24,6 +25,8 @@ const init=newI2GameState;
 let state;
 try{state=loadI2GameState(window.localStorage)}catch{state=init()}
 let preview=null;
+let showGuide=false;
+try{showGuide=readI2GuidePreference(window.localStorage)}catch{}
 
 /** Separate versioned game storage. Never write V1 or the physical event ledger. */
 function persist(){
@@ -57,11 +60,36 @@ function setActions({next='Continuar',onNext=null,back='',onBack=null}={}){
  primary.onclick=onNext;
  secondary.textContent=back;secondary.hidden=!onBack;secondary.onclick=onBack;
 }
+function guideElement(){
+ const advice=i2GuideHint(state);
+ const wrapper=node('section',{className:'mentor-area',attrs:{id:'gameGuide'}});
+ const toggle=node('button',{
+  className:'mentor-toggle',
+  text:showGuide?'Ocultar consejo de '+advice.name:'Ver consejo de '+advice.name,
+  attrs:{type:'button','aria-expanded':String(showGuide),'aria-controls':'gameGuideText'}
+ });
+ const adviceText=p(advice.name+' · '+advice.text,'mentor-copy');
+ adviceText.id='gameGuideText';
+ adviceText.hidden=!showGuide;
+ toggle.addEventListener('click',()=>{
+  showGuide=!showGuide;
+  try{saveI2GuidePreference(window.localStorage,showGuide)}catch{
+   fail.textContent='No fue posible guardar tu preferencia de guía; se mantendrá en esta visita.';
+  }
+  wrapper.replaceWith(guideElement());
+  root.querySelector('.mentor-toggle')?.focus({preventScroll:true});
+ });
+ wrapper.append(toggle,adviceText);
+ return wrapper;
+}
 function replace(children){
  root.replaceChildren(...children);
  root.scrollTop=0;
  const title=root.querySelector('#step-title');
- if(title)title.focus({preventScroll:true});
+ if(title){
+  title.after(guideElement());
+  title.focus({preventScroll:true});
+ }
 }
 function saveAndRender(){persist();render();}
 function gameTransition(action){
