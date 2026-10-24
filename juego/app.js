@@ -25,7 +25,8 @@ const init=newI2GameState;
 let state;
 try{state=loadI2GameState(window.localStorage)}catch{state=init()}
 let preview=null;
-let showGuide=readI2GuidePreference(window.localStorage);
+let showGuide=false;
+try{showGuide=readI2GuidePreference(window.localStorage)}catch{}
 
 /** Separate versioned game storage. Never write V1 or the physical event ledger. */
 function persist(){
