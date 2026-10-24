@@ -7,7 +7,7 @@ import {I2_MVP_CASE} from './i2-mvp-adapter.js';
 export const I2_GAME_STORAGE_KEY='supply-lab-i2-v1';
 export const I2_GAME_SCHEMA=2;
 const SEED='alpha-case-01'; // stable and DOES NOT disclose demand surprise
-const PHASES=Object.freeze(['intro','area','reveal','recover','result']);
+const PHASES=Object.freeze(['intro','area','reveal','recover','review','result']);
 const ARRIVALS=Object.freeze([1,2,5,10,13]);
 const COVERAGES=Object.freeze([0,25,50,75,100]);
 
@@ -22,7 +22,7 @@ export function newI2GameState(){
 }
 function stepFor(phase){
  return {intro:'briefing',area:'decision',reveal:'shock',
-  recover:'intervention',result:'learning'}[phase];
+  recover:'intervention',review:'plan-review',result:'learning'}[phase];
 }
 
 /**
@@ -60,9 +60,9 @@ export function normalizeI2GameState(raw){
  // after the reveal or skipping a planning area.
  const expectedPrefix=I2_AREAS.slice(0,confirmed.size).map(a=>a.id);
  if([...confirmed].some((id,i)=>id!==expectedPrefix[i]))return null;
- if((['reveal','recover','result'].includes(raw.phase)&&confirmed.size!==I2_AREAS.length)
+ if((['reveal','recover','review','result'].includes(raw.phase)&&confirmed.size!==I2_AREAS.length)
   ||(raw.phase==='reveal'&&raw.reveal)
-  ||(['recover','result'].includes(raw.phase)&&!raw.reveal)
+  ||(['recover','review','result'].includes(raw.phase)&&!raw.reveal)
   ||(['intro','area'].includes(raw.phase)&&raw.reveal)
   ||(raw.phase==='intro'&&raw.index!==0)){
   return null;
