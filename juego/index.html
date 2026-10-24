@@ -21,7 +21,13 @@
     <span id="gameStage" aria-live="polite">MVP alfa · Presentación</span>
     <button id="gameRestart" type="button" class="restart-link" hidden>Reiniciar</button>
    </div>
-   <div class="progress-track" role="presentation"><div id="gameProgress" class="progress-fill" style="width:0%"></div></div>
+   <div class="chapter-row">
+    <span id="gameChapter">Capítulo 1 de 4 · Prepararse</span>
+    <button id="gameMapOpen" class="map-open" type="button" aria-haspopup="dialog">Ver mapa</button>
+   </div>
+   <div class="progress-track" id="gameProgressTrack" role="progressbar" aria-label="Progreso de la misión" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Introducción">
+    <div id="gameProgress" class="progress-fill" style="width:0%"></div>
+   </div>
   </header>
   <main class="scene-scroll" id="gameScene" tabindex="-1">
    <h1>Cargando Misión CD…</h1>

@@ -7,10 +7,14 @@ import {newI2GameState,loadI2GameState,saveI2GameState} from '../src/i2-game-sta
 import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
+import {i2ProgressView} from '../src/i2-game-progress.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
 const progress=document.querySelector('#gameProgress');
+const progressTrack=document.querySelector('#gameProgressTrack');
+const chapter=document.querySelector('#gameChapter');
+const mapOpen=document.querySelector('#gameMapOpen');
 const stage=document.querySelector('#gameStage');
 const reset=document.querySelector('#gameRestart');
 const fail=document.querySelector('#gameError');
@@ -279,6 +283,14 @@ function showError(e){
  console.error('Misión CD:',e);
  fail.textContent='No se pudo conciliar el resultado físico: '+(e?.message||'error desconocido');
 }
+function paintProgress(){
+ const view=i2ProgressView(state);
+ chapter.textContent=view.chapterLabel;
+ progress.style.width=view.percent+'%';
+ progressTrack.setAttribute('aria-valuenow',String(view.percent));
+ progressTrack.setAttribute('aria-valuetext',view.chapterLabel+'; '+view.current+
+  '; '+view.confirmed+' de '+view.totalAreas+' decisiones confirmadas');
+}
 function render(){
  fail.textContent='';
  reset.hidden=state.phase==='intro';
@@ -288,7 +300,15 @@ function render(){
  else if(state.phase==='recover')recoveryScene();
  else if(state.phase==='review')reviewScene();
  else if(state.phase==='result')resultsScene();
+ paintProgress();
 }
+mapOpen.addEventListener('click',()=>{
+ const map=i2ProgressView(state);
+ openI2HelpDialog({
+  title:'Mapa de la misión · '+map.chapterLabel,
+  paragraphs:[...map.mapParagraphs]
+ },mapOpen);
+});
 reset.addEventListener('click',()=>{
  if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init();preview=null;saveAndRender()}
 });
