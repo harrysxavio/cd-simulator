@@ -13,6 +13,12 @@
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
 - **Validación humana aún abierta:** [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67): Android físico, TalkBack, comprensión pedagógica con usuario principiante. Ninguna prueba en Chromium emulado reemplaza esta aceptación.
 
+## Feedback de profundidad de juego — 24-10-2026
+
+[**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
+
+**Solo es una actualización de requisitos:** no cambia la aplicación publicada, no completa microfases adicionales ni certifica nuevos KPI. **Avance formal intacto: 14/41**, salvo PR de implementación posteriores verificados en `main`. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal sigue siendo **I2-14**, aunque sus criterios quedaron ampliados.
+
 ## Microfases integradas y evidencia
 
 | Microfase | Entrega | Merge | Estado |

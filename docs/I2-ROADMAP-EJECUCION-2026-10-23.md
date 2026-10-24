@@ -2,6 +2,8 @@
 
 > **Documento ejecutivo y de entrega.** El inventario técnico canónico sigue siendo [I2-PLAN-MAESTRO.md](I2-PLAN-MAESTRO.md), con 41 microfases **I2-00 a I2-40**. Este documento no duplica IDs ni declara funciones implementadas por haber escrito un plan. [Estado verificable](I2-STATUS.md).
 
+**Revisión vinculante (24-10-2026):** [Auditoría gerencial del juego y plan de mejora](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). Conserva F0–F8 e I2-00–I2-40; eleva los criterios F4–F7 para evitar una «alfa bonita» que solo muestre pedidos expedidos y olvide costos, capacidad, stock y tiempo. La semilla del reto se fija antes de jugar, con variaciones +/− reproducibles y sin castigar artificialmente buenas decisiones. Arte pixel sobrio y Nico son recursos didácticos, no reemplazo del modelo.
+
 ## 1. Decisión de producto y alcance
 
 El simulador V1 **v11.68 r177** es un laboratorio valioso por sus decisiones, datos, 3 SKU, 8 áreas, compras originales, 12 días, restricciones físicas, comparaciones y costos parciales. Se conserva operable e independiente. **Misión CD** será un **segundo cliente UX** en `/juego/`, bajo el mismo GitHub Pages, orientado a **un gerente principiante usando un teléfono**. El usuario decide, aprende, observa efectos y puede abrir trazabilidad profunda sin necesitarla para avanzar.
@@ -116,3 +118,19 @@ flowchart TD
 ## 7. Exclusiones deliberadas
 
 3D, multiplayer, pagos, ranking competitivo mundial, CRM, analítica de personas, agentes IA con costos externos y gamificación dependiente de servidor. Cualquier expansión posterior se tramita como decisión separada con justificación de valor, mantenimiento, datos y costo.
+
+
+## 8. Hitos reajustados por profundidad gerencial (24-10-2026)
+
+El criterio de aceptación se endurece **sin aumentar ni renumerar las 41 microfases**:
+
+| Gate | Debe poder demostrarse con evidencia |
+|---|---|
+| F4 · Configurar y comprender | Meta/budget explícito, dificultad reproducible, Nico presentado, X/backdrop, ayuda saltable y paneles accesibles |
+| F5 · Decidir y gestionar | Ocho áreas con un KPI auditable y riesgo causal por área; sin reescritura de PO ni resultados anticipados |
+| F6 · Recuperar eficazmente | Para 5 alternativas ver expedidos, espera, turno/refuerzo, fecha y gasto incremental; día 13 no recupera pedidos al corte |
+| F7 · Evaluar en contexto | 4 semáforos separados; ensayo con 100 % servicio y costo rojo; sobrecapacidad mala aunque salgan todos los pedidos; contribución parcial auditada, no utilidad ficticia |
+| F7 · Retos y replay | ≥5 semillas/escenarios incluyendo demanda real inferior al forecast; mismas condiciones y mismos costos para reintentos y comparadores |
+| F8 · Publicar | Tests de fórmulas/umbral/períodos, gestos optativos, pixel-assets livianos, Android físico, TalkBack, usuarios novatos y V1 intacta |
+
+**Prioridad:** más valor al análisis de eficiencia/costos y explicación de fechas que a sprites vistosos. Un test que solo comprueba presencia de tarjetas no cierra el criterio; hace falta equivalencia con el motor y semáforo justificable. Se mantienen los demás requisitos de este roadmap y del plan maestro.
