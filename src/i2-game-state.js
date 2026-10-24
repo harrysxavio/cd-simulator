@@ -55,13 +55,16 @@ export function normalizeI2GameState(raw){
   if(!I2_AREAS.some(a=>a.id===id)||confirmed.has(id))return null;
   confirmed.add(id);
  }
- // A restored state cannot skip the reveal or rewrite a committed plan after
- // surprise. Returning to a confirmed area is consult-only in the UI.
+ // Commit order is exactly the sequence of the eight operational areas.
+ // Returning to a past step or intro is allowed, but never changing the plan
+ // after the reveal or skipping a planning area.
+ const expectedPrefix=I2_AREAS.slice(0,confirmed.size).map(a=>a.id);
+ if([...confirmed].some((id,i)=>id!==expectedPrefix[i]))return null;
  if((['reveal','recover','result'].includes(raw.phase)&&confirmed.size!==I2_AREAS.length)
   ||(raw.phase==='reveal'&&raw.reveal)
   ||(['recover','result'].includes(raw.phase)&&!raw.reveal)
   ||(['intro','area'].includes(raw.phase)&&raw.reveal)
-  ||(raw.phase==='intro'&&(raw.index!==0||confirmed.size!==0))){
+  ||(raw.phase==='intro'&&raw.index!==0)){
   return null;
  }
  return {
