@@ -178,7 +178,7 @@ Ver [documento de diagnóstico y fórmulas](I2-REVISION-GESTION-GAMIFICADA-2026-
 
 **No usar demanda adaptada a las decisiones en la misma campaña.** La habilidad del usuario afecta los resultados bajo una demanda exógena y semilla fijadas. La dificultad puede adaptar **siguientes misiones**, antes de comenzarlas y con aviso. **No afirmar productividad por persona-hora** cuando solo hay capacidad en slots/turnos modelados; medir throughput/tiempo y utilización con denominadores verificables.
 
-### D. Criterios globales de calidad del producto
+## D. Criterios globales de calidad del producto
 
 | KPI/criterio de salida | Meta verificable | Método |
 |---|---|---|
