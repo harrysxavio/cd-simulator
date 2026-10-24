@@ -54,8 +54,7 @@ test('I2-13: briefing accepts only intro and can continue all-confirmed plans sa
  for(let i=0;i<8;i++)state=navigateI2GameState(state,'forward');
  assert.equal(state.phase,'reveal');
  state=navigateI2GameState(state,'back'); // last confirmed area
- for(let i=0;i<8;i++)state=navigateI2GameState(state,'back');
- state=navigateI2GameState(state,'back'); // first area -> briefing
+ for(let i=0;i<8;i++)state=navigateI2GameState(state,'back'); // area 7 through intro
  assert.equal(state.phase,'intro');
  assert.equal(i2FirstMissionBriefing(state).confirmed,8);
  state=navigateI2GameState(state,'start');
