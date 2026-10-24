@@ -133,7 +133,7 @@ function intro(){
  const brief=i2FirstMissionBriefing(state);
  stage.textContent='Misión 01 · Tu primer turno';
  replace([
-  p('MISIÓN 01 · PRIMER DÍA AL MANDO','eyebrow'),
+  p('MISIÓN 01 · '+brief.role,'eyebrow'),
   heading(brief.title),
   p(brief.meaning,'intro-meaning'),
   p(brief.objective,'lead'),
