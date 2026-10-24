@@ -52,10 +52,18 @@ test('I2-03: mobile V1 entry opens actual /juego/ page and returns without repla
 test('I2-03: keyboard opens real game route without an inert control',{timeout:60000},()=>verify(false,async page=>{
  await page.goto(BASE+'/',{waitUntil:'networkidle'});
  await page.locator('#gameEntry').focus();
- await page.keyboard.press('Enter');
+ // Keyboard navigation is asynchronous. Await navigation instead of sampling
+ // page.url() synchronously in the same event-loop turn.
+ await Promise.all([
+  page.waitForURL('**/juego/'),
+  page.keyboard.press('Enter')
+ ]);
  assert.equal(new URL(page.url()).pathname,PATH);
  assert.equal(await page.locator('main h1').count(),1);
  await page.locator('.action-primary').focus();
- await page.keyboard.press('Enter');
+ await Promise.all([
+  page.waitForURL(url=>new URL(url).pathname==='/'),
+  page.keyboard.press('Enter')
+ ]);
  assert.equal(new URL(page.url()).pathname,'/');
 }));
