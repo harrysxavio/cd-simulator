@@ -16,7 +16,7 @@ test('I2 MVP: decisions are canonical 8 area choices, three SKU, day 12',()=>{
  const result=i2MvpPhysicalResult({choices});
  assert.equal(result.scope,'sku-cohort');
  assert.equal(result.horizonDays,12);
- assert.deepEqual(result.skuIds.sort(),['A','B','C']);
+ assert.deepEqual([...result.skuIds].sort(),['A','B','C']);
  assert.equal(result.plannedOrders,200);
  assert.equal(result.actualOrders,280);
  assert.equal(result.shippedOrders+result.pendingOrders,280);
