@@ -69,27 +69,18 @@ export function i2MvpPhysicalResult({choices=i2DefaultChoices(),option='wait',ur
   purchaseCoveragePercent
  });
  const comparison=projection.comparison;
+ // Campaign snapshot stores PO rows while recovery keeps the sealed manifest.
+ // Compare the actual immutable original rows, not reference identity.
+ const originalRows=projection.chain.campaign.plan.originalPurchaseOrders;
  if(projection.areaModel.scope!=='sku-cohort'
   ||projection.areaModel.passed!==true
   ||comparison.baselineSnapshot.scope!=='sku-cohort'
   ||comparison.recovered.days!==I2_MVP_CASE.horizonDays
   ||comparison.recovered.completed+comparison.recovered.pending!==contract.actualSampleOrders
   ||comparison.base.orders!==contract.actualSampleOrders
-  ||projection.chain.campaign.plan.originalPurchaseOrders!==comparison.originalPurchaseOrders){
-  // Object identity of a read-model's projected array is not always retained.
-  // The actual immutability of the manifest is asserted by the canonical engine.
-  if(projection.chain.campaign.plan.originalPurchaseOrders!==comparison.originalPurchaseOrders){
-   // Compare manifest contents instead of assuming the same view-layer object.
-   const rows=projection.chain.campaign.plan.originalPurchaseOrders?.rows;
-   if(!Array.isArray(rows)||JSON.stringify(rows)!==JSON.stringify(comparison.originalPurchaseOrders?.rows))
-    throw new Error('Misión CD: el plan original fue alterado');
-  }
-  if(projection.areaModel.scope!=='sku-cohort'
-   ||projection.areaModel.passed!==true
-   ||comparison.recovered.days!==I2_MVP_CASE.horizonDays
-   ||comparison.recovered.completed+comparison.recovered.pending!==contract.actualSampleOrders
-   ||comparison.base.orders!==contract.actualSampleOrders)
-   throw new Error('Misión CD: resultado físico no conciliado');
+  ||!Array.isArray(originalRows)
+  ||JSON.stringify(originalRows)!==JSON.stringify(comparison.originalPurchaseOrders.rows)){
+  throw new Error('Misión CD: ejecución y compras originales no conciliadas');
  }
  return Object.freeze({
   scope:'sku-cohort',horizonDays:I2_MVP_CASE.horizonDays,
