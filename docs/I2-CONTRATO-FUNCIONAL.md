@@ -10,7 +10,7 @@
 2. Se utilizan **exactamente 3 SKU** A/B/C del catálogo y sus mezclas de pedidos reales del módulo `src/sku.js`.
 3. Las opciones de cada departamento provienen de `NODES` en `src/engine.js`. Se conserva el orden **Comercial → Planning → Compras → Recepción → Calidad → Inventario → Picking → Transporte** y los IDs de opción. No se reescribe `flow()` ni `eventSimulation()`.
 4. Las 5 alternativas son `wait`, `emergency`, `reserve`, `overtime`, `combined`, desde `DECISION_OPTIONS` y `RECOVERY_OPTIONS`. Una alternativa combinada **no** se evalúa sumando dos deltas.
-5. Por área, el juego presenta **un indicador principal** (el `headline` derivado del registro físico SKU de `campaignAreaReadModel.rows`) y **como máximo dos indicadores visibles**. Fórmulas e historial físico se abren bajo demanda; no se fabrican métricas a partir de texto.
+5. Por área, el juego presenta **como máximo dos indicadores visibles**. **Antes de la sorpresa**, solo puede mostrar entradas de planificación conocidas, no ninguna cifra derivada de la simulación con demanda real. **Después de revelar**, puede mostrar el `headline` del registro físico SKU de `campaignAreaReadModel.rows`. Fórmulas e historial se abren bajo demanda, nunca inventando métricas a partir del texto.
 6. **Proyección / ayuda no es confirmación**: `preview-only` nunca es ejecución. `confirmed-in-simulator` significa decisión pedagógica y no autoriza comprar, desembolsar ni contactar proveedores de verdad.
 7. **Pedidas ≠ proveedor entregó ≠ bodega recibió ≠ calidad liberó ≠ picking preparó ≠ despacho salió del CD ≠ cliente recibió.** Si el modelo no diferencia preparación/transporte por staging, no presentarlo como evento independiente.
 8. Moneda CLP: contribución parcial y supuestos siempre etiquetados; costo desconocido **no es 0** ni el resultado financiero total.
@@ -54,7 +54,7 @@ El campo `logicalStep` es un índice determinista del flujo educativo, **no hora
 | picking | Picking | low, normal, reinforce | `campaignAreaReadModel.rows[picking].headline` |
 | transport | Transporte | low, normal, extra | `campaignAreaReadModel.rows[transport].headline` |
 
-Estas rutas son **notación de contrato para seleccionar una fila por ID**; no son rutas JavaScript literales de arrays. La interfaz I2 no existe todavía. El valor de `headline` debe obtenerse de la proyección conciliada y no copiarse de la jornada agregada.
+Estas rutas son **notación de contrato para seleccionar una fila por ID**; no son rutas JavaScript literales de arrays. La interfaz I2 no existe todavía. El valor de `headline` debe obtenerse de la proyección conciliada **únicamente después del evento de revelación** y no copiarse de la jornada agregada. I2-04 debe construir una lectura segura exclusivamente de planificación para el recorrido previo, sin consultar un replay de demanda real visible al jugador.
 
 ### Equivalencia física futura, fase I2-04
 
