@@ -4,7 +4,7 @@
 **Objetivo:** desarrollar **Misión CD**, una interfaz alternativa y gamificada, prioritaria en teléfono, dentro del MISMO sitio del simulador.  
 **Regla principal:** **V1 debe permanecer funcional y accesible**, con su motor de eventos, 3 SKU, 8 áreas, 5 recuperaciones y economía auditada. I2 reutiliza lógica y contratos, no los duplica. El ingreso a la ruta I2 solo será visible cuando tenga destino real, prueba de navegación y regreso al laboratorio.
 
-**Fuente de verdad para ejecuciones futuras:** este plan. El [plan V1 de 43 microfases](EXECUTION-PLAN-43.md) permanece separado; I2 no altera su histórico ni cierra M7-38/M8-42 por asociación. Consultar [auditoría](I2-AUDITORIA-BASE-V11.68.md), [UX/guion](I2-EXPERIENCIA-MOVIL.md), [arquitectura y pruebas](I2-ARQUITECTURA-Y-PRUEBAS.md).
+**Revisión de criterio de negocio y UX del 24-10-2026:** [Profundidad gerencial, semáforos, retos justos y pixel-art](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). **Criterios vinculantes para I2-14–I2-40; no cambia los 41 IDs ni da por implementadas mejoras futuras.** La interfaz debe enseñar productividad/capacidad, servicio, tiempos y economía con causas y fórmulas, no solo contar expedidos.\n\n**Fuente de verdad para ejecuciones futuras:** este plan. El [plan V1 de 43 microfases](EXECUTION-PLAN-43.md) permanece separado; I2 no altera su histórico ni cierra M7-38/M8-42 por asociación. Consultar [auditoría](I2-AUDITORIA-BASE-V11.68.md), [UX/guion](I2-EXPERIENCIA-MOVIL.md), [arquitectura y pruebas](I2-ARQUITECTURA-Y-PRUEBAS.md).
 
 ## A. Contrato de avance
 
@@ -42,10 +42,10 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 | **I2-11** | UI | Componente de progreso y mapa | 08 | 4 capítulos / 8 áreas / micro-pasos coherentes |
 | **I2-12** | UI | Guía/personaje opcional | 08,10 | contenido breve, desactivable, no intrusivo |
 | **I2-13** | Inicio | Portada, rol, briefing y regreso V1 | 09,11 | comenzar, salir y retomar funcionan |
-| **I2-14** | Inicio | Configuración básica segura | 04,13 | defaults correctos, sin interruptor forzado |
+| **I2-14** | Inicio | Configuración básica segura (metas, presupuesto incremental, dificultad) | 04,13 | defaults válidos; cambiar objetivo no cambia demanda, semilla ni motor silenciosamente |
 | **I2-15** | Inicio | Configuración avanzada plegable | 14 | editar múltiples campos, guardar/cancelar |
-| **I2-16** | Inicio | Tutorial opcional y perfil de usuario | 12,13 | saltar ayuda sin cambiar la simulación |
-| **I2-17** | Juego | Plantilla «Entender → Decidir → Impacto» | 09,10,11,16 | uno por pantalla, sin lectura obligatoria |
+| **I2-16** | Inicio | Tutorial y presentación de Nico, pixel-art y modales | 12,13 | guía optativa; X/backdrop/Escape; foco; tutorial no cambia el cálculo |
+| **I2-17** | Juego | Plantilla Decisión / Indicadores / Nico con swipe optativo | 09,10,11,16 | KPI/semáforo y CTA accesibles sin gestos obligatorios; 0 scroll exterior |
 | **I2-18** | Áreas | Comercial y pronóstico | 04,17 | forecast antes de conocer shock |
 | **I2-19** | Áreas | Planificación y cobertura | 18 | PO original derivada sin anticipar shock |
 | **I2-20** | Áreas | Compras/proveedor y llegada | 19 | comprado ≠ entregado/recibido |
@@ -54,16 +54,16 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 | **I2-23** | Áreas | Inventario y reserva localizada | 22 | conservación stock físico / verificable |
 | **I2-24** | Áreas | Picking y pedidos completos | 23 | BOM y staging, preparado ≠ salida |
 | **I2-25** | Áreas | Transporte y expedición | 24 | salido del CD ≠ entregado al cliente |
-| **I2-26** | Shock | Evento narrativo y revelación explícita | 25 | shock oculto hasta acción del jugador |
-| **I2-27** | Shock | Diagnóstico de gerente a 3 KPIs | 26 | misma cohorte SKU; una hipótesis útil |
+| **I2-26** | Shock | Evento reproducible ±, semilla previa y revelación explícita | 25 | demanda externa fija antes de decidir; sin castigo adaptativo durante campaña |
+| **I2-27** | Shock | Diagnóstico servicio/forecast/cola/presión económica | 26 | 2 KPI visibles por vista, detalle multieje; causas verificables sin mezclar SKU/turno |
 | **I2-28** | Recovery | Selector de 5 alternativas SKU | 27 | baseline único, deltas reales sin sumas |
-| **I2-29** | Recovery | Plazos, costo y simulación opcional | 28 | día 13 no rescata; costo desconocido no es cero |
+| **I2-29** | Recovery | Plazo contextual, comparación de fecha/CLP y capacidad ociosa | 28 | día 13 no rescata; compra vs reserva correctamente distinguida |
 | **I2-30** | Recovery | Confirmación trazada y reintento | 29 | confirmación reversible antes de aceptar; PO congelada |
-| **I2-31** | Resultado | Resumen de servicio y pendientes | 30 | pedidos completos, corte, sin entregas falsas |
+| **I2-31** | Resultado | Tablero multieje y semáforos con metas/fuentes | 30 | servicio/capacidad/tiempos/costo; nadie aprueba todo con rojo crítico |
 | **I2-32** | Resultado | Evidencia por área y cronología | 31 | 8 áreas/lotes/PO sin inventar stock |
-| **I2-33** | Resultado | Lectura económica parcial y fuentes | 31 | CLP proxy etiquetado, no mezcla motores |
+| **I2-33** | Resultado | Contribución parcial auditada, costos por recuperación y fuentes | 31 | PO ≠ gasto; costo total desconocido; no doble conteo de material |
 | **I2-34** | Juego | Insignias de aprendizaje justificadas | 31–33 | sin premiar gastos ficticios o clicks |
-| **I2-35** | Juego | Retos, seeds, replay y niveles | 34 | 3+ escenarios reproducibles / mismo seed |
+| **I2-35** | Juego | Retos al alza/baja, seeds, replay y niveles | 26,34 | ≥5 casos, mismo seed = mismos eventos, exógeno no depende del jugador |
 | **I2-36** | QA | Matriz de controles E2E por estado | 13–35 | todos los controles de I2 clicables en su estado |
 | **I2-37** | QA | Calidad móvil real de layout y foco | 36 | 320/360/390/412/430 + zoom/foco |
 | **I2-38** | QA | Accesibilidad humana y comprensión | 37 | Android/TalkBack/usuario real con evidencia |
@@ -110,13 +110,13 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 
 **I2-13 · Portada y briefing.** CTA Comenzar, regresar al laboratorio, objetivo de campaña, qué es CD, 8 áreas, 3 SKU, 12 días. Flujo de primera experiencia ≤3 decisiones hasta primera área.
 
-**I2-14 · Configuración simple.** Elección de meta servicio/costo/equilibrio, ayuda sí/no, dificultad, escenario normal o reto. Default válido al hacer «Empezar sin configurar». Pruebas de equivalencia de parámetros.
+**I2-14 · Configuración simple.** Elección de meta servicio/costo/equilibrio, **presupuesto incremental modelado explícito**, dificultad, guía optativa y reto seedado. La meta solo cambia lo que el jugador prioriza y los umbrales de evaluación; **nunca cambia físicamente demanda ni costo sin advertir**. Default seguro para «Empezar sin configurar». Test con los mismos inputs produce el mismo ledger independiente de preferencias visuales.
 
 **I2-15 · Configuración avanzada.** Ajustar forecast base, capacidad, inventario y costos sin redireccionar tras cada campo; botones Guardar y Cancelar; validación inline y advertencia si cambia baseline. Test: editar 3 campos seguidos, cancelar y reabrir sin pérdida de progreso.
 
-**I2-16 · Tutor de aprendizaje.** Botón «Aprender» opcional, estrategia de habilidad (novato/intermedio/avanzado) solo afecta lo narrado; nunca cambia parámetros físicos silenciosamente. E2E compara modelos con ayuda visible/oculta.
+**I2-16 · Tutor de aprendizaje.** Presentar a **Nico como coordinador ficticio del CD** en el inicio (identidad y propósito en ≤2 frases), opt-in; guía por perfil novato/intermedio/avanzado sin tocar resultados. Definir sprites pixel-art originales, sobrios, fallback y contraste. Ayudas: **× visible**, Escape y clic real fuera del diálogo, restaurando foco y sin click-through. E2E compara modelos con ayuda visible/oculta.
 
-**I2-17 · Componente de decisión.** Tres microvistas conceptuales y una sola acción principal; selección con \`aria-pressed\`, ayuda modal, confirmación y vuelta atrás. Test unitario y E2E reutilizado por cada área; 0 errores de foco.
+**I2-17 · Componente de decisión.** Tres vistas ligeras **Decisión / Indicadores / Nico** con pestañas accesibles; swipe opcional como atajo de navegación horizontal, nunca acceso exclusivo. Acción principal fija; selección con \`aria-pressed\`, hasta 2 KPI principales por vista y semáforo con fuente/umbral; impactos de planificación visibles sin revelar demanda. Test unitario y E2E de 8 áreas, 0 scroll externo, 0 errores de foco.
 
 ### C5. Ocho áreas consecutivas (I2-18 a I2-25)
 
@@ -138,27 +138,27 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 
 ### C6. Sorpresa, diagnóstico y recovery (I2-26 a I2-30)
 
-**I2-26 · Reveal explícito:** al acabar Transporte mostrar pantalla de sorpresa **sin revelarla automáticamente**. Botón único «Revelar demanda», seed fijado para retos/replay, cambios visibles +/−; compras originales congeladas. Test de ocultación antes de pulsar y unicidad del reveal después.
+**I2-26 · Reveal explícito:** al acabar Transporte mostrar pantalla **sin revelar datos reales automáticamente**. Demanda externa precomprometida por **semilla, plantilla y dificultad antes de las decisiones**: puede crecer o decrecer (rango didáctico sujeto a pruebas), no se recalcula para castigar/recompensar decisiones. Botón «Revelar demanda» único, seed persistente, compras originales congeladas. Test de no-spoiler, mismo seed y signo positivo/negativo.
 
 **I2-27 · Diagnóstico de gerente:** «Tenías X previstos, llegaron Y, faltan Z» dentro de **la misma cohorte SKU** con tres KPI; panel de explicación causal con evidencia. Si hay restricciones simultáneas, indicarlas sin inventar causa única.
 
 **I2-28 · Comparador de recuperación:** cinco alternativas trazadas nacen de una misma base inmutable: espera, reserva, refuerzo, urgente, combinado. Visual comparar X→Y pedidos y días; no agregar deltas independientes.
 
-**I2-29 · Plazos y costo:** selectores de fecha 1/2/5/10/13 y cobertura 0/25/50/75/100; costo de compra comprometida, CLP proxy y costo desconocido separados. Test: día13 rescata 0, refuerzo sin SKU no rescata y equipo extra no inventa pedidos.
+**I2-29 · Plazos y costo:** fecha y cobertura **solo cuando la opción realmente usa compra urgente o traslado de reserva**, con etiquetas diferentes por mecanismo. Comparar día 2/10/13, Δ expedidos, Δ cola, Δ CLP, turnos y capacidad ociosa vs baseline inmutable. Día 13 fuera del corte 12 recupera cero; sin SKU el refuerzo no crea stock. Costos compra comprometida/CLP proxy/desconocidos separados. Test de comparador fecha y relevancia de controles.
 
 **I2-30 · Confirmar o reintentar:** resumen completo previo, cancelar no muta, confirmar crea evento con ID/PO/timeline y bloquea nueva confirmación incompatible; continuar sin intervenir siempre posible. Persistencia y reintento con misma semilla probados.
 
 ### C7. Resultados y motivación (I2-31 a I2-35)
 
-**I2-31 · Resultado principal:** expedidos, pendientes y servicio SKU a corte. Gráfico simple de situación inicial/final sin métricas agregadas.
+**I2-31 · Resultado principal:** servicio y pendientes con **tablero gerencial de cuatro ejes** (servicio, productividad/capacidad, costo parcial y tiempo/stock) y semáforos con fórmula, umbral, explicación y fuente. «Expedido CD» no es entrega al cliente. No felicitar globalmente si un rojo crítico persiste; progreso de capítulos ≠ desempeño. En inicio solo 2 KPI, detalle bajo demanda.
 
 **I2-32 · Detalle de ocho áreas:** acceso bajo demanda al libro físico, PO, SKU, recepción, lotes, reserva, staging, salida, colas diarias. Nada en la historia del juego altera los eventos.
 
-**I2-33 · Economía honesta:** compromisos, valor de stock, costos aplicados y contribución parcial dentro de supuestos; proxy etiquetado, ninguna caja pagada o margen contable fingidos. No importar \`Costos\` V1 como KPI de la cohorte.
+**I2-33 · Economía honesta:** integrar el **`skuEconomicAuditReadModel` de V1** en la vista I2 sin nuevo motor: contribución parcial (valor ilustrativo despachos − material expedido − turnos extra activados), CLP incremental, compras comprometidas vs recibidas/consumidas, costos por pedido recuperado cuando Δ>0, horas/empleados como desconocidos si no hay evidencia. Ninguna caja pagada ni utilidad/EBITDA fingidas; no importar el «Costo total» de jornada agregada como KPI de cohorte SKU ni duplicar desembolsos.
 
 **I2-34 · Insignias:** logros solo asociados a aprendizajes verificables (identificar compra tardía, stock retenido, no intervenir cuando corresponde), progreso de misión separado de rendimiento. Sin premios por gastar.
 
-**I2-35 · Retos reproducibles:** ≥5 plantillas, seed persistente, dificultad didáctica, replay del mismo caso, registro «qué cambió» y tabla de decisiones; ni datos reales ni aleatoriedad no reproducible.
+**I2-35 · Retos reproducibles:** ≥5 casos con semillas persistentes: sobrepronóstico con demanda baja, subpronóstico con demanda alta, proveedor tardío, recepción/calidad restringidas y sobredotación costosa. Demandas ± y dificultad preestablecidas **antes** del juego, nunca ajustadas en el reveal por desempeño; replay con mismas condiciones, comparar servicio/costo/cola y decisiones. Guardado migrable desde alfa fijo.
 
 ### C8. Verificación y entrega (I2-36 a I2-40)
 
@@ -172,7 +172,13 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 
 **I2-40 · Release independiente del juego:** ruta \`/juego/\` pública, enlace V1↔I2, versionado I2 desacoplado, README/manual, changelog, licencias y assets, verificaciones HTTP reales y evidencia de aceptación humana. **V1 debe seguir siendo el mismo laboratorio y sus sesiones deben permanecer intactas.** Solo entonces anunciar Misión CD como lista para usuarios.
 
-## D. Criterios globales de calidad del producto
+### C9. Reglas adicionales de valor didáctico y realismo (feedback 24-10-2026)
+
+Ver [documento de diagnóstico y fórmulas](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md), obligatorio para aceptación de I2-14–I2-40. La profundidad de V1 **no puede quedar oculta irreversiblemente** bajo tarjetas bonitas: información básica visible, detalle opcional por swipe/pestañas y libro/causalidad al final. Las decisiones útiles deben mostrar compensaciones de **servicio, capacidad, esperas y CLP parciales**; evitar que una sobredotación cara sea evaluada como éxito por despachar todo.
+
+**No usar demanda adaptada a las decisiones en la misma campaña.** La habilidad del usuario afecta los resultados bajo una demanda exógena y semilla fijadas. La dificultad puede adaptar **siguientes misiones**, antes de comenzarlas y con aviso. **No afirmar productividad por persona-hora** cuando solo hay capacidad en slots/turnos modelados; medir throughput/tiempo y utilización con denominadores verificables.
+
+### D. Criterios globales de calidad del producto
 
 | KPI/criterio de salida | Meta verificable | Método |
 |---|---|---|
