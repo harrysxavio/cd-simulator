@@ -99,7 +99,7 @@ export function i2MvpPhysicalResult({choices=i2DefaultChoices(),option='wait',ur
   unknownTotalCost:true,
   skuIds:Object.freeze(Object.keys(contract.skuInputs.stock)),
   originalPurchaseOrders:comparison.originalPurchaseOrders,
-  areaRows:projection.areaModel.rows,
+  areaRows:projection.areaModel.stages,
   baselineKey:comparison.baselineKey
  });
 }
