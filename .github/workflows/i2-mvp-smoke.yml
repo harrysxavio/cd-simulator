@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22'
       - name: I2 physical adapter unit tests
-        run: node --experimental-default-type=module --test tests/i2-product-contract.test.mjs tests/i2-mvp-adapter.test.mjs tests/i2-game-campaign-adapter.test.mjs tests/i2-game-state.test.mjs tests/i2-economic-privacy.test.mjs
+        run: node --experimental-default-type=module --test tests/i2-product-contract.test.mjs tests/i2-mvp-adapter.test.mjs tests/i2-game-campaign-adapter.test.mjs tests/i2-game-state.test.mjs tests/i2-economic-privacy.test.mjs tests/i2-visual-tokens.test.mjs
       - name: Install pinned browser test dependency
         run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.64.0
       - name: Focused game journey and entry
