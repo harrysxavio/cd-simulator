@@ -12,8 +12,8 @@ import {measuredCount,addMeasuredCounts} from './measurements.js';
  */
 const FREEZE=Object.freeze;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
-const money=n=>typeof n==='number'&&Number.isFinite(n)&&Number.isSafeInteger(n)&&n>=0;
-const signed=n=>typeof n==='number'&&Number.isFinite(n)&&Number.isSafeInteger(n);
+const money=n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<=Number.MAX_SAFE_INTEGER&&n>=0;
+const signed=n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<=Number.MAX_SAFE_INTEGER;
 const fail=reason=>{throw new Error('I2-06: '+reason)};
 const orderUnit=Object.freeze({scope:'sku-cohort',unit:'orders',horizonDays:12});
 
@@ -44,7 +44,7 @@ export function i2SafeScorecard(result){
  }=result;
  if(![plannedOrders,actualOrders,baselineShipped,baselinePending,
   shippedOrders,pendingOrders].every(count)
-  ||!signed(recoveredOrders)
+  ||!Number.isSafeInteger(recoveredOrders)
   ||baselineShipped+baselinePending!==actualOrders
   ||shippedOrders+pendingOrders!==actualOrders
   ||shippedOrders-baselineShipped!==recoveredOrders
