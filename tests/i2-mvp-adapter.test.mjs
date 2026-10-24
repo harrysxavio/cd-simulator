@@ -41,7 +41,7 @@ test('I2 MVP: physical results match V1 canonical adapter, never second engine',
  assert.equal(game.shippedOrders,projection.comparison.recovered.completed);
  assert.equal(game.baselineShipped,projection.comparison.base.completed);
  assert.deepEqual(game.originalPurchaseOrders,projection.comparison.originalPurchaseOrders);
- assert.deepEqual(game.areaRows,projection.areaModel.rows);
+ assert.deepEqual(game.areaRows,projection.areaModel.stages);
  assert.equal(game.incrementalExpenseCLP,projection.comparison.incrementalExpense);
 });
 
