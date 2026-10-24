@@ -24,14 +24,17 @@ async function verify(attempt){
  if(!html.includes('id="gameEntry" href="./juego/"'))errors.push('HTML missing real game route link');
  if(!html.includes('Jugar Misión CD'))errors.push('HTML missing playable alpha entry label');
  if(errors.length)throw new Error(errors.join('; '));
- const [remoteManifest,app,check,gameHtml,gameCss,gameJs,adapterJs]=await Promise.all([
+ const [remoteManifest,app,check,gameHtml,gameCss,gameJs,mvpJs,sharedJs,stateJs,boundaryJs]=await Promise.all([
   req('release.json',attempt),
   req('src/app.js?v='+release.assetRevision,attempt),
   req('src/release-status.js?v='+release.assetRevision,attempt),
   req('juego/',attempt),
   req('juego/styles.css',attempt),
   req('juego/app.js',attempt),
-  req('src/i2-mvp-adapter.js',attempt)
+  req('src/i2-mvp-adapter.js',attempt),
+  req('src/i2-game-campaign-adapter.js',attempt),
+  req('src/i2-game-state.js',attempt),
+  req('src/i2-result-boundary.js',attempt)
  ]);
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
@@ -44,8 +47,18 @@ async function verify(attempt){
   ||!gameHtml.includes('id="gameScene"')||!gameHtml.includes('src="./app.js"'))
   throw new Error('Published game route is stale or malformed');
  if(!gameCss.includes('--primary:#f97316'))throw new Error('Published game stylesheet is missing');
- if(!gameJs.includes('function recoveryScene')||!adapterJs.includes('campaignSkuContract'))
-  throw new Error('Published game logic or canonical SKU adapter missing');
+ // Verify the module dependency chain that is actually served after I2-04/05/06.
+ // The old literal "campaignSkuContract" in i2-mvp-adapter.js disappeared
+ // when orchestration moved to i2-game-campaign-adapter.js. Requiring it
+ // there produced a false red build despite HTTP 200 and a working game.
+ if(!gameJs.includes('function recoveryScene')
+  ||!gameJs.includes("from '../src/i2-result-boundary.js'")
+  ||!mvpJs.includes("from './i2-game-campaign-adapter.js'")
+  ||!sharedJs.includes("from './campaign-contract.js'")
+  ||!sharedJs.includes('createI2GameCampaignAdapter')
+  ||!stateJs.includes('loadI2GameState')
+  ||!boundaryJs.includes('i2SafeScorecard'))
+  throw new Error('Published game module dependency chain is missing or stale');
  console.log('PAGES LIVE VERIFIED: version',release.version,'asset revision',release.assetRevision,'URL',base);
 }
 let last;
