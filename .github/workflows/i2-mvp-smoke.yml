@@ -35,4 +35,4 @@ jobs:
             if curl --silent --fail http://127.0.0.1:8000/juego/ >/dev/null; then break; fi
             sleep 1
           done
-          node --experimental-default-type=module --test --test-concurrency=1 tests/browser-i2-game-route.e2e.mjs tests/browser-i2-entry-link.e2e.mjs tests/browser-i2-mvp-alpha.e2e.mjs tests/browser-i2-game-state.e2e.mjs tests/browser-i2-boundary.e2e.mjs tests/browser-i2-mobile-shell.e2e.mjs tests/browser-i2-navigation.e2e.mjs
+          node --experimental-default-type=module --test --test-concurrency=1 tests/browser-i2-game-route.e2e.mjs tests/browser-i2-entry-link.e2e.mjs tests/browser-i2-mvp-alpha.e2e.mjs tests/browser-i2-game-state.e2e.mjs tests/browser-i2-boundary.e2e.mjs tests/browser-i2-mobile-shell.e2e.mjs tests/browser-i2-navigation.e2e.mjs tests/browser-i2-help-dialog.e2e.mjs
