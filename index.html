@@ -1,5 +1,12 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#091323"><meta name="description" content="Laboratorio interactivo de decisiones y dependencias entre áreas de Supply Chain"><title>Supply Chain Operations Lab</title><link rel="icon" href="data:,"><link rel="stylesheet" href="./src/styles.css?v=177"></head><body>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#091323"><meta name="description" content="Laboratorio interactivo de decisiones y dependencias entre áreas de Supply Chain"><title>Supply Chain Operations Lab</title><link rel="icon" href="data:,"><link rel="stylesheet" href="./src/styles.css?v=177"><style>
+/* I2-03: isolated launch link; do not alter V1 assets or mobile toolbars. */
+#gameEntry{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;vertical-align:middle;margin:8px 0 0 12px;padding:10px 14px;background:#f97316;color:#251308;border-radius:11px;font-weight:800;text-decoration:none;line-height:1.3}
+#gameEntry:hover{background:#fb923c}
+#gameEntry:focus-visible{outline:3px solid #fdba74;outline-offset:3px}
+#gameEntry .game-entry-preview{font-size:.72rem;font-weight:700;opacity:.9}
+@media(max-width:500px){#gameEntry{display:flex;width:100%;margin:10px 0 0;flex-wrap:wrap}}
+</style></head><body>
 <a class="skip-to-main" href="#mainContent">Saltar al contenido principal</a>
 <header><div class="eyebrow">SUPPLY CHAIN OPERATIONS LAB · <span id="releaseCurrentVersion">V11.68</span></div>
 <div class="release-control" role="group" aria-label="Estado de versión publicada">
@@ -7,7 +14,7 @@
  <button id="checkRelease" type="button" class="release-check">↻ Verificar actualización</button>
  <span id="releaseStatus" class="release-status" aria-live="polite">Comprobando versión publicada…</span>
  <a id="forceCurrentRelease" href="./?release=11.68-r177" class="release-open">Abrir versión actual</a>
-</div><h1>Una campaña. Decisiones conectadas. Resultados medibles.</h1><p class="lead">Dirige una campaña de distribución de una empresa ficticia. Decide en ocho áreas, interpreta sus KPI y descubre cómo la productividad, las restricciones y los costos afectan el resultado del negocio.</p><span class="pill">🧪 Caso educativo · Empresa ficticia de distribución</span></header>
+</div><h1>Una campaña. Decisiones conectadas. Resultados medibles.</h1><p class="lead">Dirige una campaña de distribución de una empresa ficticia. Decide en ocho áreas, interpreta sus KPI y descubre cómo la productividad, las restricciones y los costos afectan el resultado del negocio.</p><span class="pill">🧪 Caso educativo · Empresa ficticia de distribución</span><a id="gameEntry" href="./juego/" aria-label="Explorar Misión CD, vista previa en preparación">🎮 Explorar Misión CD <span class="game-entry-preview">(vista previa)</span></a></header>
 <main class="shell" id="mainContent" tabindex="-1">
 <div class="session-controls" role="group" aria-label="Controles permanentes de la campaña">
   <span id="sessionStatus" class="session-status" aria-live="polite">Campaña activa</span>

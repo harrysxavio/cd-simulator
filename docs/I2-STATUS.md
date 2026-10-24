@@ -15,16 +15,17 @@
 ## Ejecución en curso después de Lab7
 
 - **V1 #73:** el PR [#74](https://github.com/harrysxavio/cd-simulator/pull/74) corrigió la explicación de Comercial/Planning, fue fusionado a `main` con regresión Node/Chromium verde (merge `0af11689d6e697e355d856061fe4ef1dada2dab3`). El issue #73 requiere cierre administrativo tras los controles de `main`.
-- **I2-01 — EN REVISIÓN, NO COMPLETADA:** archivo `src/i2-product-contract.js`, pruebas `tests/i2-product-contract.test.mjs` y especificación `docs/I2-CONTRATO-FUNCIONAL.md`. Equivalencia de 8 áreas, 3 SKU, 5 recuperaciones, alcance y confirmación. **No hay ruta `/juego/` ni nuevo botón**. El contador permanece en 1/41 hasta merge y pruebas verificadas.
-- **I2-02 — EN REVISIÓN, DEPENDE DE I2-01:** ruta estática `/juego/` con `juego/index.html`, `juego/styles.css` y prueba Chromium `tests/browser-i2-game-route.e2e.mjs`. Aún no fue fusionada ni validada en Pages; no es jugable.
-- **Próxima dependencia:** I2-03 solo habilitará el botón `Jugar` después de demostrar que `/juego/` es servible directamente, permite regresar a V1 y no altera su sesión.
+- **I2-01 — FUSIONADA:** [PR #76](https://github.com/harrysxavio/cd-simulator/pull/76), merge `bb3e1be914b8106ba70eb223abb6a233bcdaf2ef`, contrato + pruebas Node/Chromium de PR aprobadas.
+- **I2-02 — FUSIONADA:** [PR #77](https://github.com/harrysxavio/cd-simulator/pull/77), merge `0ee0dbfeec0dc0b9afd476d477193aea8c94b11f`, ruta real `/juego/` y E2E de PR aprobados; Pages/HTTP principales aprobados, Chromium post-merge aún debe registrarse.
+- **I2-03 — EN REVISIÓN:** enlace HTML accesible de V1 a `/juego/`, tests de ida/vuelta por teclado y móvil, más verificador real de ruta en GitHub Pages. Mantener etiqueta «vista previa» mientras el juego sea informativo y no jugable.
+- **Pendiente de cierre administrativo:** no ampliar el contador hasta finalizar Chromium en `main` del último merge y verificar mediante HTTP público que la página `/juego/` responde con la versión correcta. El botón I2-03 será «Explorar Misión CD (vista previa)» hasta existir misión jugable.
 
 ## Tabla de trabajo vigente
 
 | Fase | IDs | Estado a 23-10 | Evidencia / siguiente acción |
 | --- | --- | --- | --- |
 | F0 Auditoría base | **I2-00** | **Completada técnicamente** | PR #71 + cuatro jobs verdes |
-| F1 Doble modo | I2-01–03 | I2-01/I2-02 en revisión; 03 pendiente | I2-01 contrato y tests; I2-02 ruta; I2-03 botón con destino real |
+| F1 Doble modo | I2-01–03 | I2-01/02 fusionadas, validación final; I2-03 en revisión | I2-03 debe pasar PR, merge, navegador y Pages ruta real |
 | F2 Datos e independencia | I2-04–06 | Pendiente | Igualdad física V1/I2, storage separado, privacidad |
 | F3 Shell e interacción móvil | I2-07–12 | Pendiente | 0 scroll externo para confirmar; CTA persistente |
 | F4 Onboarding y primera decisión | I2-13–17 | Pendiente | Guía opcional y microescena reutilizable |
