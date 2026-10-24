@@ -4,6 +4,8 @@
 **Modo de acceso propuesto:** botón **«🎮 Jugar: Dirige tu CD»** en el simulador actual, con la navegación de regreso **«Ir al laboratorio»**.  
 **Alcance:** simulación formativa *gamificada*, no videojuego animado; conserva los ocho departamentos, tres SKU, cuatro tipos de pedido, eventos físicos, compras y costos trazables de V1.
 
+> **Actualización de diseño del 24-10-2026:** los requisitos de [profundidad gerencial, KPI/semáforos, desafíos reproducibles, Nico y pixel-art](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md) son vinculantes. La experiencia gamificada **no es una versión simplificada del motor**: es una interfaz más amable para tomar decisiones realistas, observar compensaciones y abrir las evidencias de V1. Las métricas sin fuente explícita se muestran sin calificación.
+
 ## 1. Visión del producto
 
 Convertir la información rica del simulador en **decisiones entendibles y agradables de una en una**, sin exigir leer un dashboard y desplazarse por varias pantallas para encontrar dónde responder. El usuario asume el rol de gerente de un CD ficticio, recibe un objetivo, puede aprender conceptos breves, decide y observa las consecuencias sin romper la cronología física.
@@ -167,3 +169,20 @@ Pantalla 4: **«Inténtalo de nuevo»**: mismo seed y decisiones reajustadas con
 8. Cada interacción conserva el **mismo baseline y el mismo contrato SKU** que V1 para idénticos parámetros. No inventar valores para el modo gamificado.
 
 Véase [plan de implementación](I2-PLAN-MAESTRO.md) y [arquitectura/reutilización](I2-ARQUITECTURA-Y-PRUEBAS.md).
+
+
+## Adenda visual y pedagógica — 24-10-2026
+
+**Regla nueva:** una decisión no se evalúa como correcta solo por cumplir servicio. Cada paso debe ofrecer el estado contextual **Decisión · Indicadores · Nico** (en pestañas accesibles); gesto lateral optativo y jamás obligatorio, con CTA fijo. Mostrar 1–2 KPI útiles en la vista central y dar acceso inmediato a productividad/capacidad, tiempo, servicio, costo parcial y trazabilidad sin un scroll de documento completo.
+
+**Nico** se presenta como coordinador ficticio del CD en la bienvenida, explica su utilidad y se puede ocultar. El arte pixel se plantea como pequeñas viñetas originales, sobrias, discretas y accesibles; el juego es profesional, no un arcade ni un espectáculo de íconos. El personaje y los sprites no realizan cálculos ni generan datos.
+
+**Ayudas:** botón visible «×», nombre accesible «Cerrar ayuda», escape y tap/clic sobre el fondo fuera de la tarjeta; clic dentro no cierra y el foco regresa al elemento original. Sin gesto imprescindible para cerrar.
+
+**Semáforos:** separados por servicio, capacidad, tiempo/stock y CLP conocido. Cada color tiene umbral, explicación, fuente, periodo y opción de inspección. Se distingue sin datos, «advertencia» y «crítico»; 100 % de pedidos expedidos con refuerzo innecesario caro no puede ser todo verde.
+
+**Sorpresas:** semilla fijada antes de las decisiones, casos de demanda al alza y a la baja. La selección de retos puede basarse en una dificultad elegida al inicio o en desempeño histórico para la **misión siguiente**, nunca cambiando la demanda real tras observar las acciones de la misión actual.
+
+**Cierre:** resultados visuales de 4 ejes, «qué lograste / dónde hay riesgo / qué haría distinto», dos opciones comparables bajo la misma demanda y el costo incremental con límites explícitos. Ninguna calificación global compensa automáticamente pérdidas críticas.
+
+La implementación de lo anterior corresponde a las microfases pendientes I2-14–I2-40; no se da por completada por la publicación de este documento.
