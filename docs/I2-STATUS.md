@@ -17,7 +17,14 @@
 
 [**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
 
-**Solo es una actualización de requisitos:** no cambia la aplicación publicada, no completa microfases adicionales ni certifica nuevos KPI. **Avance formal intacto: 14/41**, salvo PR de implementación posteriores verificados en `main`. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal sigue siendo **I2-14**, aunque sus criterios quedaron ampliados.
+**Actualización de requisitos integrada** [PR #96](https://github.com/harrysxavio/cd-simulator/pull/96), merge `6ed08f3e644bf1d76f4dd166ba12c16112b4d88d`; no completa microfases adicionales ni certifica KPI futuros. **Avance formal intacto: 14/41**. La mejora accesible de modal [PR #97](https://github.com/harrysxavio/cd-simulator/pull/97), merge `cae62d95d3df2c0c0b3b909d7fd4ab63f66766c1`, añade X y clic/tap exterior con Node, focused, Chromium PR y Pages/HTTP en main aprobados. El costo integral SKU sigue desconocido; se conserva el motor V1.
+
+## Ejecución posterior al feedback (24-10-2026)
+
+- [PR #96](https://github.com/harrysxavio/cd-simulator/pull/96) — plan gerencial, KPI y semáforos, costo, throughput, fair shock, paneles y arte opcional **fusionado**. Cambia aceptación futura, no el motor.
+- [PR #97](https://github.com/harrysxavio/cd-simulator/pull/97) — X y cierre exterior de ayudas **fusionado**, regresión móvil y total de navegador aprobadas antes del merge, Pages/HTTP postmerge aprobados.
+- [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) — I2-14 **entrega funcional parcial**: opciones de meta de servicio (85/90/95 %), presupuesto extra de referencia y dos semáforos independientes al terminar. Los importes son **gasto incremental modelado**, no costo total. **La dificultad física no es configurable todavía**: la demanda alfa se mantiene fija +40 %; no contabilizar I2-14 hasta cerrar ese requisito y validar la implementación completa.
+- V1 sigue intacta y las 14 microfases anteriores continúan contabilizadas. Las revisiones físicas Android/TalkBack y usuarios sin experiencia siguen pendientes.
 
 ## Microfases integradas y evidencia
 
@@ -46,7 +53,7 @@
 | F1 · Dos modos navegables | I2-01–03 | **Implementada** | Contrato, ruta y enlace integrados; validar publicación de la alfa |
 | F2 · Motor/estado/economía | I2-04–06 | **Completada técnicamente** | Matriz 8×5, guardado migrable, privacidad y límites CLP verificados; Android/TalkBack pendiente fuera de fase |
 | F3 · UX móvil y guía | I2-07–12 | **Completada técnicamente (6/6)** | Tokens, viewport, navegación, ayuda modal, mapa y guía opcional integrados; Android físico y TalkBack pendientes de aceptación transversal |
-| F4 · Configuración y tutorial | I2-13–17 | **I2-13 integrada; I2-14 siguiente** | Briefing y retomar la partida verificados. Faltan configuración básica/avanzada, tutor y componente de decisión final |
+| F4 · Configuración y tutorial | I2-13–17 | **I2-13 integrada; I2-14 parcial en PR #98** | Nuevas metas de servicio y presupuesto modelado, dos semáforos y persistencia; dificultad variable todavía pendiente de escenarios seedados; I2-15–17 sin cierre |
 | F5 · Ocho áreas | I2-18–25 | **Recorrido alfa, no cerrado** | Alternativas reales y secuencia de ocho áreas; falta microaprendizaje y feedback específico por área |
 | F6 · Demanda sorpresa y recuperación | I2-26–30 | **Recorrido alfa, no cerrado** | Revelación explícita y cinco estrategias; faltan diagnósticos completos y controles avanzados |
 | F7 · Resultados/gamificación | I2-31–35 | **Resultado básico alfa** | KPIs físicos y costos modelados parciales; faltan logros, reto, niveles y comparador más completo |
