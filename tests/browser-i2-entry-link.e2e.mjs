@@ -26,7 +26,7 @@ test('I2-03: mobile V1 entry opens actual /juego/ page and returns without repla
  const link=page.locator('#gameEntry');
  assert.equal(await link.count(),1);
  assert.equal(await link.getAttribute('href'),'./juego/');
- assert.match(await link.innerText(),/vista previa/i);
+ assert.match(await link.innerText(),/MVP alfa/i);
  for(const width of [320,360,390,412,430]){
   await page.setViewportSize({width,height:640});
   const geometry=await page.evaluate(()=>{
@@ -39,7 +39,7 @@ test('I2-03: mobile V1 entry opens actual /juego/ page and returns without repla
  await link.click();
  assert.equal(new URL(page.url()).pathname,PATH);
  assert.match(await page.title(),/Misión CD/);
- assert.match(await page.getByRole('status').innerText(),/todavía no están disponibles/);
+ assert.match(await page.locator('#gameScene').innerText(),/Hoy tú diriges el centro de distribución/);
  const now=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
  assert.deepEqual(now,old,'Opening game route must not touch V1 storage');
  await page.locator('.return-link').click();
@@ -60,7 +60,7 @@ test('I2-03: keyboard opens real game route without an inert control',{timeout:6
  ]);
  assert.equal(new URL(page.url()).pathname,PATH);
  assert.equal(await page.locator('main h1').count(),1);
- await page.locator('.action-primary').focus();
+ await page.locator('.return-link').focus();
  await Promise.all([
   page.waitForURL(url=>new URL(url).pathname==='/'),
   page.keyboard.press('Enter')

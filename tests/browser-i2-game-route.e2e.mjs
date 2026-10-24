@@ -22,24 +22,24 @@ async function inBrowser(phone,run){
 
 test('I2-02: direct game route serves valid mobile page, assets and real return link',{timeout:60000},()=>inBrowser(true,async page=>{
  await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
- assert.match(await page.title(),/Misión CD/);
+ assert.match(await page.title(),/Misión CD.*MVP alfa/);
  assert.equal(await page.locator('html').getAttribute('lang'),'es');
  assert.equal(await page.locator('main h1').count(),1);
- assert.equal(await page.locator('a.action-primary').getAttribute('href'),'../');
- assert.match(await page.getByRole('status').innerText(),/todavía no están disponibles/i);
+ assert.equal(await page.locator('.return-link').getAttribute('href'),'../');
+ assert.match(await page.locator('#gameScene').innerText(),/Hoy tú diriges el centro de distribución/);
  for(const width of [320,360,390,412,430]){
   await page.setViewportSize({width,height:568});
   const geometry=await page.evaluate(()=>({
    viewport:document.documentElement.clientWidth,
    content:document.documentElement.scrollWidth,
-   back:(()=>{const r=document.querySelector('.action-primary').getBoundingClientRect();return {width:r.width,height:r.height}})()
+   back:(()=>{const r=document.querySelector('#gameNext').getBoundingClientRect();return {width:r.width,height:r.height}})()
   }));
   assert.ok(geometry.content<=geometry.viewport+2,'Horizontal overflow '+width+'px: '+JSON.stringify(geometry));
   assert.ok(geometry.back.height>=44&&geometry.back.width>=44,'Back target too small');
  }
  await page.reload({waitUntil:'networkidle'});
- assert.equal(await page.locator('a.action-primary').count(),1);
- await page.locator('.action-primary').click();
+ assert.equal(await page.locator('#gameNext').count(),1);
+ await page.locator('.return-link').click();
  assert.equal(new URL(page.url()).pathname,'/');
  assert.equal(await page.locator('#operationsSection').isVisible(),true);
 }));
