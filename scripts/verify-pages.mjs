@@ -20,17 +20,27 @@ async function verify(attempt){
  if(!html.includes('src="./src/app.js?v='+release.assetRevision+'"'))errors.push('HTML references a different app asset revision');
  if(!html.includes('src="./src/release-status.js?v='+release.assetRevision+'"'))errors.push('HTML does not load release freshness verifier');
  if(!html.includes('id="primarySkuSummary"'))errors.push('HTML missing canonical SKU summary');
+ // I2-03: the public V1 link must point at an actually published child route.
+ if(!html.includes('id="gameEntry" href="./juego/"'))errors.push('HTML missing real game route link');
  if(errors.length)throw new Error(errors.join('; '));
- const [remoteManifest,app,check]=await Promise.all([
+ const [remoteManifest,app,check,gameHtml,gameCss]=await Promise.all([
   req('release.json',attempt),
   req('src/app.js?v='+release.assetRevision,attempt),
-  req('src/release-status.js?v='+release.assetRevision,attempt)
+  req('src/release-status.js?v='+release.assetRevision,attempt),
+  req('juego/',attempt),
+  req('juego/styles.css',attempt)
  ]);
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
  if(manifest.version!==release.version||manifest.assetRevision!==release.assetRevision)throw new Error('Published release manifest differs from repository HEAD');
  if(!app.includes("function renderPrimarySkuSummary(model)"))throw new Error('Published app script is missing canonical overview');
  if(!check.includes("wireReleaseStatus"))throw new Error('Published updater is missing');
+ // Confirm that GitHub Pages publishes both routes and the orange stylesheet,
+ // rather than accepting a green build with a broken navigation destination.
+ if(!gameHtml.includes('<title>Misión CD')||!gameHtml.includes('href="../"')
+  ||!gameHtml.includes('Las decisiones y el juego todavía no están disponibles'))
+  throw new Error('Published game route is stale or malformed');
+ if(!gameCss.includes('--primary:#f97316'))throw new Error('Published game stylesheet is missing');
  console.log('PAGES LIVE VERIFIED: version',release.version,'asset revision',release.assetRevision,'URL',base);
 }
 let last;
