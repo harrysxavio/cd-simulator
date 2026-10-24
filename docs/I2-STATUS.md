@@ -7,8 +7,8 @@
 
 ## Resumen
 
-- **I2-00–I2-05: 6 de 41 microfases con PR fusionado a main (~14,6 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
-- **MVP alfa vertical integrado en PR #79.** Campaña reproducible, ocho decisiones, revelación explícita de demanda +40 %, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-06 a I2-40**.
+- **I2-00–I2-08: 9 de 41 microfases con PR fusionado a main (~22,0 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **MVP alfa vertical integrado en PR #79.** Campaña reproducible, ocho decisiones, revelación explícita de demanda +40 %, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-09 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
 - **Validación humana aún abierta:** [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67): Android físico, TalkBack, comprensión pedagógica con usuario principiante. Ninguna prueba en Chromium emulado reemplaza esta aceptación.
@@ -23,6 +23,9 @@
 | I2-03 | Acceso desde V1, navegación móvil y verificador Pages | [#78](https://github.com/harrysxavio/cd-simulator/pull/78) | Integrada |
 | I2-04 | Adaptador único y paridad de 8 configuraciones × 5 recuperaciones | [#81](https://github.com/harrysxavio/cd-simulator/pull/81) | Integrada; Node, Chromium y suite enfocada PR verdes |
 | I2-05 | Guardado I2 schema 2, migración desde schema 1, bloqueo tras confirmación | [#82](https://github.com/harrysxavio/cd-simulator/pull/82) | Integrada; Node, Chromium y suite enfocada PR verdes |
+| I2-06 | Frontera de unidades, economía CLP parcial y privacidad; arreglo HTTP Pages | [#84](https://github.com/harrysxavio/cd-simulator/pull/84) | Integrada; Node, Chromium y suite focalizada PR verdes |
+| I2-07 | Tokens accesibles, contraste AA, estados seleccionados y forced-colors | [#85](https://github.com/harrysxavio/cd-simulator/pull/85) | Integrada; Node, Chromium y suite focalizada PR verdes |
+| I2-08 | Footer móvil fijo, pantallas cortas, horizontal y zoom aproximado | [#86](https://github.com/harrysxavio/cd-simulator/pull/86) | Integrada; Node, Chromium y suite focalizada PR verdes |
 
 ## Fases ejecutivas
 
@@ -30,8 +33,8 @@
 | --- | --- | --- | --- |
 | F0 · Auditoría | I2-00 | **Completada** | Auditoría y plan fusionados; QA Android de V1 sigue issue independiente |
 | F1 · Dos modos navegables | I2-01–03 | **Implementada** | Contrato, ruta y enlace integrados; validar publicación de la alfa |
-| F2 · Motor/estado/economía | I2-04–06 | **I2-04 e I2-05 integradas; I2-06 pendiente** | Matriz 8×5 y persistencia versionada validadas; faltan guardas económicas, datos y privacidad formales |
-| F3 · UX móvil y guía | I2-07–12 | **Prototipo, no certificada** | Una escena y footer fijo ya evaluados en Chromium; faltan guía final y aceptación Android |
+| F2 · Motor/estado/economía | I2-04–06 | **Completada técnicamente** | Matriz 8×5, guardado migrable, privacidad y límites CLP verificados; Android/TalkBack pendiente fuera de fase |
+| F3 · UX móvil y guía | I2-07–12 | **I2-07 e I2-08 integradas; I2-09 siguiente** | Tokens y geometría de viewport probados; faltan navegación avanzada, guía, personaje y Android físico |
 | F4 · Configuración y tutorial | I2-13–17 | **Prototipo parcial** | Introducción y elección básica; faltan configuraciones completa y tutorial accesible |
 | F5 · Ocho áreas | I2-18–25 | **Recorrido alfa, no cerrado** | Alternativas reales y secuencia de ocho áreas; falta microaprendizaje y feedback específico por área |
 | F6 · Demanda sorpresa y recuperación | I2-26–30 | **Recorrido alfa, no cerrado** | Revelación explícita y cinco estrategias; faltan diagnósticos completos y controles avanzados |
@@ -50,13 +53,20 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-06**, para reforzar límites de alcance, etiquetas monetarias y privacidad. La matriz **ocho configuraciones × cinco recuperaciones** ya está probada en I2-04; I2-05 añadió guardado recuperable sin alterar la sesión V1. El MVP alfa es una aceleración de demostración, no una excusa para dar fases por completas.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-09**, footer persistente, reversibilidad y manejo de navegación por estados. Después siguen I2-10–I2-12, tutorial, experiencia, personaje y controles de navegación más completos. El MVP alfa es una aceleración de demostración, no una excusa para dar fases por completas.
 
 ## Cierre técnico I2-04 e I2-05 (24-10-2026)
 
 - **I2-04:** PR [#81](https://github.com/harrysxavio/cd-simulator/pull/81), merge `6956b1cc97b9a1bc7019738ba2c71b1cce305550`. [Node PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060723088), [Chromium PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060723123) y [focalizada PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060723208) aprobados. Documento [I2-04](I2-04-CONTRATO-ADAPTADOR.md).
 - **I2-05:** PR [#82](https://github.com/harrysxavio/cd-simulator/pull/82), merge `ae43ebad4b53e94e3d50346a660cb6d33fec0ad3`. [Node PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060727107), [Chromium PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060727193) y [focalizada PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060727069) aprobados. Documento [I2-05](I2-05-GUARDADO-Y-MIGRACION.md).
 - **Publicación y controles posteriores:** [Node main](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279184), [Chromium main](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279179), [Pages](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279300) y [HTTP](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279225). **Verificar resultados antes de llamar release estable**. La alfa sigue siendo validación técnica sin Android físico.
+
+## Cambios I2-06 a I2-08 (24-10-2026)
+
+- **I2-06** [PR #84](https://github.com/harrysxavio/cd-simulator/pull/84), merge `69e1de4c6a2fd14e0164ef8ebe49b5db55ba593e`: proyección económica tipada con totales desconocidos en `null`, filtrado de datos sensibles y reparación del chequeo HTTP Pages. Documentación [I2-06](I2-06-LIMITES-PRIVACIDAD.md). [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40122141152), [Chromium](https://github.com/harrysxavio/cd-simulator/actions/runs/40122141162), [focused](https://github.com/harrysxavio/cd-simulator/actions/runs/40122141221) verdes. [Pages público main](https://github.com/harrysxavio/cd-simulator/actions/runs/40122675001) verde.
+- **I2-07** [PR #85](https://github.com/harrysxavio/cd-simulator/pull/85), merge `0b04a49b47b2f159aac5f9861d03cd1ded1d99e4`: sistema de tokens semánticos y contraste, forced-colors y foco. Documentación [I2-07](I2-07-TOKENS-VISUALES.md). [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40122506896), [Chromium](https://github.com/harrysxavio/cd-simulator/actions/runs/40122506969), [focused](https://github.com/harrysxavio/cd-simulator/actions/runs/40122506877) verdes.
+- **I2-08** [PR #86](https://github.com/harrysxavio/cd-simulator/pull/86), merge `4160a414c617cda6d236a768420db5d6a8da8e25`: tamaños 320–430 px, landscape, zoom aproximado, ayuda con scroll interno, footer y teclado. Documentación [I2-08](I2-08-GEOMETRIA-MOVIL.md). [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40122922857), [Chromium](https://github.com/harrysxavio/cd-simulator/actions/runs/40122922833), [focused](https://github.com/harrysxavio/cd-simulator/actions/runs/40122922802) verdes. [Pages main](https://github.com/harrysxavio/cd-simulator/actions/runs/40123473055), [HTTP main](https://github.com/harrysxavio/cd-simulator/actions/runs/40123472313) y [Chromium main](https://github.com/harrysxavio/cd-simulator/actions/runs/40123472323) son los controles post-merge; registrar su resultado antes de afirmar certificación final.
+- **QA humano:** Android real, TalkBack y comprensión por usuario principiante siguen pendientes (#67). Simulación de viewport y pruebas automatizadas no sustituyen esta evidencia.
 
 ## Referencias de QA del MVP
 
