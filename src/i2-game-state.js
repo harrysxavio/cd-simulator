@@ -43,7 +43,7 @@ export function normalizeI2GameState(raw){
  }
  const isV2=raw.schema===I2_GAME_SCHEMA;
  if(isV2&&(raw.campaignId!==I2_MVP_CASE.campaignId||raw.seed!==SEED
-  ||raw.substep!==stepFor(raw.phase)))return null;
+  ))return null;
  const choices={};
  for(const area of I2_AREAS){
   const optionId=raw.choices[area.id];
@@ -61,8 +61,7 @@ export function normalizeI2GameState(raw){
   ||(raw.phase==='reveal'&&raw.reveal)
   ||(['recover','result'].includes(raw.phase)&&!raw.reveal)
   ||(['intro','area'].includes(raw.phase)&&raw.reveal)
-  ||(raw.phase==='intro'&&(raw.index!==0||confirmed.size!==0))
-  ||(raw.phase==='area'&&[...confirmed].some(id=>I2_AREAS.find(a=>a.id===id).index>raw.index))){
+  ||(raw.phase==='intro'&&(raw.index!==0||confirmed.size!==0))){
   return null;
  }
  return {
