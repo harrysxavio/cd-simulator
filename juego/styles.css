@@ -232,3 +232,27 @@ html,body{height:100%;overflow:hidden}
  .help-trigger,.i2-help-close{background:ButtonFace;color:ButtonText;border:2px solid ButtonText}
  :is(.help-trigger,.i2-help-close):focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-11 · four chapters / eight areas; optional map keeps main scene uncluttered. */
+.chapter-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px}
+#gameChapter{color:var(--warning-text);font-size:.74rem;font-weight:750;line-height:1.25}
+.map-open{
+ min-height:44px;min-width:78px;padding:7px 10px;
+ background:var(--detail-bg);color:var(--detail-label);
+ border:1px solid var(--border);border-radius:10px;
+ font:inherit;font-size:.78rem;font-weight:750;white-space:nowrap;cursor:pointer;
+}
+.map-open:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+@media(max-height:480px){
+ .chapter-row{min-height:42px}
+}
+@media(max-width:260px){
+ .chapter-row{gap:4px}
+ .map-open{min-width:65px;padding-inline:6px;font-size:.72rem}
+ #gameChapter{font-size:.69rem}
+}
+@media(forced-colors:active){
+ .map-open{background:ButtonFace;color:ButtonText;border:2px solid ButtonText}
+ .map-open:focus-visible{outline:3px solid Highlight;outline-offset:3px}
+}
