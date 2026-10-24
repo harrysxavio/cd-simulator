@@ -4,6 +4,7 @@ import {NODES} from '../src/engine.js';
 import {I2_AREAS,I2_RECOVERIES} from '../src/i2-product-contract.js';
 import {i2MvpPhysicalResult,I2_MVP_CASE} from '../src/i2-mvp-adapter.js';
 import {newI2GameState,loadI2GameState,saveI2GameState} from '../src/i2-game-state.js';
+import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -183,12 +184,13 @@ function recoveryScene(){
  impact.addEventListener('click',()=>{
   try{
    preview=resultFor();
+   const safe=i2SafeScorecard(preview);
    const box=section('impact-result',[
     node('strong',{text:'Resultado estimado, no confirmado'}),
-    p('Pedidos expedidos: '+num.format(preview.shippedOrders)+' / '+num.format(preview.actualOrders)),
-    p('Mejora frente a no intervenir: '+num.format(preview.recoveredOrders)+' pedidos.'),
-    p('Gasto incremental modelado: '+money.format(preview.incrementalExpenseCLP)+'.','note'),
-    p('No representa costo operacional total ni entrega al cliente.','footnote')
+    p('Pedidos expedidos: '+num.format(safe.shippedOrders.value)+' / '+num.format(safe.actualOrders.value)),
+    p('Mejora frente a no intervenir: '+num.format(safe.recoveredOrders.value)+' pedidos.'),
+    p('Gasto incremental modelado: '+money.format(safe.incrementalExpense.value)+'.','note'),
+    p('Costo total: desconocido. Expedición desde el CD no significa entrega al cliente.','footnote')
    ]);
    root.querySelector('.impact-wrap').append(box);
    impact.disabled=true;
@@ -197,7 +199,7 @@ function recoveryScene(){
  setActions({
   next:'Confirmar intervención →',
   onNext:()=>{
-   try{resultFor();state.phase='result';saveAndRender()}
+   try{i2SafeScorecard(resultFor());state.phase='result';saveAndRender()}
    catch(e){showError(e)}
   }
  });
@@ -205,15 +207,18 @@ function recoveryScene(){
 function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
  stage.textContent='Resultado · Aprendizaje';progress.style.width='100%';
- let data;try{data=resultFor()}catch(e){showError(e);return}
+ let data,score;
+ try{data=resultFor();score=i2SafeScorecard(data)}catch(e){showError(e);return}
  const overview=section('metrics-grid',[
-  section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(data.shippedOrders)})]),
-  section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(data.pendingOrders)})])
+  section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
+  section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
  ]);
  const detail=node('details',{className:'learn-more'},[
   node('summary',{text:'Consultar indicadores y áreas'}),
-  p('Antes de tu recuperación se expidieron '+num.format(data.baselineShipped)+' pedidos; la intervención cambió ese resultado en '+num.format(data.recoveredOrders)+'.'),
-  p('Gasto incremental modelado: '+money.format(data.incrementalExpenseCLP)+'. El costo operacional total es desconocido.'),
+  p('Antes de tu recuperación se expidieron '+num.format(score.baselineShipped.value)+' pedidos; la intervención cambió ese resultado en '+num.format(score.recoveredOrders.value)+'.'),
+  p('Gasto incremental modelado: '+money.format(score.incrementalExpense.value)+'. El costo operacional total es desconocido.'),
+  p('Compromiso de compras originales: '+money.format(score.committedOriginalPurchases.value)+' (no equivale a pago ni se suma otra vez al costo).','note'),
+  p('Variación del proxy económico: '+money.format(score.economicProxyDelta.value)+' (no representa utilidad ni EBITDA).','note'),
   ...data.areaRows.map(a=>section('area-detail',[
    node('strong',{text:a.title}),p(a.headline,'note')
   ]))
@@ -221,12 +226,13 @@ function resultsScene(){
  replace([
   p('CIERRE DE CAMPAÑA · DÍA 12','eyebrow'),
   heading('Estas fueron las consecuencias de tus decisiones.'),
-  p('Demanda real: '+num.format(data.actualOrders)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
+  p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
   section('guide-box',[
    node('strong',{text:'Lección para gerencia'}),
-   p(data.recoveredOrders>0?'La intervención recuperó pedidos frente a mantener el escenario sin actuar. Revisa también su costo.':'Esta decisión no recuperó pedidos adicionales antes del corte. A veces el plazo, el stock o varias restricciones simultáneas limitan la acción.'),
-   p('Preparado no significa expedido. Salir del CD tampoco acredita entrega al cliente.')
+   p(score.recoveredOrders.value>0?'La intervención recuperó pedidos frente a mantener el escenario sin actuar. Revisa también su costo.':'Esta decisión no recuperó pedidos adicionales antes del corte. A veces el plazo, el stock o varias restricciones simultáneas limitan la acción.'),
+   p('Preparado no significa expedido. Salir del CD tampoco acredita entrega al cliente.'),
+   p('El costo total, utilidad neta y EBITDA son desconocidos: sin datos contables completos, no son $0.','note')
   ]),
   detail,
   p('Simulación educativa, no operación real ni contabilidad completa.','footnote')
