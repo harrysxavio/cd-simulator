@@ -54,7 +54,7 @@ test('I2-01: 5 recovery options are canonical, ordered and separately validated'
 });
 
 /** Player actions must never silently rewrite V1 choices or generate purchase events. */
-test('I2-01: area decisions map to V1's exact IDs without mutating either view',()=>{
+test('I2-01: area decisions map to canonical V1 IDs without mutating either view',()=>{
  const original={...DEFAULTS};
  const decisions=I2_AREAS.map((area,index)=>createI2Decision({
   campaignId,area:area.id,optionId:NODES[index].choices[2].id,logicalStep:index,
