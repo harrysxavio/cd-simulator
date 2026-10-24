@@ -2,9 +2,8 @@
 // Existing src/i2-mvp-adapter.js owns the physical model; this file is UI only.
 import {NODES} from '../src/engine.js';
 import {I2_AREAS,I2_RECOVERIES} from '../src/i2-product-contract.js';
-import {i2DefaultChoices,i2MvpPhysicalResult,I2_MVP_CASE} from '../src/i2-mvp-adapter.js';
-
-const KEY='supply-lab-i2-v1';
+import {i2MvpPhysicalResult,I2_MVP_CASE} from '../src/i2-mvp-adapter.js';
+import {newI2GameState,loadI2GameState,saveI2GameState} from '../src/i2-game-state.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -14,41 +13,17 @@ const reset=document.querySelector('#gameRestart');
 const fail=document.querySelector('#gameError');
 const money=new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0});
 const num=new Intl.NumberFormat('es-CL');
-const init=()=>({
- schema:1,phase:'intro',index:0,
- choices:{...i2DefaultChoices()},recovery:'wait',arrivalDay:2,coverage:100,
- confirmedAreas:[],reveal:false
-});
-let state=load();
+const init=newI2GameState;
+let state;
+try{state=loadI2GameState(window.localStorage)}catch{state=init()}
 let preview=null;
 
-/** Restore only whitelisted user choices. Never load a simulated stock ledger. */
-function load(){
- try{
-  const raw=JSON.parse(localStorage.getItem(KEY)||'null');
-  if(!raw||raw.schema!==1||!['intro','area','reveal','recover','result'].includes(raw.phase))return init();
-  if(!Number.isInteger(raw.index)||raw.index<0||raw.index>7)return init();
-  const choices={...i2DefaultChoices()};
-  for(const a of I2_AREAS){
-   if(!a.choices.some(c=>c.optionId===raw.choices?.[a.id]))return init();
-   choices[a.id]=raw.choices[a.id];
-  }
-  if(!I2_RECOVERIES.some(r=>r.optionId===raw.recovery))return init();
-  if(![1,2,5,10,13].includes(raw.arrivalDay)||![0,25,50,75,100].includes(raw.coverage))return init();
-  const confirmedAreas=Array.isArray(raw.confirmedAreas)
-   ?raw.confirmedAreas.filter(id=>I2_AREAS.some(a=>a.id===id)):[];
-  if(raw.phase!=='intro'&&raw.phase!=='area'&&confirmedAreas.length!==8)return init();
-  return {
-   schema:1,phase:raw.phase,index:raw.index,choices,recovery:raw.recovery,
-   arrivalDay:raw.arrivalDay,coverage:raw.coverage,
-   confirmedAreas,reveal:raw.reveal===true
-  };
- }catch{return init()}
-}
-/** localStorage key is independent of V1 and stores only decisions, not events. */
+/** Separate versioned game storage. Never write V1 or the physical event ledger. */
 function persist(){
- try{localStorage.setItem(KEY,JSON.stringify(state))}catch{
-  fail.textContent='No se pudo guardar localmente. Puedes seguir jugando, pero la partida puede perderse al recargar.';
+ try{
+  state=saveI2GameState(window.localStorage,state);
+ }catch{
+  fail.textContent='No se pudo guardar localmente. Puedes continuar, pero la partida puede perderse al recargar.';
  }
 }
 function node(tag,{className='',text='',attrs={}}={},children=[]){
@@ -83,9 +58,18 @@ function replace(children){
 }
 function saveAndRender(){persist();render();}
 function choiceList(area){
- return section('choice-list',area.choices.map(c=>button(c.label,()=>{
-  state.choices[area.id]=c.optionId;saveAndRender();
- },{selected:state.choices[area.id]===c.optionId,description:c.description})));
+ const locked=state.confirmedAreas.includes(area.id);
+ const cards=area.choices.map(c=>{
+  const option=button(c.label,()=>{
+   if(locked)return;
+   state.choices[area.id]=c.optionId;saveAndRender();
+  },{selected:state.choices[area.id]===c.optionId,description:c.description});
+  option.disabled=locked;
+  return option;
+ });
+ const list=section('choice-list',cards);
+ if(locked)list.append(p('Decisión confirmada. Puedes consultarla, pero para cambiarla debes reiniciar la campaña.','note'));
+ return list;
 }
 function intro(){
  stage.textContent='MVP alfa · Presentación';progress.style.width='0%';
