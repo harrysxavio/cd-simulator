@@ -9,15 +9,21 @@
 - **I2-00 = completada técnicamente**: auditada, revisada y fusionada a `main` como [PR #71](https://github.com/harrysxavio/cd-simulator/pull/71). SHA merge `675d0945daca8d510caef127c70a6265ead45b95`.
 - **Cuatro controles post-merge aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40018532638), [Chromium](https://github.com/harrysxavio/cd-simulator/actions/runs/40018532417), [Pages](https://github.com/harrysxavio/cd-simulator/actions/runs/40018532178) y [HTTP real](https://github.com/harrysxavio/cd-simulator/actions/runs/40018532596).
 - **1/41 microfases completadas técnicamente (2,4 %).** I2-01 a I2-40 pendientes. Este porcentaje es número de entregas, **no porcentaje de esfuerzo ni de juego listo**.
-- **QA V1 no completamente cerrado:** Android físico/TalkBack/comprensión pendiente (issue [#67](https://github.com/harrysxavio/cd-simulator/issues/67)); M8-42 no habilita release estable. Un error real de ayuda de planificación/forecast está documentado en [#73](https://github.com/harrysxavio/cd-simulator/issues/73). No declararlo corregido hasta aprobar y fusionar su PR.
+- **QA V1 no completamente cerrado:** Android físico/TalkBack/comprensión pendiente (issue [#67](https://github.com/harrysxavio/cd-simulator/issues/67)); M8-42 no habilita release estable. La corrección de ayuda de planificación/forecast [#73](https://github.com/harrysxavio/cd-simulator/issues/73) fue fusionada por PR #74; se mantiene registro del issue hasta cierre formal.
 - **Cobertura limitada y explícita:** 32 botones HTML identificados + controles dinámicos; la auditoría y la suite Chromium representan recorridos, no una prueba exhaustiva de cada botón en cada estado. La matriz exhaustiva es I2-36.
+
+## Ejecución en curso después de Lab7
+
+- **V1 #73:** el PR [#74](https://github.com/harrysxavio/cd-simulator/pull/74) corrigió la explicación de Comercial/Planning, fue fusionado a `main` con regresión Node/Chromium verde (merge `0af11689d6e697e355d856061fe4ef1dada2dab3`). El issue #73 requiere cierre administrativo tras los controles de `main`.
+- **I2-01 — EN REVISIÓN, NO COMPLETADA:** archivo `src/i2-product-contract.js`, pruebas `tests/i2-product-contract.test.mjs` y especificación `docs/I2-CONTRATO-FUNCIONAL.md`. Equivalencia de 8 áreas, 3 SKU, 5 recuperaciones, alcance y confirmación. **No hay ruta `/juego/` ni nuevo botón**. El contador permanece en 1/41 hasta merge y pruebas verificadas.
+- **Próxima dependencia:** I2-02 crea una ruta `/juego/` realmente servible antes de que I2-03 habilite el botón `Jugar`.
 
 ## Tabla de trabajo vigente
 
 | Fase | IDs | Estado a 23-10 | Evidencia / siguiente acción |
 | --- | --- | --- | --- |
 | F0 Auditoría base | **I2-00** | **Completada técnicamente** | PR #71 + cuatro jobs verdes |
-| F1 Doble modo | I2-01–03 | Pendiente | I2-01 contrato; I2-02 ruta; I2-03 botón con destino real |
+| F1 Doble modo | I2-01–03 | I2-01 en revisión; 02–03 pendientes | I2-01 contrato y tests; I2-02 ruta; I2-03 botón con destino real |
 | F2 Datos e independencia | I2-04–06 | Pendiente | Igualdad física V1/I2, storage separado, privacidad |
 | F3 Shell e interacción móvil | I2-07–12 | Pendiente | 0 scroll externo para confirmar; CTA persistente |
 | F4 Onboarding y primera decisión | I2-13–17 | Pendiente | Guía opcional y microescena reutilizable |
