@@ -1,6 +1,6 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
-**Estado:** plan técnico vigente de 41 microfases, adoptado a partir de v11.68 r177. **Corte 24-10-2026:** I2-00–I2-11 integradas técnicamente (PR #71, #76, #77, #78, #81, #82, #84, #85, #86, #88, #89 y #91); **12/41** microentregas (29,3 %, no porcentaje de esfuerzo). I2-12 está en revisión (#92); I2-13–I2-40 quedan pendientes de aceptación formal aunque existe un MVP alfa transversal. Android físico/TalkBack/usuario aún pendiente (#67); defecto V1 #73 cerrado con PR #74. Ver evidencia en [estado actualizado](I2-STATUS.md). El [roadmap ejecutivo rebaselado de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md) define hitos, UX, dependencias, métricas y orden de ejecución, sin cambiar estos IDs.  
+**Estado:** plan técnico vigente de 41 microfases, adoptado a partir de v11.68 r177. **Corte 24-10-2026:** I2-00–I2-12 integradas técnicamente (PR #71, #76, #77, #78, #81, #82, #84, #85, #86, #88, #89, #91 y #92); **13/41** microentregas (31,7 %, no porcentaje de esfuerzo). I2-13–I2-40 quedan pendientes de aceptación formal aunque existe un MVP alfa transversal. Android físico/TalkBack/usuario aún pendiente (#67); defecto V1 #73 cerrado con PR #74. Ver evidencia en [estado actualizado](I2-STATUS.md). El [roadmap ejecutivo rebaselado de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md) define hitos, UX, dependencias, métricas y orden de ejecución, sin cambiar estos IDs.  
 **Objetivo:** desarrollar **Misión CD**, una interfaz alternativa y gamificada, prioritaria en teléfono, dentro del MISMO sitio del simulador.  
 **Regla principal:** **V1 debe permanecer funcional y accesible**, con su motor de eventos, 3 SKU, 8 áreas, 5 recuperaciones y economía auditada. I2 reutiliza lógica y contratos, no los duplica. El ingreso a la ruta I2 solo será visible cuando tenga destino real, prueba de navegación y regreso al laboratorio.
 
@@ -70,7 +70,7 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 | **I2-39** | QA | Regresión integral y auditoría económica | 38 | reconciliaciones y escenarios extremos |
 | **I2-40** | Release | Publicación I2 verificable, guía y versionado | 39 | Pages/HTTP/versión, criterios humanos y V1 intacta |
 
-**Total:** 41 microfases (00–40). **I2-00–I2-11 tienen PR fusionado; I2-12 está en revisión y es la siguiente microfase formal.** Las fases posteriores tienen un MVP de recorrido parcial, no aceptación completa. Consulte el [estado con evidencia](I2-STATUS.md) y el [roadmap rebaselado](I2-ROADMAP-EJECUCION-2026-10-23.md).
+**Total:** 41 microfases (00–40). **I2-00–I2-12 tienen PR fusionado; I2-13 es la siguiente microfase formal.** Las fases posteriores tienen un MVP de recorrido parcial, no aceptación completa. Consulte el [estado con evidencia](I2-STATUS.md) y el [roadmap rebaselado](I2-ROADMAP-EJECUCION-2026-10-23.md).
 
 ## C. Criterios detallados de fases, organizados por paquetes pequeños
 
