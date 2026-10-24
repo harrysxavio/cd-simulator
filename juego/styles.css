@@ -217,7 +217,8 @@ html,body{height:100%;overflow:hidden}
 }
 .i2-help-head h2{font-size:1.04rem;line-height:1.4;margin:0;overflow-wrap:anywhere}
 .i2-help-close{
- flex:0 0 auto;min-height:44px;padding:7px 11px;
+ flex:0 0 auto;min-width:44px;min-height:44px;padding:5px 9px;
+ font-size:1.4rem!important;line-height:1;
  font:inherit;font-size:.8rem;font-weight:800;
  background:var(--primary);color:var(--action-label);
  border:0;border-radius:10px;cursor:pointer;

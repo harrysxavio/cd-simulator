@@ -32,6 +32,22 @@ test('I2-10: optional contextual dialog traps focus, Escape restores trigger and
    'Escape must return keyboard focus to help trigger');
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),previous,
    'Opening help must never recalculate or mutate decisions');
+  // Visible UI is just ×; the accessible name still explains its action.
+  await source.click();
+  assert.equal(await page.locator('.i2-help-close').innerText(),'×');
+  assert.match(await page.locator('.i2-help-close').getAttribute('aria-label'),/Cerrar explicación/);
+  await modal.locator('.i2-help-content p').first().click();
+  assert.equal(await modal.isVisible(),true,'Click inside dialog must not dismiss');
+  await page.mouse.click(3,3);
+  await modal.waitFor({state:'detached'});
+  assert.equal(await source.evaluate(e=>e===document.activeElement),true,
+   'Click outside must restore trigger focus');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),previous);
+  await source.click();
+  await page.touchscreen.tap(3,3);
+  await modal.waitFor({state:'detached'});
+  assert.equal(await source.evaluate(e=>e===document.activeElement),true,
+   'Touch outside must restore trigger focus');
   const second=page.locator('.help-trigger').nth(1);
   for(const [width,height] of [[320,568],[360,640],[430,932]]){
    await page.setViewportSize({width,height});

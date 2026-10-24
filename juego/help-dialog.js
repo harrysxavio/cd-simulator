@@ -21,7 +21,7 @@ export function openI2HelpDialog({title,paragraphs},source){
  const close=document.createElement('button');
  close.type='button';
  close.className='i2-help-close';
- close.textContent='Cerrar ayuda ✕';
+ close.textContent='×';
  close.setAttribute('aria-label','Cerrar explicación y volver a la decisión');
  const main=document.createElement('div');
  main.className='i2-help-content';
@@ -39,6 +39,15 @@ export function openI2HelpDialog({title,paragraphs},source){
   if(source.isConnected)source.focus({preventScroll:true});
  };
  close.addEventListener('click',()=>dialog.close());
+// A click on the scrim outside the dialog rectangle closes the help.
+// Interacting with its content, text or scroll must not dismiss it.
+dialog.addEventListener('click',event=>{
+ if(event.target!==dialog)return;
+ const box=dialog.getBoundingClientRect();
+ const outside=event.clientX<box.left||event.clientX>box.right
+  ||event.clientY<box.top||event.clientY>box.bottom;
+ if(outside)dialog.close();
+});
  // There is deliberately just one focusable control in this concise sheet.
  // Some Chromium builds move focus to <body> on Tab even for a top-layer
  // <dialog> with only one tabbable node: keep focus within the dialog.
