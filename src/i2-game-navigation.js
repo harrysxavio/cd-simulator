@@ -17,7 +17,8 @@ export function navigateI2GameState(value,action){
  switch(action){
   case 'start':
    if(next.phase!=='intro')break;
-   change('area',0);
+   // Resume at the earliest unconfirmed area, never erase the earlier plan.
+   change('area',Math.min(next.confirmedAreas.length,I2_AREAS.length-1));
    return normalizeI2GameState(next);
   case 'forward':
    if(next.phase==='area'){
@@ -79,7 +80,7 @@ export function i2FooterLabels(value){
  const state=normalizeI2GameState(value);
  if(!state)throw new Error('I2-09: estado inválido');
  switch(state.phase){
-  case 'intro':return Object.freeze({primary:'Comenzar misión →',secondary:null,action:'start',back:null});
+  case 'intro':return Object.freeze({primary:state.confirmedAreas.length?'Continuar mi plan →':'Comenzar misión →',secondary:null,action:'start',back:null});
   case 'area':{
    const confirmed=state.confirmedAreas.includes(I2_AREAS[state.index].id);
    return Object.freeze({

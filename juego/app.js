@@ -9,6 +9,7 @@ import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
 import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
+import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -129,17 +130,32 @@ function choiceList(area){
  return list;
 }
 function intro(){
- stage.textContent='MVP alfa · Presentación';progress.style.width='0%';
+ const brief=i2FirstMissionBriefing(state);
+ stage.textContent='Misión 01 · Tu primer turno';
  replace([
-  p('MISIÓN 01 · GERENTE DE CENTRO DE DISTRIBUCIÓN','eyebrow'),
-  heading('Hoy tú diriges el centro de distribución.'),
-  p('Decidirás en ocho áreas y luego descubrirás un cambio inesperado en la demanda. Tu desafío es gestionar el resultado, no adivinar la respuesta.','lead'),
-  section('guide-box',[
-   node('strong',{text:'Tu guía de operaciones'}),
-   p('Primero observa el contexto. Después elige una alternativa por área. Si quieres, abre la explicación; no es obligatoria.'),
-   p('Caso ficticio con 3 SKU, 200 pedidos planificados en una muestra y horizonte físico hasta el día 12. La demanda real se revelará después del plan.','note')
+  p('MISIÓN 01 · '+brief.role,'eyebrow'),
+  heading(brief.title),
+  p(brief.meaning,'intro-meaning'),
+  p(brief.objective,'lead'),
+  section('intro-facts',brief.quickFacts.map(fact=>
+   section('intro-fact',[
+    node('strong',{text:fact.value}),
+    node('span',{text:fact.label})
+   ])
+  )),
+  ...(brief.continuing?[
+   p('PARTIDA EN CURSO','intro-resume-title'),
+   p(brief.resumeLabel+'. Puedes continuar sin perder lo que ya decidiste.','intro-resume')
+  ]:[]),
+  section('briefing-steps',[
+   node('strong',{text:'Tu desafío en 3 pasos'}),
+   ...brief.steps.map((step,index)=>section('briefing-step',[
+    node('span',{className:'briefing-number',text:String(index+1)}),
+    p(step)
+   ]))
   ]),
-  p('Las decisiones son educativas: no generan órdenes de compra ni costos reales.','footnote')
+  p('Partimos con '+num.format(brief.plannedOrders)+' pedidos previstos en una muestra. La demanda real sigue oculta.','note'),
+  p(brief.warning,'footnote')
  ]);
  updateFooter();
 }
