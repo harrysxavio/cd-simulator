@@ -10,7 +10,7 @@
 2. Se utilizan **exactamente 3 SKU** A/B/C del catálogo y sus mezclas de pedidos reales del módulo `src/sku.js`.
 3. Las opciones de cada departamento provienen de `NODES` en `src/engine.js`. Se conserva el orden **Comercial → Planning → Compras → Recepción → Calidad → Inventario → Picking → Transporte** y los IDs de opción. No se reescribe `flow()` ni `eventSimulation()`.
 4. Las 5 alternativas son `wait`, `emergency`, `reserve`, `overtime`, `combined`, desde `DECISION_OPTIONS` y `RECOVERY_OPTIONS`. Una alternativa combinada **no** se evalúa sumando dos deltas.
-5. Por área, el juego presenta **como máximo dos indicadores visibles**. **Antes de la sorpresa**, solo puede mostrar entradas de planificación conocidas, no ninguna cifra derivada de la simulación con demanda real. **Después de revelar**, puede mostrar el `headline` del registro físico SKU de `campaignAreaReadModel.rows`. Fórmulas e historial se abren bajo demanda, nunca inventando métricas a partir del texto.
+5. Por área, el juego presenta **como máximo dos indicadores visibles**. **Antes de la sorpresa**, solo puede mostrar entradas de planificación conocidas, no ninguna cifra derivada de la simulación con demanda real. **Después de revelar**, puede mostrar el `headline` del registro físico SKU de `campaignAreaReadModel.stages`. Fórmulas e historial se abren bajo demanda, nunca inventando métricas a partir del texto.
 6. **Proyección / ayuda no es confirmación**: `preview-only` nunca es ejecución. `confirmed-in-simulator` significa decisión pedagógica y no autoriza comprar, desembolsar ni contactar proveedores de verdad.
 7. **Pedidas ≠ proveedor entregó ≠ bodega recibió ≠ calidad liberó ≠ picking preparó ≠ despacho salió del CD ≠ cliente recibió.** Si el modelo no diferencia preparación/transporte por staging, no presentarlo como evento independiente.
 8. Moneda CLP: contribución parcial y supuestos siempre etiquetados; costo desconocido **no es 0** ni el resultado financiero total.
@@ -45,14 +45,14 @@ El campo `logicalStep` es un índice determinista del flujo educativo, **no hora
 
 | ID V1 | Nombre juego | IDs válidos | Fuente de KPI inicial |
 | --- | --- | --- | --- |
-| commercial | Comercial | under, accurate, over | `campaignAreaReadModel.rows[commercial].headline` |
-| planning | Planificación | partial, full, buffer | `campaignAreaReadModel.rows[planning].headline` |
-| purchasing | Compras | cheap, reliable, express | `campaignAreaReadModel.rows[purchasing].headline` |
-| receiving | Recepción | low, normal, extra | `campaignAreaReadModel.rows[receiving].headline` |
-| quality | Calidad | slow, normal, priority | `campaignAreaReadModel.rows[quality].headline` |
-| inventory | Inventario | weak, normal, count | `campaignAreaReadModel.rows[inventory].headline` |
-| picking | Picking | low, normal, reinforce | `campaignAreaReadModel.rows[picking].headline` |
-| transport | Transporte | low, normal, extra | `campaignAreaReadModel.rows[transport].headline` |
+| commercial | Comercial | under, accurate, over | `campaignAreaReadModel.stages[commercial].headline` |
+| planning | Planificación | partial, full, buffer | `campaignAreaReadModel.stages[planning].headline` |
+| purchasing | Compras | cheap, reliable, express | `campaignAreaReadModel.stages[purchasing].headline` |
+| receiving | Recepción | low, normal, extra | `campaignAreaReadModel.stages[receiving].headline` |
+| quality | Calidad | slow, normal, priority | `campaignAreaReadModel.stages[quality].headline` |
+| inventory | Inventario | weak, normal, count | `campaignAreaReadModel.stages[inventory].headline` |
+| picking | Picking | low, normal, reinforce | `campaignAreaReadModel.stages[picking].headline` |
+| transport | Transporte | low, normal, extra | `campaignAreaReadModel.stages[transport].headline` |
 
 Estas rutas son **notación de contrato para seleccionar una fila por ID**; no son rutas JavaScript literales de arrays. La interfaz I2 no existe todavía. El valor de `headline` debe obtenerse de la proyección conciliada **únicamente después del evento de revelación** y no copiarse de la jornada agregada. I2-04 debe construir una lectura segura exclusivamente de planificación para el recorrido previo, sin consultar un replay de demanda real visible al jugador.
 
