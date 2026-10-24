@@ -190,3 +190,45 @@ html,body{height:100%;overflow:hidden}
  .action-primary,.action-secondary{font-size:.78rem;padding-inline:5px;overflow-wrap:anywhere}
  .action-secondary{flex-basis:38%}
 }
+
+
+/* I2-10 · Optional modal explanations keep each decision scene short. */
+.help-trigger{
+ display:block;width:100%;text-align:left;min-height:48px;
+ margin:10px 0;padding:13px;
+ border:1px solid var(--border);border-radius:12px;
+ background:var(--detail-bg);color:var(--detail-label);
+ font:inherit;font-size:.88rem;font-weight:700;line-height:1.4;cursor:pointer;
+}
+.help-trigger::after{content:'  ↗';font-size:.95em}
+.help-trigger:focus-visible,.i2-help-close:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+.i2-help-dialog{
+ box-sizing:border-box;width:min(92vw,540px);max-height:min(80vh,80dvh);
+ margin:auto;padding:0;overflow-y:auto;overscroll-behavior:contain;
+ color:var(--text);background:var(--panel);
+ border:1px solid var(--border);border-radius:16px;
+ box-shadow:0 12px 45px rgba(0,0,0,.48);
+}
+.i2-help-dialog::backdrop{background:rgba(2,8,20,.78)}
+.i2-help-head{
+ display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+ position:sticky;top:0;z-index:1;padding:16px 16px 12px;
+ background:var(--panel);border-bottom:1px solid var(--border);
+}
+.i2-help-head h2{font-size:1.04rem;line-height:1.4;margin:0;overflow-wrap:anywhere}
+.i2-help-close{
+ flex:0 0 auto;min-height:44px;padding:7px 11px;
+ font:inherit;font-size:.8rem;font-weight:800;
+ background:var(--primary);color:var(--action-label);
+ border:0;border-radius:10px;cursor:pointer;
+}
+.i2-help-content{padding:14px 16px 22px}
+.i2-help-content p{font-size:.9rem;line-height:1.55;margin:0 0 13px}
+@media(max-width:350px){
+ .i2-help-head{flex-direction:column}
+ .i2-help-close{align-self:flex-end}
+}
+@media(forced-colors:active){
+ .help-trigger,.i2-help-close{background:ButtonFace;color:ButtonText;border:2px solid ButtonText}
+ :is(.help-trigger,.i2-help-close):focus-visible{outline:3px solid Highlight}
+}

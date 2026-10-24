@@ -6,6 +6,7 @@ import {i2MvpPhysicalResult,I2_MVP_CASE} from '../src/i2-mvp-adapter.js';
 import {newI2GameState,loadI2GameState,saveI2GameState} from '../src/i2-game-state.js';
 import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
+import {openI2HelpDialog} from './help-dialog.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -114,16 +115,27 @@ function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
  progress.style.width=(100*(state.index+1)/10)+'%';
- const lesson=node('details',{className:'learn-more'},[
-  node('summary',{text:'¿Qué significa esta área y su KPI?'}),
-  p(original.desc),
-  p('KPI a observar: '+original.kpi+'. Antes de revelar la demanda no mostramos resultados físicos futuros.')
- ]);
- const consequence=node('details',{className:'learn-more'},[
-  node('summary',{text:'¿Qué podría cambiar con mi decisión?'}),
-  p('Tu elección modificará los parámetros canónicos del simulador. Puede tener efectos en otras áreas y no garantiza que se expidan más pedidos.'),
-  p('El impacto medido se conocerá después de revelar la demanda y ejecutar la cohorte de pedidos.','note')
- ]);
+ const helpButton=(label,title,paragraphs)=>{
+  const button=node('button',{
+   className:'learn-more help-trigger',
+   text:label,
+   attrs:{type:'button','aria-haspopup':'dialog'}
+  });
+  button.addEventListener('click',()=>openI2HelpDialog({title,paragraphs},button));
+  return button;
+ };
+ const lesson=helpButton('¿Qué significa esta área y su KPI?',
+  original.title+' · Qué mide',[
+   original.desc,
+   'KPI a observar: '+original.kpi+'.',
+   'Antes de revelar la demanda no mostramos resultados físicos futuros.'
+  ]);
+ const consequence=helpButton('¿Qué podría cambiar con mi decisión?',
+  original.title+' · Impacto posible',[
+   'Tu elección modifica los parámetros canónicos del simulador y puede afectar otras áreas.',
+   'No garantiza que se expidan más pedidos.',
+   'El efecto físico real solo se calcula y presenta después de revelar la demanda.'
+  ]);
  replace([
   p('DECISIÓN '+(state.index+1)+' DE 8','eyebrow'),
   heading(original.icon+' '+original.title),
