@@ -1,14 +1,14 @@
 # Implementación 2 · Estado verificable de Misión CD
 
-**Corte:** 23 de octubre de 2026 (Chile) · **Base V1:** v11.68 r177.  
+**Corte:** 24 de octubre de 2026 (Chile) · **Base V1:** v11.68 r177.  
 **Plan técnico:** [41 microfases I2-00–I2-40](I2-PLAN-MAESTRO.md) · [Roadmap ejecutivo de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md).  
 **Enlace de la alfa:** https://harrysxavio.github.io/cd-simulator/juego/  
 **Documentación del primer corte vertical:** [I2-MVP-ALFA.md](I2-MVP-ALFA.md).
 
 ## Resumen
 
-- **I2-00–I2-03: 4 de 41 microfases con PR fusionado a main (~9,8 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
-- **MVP alfa vertical integrado en PR #79.** Campaña reproducible, ocho decisiones, revelación explícita de demanda +40 %, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-04 a I2-40**.
+- **I2-00–I2-05: 6 de 41 microfases con PR fusionado a main (~14,6 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **MVP alfa vertical integrado en PR #79.** Campaña reproducible, ocho decisiones, revelación explícita de demanda +40 %, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-06 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
 - **Validación humana aún abierta:** [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67): Android físico, TalkBack, comprensión pedagógica con usuario principiante. Ninguna prueba en Chromium emulado reemplaza esta aceptación.
@@ -21,6 +21,8 @@
 | I2-01 | Contrato de decisiones y unidades SKU | [#76](https://github.com/harrysxavio/cd-simulator/pull/76) | Integrada |
 | I2-02 | Ruta real `/juego/`, retorno y aislamiento V1 | [#77](https://github.com/harrysxavio/cd-simulator/pull/77) | Integrada |
 | I2-03 | Acceso desde V1, navegación móvil y verificador Pages | [#78](https://github.com/harrysxavio/cd-simulator/pull/78) | Integrada |
+| I2-04 | Adaptador único y paridad de 8 configuraciones × 5 recuperaciones | [#81](https://github.com/harrysxavio/cd-simulator/pull/81) | Integrada; Node, Chromium y suite enfocada PR verdes |
+| I2-05 | Guardado I2 schema 2, migración desde schema 1, bloqueo tras confirmación | [#82](https://github.com/harrysxavio/cd-simulator/pull/82) | Integrada; Node, Chromium y suite enfocada PR verdes |
 
 ## Fases ejecutivas
 
@@ -28,7 +30,7 @@
 | --- | --- | --- | --- |
 | F0 · Auditoría | I2-00 | **Completada** | Auditoría y plan fusionados; QA Android de V1 sigue issue independiente |
 | F1 · Dos modos navegables | I2-01–03 | **Implementada** | Contrato, ruta y enlace integrados; validar publicación de la alfa |
-| F2 · Motor/estado/economía | I2-04–06 | **En curso (alfa parcial)** | Adapter SKU de un caso integrado; falta matriz 8×5, almacenamiento migrable y guardas económicas |
+| F2 · Motor/estado/economía | I2-04–06 | **I2-04 e I2-05 integradas; I2-06 pendiente** | Matriz 8×5 y persistencia versionada validadas; faltan guardas económicas, datos y privacidad formales |
 | F3 · UX móvil y guía | I2-07–12 | **Prototipo, no certificada** | Una escena y footer fijo ya evaluados en Chromium; faltan guía final y aceptación Android |
 | F4 · Configuración y tutorial | I2-13–17 | **Prototipo parcial** | Introducción y elección básica; faltan configuraciones completa y tutorial accesible |
 | F5 · Ocho áreas | I2-18–25 | **Recorrido alfa, no cerrado** | Alternativas reales y secuencia de ocho áreas; falta microaprendizaje y feedback específico por área |
@@ -48,7 +50,13 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-04**, cuyo adaptador debe verificar **ocho configuraciones × cinco recuperaciones** contra V1 y aplicar restricciones de frontera física. El MVP alfa es una aceleración de demostración, no una excusa para dar fases por completas.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-06**, para reforzar límites de alcance, etiquetas monetarias y privacidad. La matriz **ocho configuraciones × cinco recuperaciones** ya está probada en I2-04; I2-05 añadió guardado recuperable sin alterar la sesión V1. El MVP alfa es una aceleración de demostración, no una excusa para dar fases por completas.
+
+## Cierre técnico I2-04 e I2-05 (24-10-2026)
+
+- **I2-04:** PR [#81](https://github.com/harrysxavio/cd-simulator/pull/81), merge `6956b1cc97b9a1bc7019738ba2c71b1cce305550`. [Node PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060723088), [Chromium PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060723123) y [focalizada PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060723208) aprobados. Documento [I2-04](I2-04-CONTRATO-ADAPTADOR.md).
+- **I2-05:** PR [#82](https://github.com/harrysxavio/cd-simulator/pull/82), merge `ae43ebad4b53e94e3d50346a660cb6d33fec0ad3`. [Node PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060727107), [Chromium PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060727193) y [focalizada PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40060727069) aprobados. Documento [I2-05](I2-05-GUARDADO-Y-MIGRACION.md).
+- **Publicación y controles posteriores:** [Node main](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279184), [Chromium main](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279179), [Pages](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279300) y [HTTP](https://github.com/harrysxavio/cd-simulator/actions/runs/40061279225). **Verificar resultados antes de llamar release estable**. La alfa sigue siendo validación técnica sin Android físico.
 
 ## Referencias de QA del MVP
 
