@@ -18,8 +18,8 @@ async function mobileCheck(stage){
    assert.equal(await page.locator('.mission-guide').isVisible(),true);
    assert.match(await page.locator('.mission-guide').innerText(),/Elige una opción/);
    assert.equal(await page.locator('.mission-impact-details').getAttribute('open'),null);
-   assert.match(await page.locator('#choices .compact-flow').innerText(),/Llegan/);
-   assert.match(await page.locator('#choices .compact-flow').innerText(),/siguen/);
+   assert.match(await page.locator('#choices .compact-flow').innerText(),/Demanda base/);
+   assert.match(await page.locator('#choices .compact-flow').innerText(),/pronóstico/);
    assert.equal(await page.locator('.flow-technical').getAttribute('open'),null);
    await page.locator('#choices .choice').filter({hasText:'Forecast conservador'}).click();
    const chosen=await page.locator('#choices .choice[aria-pressed="true"]').count();

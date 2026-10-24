@@ -1919,9 +1919,18 @@ if(phase==='plan'){add(choices,'h3','','Decisión inicial');n.choices.forEach((c
 const p=PARAMETERS[n.id],control=add(choices,'div','numeric-control');control.hidden=phase==='recover';add(control,'label','',p.label+' ('+p.unit.trim()+')');add(control,'p','muted',p.hint);const row=add(control,'div','numeric-row'),input=add(row,'input','numeric-input');input.type='number';input.setAttribute('aria-label',p.label+' ('+p.unit.trim()+')');input.min=p.min;input.max=p.max;input.step=p.step;input.value=numericValue(n.id,decisions);input.disabled=planFrozen;input.onchange=()=>{if(planFrozen)return;const v=+input.value;if(input.value===''||!Number.isFinite(v)||v<p.min||v>p.max){alert('Valor permitido: '+p.min+' a '+p.max);return}decisions[n.id]=decisions[n.id]??DEFAULTS[n.id];decisions.values[n.id]=v;save();render()};
 }const box=add(choices,'div','flow-summary compact-flow');
  add(box,'strong','',phase==='plan'?'Resultado de tu elección':'Efecto de las decisiones');
- add(box,'p','','Llegan '+fmt(st.input)+' → siguen '+fmt(st.output)+' hacia la próxima área.');
+ // El primer par de áreas comunica PLAN, no movimiento físico.
+ // Evita presentar sobrecobertura o forecast optimista como stock creado.
+ const isPlanningProjection=n.id==='commercial'||n.id==='planning';
+ add(box,'p','',n.id==='commercial'
+  ?'Demanda base '+fmt(st.input)+' → pronóstico '+fmt(st.output)+'.'
+  :n.id==='planning'
+   ?'Brecha calculada '+fmt(st.input)+' → compra planificada '+fmt(st.output)+'.'
+   :'Llegan '+fmt(st.input)+' → siguen '+fmt(st.output)+' hacia la próxima área.');
  const delta=Math.max(0,st.input-st.output);
- add(box,'small','',delta?'Aquí se detienen '+fmt(delta)+' unidades equivalentes.':'Esta área no reduce el flujo que recibe.');
+ add(box,'small','',isPlanningProjection
+  ?'Proyección del plan: aún no son unidades recibidas, disponibles ni expedidas.'
+  :delta?'Aquí se detienen '+fmt(delta)+' unidades equivalentes.':'Esta área no reduce el flujo que recibe.');
  const lesson=explainAreaDecision({
   area:n.title,input:st.input,output:st.output,capacity:st.capacity,phase
  });
