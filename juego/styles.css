@@ -3,6 +3,11 @@
  color-scheme:dark;
  --bg:#0e1726;--panel:#172438;--text:#f3f5fa;--muted:#c1cad8;
  --primary:#f97316;--primary-dark:#a74308;--border:#3c506a;
+ --action-label:#241307;--focus-ring:#fed7aa;--choice-selected-bg:#3b291e;
+ --choice-selected-label:#fdba74;--choice-bg:#1b293b;--choice-border:#55667c;
+ --detail-bg:#142236;--detail-label:#ffca9e;
+ --warning-text:#ffc18d;--success-text:#a7f3d0;
+ --danger-bg:#572627;--danger-text:#ffd9da;--disabled-opacity:.45;
  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
  background:var(--bg);color:var(--text);
 }
@@ -137,3 +142,32 @@ html,body{height:100%;overflow:hidden}
 @media(min-width:600px){.topbar{padding-inline:30px}.scene-scroll{padding:20px 30px}.action-bar{padding-inline:30px}.choice-list{grid-template-columns:1fr 1fr}}
 @media(max-width:350px){.brand{font-size:.9rem}.return-link{font-size:.76rem;padding:5px 7px}.scene-scroll{padding-inline:11px}.topbar{padding-inline:10px}.action-secondary{flex-basis:34%;font-size:.8rem}}
 @media(prefers-reduced-motion:reduce){.progress-fill{transition:none}}
+
+/* I2-07 · semantic palette. Text and border/checked glyph corroborate color. */
+.action-primary{color:var(--action-label)}
+.action-primary:disabled,.impact-btn:disabled{opacity:var(--disabled-opacity)}
+.game-choice{background:var(--choice-bg);border-color:var(--choice-border)}
+.game-choice.chosen{background:var(--choice-selected-bg);border:2px solid var(--primary)}
+.game-choice.chosen strong::before{color:var(--choice-selected-label)}
+.learn-more{background:var(--detail-bg)}
+.learn-more summary{color:var(--detail-label)}
+.error-line{background:var(--danger-bg);color:var(--danger-text)}
+.game-choice:disabled{cursor:not-allowed;opacity:.85}
+.game-choice:disabled.chosen{opacity:1}
+.return-link:focus-visible,.restart-link:focus-visible,
+.select-group select:focus-visible,.learn-more summary:focus-visible,
+.game-choice:focus-visible,.impact-btn:focus-visible,
+.action-primary:focus-visible,.action-secondary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px;
+}
+@media(forced-colors:active){
+ .game-choice,.game-choice.chosen,.action-primary,.action-secondary,.impact-btn,
+ .return-link,.restart-link,.learn-more,.select-group select{
+  forced-color-adjust:auto;background:ButtonFace;color:ButtonText;border:2px solid ButtonText;
+ }
+ .game-choice.chosen,.game-choice[aria-pressed="true"]{border:3px solid Highlight;outline:1px solid ButtonText}
+ .game-choice.chosen strong::before{color:ButtonText}
+ .guide-box{border-left:4px solid Highlight}
+ .progress-fill{background:Highlight}
+ :is(button,a,select,summary):focus-visible{outline:3px solid Highlight;outline-offset:3px}
+}
