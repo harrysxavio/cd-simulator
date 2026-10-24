@@ -21,7 +21,10 @@ test('I2-09: touch and keyboard navigation use footer, reset scroll and protect 
   assert.equal(await page.locator('#gameBack').isVisible(),true);
   assert.equal(await page.locator('#gameNext').innerText(),'Confirmar y siguiente →');
   // Scroll only the content, then confirm. The next scene resets its content scroll.
-  await page.locator('.learn-more summary').first().click();
+  await page.locator('.help-trigger').first().click();
+  await page.locator('.i2-help-dialog').waitFor({state:'visible'});
+  await page.locator('.i2-help-close').click();
+  await page.locator('.i2-help-dialog').waitFor({state:'detached'});
   await page.locator('#gameScene').evaluate(e=>{e.scrollTop=e.scrollHeight});
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameStage').innerText(),/Área 2 de 8/);
