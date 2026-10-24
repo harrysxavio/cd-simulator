@@ -27,6 +27,8 @@ test('I2-01: 8 canonical areas, their choice IDs, 3 SKU and <=2 visible KPI',()=
   assert.ok(area.question.length>12);
   assert.equal(area.readModel,'campaignAreaReadModel.rows');
   assert.equal(area.primarySignal,'headline');
+  assert.equal(area.primarySignalVisibleAfter,'demand-reveal');
+  assert.equal(area.preRevealSignal,'planning-only');
   assert.ok(1+(area.secondarySignal===null?0:1)<=area.visibleKpiLimit);
   assert.ok(area.visibleKpiLimit<=2);
   assert.deepEqual(area.choices.map(x=>x.optionId),NODES[index].choices.map(x=>x.id));
@@ -119,5 +121,6 @@ test('I2-01: SKU counts retain 12-day unit and reject aggregate cost/quantity co
  assert.throws(()=>i2MeasuredKpi(10,{unit:'CLP'}),/Dimensión incompatible/);
  assert.throws(()=>i2MeasuredKpi(-1),/Cantidad/);
  assert.match(I2_PRODUCT_SCOPE.serviceBoundary,/entregado al cliente/);
+ assert.match(I2_PRODUCT_SCOPE.revealBoundary,/evento explícito/);
  assert.match(I2_PRODUCT_SCOPE.costBoundary,/desconocido/);
 });
