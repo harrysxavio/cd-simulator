@@ -171,3 +171,22 @@ html,body{height:100%;overflow:hidden}
  .progress-fill{background:Highlight}
  :is(button,a,select,summary):focus-visible{outline:3px solid Highlight;outline-offset:3px}
 }
+
+/* I2-08 · short screens, landscape and high text/zoom density.
+   The scene alone scrolls; primary/secondary actions remain in the footer. */
+@media(max-height:480px){
+ .topbar{padding-block:5px}
+ .stage-row{margin-top:2px;min-height:24px}
+ .progress-track{margin-top:3px}
+ .scene-scroll{padding-top:9px;padding-bottom:14px}
+ .action-bar{padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:260px){
+ .top-row{flex-direction:column;align-items:stretch}
+ .top-row .return-link{align-self:flex-start}
+ .topbar{padding-inline:8px}
+ .scene-scroll{padding-inline:8px}
+ .action-bar{padding-inline:6px;gap:5px}
+ .action-primary,.action-secondary{font-size:.78rem;padding-inline:5px;overflow-wrap:anywhere}
+ .action-secondary{flex-basis:38%}
+}
