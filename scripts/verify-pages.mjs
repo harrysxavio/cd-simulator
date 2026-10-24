@@ -22,13 +22,16 @@ async function verify(attempt){
  if(!html.includes('id="primarySkuSummary"'))errors.push('HTML missing canonical SKU summary');
  // I2-03: the public V1 link must point at an actually published child route.
  if(!html.includes('id="gameEntry" href="./juego/"'))errors.push('HTML missing real game route link');
+ if(!html.includes('Jugar Misión CD'))errors.push('HTML missing playable alpha entry label');
  if(errors.length)throw new Error(errors.join('; '));
- const [remoteManifest,app,check,gameHtml,gameCss]=await Promise.all([
+ const [remoteManifest,app,check,gameHtml,gameCss,gameJs,adapterJs]=await Promise.all([
   req('release.json',attempt),
   req('src/app.js?v='+release.assetRevision,attempt),
   req('src/release-status.js?v='+release.assetRevision,attempt),
   req('juego/',attempt),
-  req('juego/styles.css',attempt)
+  req('juego/styles.css',attempt),
+  req('juego/app.js',attempt),
+  req('src/i2-mvp-adapter.js',attempt)
  ]);
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
@@ -38,9 +41,11 @@ async function verify(attempt){
  // Confirm that GitHub Pages publishes both routes and the orange stylesheet,
  // rather than accepting a green build with a broken navigation destination.
  if(!gameHtml.includes('<title>Misión CD')||!gameHtml.includes('href="../"')
-  ||!gameHtml.includes('Las decisiones y el juego todavía no están disponibles'))
+  ||!gameHtml.includes('id="gameScene"')||!gameHtml.includes('src="./app.js"'))
   throw new Error('Published game route is stale or malformed');
  if(!gameCss.includes('--primary:#f97316'))throw new Error('Published game stylesheet is missing');
+ if(!gameJs.includes('function recoveryScene')||!adapterJs.includes('campaignSkuContract'))
+  throw new Error('Published game logic or canonical SKU adapter missing');
  console.log('PAGES LIVE VERIFIED: version',release.version,'asset revision',release.assetRevision,'URL',base);
 }
 let last;
