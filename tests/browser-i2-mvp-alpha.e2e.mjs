@@ -61,7 +61,8 @@ test('MVP alpha: eight decisions, explicit reveal, fifth recovery and physical r
  await continueM(page);
  assert.match(await page.locator('#gameScene h1').innerText(),/consecuencias/);
  assert.equal(await page.locator('.metric-card').count(),2);
- assert.match(await page.locator('#gameScene').innerText(),/El costo operacional total es desconocido/);
+ await page.locator('.learn-more summary').click(); // Open optional breakdown first.
+ assert.match(await page.locator('#gameScene').innerText(),/costo operacional total es desconocido/i);
  await page.reload({waitUntil:'networkidle'});
  assert.match(await page.locator('#gameScene h1').innerText(),/consecuencias/);
  await continueM(page);
