@@ -43,7 +43,7 @@ export const I2_AREAS=freezeDeep(NODES.map((node,index)=>({
  index,
  title:node.title,
  question:QUESTIONS[node.id],
- readModel:'campaignAreaReadModel.rows',
+ readModel:'campaignAreaReadModel.stages',
  // The canonical row is derived from the actual-demand replay; never
  // surface its headline before the player explicitly reveals the surprise.
  // Before reveal, I2-04 must provide a separate planning-only projection.

@@ -25,7 +25,7 @@ test('I2-01: 8 canonical areas, their choice IDs, 3 SKU and <=2 visible KPI',()=
   assert.equal(area.index,index);
   assert.equal(area.title,NODES[index].title);
   assert.ok(area.question.length>12);
-  assert.equal(area.readModel,'campaignAreaReadModel.rows');
+  assert.equal(area.readModel,'campaignAreaReadModel.stages');
   assert.equal(area.primarySignal,'headline');
   assert.equal(area.primarySignalVisibleAfter,'demand-reveal');
   assert.equal(area.preRevealSignal,'planning-only');
