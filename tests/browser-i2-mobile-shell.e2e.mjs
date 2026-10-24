@@ -45,10 +45,11 @@ test('I2-08: one-screen shell never loses footer in mobile sizes, landscape and 
    await page.setViewportSize({width:w,height:h});
    await ensureShell(page,label);
    // Long scene help must scroll INSIDE the scene, not the whole document.
-   await page.locator('.learn-more summary').first().click();
-   await page.locator('#gameScene').evaluate(e=>{e.scrollTop=e.scrollHeight});
-   await ensureShell(page,label+' with explanation expanded');
-   await page.locator('.learn-more summary').first().click();
+   await page.locator('.help-trigger').first().click();
+   await page.locator('.i2-help-dialog').evaluate(e=>{e.scrollTop=e.scrollHeight});
+   await ensureShell(page,label+' with explanatory dialog');
+   await page.locator('.i2-help-close').click();
+   await page.locator('.i2-help-dialog').waitFor({state:'detached'});
   }
   await page.setViewportSize({width:360,height:640});
   await page.locator('#gameNext').focus();
