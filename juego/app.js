@@ -10,6 +10,7 @@ import {openI2HelpDialog} from './help-dialog.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
 import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
+import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateObjectives} from '../src/i2-management-objectives.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -26,6 +27,7 @@ const init=newI2GameState;
 let state;
 try{state=loadI2GameState(window.localStorage)}catch{state=init()}
 let preview=null;
+let objectives=i2ReadObjectives(window.localStorage);
 let showGuide=false;
 try{showGuide=readI2GuidePreference(window.localStorage)}catch{}
 
@@ -129,6 +131,39 @@ function choiceList(area){
  if(locked)list.append(p('Decisión confirmada. Puedes consultarla, pero para cambiarla debes reiniciar la campaña.','note'));
  return list;
 }
+function objectivesSummary(){
+ return 'Meta de servicio '+I2_GOALS[objectives.goal].serviceTargetPercent+
+ ' % · Límite extra '+money.format(objectives.incrementalBudgetCLP);
+}
+function objectivesSettings(){
+ const locked=state.confirmedAreas.length>0,details=node('details',{className:'management-settings'});
+ details.append(node('summary',{text:'Ajustar metas gerenciales'}));
+ function field(label,id,options,current,key,convert){
+  const group=section('management-field'),select=node('select',{attrs:{id}});
+  for(const option of options){
+   const o=node('option',{text:option.label,attrs:{value:option.value}});
+   o.selected=option.value===current;select.append(o);
+  }
+  select.disabled=locked;
+  select.addEventListener('change',()=>{
+   if(locked)return;
+   try{
+    objectives=i2SaveObjectives(window.localStorage,{...objectives,[key]:convert(select.value)});
+    const t=root.querySelector('#managementTarget');if(t)t.textContent=objectivesSummary();
+   }catch(e){showError(e)}
+  });
+  group.append(node('label',{text:label,attrs:{for:id}}),select);
+  return group;
+ }
+ details.append(
+  p('Estas metas evalúan resultados. No cambian pronóstico, compras ni demanda.','footnote'),
+  field('Objetivo gerencial','gameGoal',Object.entries(I2_GOALS).map(([value,v])=>({value,label:v.label})),objectives.goal,'goal',String),
+  field('Límite de gasto incremental modelado','gameBudget',I2_BUDGET_CHOICES.map(value=>({value,label:money.format(value)})),objectives.incrementalBudgetCLP,'incrementalBudgetCLP',Number),
+  p('Dificultad actual: alfa fija +40 %. Los retos con semilla llegarán en I2-26/35.','footnote'),
+  ...(locked?[p('La meta está cerrada al confirmar la primera decisión.','note')]:[])
+ );
+ return details;
+}
 function intro(){
  const brief=i2FirstMissionBriefing(state);
  stage.textContent='Misión 01 · Tu primer turno';
@@ -155,6 +190,8 @@ function intro(){
    ]))
   ]),
   p('Partimos con '+num.format(brief.plannedOrders)+' pedidos previstos en una muestra. La demanda real sigue oculta.','note'),
+  node('p',{className:'management-target',text:objectivesSummary(),attrs:{id:'managementTarget'}}),
+  objectivesSettings(),
   p(brief.warning,'footnote')
  ]);
  updateFooter();
@@ -291,8 +328,8 @@ function reviewScene(){
 function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
  stage.textContent='Resultado · Aprendizaje';progress.style.width='100%';
- let data,score;
- try{data=resultFor();score=i2SafeScorecard(data)}catch(e){showError(e);return}
+ let data,score,evaluation;
+ try{data=resultFor();score=i2SafeScorecard(data);evaluation=i2EvaluateObjectives(score,objectives)}catch(e){showError(e);return}
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -312,6 +349,23 @@ function resultsScene(){
   heading('Estas fueron las consecuencias de tus decisiones.'),
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
+  section('management-evaluation',[
+   node('strong',{text:'Tu gestión frente a las metas'}),
+   ...[['Servicio de expedición',evaluation.service.status,
+      evaluation.service.actualPercent.toFixed(1).replace('.',',')+' % / meta '+evaluation.service.targetPercent+' %',
+      evaluation.service.description],
+     ['Gasto extra modelado',evaluation.expense.status,
+      money.format(evaluation.expense.valueCLP)+' / límite '+money.format(evaluation.expense.budgetCLP),
+      evaluation.expense.description]].map(([label,status,value,description])=>
+     section('management-traffic-row',[
+      node('span',{className:'management-traffic status-'+status,text:
+       status==='green'?'Adecuado':status==='amber'?'Atención':'Crítico'}),
+      node('strong',{text:label}),p(value+' · '+description,'note')
+     ])),
+   p(evaluation.allGreen?'Las dos metas configuradas se cumplieron, sin afirmar rentabilidad total.':
+     'Atención: un buen despacho no compensa una desviación crítica de costo o servicio.','note'),
+   p('Evaluación didáctica de dos ejes. Costo total y productividad persona-hora: sin datos auditables.','footnote')
+  ]),
   section('guide-box',[
    node('strong',{text:'Lección para gerencia'}),
    p(score.recoveredOrders.value>0?'La intervención recuperó pedidos frente a mantener el escenario sin actuar. Revisa también su costo.':'Esta decisión no recuperó pedidos adicionales antes del corte. A veces el plazo, el stock o varias restricciones simultáneas limitan la acción.'),
