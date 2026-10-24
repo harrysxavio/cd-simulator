@@ -39,6 +39,15 @@ export function openI2HelpDialog({title,paragraphs},source){
   if(source.isConnected)source.focus({preventScroll:true});
  };
  close.addEventListener('click',()=>dialog.close());
+ // There is deliberately just one focusable control in this concise sheet.
+ // Some Chromium builds move focus to <body> on Tab even for a top-layer
+ // <dialog> with only one tabbable node: keep focus within the dialog.
+ dialog.addEventListener('keydown',event=>{
+  if(event.key==='Tab'){
+   event.preventDefault();
+   close.focus({preventScroll:true});
+  }
+ });
  dialog.addEventListener('close',cleanup,{once:true});
  // The native cancel event handles Escape and closes the top-layer dialog.
  document.body.append(dialog);
