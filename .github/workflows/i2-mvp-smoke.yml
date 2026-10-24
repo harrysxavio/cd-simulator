@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: '22'
       - name: I2 physical adapter unit tests
-        run: node --experimental-default-type=module --test tests/i2-product-contract.test.mjs tests/i2-mvp-adapter.test.mjs tests/i2-game-campaign-adapter.test.mjs tests/i2-game-state.test.mjs
+        run: node --experimental-default-type=module --test tests/i2-product-contract.test.mjs tests/i2-mvp-adapter.test.mjs tests/i2-game-campaign-adapter.test.mjs tests/i2-game-state.test.mjs tests/i2-economic-privacy.test.mjs
       - name: Install pinned browser test dependency
         run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.64.0
       - name: Focused game journey and entry
@@ -35,4 +35,4 @@ jobs:
             if curl --silent --fail http://127.0.0.1:8000/juego/ >/dev/null; then break; fi
             sleep 1
           done
-          node --experimental-default-type=module --test --test-concurrency=1 tests/browser-i2-game-route.e2e.mjs tests/browser-i2-entry-link.e2e.mjs tests/browser-i2-mvp-alpha.e2e.mjs tests/browser-i2-game-state.e2e.mjs
+          node --experimental-default-type=module --test --test-concurrency=1 tests/browser-i2-game-route.e2e.mjs tests/browser-i2-entry-link.e2e.mjs tests/browser-i2-mvp-alpha.e2e.mjs tests/browser-i2-game-state.e2e.mjs tests/browser-i2-boundary.e2e.mjs
