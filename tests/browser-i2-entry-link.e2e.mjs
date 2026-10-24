@@ -39,6 +39,9 @@ test('I2-03: mobile V1 entry opens actual /juego/ page and returns without repla
  await link.click();
  assert.equal(new URL(page.url()).pathname,PATH);
  assert.match(await page.title(),/Misión CD/);
+ // The routed HTML can arrive before its module has painted the first scene.
+ // Wait for the playable title, not the temporary "Cargando..." placeholder.
+ await page.locator('#gameScene h1').filter({hasText:'Hoy tú diriges el centro de distribución'}).waitFor({state:'visible'});
  assert.match(await page.locator('#gameScene').innerText(),/Hoy tú diriges el centro de distribución/);
  const now=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
  assert.deepEqual(now,old,'Opening game route must not touch V1 storage');
