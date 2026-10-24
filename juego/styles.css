@@ -316,3 +316,47 @@ html,body{height:100%;overflow:hidden}
  .intro-fact,.briefing-steps{border:1px solid CanvasText}
  .briefing-number{background:Highlight;color:HighlightText}
 }
+
+
+/* I2-14 · Managerial goal (evaluation only), no impact on real SKU physics. */
+.management-target{
+ margin:10px 0 6px;font-size:.82rem;font-weight:750;color:var(--warning-text);
+}
+.management-settings{
+ padding:9px 12px;margin:8px 0 12px;border-radius:12px;
+ border:1px solid var(--border);background:var(--detail-bg);
+}
+.management-settings summary{cursor:pointer;font-size:.85rem;font-weight:750;min-height:44px;display:list-item;align-content:center}
+.management-field{display:flex;flex-direction:column;gap:5px;margin:12px 0}
+.management-field label{font-size:.8rem;color:var(--muted)}
+.management-field select{
+ width:100%;min-height:46px;padding:7px;
+ background:var(--panel);color:var(--text);border:1px solid var(--border);
+ border-radius:9px;font:inherit;font-size:.86rem;
+}
+.management-field select:focus-visible,.management-settings summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px;
+}
+.management-field select:disabled{opacity:.75}
+.management-evaluation{
+ display:flex;flex-direction:column;gap:9px;margin:14px 0;
+ padding:13px;border-radius:14px;border:1px solid var(--border);
+}
+.management-evaluation>strong{font-size:.9rem}
+.management-traffic-row{
+ display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 9px;
+ padding:9px;border:1px solid var(--border);border-radius:10px;
+}
+.management-traffic-row>strong{font-size:.82rem;align-self:center}
+.management-traffic-row>p{grid-column:1/-1;margin:0;font-size:.78rem}
+.management-traffic{
+ font-size:.72rem;font-weight:800;padding:4px 7px;
+ border:1px solid currentColor;border-radius:7px;
+}
+.status-green{color:var(--success-text)}
+.status-amber{color:var(--warning-text)}
+.status-red{color:var(--danger-text)}
+@media(forced-colors:active){
+ .management-traffic{color:CanvasText;border:2px solid CanvasText}
+ .management-traffic-row{border:1px solid CanvasText}
+}
