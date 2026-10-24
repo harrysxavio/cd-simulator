@@ -47,10 +47,17 @@ test('I2-13: first-time briefing on phone, start in one action, safe exit and re
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('#gameNext').innerText(),'Continuar mi plan →');
   assert.equal(await page.locator('.intro-fact').count(),3);
+  // The game must leave V1's key untouched before navigating away.
+  assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-v90')),'preserve-legacy');
   await page.locator('.return-link').click();
   await page.waitForURL(url=>url.pathname.endsWith('/cd-simulator/')||url.pathname==='/');
-  assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-v90')),'preserve-legacy');
+  // V1 owns this key and may replace our deliberately malformed marker with
+  // its own validated session when V1 itself loads. That is not an I2 write.
+  const v1AfterLoad=await page.evaluate(()=>localStorage.getItem('supply-lab-v90'));
+  assert.ok(v1AfterLoad);
+  assert.ok(JSON.parse(v1AfterLoad).schemaVersion>=1);
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
+  assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-v90')),v1AfterLoad);
   assert.equal(await page.locator('#gameNext').innerText(),'Continuar mi plan →');
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameStage').innerText(),/Área 2 de 8/);
