@@ -7,11 +7,11 @@
 | Campo | Valores | Modelo efectivo |
 | --- | --- | --- |
 | Pedidos previstos en la muestra | 160, 200, 240 | `plannedSampleOrders` del contrato SKU, que escala también el tamaño de la cohorte observada según la semilla previamente fijada |
-| Dotación teórica de Picking | 3, 5, 7 | `scenario.pickingOperators` del motor agregado, trasladado a `pickingUnitCapacity` del modelo SKU como supuesto didáctico |
+| Tope físico de Picking por jornada | Según decisión de área (sin tope adicional), 40, 80 SKU/día | `pickingUnitCapacityLimit` reduce `pickingUnitCapacity` solo si es más estricto que la decisión en Picking; conserva la causalidad de las ocho áreas |
 | Perfil de stock inicial físico A/B/C | 75 %, 100 %, 125 % del catálogo (redondeo hacia abajo) | `skuOpeningState({stock})` dentro del contrato físico SKU: A/B/C reales del modelo, nunca `scenario.initialStock` de la jornada agregada |
 | Costo del refuerzo activado | CLP 50.000, 70.000, 100.000 por jornada | `extraCapacityDailyCost` del mismo `recoveryComparison` de V1. Es costo incremental *parcial*, no P&L completo |
 
-**Caso por defecto inalterado:** 200 pedidos, 5 operarios teóricos, catálogo SKU 100 %, CLP 70.000 por jornada; mismas cinco semillas de I2-14. Un usuario puede pulsar «Comenzar misión» sin tocar estos campos.
+**Caso por defecto inalterado:** 200 pedidos, Picking según áreas (sin límite adicional), catálogo SKU 100 %, CLP 70.000 por jornada; mismas cinco semillas de I2-14. Un usuario puede pulsar «Comenzar misión» sin tocar estos campos.
 
 ### Flujo
 
@@ -28,11 +28,11 @@
 - Los campos se validan mediante listas cerradas, incluidas fechas, magnitudes y costos enteros. Campos desconocidos o valores fuera de rango se rechazan.
 - La apertura SKU explícita es validada por `skuOpeningState` y auditada por `auditSkuDecisionBoundary`. Se prohíbe enviar un stock agregado como stock físico.
 - Solo se persisten configuración, semilla y opciones; nunca movimientos de clientes ni ledger físico.
-- El motor agregado actúa como fuente de proxies de capacidad, no como contabilidad ni observación operacional calibrada.
+- El motor agregado actúa como fuente de proxies de capacidad, con un límite SKU/día adicional configurable y auditado; no se confunde con dotación de personal ni productividad medida.
 
 ### Qué NO se considera resuelto
 
-No se ha calibrado equivalencia real de operarios ↔ pedidos/hora, ni costo total, inventario financiero completo, ni niveles de dificultad económicos. No se incluyen horas-persona medibles, costos de transporte sin tarifa ni cumplimiento al cliente. La economía completa y los semáforos multieje siguen en F7. Android físico, TalkBack y observación humana siguen en F8.
+No se ha calibrado equivalencia real de unidades SKU ↔ horas-persona, ni costo total, inventario financiero completo, ni niveles de dificultad económicos. No se incluyen horas-persona medibles, costos de transporte sin tarifa ni cumplimiento al cliente. La economía completa y los semáforos multieje siguen en F7. Android físico, TalkBack y observación humana siguen en F8.
 
 ### Puertas de aceptación
 
