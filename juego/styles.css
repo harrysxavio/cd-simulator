@@ -566,3 +566,47 @@ html,body{height:100%;overflow:hidden}
   outline:3px solid Highlight
  }
 }
+
+
+/* I2-19 · Cobertura SKU. El manifiesto se consulta solo al abrir detalles. */
+.planning-coverage-teaching,.planning-outcome{
+ display:grid;gap:7px;min-width:0;padding:11px;margin:9px 0 12px;
+ border-radius:12px;border:1px solid var(--border);background:var(--panel)
+}
+.planning-coverage-teaching>strong,.planning-outcome>strong{
+ font-size:.89rem;line-height:1.4
+}
+.planning-coverage-teaching p,.planning-outcome p{
+ margin:0!important;line-height:1.45;font-size:.78rem
+}
+.planning-coverage-numbers{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.planning-coverage-number{
+ display:flex;flex-direction:column;gap:5px;padding:9px;
+ border:1px solid var(--border);border-radius:10px;background:var(--detail-bg);min-width:0
+}
+.planning-coverage-number span{font-size:.73rem;color:var(--muted)}
+.planning-coverage-number strong{
+ font-size:1rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.planning-sku-detail{
+ border:1px solid var(--border);border-radius:10px;padding:5px 9px;
+ background:var(--detail-bg)
+}
+.planning-sku-detail summary{
+ font-weight:750;font-size:.8rem;cursor:pointer;min-height:44px;align-content:center
+}
+.planning-sku-detail summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.planning-sku-row{padding:8px 0;border-top:1px solid var(--border)}
+.planning-sku-row strong{font-size:.78rem}
+.planning-sku-row .footnote{margin:4px 0!important}
+@media(max-width:350px){.planning-coverage-numbers{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .planning-coverage-teaching,.planning-outcome,.planning-coverage-number,.planning-sku-detail{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .planning-sku-detail summary:focus-visible{outline:3px solid Highlight}
+}
