@@ -40,7 +40,7 @@ test('I2-16: Nico se presenta sin activar consejos y niveles no mutan campaña n
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'true');
   assert.match(await page.locator('.mentor-response').innerText(),/Por ejemplo:/);
   assert.equal(await page.locator('.mentor-question').count(),1);
-  assert.match(await page.locator('.mentor-question').innerText(),/\\?/);
+  assert.match(await page.locator('.mentor-question').innerText(),/\?$/);
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameGuideText').innerText(),/demanda prevista|demanda observada/);
   assert.doesNotMatch(await page.locator('#gameGuideText').innerText(),/300 pedidos|50 %/);
