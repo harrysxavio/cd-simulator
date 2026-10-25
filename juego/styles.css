@@ -610,3 +610,56 @@ html,body{height:100%;overflow:hidden}
  }
  .planning-sku-detail summary:focus-visible{outline:3px solid Highlight}
 }
+
+/* I2-20: distinción de compra, proveedor, muelle y recepción física SKU. */
+.supplier-purchasing-teaching,.supplier-purchasing-outcome{
+ margin:9px 0 12px;padding:11px;display:grid;gap:8px;
+ background:var(--panel);border:1px solid var(--border);
+ border-radius:12px;min-width:0
+}
+.supplier-purchasing-teaching>strong,.supplier-purchasing-outcome>strong{
+ font-size:.88rem;line-height:1.4
+}
+.supplier-purchasing-teaching p,.supplier-purchasing-outcome p{
+ margin:0!important;font-size:.77rem;line-height:1.45
+}
+.supplier-purchasing-metrics{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.supplier-metric{
+ display:flex;flex-direction:column;gap:5px;border:1px solid var(--border);
+ padding:9px;border-radius:10px;background:var(--detail-bg);min-width:0
+}
+.supplier-metric span{font-size:.7rem;color:var(--muted)}
+.supplier-metric strong{font-variant-numeric:tabular-nums;font-size:1rem}
+.supplier-sku-detail{
+ padding:6px 9px;border-radius:10px;border:1px solid var(--border);
+ background:var(--detail-bg)
+}
+.supplier-sku-detail summary{
+ display:list-item;min-height:44px;align-content:center;
+ font-weight:750;font-size:.78rem;cursor:pointer
+}
+.supplier-sku-detail summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.supplier-sku-row{border-top:1px solid var(--border);padding:7px 0}
+.supplier-sku-row>strong{font-size:.78rem}
+.supplier-sku-row p{margin:3px 0!important}
+@media(max-width:340px){.supplier-purchasing-metrics{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .supplier-purchasing-teaching,.supplier-purchasing-outcome,.supplier-sku-detail,.supplier-metric{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .supplier-sku-detail summary:focus-visible{outline:3px solid Highlight}
+}
+
+/* Nico's 21 high-quality PNG originals are opt-in only after checksum verification. */
+.nico-scene-portrait{
+ display:block;width:112px;height:112px;object-fit:contain;
+ border-radius:12px;margin:4px auto 9px;
+ background:var(--detail-bg);border:1px solid var(--border);
+}
+.mentor-area>.nico-scene-portrait{width:88px;height:88px;float:left;margin:5px 11px 3px 0}
+@media(max-width:320px){.nico-scene-portrait{width:84px;height:84px}}
+@media(forced-colors:active){.nico-scene-portrait{border-color:CanvasText}}
