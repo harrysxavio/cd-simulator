@@ -780,6 +780,35 @@ function resultsScene(){
   ]),
   p(data.purchasing.boundary,'footnote')
  ]);
+ const receive=data.receiving;
+ const receivingOutcome=section('receiving-outcome',[
+  node('strong',{text:'Recepción · qué sucedió en el muelle'}),
+  section('receiving-capacity-numbers',[
+   ...[['Llegaron al muelle',receive.totals.arrivedSkuUnits],
+      ['Recibidas físicamente',receive.totals.receivedSkuUnits],
+      ['Pendientes al cierre',receive.totals.waitingAtCutoffSkuUnits],
+      ['Pico de cola',receive.totals.peakDockQueueSkuUnits]]
+     .map(([label,value])=>section('receiving-capacity-number',[
+      node('span',{text:label}),node('strong',{text:num.format(value)+' SKU'})]))
+  ]),
+  p(receive.totals.peakDockQueueSkuUnits>0
+   ?'Hubo esperas en muelle: '+num.format(receive.totals.queueSkuDays)+
+    ' SKU-días acumulados antes del cierre.'
+   :'En esta muestra no se formó una cola de Recepción. Podrían existir faltantes o demoras en otras áreas.','note'),
+  node('details',{className:'receiving-daily-details'},[
+   node('summary',{text:'Ver llegadas y cola día por día'}),
+   ...receive.rows.filter(d=>d.arrivedSkuUnits>0||
+    d.receivedSkuUnits>0||d.endDockQueueSkuUnits>0)
+    .map(d=>section('receiving-daily-row',[
+     node('strong',{text:'Día '+d.day}),
+     p('Llegadas: '+num.format(d.arrivedSkuUnits)+
+       ' · Recepciones: '+num.format(d.receivedSkuUnits)+
+       ' · En muelle: '+num.format(d.endDockQueueSkuUnits)+' SKU'),
+     p('Espera más antigua: '+d.oldestWaitingDays+' días','footnote')
+    ]))
+  ]),
+  p(receive.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -804,6 +833,7 @@ function resultsScene(){
   forecast,
   planning,
   purchasing,
+  receivingOutcome,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
