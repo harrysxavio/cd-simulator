@@ -17,7 +17,7 @@ test('I2-15: listas cerradas, defaults antiguos y stock físico SKU no agregado'
   {A:187,B:112,C:68});
  for(const invalid of [
   {...I2_DEFAULT_ADVANCED,plannedOrders:999999},
-  {...I2_DEFAULT_ADVANCED,pickingOperators:0},
+  {...I2_DEFAULT_ADVANCED,pickingLimitSkuPerDay:'0'},
   {...I2_DEFAULT_ADVANCED,stockProfile:'other'},
   {...I2_DEFAULT_ADVANCED,extraCapacityDailyCostCLP:-1},
   {...I2_DEFAULT_ADVANCED,tracking:'exposed'}
@@ -29,7 +29,7 @@ test('I2-15: migración de partidas v2 preconfiguración, persistencia y replay 
  delete legacy.advanced;
  const migrated=normalizeI2GameState(legacy);
  assert.deepEqual(migrated,newI2GameState());
- const custom={...I2_DEFAULT_ADVANCED,plannedOrders:160,pickingOperators:7,
+ const custom={...I2_DEFAULT_ADVANCED,plannedOrders:160,pickingLimitSkuPerDay:'40',
   stockProfile:'low',extraCapacityDailyCostCLP:100000};
  const init=newI2GameState({seed:'alpha-case-03',advanced:custom});
  const entries=new Map([['supply-lab-v90','unchanged']]);
@@ -48,7 +48,7 @@ test('I2-15: migración de partidas v2 preconfiguración, persistencia y replay 
 test('I2-15: configuración cambia base canónica y costo sin inventar gasto integral',()=>{
  const choices=i2DefaultChoices();
  const base=i2MvpPhysicalResult({choices,seed:'alpha-case-03'});
- const custom={...I2_DEFAULT_ADVANCED,plannedOrders:160,pickingOperators:7,
+ const custom={...I2_DEFAULT_ADVANCED,plannedOrders:160,pickingLimitSkuPerDay:'40',
   stockProfile:'high',extraCapacityDailyCostCLP:50000};
  const a=i2MvpPhysicalResult({choices,seed:'alpha-case-03',advanced:custom,option:'wait'});
  const b=i2MvpPhysicalResult({choices,seed:'alpha-case-03',advanced:custom,option:'wait'});
@@ -67,6 +67,15 @@ test('I2-15: configuración cambia base canónica y costo sin inventar gasto int
  const lowResult=i2MvpPhysicalResult({choices,seed:'alpha-case-03',advanced:low});
  assert.notEqual(lowResult.baselineKey,a.baselineKey,
   'El stock físico configurado debe formar parte de la base inmutable');
+ // Un límite físico relevante debe afectar un resultado observable, no solo metadatos.
+ const highDemand=i2MvpPhysicalResult({choices,seed:'alpha-case-04',
+  advanced:{...I2_DEFAULT_ADVANCED,plannedOrders:240,stockProfile:'high'}});
+ const constrained=i2MvpPhysicalResult({choices,seed:'alpha-case-04',
+  advanced:{...I2_DEFAULT_ADVANCED,plannedOrders:240,stockProfile:'high',pickingLimitSkuPerDay:'40'}});
+ assert.equal(constrained.actualOrders,highDemand.actualOrders);
+ assert.ok(constrained.shippedOrders<highDemand.shippedOrders,
+  'El límite de 40 unidades SKU/día debe reducir expedición de pedidos completos');
+ assert.notEqual(constrained.baselineKey,highDemand.baselineKey);
  // Tarifa diaria: cambia la economía modelada, no existencias ni capacidad.
  const highCost={...custom,extraCapacityDailyCostCLP:100000};
  const x=i2MvpPhysicalResult({choices,seed:'alpha-case-03',advanced:custom,option:'overtime'});
