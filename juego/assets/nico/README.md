@@ -27,6 +27,23 @@ Las láminas son conjuntos de ilustraciones, no iconos ya segmentados.
 Los 12 recortes individuales conservan su fondo original; no son sprites transparentes.
 El contenido binario debe cargarse y verificarse antes de enlazarlo desde `app.js` o `styles.css`.
 
+## Instalación validada desde el respaldo ZIP
+
+El respaldo aportado por el usuario contiene 21 PNG originales (y el catálogo); **ningún archivo binario se ha subido al repositorio en esta entrega**. No marcar el inventario como completo solo por disponer de un ZIP o su manifest.
+
+El instalador incluido en el proyecto automatiza la recuperación sin copiar y pegar imágenes:
+
+```bash
+python3 tools/install-nico-assets.py cd_simulator_nico_assets_backup_2026-10-25.zip
+git add juego/assets/nico/ src/i2-nico-art.js
+git commit -m "assets: respaldar 21 PNG originales de Nico"
+git push
+```
+
+El script verifica los **21 hashes SHA-256** del `manifest.json` antes de extraer, rechaza rutas inseguras, conserva los bytes originales y activa `I2_NICO_ASSETS_READY=true` solo después de instalarlos todos. El juego usa `juego/nico.svg` mientras tanto. Una vez publicados, ya están conectadas las poses de bienvenida, explicación, alerta, demanda, análisis y recuperación. Las cinco láminas de iconos quedan indexadas, **no se recortan ni fingen iconos individuales**.
+
+**Advertencia de calidad:** las expresiones individuales mantienen el fondo original; revisar cómo lucen sobre tarjetas de distintos colores antes de liberar las 21 imágenes como sprites definitivos.
+
 ## Carga manual desde el respaldo
 
 1. Descarga el ZIP `cd_simulator_nico_assets_backup_2026-10-25.zip` proporcionado en el chat.
