@@ -16,6 +16,7 @@ import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_ADVANCED_FIELDS,i2ValidateAdvanced} from '../src/i2-advanced-settings.js';
 import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-indicators.js';
+import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -350,6 +351,27 @@ function intro(){
  ]);
  updateFooter();
 }
+/**
+ * I2-18: solo planificación. El lector no conoce la semilla de demanda,
+ * el libro de eventos ni el resultado físico (I2-18 contrato separado).
+ */
+function commercialForecastTeaching(){
+ const lesson=i2CommercialForecastLesson(state);
+ const chain=node('details',{className:'commercial-flow'},[
+  node('summary',{text:'Cómo afecta Compras y al resto del CD'}),
+  ...lesson.chain.map((step,i)=>p((i+1)+'. '+step,'commercial-flow-step')),
+  p('Lead time nominal del catálogo SKU: '+lesson.leadTimes.map(x=>
+   x.id+' '+x.nominalDays+' días').join(' · ')+'. Fecha efectiva sujeta a proveedor y proceso.','footnote')
+ ]);
+ return section('commercial-forecast-teaching',[
+  node('strong',{text:lesson.main}),
+  p(lesson.secondary,'commercial-forecast-sub'),
+  p(lesson.whatIf,'note'),
+  chain,
+  p(lesson.warning,'footnote'),
+  p('Fuente: '+lesson.source,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -392,10 +414,13 @@ function areaScene(){
  ]);
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
-  choiceList(area),lesson,consequence
+  choiceList(area),
+  ...(area.id==='commercial'?[p('El forecast es una hipótesis de compra, no una venta garantizada. Mira Indicadores para ver la equivalencia de tu muestra.','commercial-brief')]:[]),
+  lesson,consequence
  ]);
  const indicators=section('area-tab-panel',[
-  p('Entradas previstas, no resultados','option-heading'),compare
+  p('Entradas previstas, no resultados','option-heading'),compare,
+  ...(area.id==='commercial'?[commercialForecastTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
@@ -572,6 +597,31 @@ function resultsScene(){
  stage.textContent='Resultado · Aprendizaje';progress.style.width='100%';
  let data,score,evaluation;
  try{data=resultFor();score=i2SafeScorecard(data);evaluation=i2EvaluateObjectives(score,objectives)}catch(e){showError(e);return}
+ // Solo tras el reveal: lee el mismo compromiso original por SKU.
+ const commercial=data.commercial;
+ const forecast=section('commercial-result',[
+  node('strong',{text:'Comercial · pronóstico versus realidad'}),
+  section('commercial-result-pair',[
+   p('Pronóstico: '+num.format(commercial.forecastOrders)+' pedidos de muestra'),
+   p('Observados: '+num.format(commercial.actualOrders)+' pedidos')
+  ]),
+  p('Diferencia real − pronóstico: '+(commercial.varianceVsForecastOrders>0?'+':'')+
+   num.format(commercial.varianceVsForecastOrders)+' pedidos. '+(
+    commercial.errorDirection==='under'?'El plan subestimó la demanda.':
+    commercial.errorDirection==='over'?'El plan sobreestimó la demanda.':
+    'El pronóstico coincidió con la demanda observada.'
+   )),
+  p('Compras originales comprometidas: '+num.format(commercial.originalCommittedSkuUnits)+
+   ' unidades SKU · '+money.format(commercial.originalCommittedValueCLP)+'.','note'),
+  p('Compromiso no es pago ni gasto operativo total. Compras, capacidad y plazo también afectan el servicio.','footnote'),
+  node('details',{className:'commercial-commitment-details'},[
+   node('summary',{text:'Ver compras originales por SKU y día previsto'}),
+   ...commercial.originalRows.map(row=>p(
+    'SKU '+row.skuId+': '+num.format(row.committedSkuUnits)+
+    ' unidades · llegada prevista día '+row.expectedArrivalDay
+   ))
+  ])
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -591,6 +641,7 @@ function resultsScene(){
   heading('Estas fueron las consecuencias de tus decisiones.'),
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
+  forecast,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
