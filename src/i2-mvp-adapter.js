@@ -4,6 +4,7 @@ import {i2ChallengeForSeed,I2_DEFAULT_SEED} from './i2-challenge-config.js';
 import {i2AdvancedPhysicalOptions,I2_DEFAULT_ADVANCED} from './i2-advanced-settings.js';
 import {commercialPlanningReading} from './commercial-planning.js';
 import {i2CommercialOutcomeReading} from './i2-commercial-forecast-lesson.js';
+import {i2PlanningCoverageOutcome} from './i2-planning-coverage.js';
 import {I2_AREAS,I2_RECOVERIES} from './i2-product-contract.js';
 import {createI2GameCampaignAdapter,i2AreaSelection} from './i2-game-campaign-adapter.js';
 
@@ -63,6 +64,7 @@ export function i2MvpPhysicalResult({
   policy:'balanced',option,urgentArrivalDay,purchaseCoveragePercent
  });
  const {contract,comparison,areaModel}=canonical;
+ const planning=i2PlanningCoverageOutcome(comparison.planningCommitment);
  // Reusar el manifiesto físico original e inmutable del motor SKU.
  const commercial=i2CommercialOutcomeReading(commercialPlanningReading(
   comparison.planningCommitment,{actualOrders:contract.actualSampleOrders,
@@ -84,7 +86,7 @@ export function i2MvpPhysicalResult({
   unknownTotalCost:true,
   skuIds:Object.freeze(Object.keys(contract.skuInputs.stock)),
   originalPurchaseOrders:comparison.originalPurchaseOrders,
-  commercial,
+  commercial,planning,
   areaRows:areaModel.stages,
   baselineKey:comparison.baselineKey
  });
