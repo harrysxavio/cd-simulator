@@ -94,7 +94,18 @@ test('I2-06: exposed projection is allow-listed; no ledger, customer, tracking o
   physicalLedger:privateSource.orders});
  assert.equal(stored.length,1);
  assert.equal(stored[0][0],I2_GAME_STORAGE_KEY);
- assert.doesNotMatch(stored[0][1],/tracking|customer|orders|ledger|private@example.com|PII0001/i);
+ // Un parámetro legítimo como plannedOrders no equivale a guardar pedidos,
+ // tracking ni un ledger. Validamos estructura y ausencia de PII por separado.
+ const saved=JSON.parse(stored[0][1]);
+ assert.deepEqual(Object.keys(saved).sort(),[
+  'schema','campaignId','seed','phase','substep','index','choices','recovery',
+  'arrivalDay','coverage','advanced','confirmedAreas','reveal'
+ ].sort());
+ assert.deepEqual(Object.keys(saved.advanced).sort(),[
+  'plannedOrders','pickingOperators','stockProfile','extraCapacityDailyCostCLP'
+ ].sort());
+ assert.doesNotMatch(stored[0][1],
+  /tracking|customer|physicalLedger|private@example.com|PII0001|confidential/i);
 });
 
 test('I2-06: Pages verifier checks current served module chain, not the removed direct dependency',()=>{
