@@ -763,3 +763,48 @@ html,body{height:100%;overflow:hidden}
  .receiving-queue-explanation summary:focus-visible,
  .receiving-daily-details summary:focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-22 · Calidad: una retención es temporal, nunca merma implícita. */
+.quality-release-teaching,.quality-outcome{
+ display:grid;gap:8px;min-width:0;margin:9px 0 12px;padding:11px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel);
+}
+.quality-release-teaching>strong,.quality-outcome>strong{
+ font-size:.9rem;line-height:1.4
+}
+.quality-release-teaching p,.quality-outcome p{
+ font-size:.78rem;line-height:1.45;margin:0!important
+}
+.quality-release-numbers{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.quality-release-number{
+ display:flex;flex-direction:column;gap:5px;min-width:0;padding:9px;
+ border:1px solid var(--border);border-radius:10px;background:var(--detail-bg)
+}
+.quality-release-number span{font-size:.72rem;color:var(--muted)}
+.quality-release-number strong{
+ font-size:1rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.quality-explanation,.quality-daily-details{
+ border:1px solid var(--border);border-radius:10px;
+ background:var(--detail-bg);padding:6px 9px
+}
+.quality-explanation summary,.quality-daily-details summary{
+ min-height:44px;align-content:center;font-weight:750;
+ font-size:.8rem;cursor:pointer
+}
+.quality-explanation summary:focus-visible,.quality-daily-details summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.quality-daily-row{padding:7px 0;border-top:1px solid var(--border)}
+.quality-daily-row strong{font-size:.78rem}
+@media(max-width:340px){.quality-release-numbers{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .quality-release-teaching,.quality-outcome,.quality-release-number,
+ .quality-explanation,.quality-daily-details{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .quality-explanation summary:focus-visible,.quality-daily-details summary:focus-visible{outline:3px solid Highlight}
+}

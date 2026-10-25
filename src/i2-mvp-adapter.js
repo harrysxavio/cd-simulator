@@ -7,6 +7,7 @@ import {i2CommercialOutcomeReading} from './i2-commercial-forecast-lesson.js';
 import {i2PlanningCoverageOutcome} from './i2-planning-coverage.js';
 import {i2SupplierOutcomeReading} from './i2-supplier-purchasing.js';
 import {i2ReceivingOutcomeReading} from './i2-receiving-dock.js';
+import {i2QualityReleaseOutcomeReading} from './i2-quality-release.js';
 import {I2_AREAS,I2_RECOVERIES} from './i2-product-contract.js';
 import {createI2GameCampaignAdapter,i2AreaSelection} from './i2-game-campaign-adapter.js';
 
@@ -69,6 +70,7 @@ export function i2MvpPhysicalResult({
  const planning=i2PlanningCoverageOutcome(comparison.planningCommitment);
  const purchasing=i2SupplierOutcomeReading(comparison);
  const receiving=i2ReceivingOutcomeReading(comparison);
+ const quality=i2QualityReleaseOutcomeReading(comparison);
  // Reusar el manifiesto físico original e inmutable del motor SKU.
  const commercial=i2CommercialOutcomeReading(commercialPlanningReading(
   comparison.planningCommitment,{actualOrders:contract.actualSampleOrders,
@@ -90,7 +92,7 @@ export function i2MvpPhysicalResult({
   unknownTotalCost:true,
   skuIds:Object.freeze(Object.keys(contract.skuInputs.stock)),
   originalPurchaseOrders:comparison.originalPurchaseOrders,
-  commercial,planning,purchasing,receiving,
+  commercial,planning,purchasing,receiving,quality,
   areaRows:areaModel.stages,
   baselineKey:comparison.baselineKey
  });
