@@ -1,19 +1,22 @@
 import {DEFAULTS} from './engine.js';
 import {I2_AREAS,I2_RECOVERIES} from './i2-product-contract.js';
 import {I2_MVP_CASE} from './i2-mvp-adapter.js';
+import {I2_DEFAULT_SEED,i2ChallengeForSeed} from './i2-challenge-config.js';
 
 /** I2-05: only educational choices and navigation are saved.
  * Never persist a physical SKU ledger, a recovery preview or V1's session. */
 export const I2_GAME_STORAGE_KEY='supply-lab-i2-v1';
 export const I2_GAME_SCHEMA=2;
-const SEED='alpha-case-01'; // stable and DOES NOT disclose demand surprise
+const SEED=I2_DEFAULT_SEED; // el caso por defecto respeta todas las partidas anteriores
 const PHASES=Object.freeze(['intro','area','reveal','recover','review','result']);
 const ARRIVALS=Object.freeze([1,2,5,10,13]);
 const COVERAGES=Object.freeze([0,25,50,75,100]);
 
-export function newI2GameState(){
+export function newI2GameState({seed=SEED}={}){
+ // No se acepta una semilla libre ni un resultado dictado por el jugador.
+ i2ChallengeForSeed(seed);
  return {
-  schema:I2_GAME_SCHEMA,campaignId:I2_MVP_CASE.campaignId,seed:SEED,
+  schema:I2_GAME_SCHEMA,campaignId:I2_MVP_CASE.campaignId,seed,
   phase:'intro',substep:'briefing',index:0,
   choices:Object.fromEntries(I2_AREAS.map(a=>[a.id,DEFAULTS[a.id]])),
   recovery:'wait',arrivalDay:2,coverage:100,
@@ -42,8 +45,10 @@ export function normalizeI2GameState(raw){
   return null;
  }
  const isV2=raw.schema===I2_GAME_SCHEMA;
- if(isV2&&(raw.campaignId!==I2_MVP_CASE.campaignId||raw.seed!==SEED
-  ))return null;
+ if(isV2){
+  if(raw.campaignId!==I2_MVP_CASE.campaignId)return null;
+  try{i2ChallengeForSeed(raw.seed)}catch{return null}
+ }
  const choices={};
  for(const area of I2_AREAS){
   const optionId=raw.choices[area.id];
@@ -68,7 +73,7 @@ export function normalizeI2GameState(raw){
   return null;
  }
  return {
-  schema:I2_GAME_SCHEMA,campaignId:I2_MVP_CASE.campaignId,seed:SEED,
+  schema:I2_GAME_SCHEMA,campaignId:I2_MVP_CASE.campaignId,seed:isV2?raw.seed:SEED,
   phase:raw.phase,substep:stepFor(raw.phase),index:raw.index,
   choices,recovery:raw.recovery,arrivalDay:raw.arrivalDay,coverage:raw.coverage,
   confirmedAreas:[...confirmed],reveal:raw.reveal

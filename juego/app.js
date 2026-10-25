@@ -11,6 +11,7 @@ import {i2ProgressView} from '../src/i2-game-progress.js';
 import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
 import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateObjectives} from '../src/i2-management-objectives.js';
+import {I2_CHALLENGES,i2ChallengeForSeed,i2ChallengeReveal} from '../src/i2-challenge-config.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -135,6 +136,30 @@ function objectivesSummary(){
  return 'Meta de servicio '+I2_GOALS[objectives.goal].serviceTargetPercent+
  ' % · Límite extra '+money.format(objectives.incrementalBudgetCLP);
 }
+/** Selector de escenario: el signo de la demanda sigue oculto hasta Revelar. */
+function challengeField(locked){
+ const group=section('management-field');
+ const select=node('select',{attrs:{id:'gameChallenge'}});
+ for(const c of I2_CHALLENGES){
+  const option=node('option',{text:c.level+' · '+c.label,attrs:{value:c.seed}});
+  option.selected=c.seed===state.seed;
+  select.append(option);
+ }
+ select.disabled=locked;
+ select.addEventListener('change',()=>{
+  if(state.confirmedAreas.length>0)return;
+  try{
+   // El escenario queda precomprometido antes de la primera confirmación.
+   state.seed=i2ChallengeForSeed(select.value).seed;
+   persist();
+   const label=root.querySelector('#gameChallengeLabel');
+   if(label)label.textContent='Reto activo: '+i2ChallengeForSeed(state.seed).level;
+  }catch(e){showError(e)}
+ });
+ group.append(node('label',{text:'Reto y dificultad',attrs:{for:'gameChallenge'}}),
+  select,p('La demanda real queda fijada por este reto antes de decidir. Su resultado se oculta hasta revelar.','footnote'));
+ return group;
+}
 function objectivesSettings(){
  const locked=state.confirmedAreas.length>0,details=node('details',{className:'management-settings'});
  details.append(node('summary',{text:'Ajustar metas gerenciales'}));
@@ -159,7 +184,7 @@ function objectivesSettings(){
   p('Estas metas evalúan resultados. No cambian pronóstico, compras ni demanda.','footnote'),
   field('Objetivo gerencial','gameGoal',Object.entries(I2_GOALS).map(([value,v])=>({value,label:v.label})),objectives.goal,'goal',String),
   field('Límite de gasto incremental modelado','gameBudget',I2_BUDGET_CHOICES.map(value=>({value,label:money.format(value)})),objectives.incrementalBudgetCLP,'incrementalBudgetCLP',Number),
-  p('Dificultad actual: alfa fija +40 %. Los retos con semilla llegarán en I2-26/35.','footnote'),
+  challengeField(locked),
   ...(locked?[p('La meta está cerrada al confirmar la primera decisión.','note')]:[])
  );
  return details;
@@ -191,6 +216,7 @@ function intro(){
   ]),
   p('Partimos con '+num.format(brief.plannedOrders)+' pedidos previstos en una muestra. La demanda real sigue oculta.','note'),
   node('p',{className:'management-target',text:objectivesSummary(),attrs:{id:'managementTarget'}}),
+  node('p',{className:'footnote',text:'Reto activo: '+i2ChallengeForSeed(state.seed).level,attrs:{id:'gameChallengeLabel'}}),
   objectivesSettings(),
   p(brief.warning,'footnote')
  ]);
@@ -252,7 +278,8 @@ function revealScene(){
 function resultFor(option){
  return i2MvpPhysicalResult({
   choices:state.choices,option:option??state.recovery,
-  urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage
+  urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage,
+  seed:state.seed
  });
 }
 function labeledSelect(label,values,current,onChange){
@@ -268,11 +295,13 @@ function labeledSelect(label,values,current,onChange){
 }
 function recoveryScene(){
  if(!state.reveal){state.phase='reveal';render();return}
+ const reveal=i2ChallengeReveal(state.seed,I2_MVP_CASE.plannedOrders);
  stage.textContent='Crisis · Recuperación';progress.style.width='92%';
  replace([
-  p('DEMANDA SORPRESA · CASO FIJO','eyebrow'),
-  heading('¡La demanda aumentó un 40 %!'),
-  p('Se planificó una muestra de '+num.format(I2_MVP_CASE.plannedOrders)+' pedidos, pero el ejercicio físico tiene '+num.format(280)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
+  p('DEMANDA SORPRESA · CASO REPRODUCIBLE','eyebrow'),
+  heading(reveal.heading),
+  p('Se planificó una muestra de '+num.format(reveal.plannedOrders)+' pedidos, pero se observaron '+num.format(reveal.actualOrders)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
+  p(reveal.context,'note'),
   section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
   p('Tu acción gerencial','option-heading'),
   section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
@@ -408,6 +437,6 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init();preview=null;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed});preview=null;saveAndRender()}
 });
 render();

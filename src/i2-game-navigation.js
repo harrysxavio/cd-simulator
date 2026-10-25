@@ -69,7 +69,8 @@ export function navigateI2GameState(value,action){
    }
    break;
   case 'restart':
-   return newI2GameState();
+   // Reintento en condiciones idénticas, sin filtrar la sorpresa de antemano.
+   return newI2GameState({seed:previous.seed});
   default:
    break;
  }
