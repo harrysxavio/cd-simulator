@@ -19,7 +19,7 @@ import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-ind
 import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
 import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
 import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
-import {I2_NICO_ASSETS_READY,i2NicoPoseAsset} from '../src/i2-nico-art.js';
+import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -74,12 +74,21 @@ function setActions({next='Continuar',onNext=null,back='',onBack=null}={}){
  primary.onclick=onNext;
  secondary.textContent=back;secondary.hidden=!onBack;secondary.onclick=onBack;
 }
+/** Only verified, user-supplied Nico art; recover gracefully from missing CDN files. */
+function nicoImage(src,{className='',width=112,height=112}={}){
+ const img=node('img',{className,attrs:{
+  src,width:String(width),height:String(height),alt:'',loading:'lazy',decoding:'async'
+ }});
+ img.addEventListener('error',()=>{
+  if(img.getAttribute('src')!=='./nico.svg')img.setAttribute('src','./nico.svg');
+ });
+ return img;
+}
 /** Art source PNGs are loaded only after hash-verified installation. */
 function nicoScenePortrait(kind){
  if(!I2_NICO_ASSETS_READY)return null;
  const art=i2NicoPoseAsset(kind);
- return node('img',{className:'nico-scene-portrait',
-  attrs:{src:art.src,alt:'',width:'112',height:'112',loading:'lazy'}});
+ return nicoImage(art.src,{className:'nico-scene-portrait'});
 }
 function guideElement(){
  const advice=i2NicoCoachTip(state,guideLevel);
@@ -89,7 +98,12 @@ function guideElement(){
   text:showGuide?'Ocultar consejo de '+advice.name:'Ver consejo de '+advice.name,
   attrs:{type:'button','aria-expanded':String(showGuide),'aria-controls':'gameGuideText'}
  });
- const adviceText=p(advice.name+' · '+advice.text,'mentor-copy');
+ const adviceText=section('mentor-response',[
+  ...(showGuide?[nicoScenePortrait(advice.pose)]:[]),
+  p(advice.text,'mentor-copy'),
+  p('Por ejemplo: '+advice.example,'mentor-example'),
+  p(advice.question,'mentor-question')
+ ]);
  adviceText.id='gameGuideText';
  adviceText.hidden=!showGuide;
  toggle.addEventListener('click',()=>{
@@ -100,9 +114,7 @@ function guideElement(){
   wrapper.replaceWith(guideElement());
   root.querySelector('.mentor-toggle')?.focus({preventScroll:true});
  });
- wrapper.append(toggle);
- if(showGuide){const art=nicoScenePortrait(state.phase==='area'?'explanation':'hint');if(art)wrapper.append(art)}
- wrapper.append(adviceText);
+ wrapper.append(toggle,adviceText);
  return wrapper;
 }
 function replace(children,{guide=true}={}){
@@ -293,11 +305,11 @@ function advancedSummary(){
 function nicoWelcome(){
  const avatar=section('nico-avatar',[
   node('span',{className:'nico-avatar-fallback',text:'NC',attrs:{'aria-hidden':'true'}}),
-  node('img',{attrs:{src:i2NicoPoseAsset('welcome').src,width:'40',height:'40',alt:'',loading:'lazy'}})
+  nicoImage(i2NicoPortraitAsset().src,{width:76,height:92})
  ]);
  const intro=section('nico-intro-text',[
-  node('strong',{text:'Nico · Coordinador ficticio del CD'}),
-  p('Soy Nico. Puedo enseñarte cómo se conectan las áreas; tú tomas todas las decisiones.','nico-intro-line')
+  node('strong',{text:'¡Hola! Soy Nico, tu compañero de misión'}),
+  p('Vamos a recorrer el CD juntos. Te explicaré lo importante con ejemplos y tú tomarás las decisiones.','nico-intro-line')
  ]);
  const card=section('nico-welcome',[
   section('nico-welcome-head',[avatar,intro])
@@ -501,7 +513,7 @@ function areaScene(){
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
-  p('Puedo ayudarte a razonar la decisión, pero no conozco los pedidos reales ni el resultado futuro.','note'),
+  p('¿Lo vemos juntos? Te cuento qué puede pasar con esta decisión y te dejo una pregunta para pensar.','note'),
   guideElement(),
   p('Si mis consejos no te sirven, puedes dejarlos ocultos y continuar.','footnote')
  ]);
