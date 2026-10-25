@@ -17,7 +17,11 @@ test('I2-16: Nico se presenta sin activar consejos y niveles no mutan campaña n
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'false',
    'Mostrar el personaje no activa consejos automáticamente');
   const art=page.locator('.nico-avatar img');
-  assert.equal(await art.getAttribute('src'),'./nico.svg');
+  const expectedSrc=await page.evaluate(async()=>{
+   const media=await import('/src/i2-nico-art.js');
+   return media.i2NicoPoseAsset('welcome').src;
+  });
+  assert.equal(await art.getAttribute('src'),expectedSrc);
   assert.equal(await art.getAttribute('alt'),'');
   assert.equal(await art.evaluate(img=>img.complete&&img.naturalWidth>0),true);
   await page.evaluate(()=>localStorage.setItem('supply-lab-v90','keep-v1'));
