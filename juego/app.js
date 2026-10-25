@@ -18,6 +18,7 @@ import {I2_ADVANCED_FIELDS,i2ValidateAdvanced} from '../src/i2-advanced-settings
 import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-indicators.js';
 import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
 import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
+import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -405,6 +406,34 @@ function planningCoverageTeaching(){
   p('Fuente: '+model.source,'footnote')
  ]);
 }
+/** Compras: el proveedor puede cumplir sin que Recepción ingrese ni Calidad libere. */
+function supplierPurchasingTeaching(){
+ const model=i2SupplierCommitmentPreview(state);
+ const detail=node('details',{className:'supplier-sku-detail'},[
+  node('summary',{text:'Ver compromiso y abastecimiento por SKU'}),
+  ...model.rows.map(row=>section('supplier-sku-row',[
+   node('strong',{text:'SKU '+row.skuId}),
+   p('Orden proyectada: '+num.format(row.orderedSkuUnits)+
+    ' · cumplidas por proveedor (modelo): '+num.format(row.modeledSupplierFulfilledSkuUnits)),
+   p('Faltante proveedor: '+num.format(row.modeledSupplierShortfallSkuUnits)+
+    ' · plazo base '+row.standardLeadDays+' días','footnote')
+  ]))
+ ]);
+ return section('supplier-purchasing-teaching',[
+  node('strong',{text:'Proveedor: '+model.supplierFillPercent+' % de cumplimiento supuesto'}),
+  section('supplier-purchasing-metrics',[
+   section('supplier-metric',[node('span',{text:'Unidades comprometidas'}),
+    node('strong',{text:num.format(model.originalCommittedSkuUnits)})]),
+   section('supplier-metric',[node('span',{text:'Cumpliría el proveedor'}),
+    node('strong',{text:num.format(model.modeledSupplierFulfilledSkuUnits)})]),
+   section('supplier-metric',[node('span',{text:'No cumpliría'}),
+    node('strong',{text:num.format(model.modeledSupplierShortfallSkuUnits)})])
+  ]),
+  p(model.lesson,'note'),
+  detail,
+  p(model.boundary,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -448,6 +477,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='purchasing'?[p('La entrega del proveedor es una hipótesis; solo Recepción registra unidades físicas. Mira Indicadores para separar compromiso, cumplimiento y plazo.','commercial-brief')]:[]),
   ...(area.id==='planning'?[p('La cobertura elegida modifica la compra SKU planificada, no el stock disponible hoy. Revisa Indicadores para evaluar unidades y compromiso.','commercial-brief')]:[]),
   ...(area.id==='commercial'?[p('El forecast es una hipótesis de compra, no una venta garantizada. Mira Indicadores para ver la equivalencia de tu muestra.','commercial-brief')]:[]),
   lesson,consequence
@@ -455,7 +485,8 @@ function areaScene(){
  const indicators=section('area-tab-panel',[
   p('Entradas previstas, no resultados','option-heading'),compare,
   ...(area.id==='commercial'?[commercialForecastTeaching()]:[]),
-  ...(area.id==='planning'?[planningCoverageTeaching()]:[])
+  ...(area.id==='planning'?[planningCoverageTeaching()]:[]),
+  ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
@@ -673,6 +704,32 @@ function resultsScene(){
     ' unidades comprometidas · llegada prevista día '+row.nominalArrivalDay,'note'))
   ])
  ]);
+ const purchasing=section('supplier-purchasing-outcome',[
+  node('strong',{text:'Compras · ¿llegó realmente el abastecimiento?'}),
+  p('Libro original del proveedor y Recepción, antes de cualquier recuperación.','note'),
+  section('supplier-purchasing-metrics',[
+   ...[['Comprometidas',data.purchasing.totals.orderedSkuUnits],
+      ['Proveedor cumplió',data.purchasing.totals.fulfilledSkuUnits],
+      ['Llegaron al CD',data.purchasing.totals.arrivedByCutoffSkuUnits],
+      ['Recibidas en bodega',data.purchasing.totals.warehouseReceivedSkuUnits]]
+     .map(([label,n])=>section('supplier-metric',[node('span',{text:label}),
+      node('strong',{text:num.format(n)})]))
+  ]),
+  p('Faltante proveedor: '+num.format(data.purchasing.totals.supplierShortfallSkuUnits)+
+   ' SKU · en tránsito al corte: '+num.format(data.purchasing.totals.inTransitSkuUnits)+
+   ' SKU · esperando Recepción: '+num.format(data.purchasing.totals.waitingWarehouseSkuUnits)+' SKU.','note'),
+  node('details',{className:'supplier-sku-detail'},[
+   node('summary',{text:'Ver trazabilidad original por SKU'}),
+   ...data.purchasing.rows.map(row=>section('supplier-sku-row',[
+    node('strong',{text:'SKU '+row.skuId}),
+    p('Pedidas '+num.format(row.orderedSkuUnits)+' · cumplidas '+num.format(row.fulfilledSkuUnits)+
+     ' · llegada nominal día '+row.modeledArrivalDay),
+    p('Recibidas físicamente '+num.format(row.warehouseReceivedSkuUnits)+
+     ' · esperando muelle '+num.format(row.waitingWarehouseSkuUnits),'footnote')
+   ]))
+  ]),
+  p(data.purchasing.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -694,6 +751,7 @@ function resultsScene(){
   overview,
   forecast,
   planning,
+  purchasing,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
