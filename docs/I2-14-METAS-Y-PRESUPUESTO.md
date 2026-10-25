@@ -10,9 +10,13 @@
 - Una advertencia explícita evita conclusiones verdes globales cuando alguno de los dos ejes sea crítico; productividad por persona-hora, costos no tarificados y utilidad siguen como desconocidos.
 - El panel de la configuración queda plegado por defecto para no añadir scroll exterior ni controles permanentes.
 
-## Limitación deliberada y puerta para terminar I2-14
+## Ampliación funcional: retos seedados (continuación de I2-14)
 
-**Dificultad variable / retos seedados NO están funcionales todavía** en esta entrega: el caso físico publicado sigue siendo 200 pedidos previstos, sorpresa fija +40 %, y esta circunstancia se anuncia en la configuración. No se presenta un control inerte. La dificultad y selección de escenarios son requisitos de I2-26 / I2-35 y necesitan escenario exógeno, generación determinista y migración de partida. **I2-14 queda parcialmente implementada hasta verificar ese vínculo**, sin contabilizar una microfase completada solo por presentar los controles de meta/budget.
+La segunda entrega conecta la configuración de dificultad con cinco escenarios **efectivos**, fijados por semilla antes de la primera confirmación. Incluye demanda real superior e inferior al pronóstico, revelación explícita, persistencia/reinicio sobre el mismo reto y conciliación con el motor físico SKU original. La configuración no cambia pronóstico, órdenes de compra o costo de forma silenciosa. La dificultad **ya no es un selector decorativo**.
+
+Especificaciones y criterios verificables: [I2-14-RETOS-REPRODUCIBLES.md](I2-14-RETOS-REPRODUCIBLES.md). Los cinco casos son un primer catálogo de demanda; I2-26/35 siguen pendientes de diagnóstico ampliado y retos de proveedores, recepción, calidad y sobredotación.
+
+**La finalización de I2-14 está condicionada a los gates y al merge de esta segunda entrega;** no se cuenta de antemano.
 
 ## Pruebas
 
@@ -20,4 +24,4 @@
 - `tests/browser-i2-management-objectives.e2e.mjs`: 360×760 Android emulado, configuración plegable, selección, persistencia tras recarga, primera decisión bloquea cambios, cierre de misión con refuerzo y semáforos de resultado.
 - Gate focused de I2, Node completa, Chromium general y Pages/HTTP antes de desplegar el cambio.
 
-**Siguientes entregas:** I2-15 (configuración avanzada) y el contrato seedado de I2-26/35; I2-17 y I2-31–33 ampliarán de dos a cuatro ejes de servicio, capacidad, espera y costos auditados. La meta es pedagógica y configurable, no un SLA estándar de una empresa real.
+**Siguientes entregas:** I2-15 (configuración avanzada), diagnóstico I2-26 y retos ampliados I2-35; I2-17 y I2-31–33 ampliarán de dos a cuatro ejes de servicio, capacidad, espera y costos auditados. La meta es pedagógica y configurable, no un SLA estándar de una empresa real.
