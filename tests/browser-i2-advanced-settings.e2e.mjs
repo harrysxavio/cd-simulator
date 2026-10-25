@@ -20,18 +20,18 @@ test('I2-15: editar cuatro supuestos, cancelar, guardar, recargar y bloquear en 
   assert.equal(await page.locator('#advancedSave').isVisible(),true);
   const before=await page.evaluate(key=>localStorage.getItem(key),GAME_KEY);
   await page.locator('#advancedOrders').selectOption('160');
-  await page.locator('#advancedPicking').selectOption('7');
+  await page.locator('#advancedPicking').selectOption('40');
   await page.locator('#advancedStock').selectOption('low');
   await page.locator('#advancedCost').selectOption('100000');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),GAME_KEY),before,
    'Editar borrador no escribe en almacenamiento');
   await page.locator('#advancedCancel').click();
   assert.equal(await page.locator('#advancedOrders').inputValue(),'200');
-  assert.equal(await page.locator('#advancedPicking').inputValue(),'5');
+  assert.equal(await page.locator('#advancedPicking').inputValue(),'base');
   assert.equal(await page.locator('#advancedStock').inputValue(),'standard');
   assert.equal(await page.locator('#advancedCost').inputValue(),'70000');
   await page.locator('#advancedOrders').selectOption('160');
-  await page.locator('#advancedPicking').selectOption('7');
+  await page.locator('#advancedPicking').selectOption('40');
   await page.locator('#advancedStock').selectOption('low');
   await page.locator('#advancedCost').selectOption('100000');
   await page.locator('#advancedSave').click();
@@ -39,7 +39,7 @@ test('I2-15: editar cuatro supuestos, cancelar, guardar, recargar y bloquear en 
   assert.match(await page.locator('#gamePlanOrders').innerText(),/160/);
   let saved=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),GAME_KEY);
   assert.deepEqual(saved.advanced,{
-   plannedOrders:160,pickingOperators:7,stockProfile:'low',
+   plannedOrders:160,pickingLimitSkuPerDay:'40',stockProfile:'low',
    extraCapacityDailyCostCLP:100000
   });
   assert.equal(saved.reveal,false);
@@ -59,7 +59,7 @@ test('I2-15: editar cuatro supuestos, cancelar, guardar, recargar y bloquear en 
   saved=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),GAME_KEY);
   assert.equal(saved.reveal,false);
   assert.deepEqual(saved.advanced, {
-   plannedOrders:160,pickingOperators:7,stockProfile:'low',
+   plannedOrders:160,pickingLimitSkuPerDay:'40',stockProfile:'low',
    extraCapacityDailyCostCLP:100000
   });
   await page.locator('#gameNext').click(); // revelar demanda +40 %
