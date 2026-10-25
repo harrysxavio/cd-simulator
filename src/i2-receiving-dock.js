@@ -23,7 +23,7 @@ const fail=message=>{throw new Error('I2-21: '+message)};
 export function i2ReceivingCapacityPreview(raw){
  const state=normalizeI2GameState(raw);
  if(!state||state.phase!=='area'||state.index!==3||state.reveal
-  ||state.confirmedAreas.join(',')!=='commercial,planning,purchasing')
+  ||state.confirmedAreas.slice(0,3).join(',')!=='commercial,planning,purchasing')
   fail('Recepción necesita las tres áreas previas confirmadas');
  const selected=AREA.choices.find(x=>x.id===state.choices.receiving);
  const reference=AREA.choices.find(x=>x.id==='normal');
