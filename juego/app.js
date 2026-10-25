@@ -431,6 +431,7 @@ function supplierPurchasingTeaching(){
  ]);
  return section('supplier-purchasing-teaching',[
   node('strong',{text:'Proveedor: '+model.supplierFillPercent+' % de cumplimiento supuesto'}),
+  p('Tasa efectiva aplicada a SKU tras redondear las unidades de V1: '+model.effectiveSkuFillPercent.toFixed(2).replace('.',',')+' %.','footnote'),
   section('supplier-purchasing-metrics',[
    section('supplier-metric',[node('span',{text:'Unidades comprometidas'}),
     node('strong',{text:num.format(model.originalCommittedSkuUnits)})]),
