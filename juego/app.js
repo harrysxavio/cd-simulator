@@ -20,6 +20,7 @@ import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.j
 import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
 import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
 import {i2ReceivingCapacityPreview} from '../src/i2-receiving-dock.js';
+import {i2QualityReleasePreview} from '../src/i2-quality-release.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
@@ -480,6 +481,29 @@ function receivingDockTeaching(){
   p(m.boundary,'footnote')
  ]);
 }
+/** Solo opciones de Calidad elegidas, sin simular resultados futuros. */
+function qualityTeaching(){
+ const m=i2QualityReleasePreview(state);
+ return section('quality-release-teaching',[
+  node('strong',{text:'Calidad · revisión y liberación de productos'}),
+  section('quality-release-numbers',[
+   section('quality-release-number',[
+    node('span',{text:'Liberación prevista por jornada'}),
+    node('strong',{text:m.selectedReleasePercent+' %'})]),
+   section('quality-release-number',[
+    node('span',{text:'Diferencia frente a turno normal'}),
+    node('strong',{text:(m.differencePoints>0?'+':'')+m.differencePoints+' pp'})])
+  ]),
+  p('Nico te cuenta: recibir una caja no basta para preparar el pedido. Primero debemos terminar su revisión.','note'),
+  node('details',{className:'quality-explanation'},[
+   node('summary',{text:'¿Qué pasa si un lote sigue en revisión?'}),
+   p(m.definition),
+   p(m.example,'note'),
+   p(m.note,'note')
+  ]),
+  p(m.boundary,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -523,6 +547,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='quality'?[p('Calidad revisa los productos que ya entraron al CD. Una unidad retenida está esperando revisión: no significa que esté dañada o perdida.','commercial-brief')]:[]),
   ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
   ...(area.id==='purchasing'?[p('La entrega del proveedor es una hipótesis; solo Recepción registra unidades físicas. Mira Indicadores para separar compromiso, cumplimiento y plazo.','commercial-brief')]:[]),
   ...(area.id==='planning'?[p('La cobertura elegida modifica la compra SKU planificada, no el stock disponible hoy. Revisa Indicadores para evaluar unidades y compromiso.','commercial-brief')]:[]),
@@ -534,7 +559,8 @@ function areaScene(){
   ...(area.id==='commercial'?[commercialForecastTeaching()]:[]),
   ...(area.id==='planning'?[planningCoverageTeaching()]:[]),
   ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[]),
-  ...(area.id==='receiving'?[receivingDockTeaching()]:[])
+  ...(area.id==='receiving'?[receivingDockTeaching()]:[]),
+  ...(area.id==='quality'?[qualityTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
@@ -809,6 +835,39 @@ function resultsScene(){
   ]),
   p(receive.boundary,'footnote')
  ]);
+ const q=data.quality;
+ const qualityOutcome=section('quality-outcome',[
+  node('strong',{text:'Calidad · unidades revisadas y en espera'}),
+  section('quality-release-numbers',[
+   ...[['Recibidas para revisión',q.totals.receivedSkuUnits],
+      ['Liberadas',q.totals.releasedSkuUnits],
+      ['Retenidas al cierre',q.totals.heldAtCutoffSkuUnits],
+      ['Máximo retenido',q.totals.peakHeldSkuUnits]]
+      .map(([label,n])=>section('quality-release-number',[
+       node('span',{text:label}),
+       node('strong',{text:num.format(n)+' SKU'})
+      ]))
+  ]),
+  p(q.totals.peakHeldSkuUnits>0
+   ?'Durante la misión hubo unidades esperando revisión. Acumulación: '+
+    num.format(q.totals.pendingSkuDays)+' SKU-días de espera.'
+   :'En esta muestra no quedaron unidades retenidas al cierre de las jornadas. Esto no garantiza que todos los pedidos fueran despachados.','note'),
+  node('details',{className:'quality-daily-details'},[
+   node('summary',{text:'Consultar revisión por día y por SKU'}),
+   ...q.rows.filter(day=>day.receivedSkuUnits>0||
+    day.releasedSkuUnits>0||day.heldEndOfDaySkuUnits>0)
+    .map(day=>section('quality-daily-row',[
+     node('strong',{text:'Día '+day.day}),
+     p('Ingresaron: '+num.format(day.receivedSkuUnits)+
+      ' · liberadas: '+num.format(day.releasedSkuUnits)+
+      ' · en revisión: '+num.format(day.heldEndOfDaySkuUnits)+' SKU'),
+     p('Espera más antigua: '+day.oldestHeldDays+' días','footnote')
+    ])),
+   ...q.bySku.map(sku=>p('SKU '+sku.skuId+': '+num.format(sku.releasedSkuUnits)+
+    ' liberadas · '+num.format(sku.heldSkuUnits)+' en revisión','footnote'))
+  ]),
+  p(q.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -834,6 +893,7 @@ function resultsScene(){
   planning,
   purchasing,
   receivingOutcome,
+  qualityOutcome,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
