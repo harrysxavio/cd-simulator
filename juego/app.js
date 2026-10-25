@@ -15,6 +15,7 @@ import {I2_CHALLENGES,i2ChallengeForSeed,i2ChallengeReveal} from '../src/i2-chal
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_ADVANCED_FIELDS,i2ValidateAdvanced} from '../src/i2-advanced-settings.js';
+import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-indicators.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -31,6 +32,7 @@ const init=newI2GameState;
 let state;
 try{state=loadI2GameState(window.localStorage)}catch{state=init()}
 let preview=null;
+let areaTab='decision'; // solo navegación visual; nunca persistir en campaña
 let objectives=i2ReadObjectives(window.localStorage);
 let showGuide=false;
 try{showGuide=readI2GuidePreference(window.localStorage)}catch{}
@@ -90,12 +92,12 @@ function guideElement(){
  wrapper.append(toggle,adviceText);
  return wrapper;
 }
-function replace(children){
+function replace(children,{guide=true}={}){
  root.replaceChildren(...children);
  root.scrollTop=0;
  const title=root.querySelector('#step-title');
  if(title){
-  title.after(guideElement());
+  if(guide)title.after(guideElement());
   title.focus({preventScroll:true});
  }
 }
@@ -103,6 +105,7 @@ function saveAndRender(){persist();render();}
 function gameTransition(action){
  try{
   state=navigateI2GameState(state,action);
+  areaTab='decision';
   preview=null;
   saveAndRender();
  }catch(e){showError(e)}
@@ -372,18 +375,103 @@ function areaScene(){
    'No garantiza que se expidan más pedidos.',
    'El efecto físico real solo se calcula y presenta después de revelar la demanda.'
   ]);
+ // Esta lectura es solo de opciones de V1. El motor SKU no se ejecuta aquí.
+ const model=i2AreaPlanningIndicators(state);
+ const compare=section('area-assumption-summary',[
+  section('area-metric-pair',model.metrics.map(metric=>section('area-assumption-metric',[
+   node('span',{text:metric.label}),node('strong',{text:metric.formatted})
+  ]))),
+  section('area-reference-row',[
+   node('span',{className:'area-reference-light '+model.traffic.kind,
+    text:model.traffic.label}),
+   p('Referencia: '+model.threshold.formatted+' · '+model.threshold.definition)
+  ]),
+  p('Posible consecuencia: '+model.consequence,'note'),
+  p('Fuente: '+model.threshold.source,'footnote'),
+  ...model.boundaries.map(line=>p(line,'footnote'))
+ ]);
+ const decision=section('area-tab-panel',[
+  p('Selecciona una alternativa','option-heading'),
+  choiceList(area),lesson,consequence
+ ]);
+ const indicators=section('area-tab-panel',[
+  p('Entradas previstas, no resultados','option-heading'),compare
+ ]);
+ const nico=section('area-tab-panel',[
+  p('Nico · coordinador ficticio del CD','option-heading'),
+  p('Puedo ayudarte a razonar la decisión, pero no conozco los pedidos reales ni el resultado futuro.','note'),
+  guideElement(),
+  p('Si mis consejos no te sirven, puedes dejarlos ocultos y continuar.','footnote')
+ ]);
+ const content=[decision,indicators,nico];
+ const tabList=node('div',{className:'area-tab-list',attrs:{
+  role:'tablist','aria-label':'Vistas para decidir en '+original.title
+ }});
+ const tabs=I2_AREA_TABS.map((item,i)=>{
+  const el=node('button',{className:'area-tab',text:item.label,attrs:{
+   type:'button',role:'tab',id:'area-tab-'+item.id,
+   'aria-controls':'area-panel-'+item.id,
+   'aria-selected':String(item.id===areaTab),
+   tabindex:item.id===areaTab?'0':'-1'
+  }});
+  content[i].id='area-panel-'+item.id;
+  content[i].setAttribute('role','tabpanel');
+  content[i].setAttribute('aria-labelledby','area-tab-'+item.id);
+  content[i].setAttribute('tabindex','0');
+  content[i].hidden=item.id!==areaTab;
+  tabList.append(el);
+  return el;
+ });
+ function activate(i,{focus=false}={}){
+  if(i<0||i>=tabs.length)return;
+  areaTab=I2_AREA_TABS[i].id;
+  tabs.forEach((tab,j)=>{
+   tab.setAttribute('aria-selected',String(i===j));
+   tab.tabIndex=i===j?0:-1;
+   content[j].hidden=i!==j;
+  });
+  // Solo se desplaza el contenedor interno, nunca la página ni el footer.
+  root.scrollTop=0;
+  if(focus)tabs[i].focus({preventScroll:true});
+ }
+ tabs.forEach((tab,i)=>{
+  tab.addEventListener('click',()=>activate(i));
+  tab.addEventListener('keydown',event=>{
+   const next=event.key==='ArrowRight'?(i+1)%tabs.length
+    :event.key==='ArrowLeft'?(i+tabs.length-1)%tabs.length
+    :event.key==='Home'?0:event.key==='End'?tabs.length-1:-1;
+   if(next<0)return;
+   event.preventDefault();activate(next,{focus:true});
+  });
+ });
+ const shell=section('area-tabs-shell',[tabList,...content]);
+ // Gesto opcional: ignorar controles, scroll vertical y bordes reservados al SO.
+ // Siempre existe la alternativa explícita de pestañas clicables y teclado.
+ let origin=null;
+ shell.addEventListener('touchstart',event=>{
+  origin=null;
+  if(event.touches.length!==1)return;
+  const touch=event.touches[0];
+  if(touch.clientX<26||touch.clientX>innerWidth-26)return;
+  if(event.target.closest('button,a,input,select,textarea,summary,[role="tab"]'))return;
+  origin={x:touch.clientX,y:touch.clientY};
+ },{passive:true});
+ shell.addEventListener('touchend',event=>{
+  if(!origin||event.changedTouches.length!==1)return;
+  const dx=event.changedTouches[0].clientX-origin.x;
+  const dy=event.changedTouches[0].clientY-origin.y;
+  origin=null;
+  if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.5)return;
+  const current=I2_AREA_TABS.findIndex(item=>item.id===areaTab);
+  activate(current+(dx<0?1:-1));
+ },{passive:true});
+ shell.addEventListener('touchcancel',()=>{origin=null},{passive:true});
  replace([
   p('DECISIÓN '+(state.index+1)+' DE 8','eyebrow'),
   heading(original.icon+' '+original.title),
   p(area.question,'lead'),
-  section('mini-kpi',[
-   node('span',{text:'KPI que aprenderás'}),
-   node('strong',{text:original.kpi}),
-   node('small',{text:'Resultado oculto hasta conocer la demanda real'})
-  ]),
-  p('Selecciona una alternativa','option-heading'),
-  choiceList(area),lesson,consequence
- ]);
+  shell
+ ],{guide:false});
  updateFooter();
 }
 function revealScene(){
