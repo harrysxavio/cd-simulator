@@ -1,6 +1,6 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
-**Estado:** plan técnico vigente de 41 microfases, adoptado a partir de v11.68 r177. **Corte 25-10-2026:** I2-00–I2-16 integradas técnicamente hasta [PR #102](https://github.com/harrysxavio/cd-simulator/pull/102); **17/41** microentregas (41,5 %, no porcentaje de esfuerzo). I2-17–I2-40 quedan pendientes de aceptación formal aunque existe un MVP alfa transversal. La auditoría física Android/TalkBack (#67) es transversal. Android físico/TalkBack/usuario aún pendiente (#67); defecto V1 #73 cerrado con PR #74. Ver evidencia en [estado actualizado](I2-STATUS.md). El [roadmap ejecutivo rebaselado de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md) define hitos, UX, dependencias, métricas y orden de ejecución, sin cambiar estos IDs.  
+**Estado:** plan técnico vigente de 41 microfases, adoptado a partir de v11.68 r177. **Corte 25-10-2026:** I2-00–I2-17 integradas técnicamente hasta [PR #103](https://github.com/harrysxavio/cd-simulator/pull/103); **18/41** microentregas (43,9 %, no porcentaje de esfuerzo). La fase F4 está integrada (5/5). I2-18–I2-40 quedan pendientes de aceptación formal aunque existe un MVP alfa transversal. La auditoría física Android/TalkBack (#67) es transversal. Android físico/TalkBack/usuario aún pendiente (#67); defecto V1 #73 cerrado con PR #74. Ver evidencia en [estado actualizado](I2-STATUS.md). El [roadmap ejecutivo rebaselado de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md) define hitos, UX, dependencias, métricas y orden de ejecución, sin cambiar estos IDs.  
 **Objetivo:** desarrollar **Misión CD**, una interfaz alternativa y gamificada, prioritaria en teléfono, dentro del MISMO sitio del simulador.  
 **Regla principal:** **V1 debe permanecer funcional y accesible**, con su motor de eventos, 3 SKU, 8 áreas, 5 recuperaciones y economía auditada. I2 reutiliza lógica y contratos, no los duplica. El ingreso a la ruta I2 solo será visible cuando tenga destino real, prueba de navegación y regreso al laboratorio.
 
@@ -70,7 +70,7 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 | **I2-39** | QA | Regresión integral y auditoría económica | 38 | reconciliaciones y escenarios extremos |
 | **I2-40** | Release | Publicación I2 verificable, guía y versionado | 39 | Pages/HTTP/versión, criterios humanos y V1 intacta |
 
-**Total:** 41 microfases (00–40). **I2-00–I2-16 tienen PR fusionado; I2-17 es la siguiente microfase formal.** Las fases posteriores tienen un MVP de recorrido parcial, no aceptación completa. Consulte el [estado con evidencia](I2-STATUS.md) y el [roadmap rebaselado](I2-ROADMAP-EJECUCION-2026-10-23.md).
+**Total:** 41 microfases (00–40). **I2-00–I2-17 tienen PR fusionado; I2-18 es la siguiente microfase formal.** Las fases posteriores tienen un MVP de recorrido parcial, no aceptación completa. Consulte el [estado con evidencia](I2-STATUS.md) y el [roadmap rebaselado](I2-ROADMAP-EJECUCION-2026-10-23.md).
 
 ## C. Criterios detallados de fases, organizados por paquetes pequeños
 
@@ -119,6 +119,8 @@ Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico
 **Evidencia de cierre I2-14–I2-16 (25-10-2026):** [#98](https://github.com/harrysxavio/cd-simulator/pull/98) y [#100](https://github.com/harrysxavio/cd-simulator/pull/100) (metas y retos), [#101](https://github.com/harrysxavio/cd-simulator/pull/101) (configuración avanzada), [#102](https://github.com/harrysxavio/cd-simulator/pull/102) (Nico). Los tres entregables tienen Node, focused y Chromium de PR aprobados; controles de Pages/HTTP y QA Android real se registran en [estado](I2-STATUS.md). No equivale a completar F4 sin I2-17 ni a certificar costos totales.
 
 **I2-17 · Componente de decisión.** Tres vistas ligeras **Decisión / Indicadores / Nico** con pestañas accesibles; swipe opcional como atajo de navegación horizontal, nunca acceso exclusivo. Acción principal fija; selección con \`aria-pressed\`, hasta 2 KPI principales por vista y semáforo con fuente/umbral; impactos de planificación visibles sin revelar demanda. Test unitario y E2E de 8 áreas, 0 scroll externo, 0 errores de foco.
+
+**Cierre técnico I2-17 / F4 (25-10-2026):** [PR #103](https://github.com/harrysxavio/cd-simulator/pull/103), merge `1032f80`: tres tabs accesibles, un máximo de dos indicadores de supuestos anteriores al evento, comparación con referencia V1 y fuente, tutor opcional, CTA fijo, swipe no obligatorio y tres gates Node/Chromium/focused aprobados. F4 integrada; esta aceptación técnica no sustituye Android físico, TalkBack ni pruebas con usuarios de F8.
 
 ### C5. Ocho áreas consecutivas (I2-18 a I2-25)
 
