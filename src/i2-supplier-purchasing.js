@@ -1,4 +1,6 @@
 import {NODES} from './engine.js';
+import {flow} from './flow.js';
+import {DEFAULT_SCENARIO} from './scenario.js';
 import {SKU_CATALOG} from './sku.js';
 import {normalizeI2GameState} from './i2-game-state.js';
 import {i2PlanningCoveragePreview} from './i2-planning-coverage.js';
@@ -31,11 +33,18 @@ export function i2SupplierCommitmentPreview(raw){
  // Reuse the same projection as I2-19; changing index is a READ-ONLY
  // calculation and does not confirm, edit or save a decision.
  const planning=i2PlanningCoveragePreview({...state,index:1});
+ // Campaign adapter also translates a whole-unit legacy delivery rate into
+ // a physical SKU fill percentage. Never infer it from the displayed 75/95/100.
+ // Freeze the aggregate proxy at PLANNED demand; no observed shock enters.
+ const aggregate=flow(state.choices,{},
+  {...DEFAULT_SCENARIO,demand:1000,actualDemand:1000,lockUpstream:true});
+ const effectiveRate=aggregate.ordered>0
+  ?100*aggregate.delivered/aggregate.ordered:choice.delivery;
  const rows=planning.rows.map((row,i)=>{
   const sku=SKU_CATALOG[i];
   if(sku.id!==row.skuId)throw new Error('I2-20: SKU de compra incompatible');
   const committed=row.plannedPurchaseSkuUnits;
-  const fulfilled=Math.floor(committed*choice.delivery/100);
+  const fulfilled=Math.floor(committed*effectiveRate/100);
   return {
    skuId:sku.id,orderedSkuUnits:committed,
    modeledSupplierFulfilledSkuUnits:fulfilled,
@@ -46,6 +55,7 @@ export function i2SupplierCommitmentPreview(raw){
  return freezeDeep({
   phase:'pre-reveal',scope:'sku-cohort',status:'supplier-assumptions-only',
   supplier:choice.id,supplierFillPercent:choice.delivery,
+  effectiveSkuFillPercent:effectiveRate,
   originalCommittedSkuUnits:sum(rows,'orderedSkuUnits'),
   modeledSupplierFulfilledSkuUnits:sum(rows,'modeledSupplierFulfilledSkuUnits'),
   modeledSupplierShortfallSkuUnits:sum(rows,'modeledSupplierShortfallSkuUnits'),
@@ -56,7 +66,7 @@ export function i2SupplierCommitmentPreview(raw){
    :choice.id==='reliable'
    ?'Mayor cumplimiento supuesto reduce faltantes, pero la fecha de llegada y Recepción siguen importando.'
    :'El 100 % supuesto de cumplimiento NO convierte entregas en stock disponible hoy; los plazos nominales permanecen.',
-  source:'NODES.purchasing.delivery, i2PlanningCoveragePreview e inventoryPolicy; Math.floor por SKU de deliveryTimeline',
+  source:'NODES.purchasing.delivery, flow de V1 con demanda planeada y campaña bloqueada, i2PlanningCoveragePreview y Math.floor de deliveryTimeline',
   boundary:'Cantidades modeladas de proveedor, NO entrega observada, recibo físico, stock usable, factura, pago ni expedición.'
  });
 }
