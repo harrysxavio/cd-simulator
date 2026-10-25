@@ -56,7 +56,8 @@ export function auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSam
   ||skuInputs.plannedForecastPercent!==commercialForecast
   ||skuInputs.planningCoveragePercent!==planningCoverage
   ||skuInputs.receivingUnitCapacity!==area.receivingCapacity
-  ||skuInputs.pickingUnitCapacity!==area.pickingCapacity
+  ||skuInputs.pickingUnitCapacity!==Math.min(area.pickingCapacity,
+    skuInputs.pickingUnitCapacityLimit??Infinity)
   ||skuInputs.transportUnitCapacity!==area.stages[7].capacity)fail('capacidad o tasa no se corresponde con la decisión');
  for(const name of ['receivingUnitCapacity','pickingUnitCapacity','transportUnitCapacity']){
   if(!validInteger(skuInputs[name]))fail('capacidad diaria SKU inválida');
@@ -64,8 +65,19 @@ export function auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSam
  for(const name of ['plannedForecastPercent','planningCoveragePercent','qualityReleasePercent','inventoryAccuracyPercent']){
   if(skuInputs[name]<0||skuInputs[name]>200)fail('tasa de gestión fuera de rango');
  }
+ if(Object.hasOwn(skuInputs,'pickingUnitCapacityLimit')
+  &&(!Number.isSafeInteger(skuInputs.pickingUnitCapacityLimit)
+    ||skuInputs.pickingUnitCapacityLimit<1||skuInputs.pickingUnitCapacityLimit>100000))
+  fail('límite SKU Picking inválido');
  // Whitelist: do not accidentally pass aggregate output, costs or reserves.
+ // El único importe permitido es la tarifa didáctica de refuerzo SKU.
+ // No se permite transportar finanzas/costos de la jornada agregada.
+ if(Object.hasOwn(skuInputs,'extraCapacityDailyCost')
+  &&(!Number.isSafeInteger(skuInputs.extraCapacityDailyCost)
+    ||skuInputs.extraCapacityDailyCost<0||skuInputs.extraCapacityDailyCost>1000000))
+  fail('tarifa SKU fuera de rango');
  const allowed=['policy','plannedOrders','actualOrders','stock','delayDays',
+  'extraCapacityDailyCost','pickingUnitCapacityLimit',
   ...names,'supplierFill'];
  if(Object.keys(skuInputs).some(key=>!allowed.includes(key)))fail('campo agregado no autorizado en el replay SKU');
  if(!skuInputs.delayDays||typeof skuInputs.delayDays!=='object'
@@ -85,7 +97,7 @@ export function auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSam
  if(mappings.some((m,i)=>area.stages[i]?.id!==m.area))fail('orden de las ocho áreas no coincide');
  return freezeDeep({
   passed:true,scope:'sample-not-accounting',sourceScope:'aggregate-shift',targetScope:'sku-cohort',
-  physicalStockSource:'catalog-opening-only',sampleSizeRule:'round(plannedSampleOrders * actualShiftDemand / plannedShiftDemand)',
+  physicalStockSource:openingState.source==='catalog'?'catalog-opening-only':'explicit-sku-opening',sampleSizeRule:'round(plannedSampleOrders * actualShiftDemand / plannedShiftDemand)',
   sampleOrders:{planned:plannedSampleOrders,actual:expectedOrders},
   mappings,
   excluded:[

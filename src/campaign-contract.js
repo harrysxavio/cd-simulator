@@ -17,7 +17,8 @@ import {auditSkuDecisionBoundary} from './sku-boundary-audit.js';
  */
 export function campaignSkuContract({
  decisions={},actions={},scenario={},policy='balanced',
- supplierDelay=false,plannedSampleOrders=200,campaignId='SKU-LAB'
+ supplierDelay=false,plannedSampleOrders=200,campaignId='SKU-LAB',
+ openingStock=null,extraCapacityDailyCost=null,pickingUnitCapacityLimit=null
 }={}){
  if(!['lean','balanced','service'].includes(policy))throw new Error('Política SKU inválida');
  if(!Number.isSafeInteger(plannedSampleOrders)||plannedSampleOrders<1||plannedSampleOrders>100000)throw new Error('Tamaño de muestra SKU inválido');
@@ -41,15 +42,19 @@ export function campaignSkuContract({
   // is physically sourced and audited: never manufacture SKU stock from it.
   inventoryAccuracyPercent:Math.max(0,Math.min(100,numericValue('inventory',decisions))),
   receivingUnitCapacity:area.receivingCapacity,
-  pickingUnitCapacity:area.pickingCapacity,
+  pickingUnitCapacity:pickingUnitCapacityLimit===null?area.pickingCapacity:
+   Math.min(area.pickingCapacity,pickingUnitCapacityLimit),
   transportUnitCapacity:area.stages[7].capacity
  };
  // A single SKU opening is shared across policy, recovery and recorded events.
  // Aggregate scenario.initialStock remains separate until a later explicit mapping.
- const openingState=skuOpeningState();
+ // La apertura es explícitamente SKU; jamás convertir stock agregado a SKU.
+ const openingState=skuOpeningState({stock:openingStock});
  const skuInputs={
   policy,plannedOrders:plannedSampleOrders,actualOrders:actualSampleOrders,stock:openingState.openingBySku,
-  delayDays:supplierDelay?{A:8}:{},...skuAreaCapacity
+  delayDays:supplierDelay?{A:8}:{},...skuAreaCapacity,
+  ...(extraCapacityDailyCost===null?{}:{extraCapacityDailyCost}),
+  ...(pickingUnitCapacityLimit===null?{}:{pickingUnitCapacityLimit})
  };
  // Prove each managerial proxy is separated from physical quantities and costs.
  const boundaryAudit=auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSampleOrders,
@@ -59,7 +64,7 @@ export function campaignSkuContract({
   skuUnit:SCOPE_DEFINITIONS.sku.skuDisplayUnit,orderUnit:SCOPE_DEFINITIONS.sku.orderDisplayUnit,plannedCampaignUnits:area.plannedDemand,
   actualCampaignUnits:area.demand,plannedSampleOrders,actualSampleOrders,
   sampleRatio:area.demand/area.plannedDemand,
-  stockFromCatalog:true,stockOpeningShared:true,inventoryAccuracyLinked:true,inventoryReserveActionNotLinked:true,
+  stockFromCatalog:openingStock===null,stockOpeningShared:true,inventoryAccuracyLinked:true,inventoryReserveActionNotLinked:true,
   note:'Muestra de pedidos SKU derivada de la proporción de demanda de la campaña agregada. No representa la totalidad de sus unidades ni de su inventario. La exactitud de Inventario condiciona el picking SKU sin destruir existencias. La reserva de Inventario agregado y los costos todavía no son intercambiables.'
  };
  // Freeze nested arrays/objects to prevent one UI view from mutating the plan

@@ -1,6 +1,7 @@
 import {DEFAULTS} from './engine.js';
 import {DEFAULT_SCENARIO} from './scenario.js';
 import {i2ChallengeForSeed,I2_DEFAULT_SEED} from './i2-challenge-config.js';
+import {i2AdvancedPhysicalOptions,I2_DEFAULT_ADVANCED} from './i2-advanced-settings.js';
 import {I2_AREAS,I2_RECOVERIES} from './i2-product-contract.js';
 import {createI2GameCampaignAdapter,i2AreaSelection} from './i2-game-campaign-adapter.js';
 
@@ -31,7 +32,7 @@ export function i2CanonicalChoices(choices){
  */
 export function i2MvpPhysicalResult({
  choices=i2DefaultChoices(),option='wait',urgentArrivalDay=2,purchaseCoveragePercent=100,
- seed=I2_DEFAULT_SEED
+ seed=I2_DEFAULT_SEED,advanced=I2_DEFAULT_ADVANCED
 }={}){
  if(!I2_RECOVERIES.some(r=>r.optionId===option))
   throw new Error('Misión CD: recuperación inválida');
@@ -43,10 +44,14 @@ export function i2MvpPhysicalResult({
   throw new Error('Misión CD: cobertura urgente inválida');
  // La semilla se fija antes de planificar y no depende de decisiones ni desempeño.
  const challenge=i2ChallengeForSeed(seed);
+ const options=i2AdvancedPhysicalOptions(advanced);
  const canonical=shared.evaluate({
   revealed:true,choices,
   campaignId:I2_MVP_CASE.campaignId,
-  plannedOrders:I2_MVP_CASE.plannedOrders,
+  plannedOrders:options.plannedOrders,
+  openingStock:options.openingStock,
+  extraCapacityDailyCost:options.extraCapacityDailyCost,
+  pickingUnitCapacityLimit:options.pickingUnitCapacityLimit,
   scenario:{
    ...DEFAULT_SCENARIO,
    demand:1000,
