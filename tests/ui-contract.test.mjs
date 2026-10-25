@@ -96,9 +96,12 @@ test('single campaign contract supplies physical SKU capacities and limits',()=>
  assert.ok(app.includes("import {campaignSkuContract} from './campaign-contract.js?v="));
  assert.ok(app.includes('const currentCampaignContract=()=>campaignSkuContract({'));
  assert.ok(app.includes('const contract=currentCampaignContract(),r=contract.area'));
- for(const key of ['receivingUnitCapacity:area.receivingCapacity','pickingUnitCapacity:area.pickingCapacity','transportUnitCapacity:area.stages[7].capacity']){
+ for(const key of ['receivingUnitCapacity:area.receivingCapacity','transportUnitCapacity:area.stages[7].capacity']){
   assert.ok(adapter.includes(key),'Missing SKU capacity: '+key);
  }
+ // El Picking de V1 sigue siendo la base; I2 añade solo un techo SKU validado.
+ assert.ok(adapter.includes('pickingUnitCapacity:pickingUnitCapacityLimit===null?area.pickingCapacity'));
+ assert.ok(adapter.includes('Math.min(area.pickingCapacity,pickingUnitCapacityLimit)'));
  const session=readFileSync(new URL('../src/sku-session.js',import.meta.url),'utf8');
  assert.ok(app.includes('const chain=projection.chain'));
  assert.ok(session.includes('comparisonResult:entry.comparison'));
