@@ -8,12 +8,12 @@ import {SKU_COST_DEFAULTS} from './sku-cost-catalog.js';
  */
 export const I2_ADVANCED_FIELDS=Object.freeze({
  plannedOrders:Object.freeze([160,200,240]),
- pickingOperators:Object.freeze([3,5,7]),
+ pickingLimitSkuPerDay:Object.freeze(['base','40','80']),
  stockProfile:Object.freeze(['low','standard','high']),
  extraCapacityDailyCostCLP:Object.freeze([50000,70000,100000])
 });
 export const I2_DEFAULT_ADVANCED=Object.freeze({
- plannedOrders:200,pickingOperators:5,stockProfile:'standard',
+ plannedOrders:200,pickingLimitSkuPerDay:'base',stockProfile:'standard',
  extraCapacityDailyCostCLP:SKU_COST_DEFAULTS.recovery.addedCapacityCLPPerDay
 });
 
@@ -24,7 +24,7 @@ export function i2ValidateAdvanced(value){
   throw new Error('I2-15: configuración avanzada inválida');
  }
  return Object.freeze({
-  plannedOrders:value.plannedOrders,pickingOperators:value.pickingOperators,
+  plannedOrders:value.plannedOrders,pickingLimitSkuPerDay:value.pickingLimitSkuPerDay,
   stockProfile:value.stockProfile,extraCapacityDailyCostCLP:value.extraCapacityDailyCostCLP
  });
 }
@@ -41,7 +41,9 @@ export function i2AdvancedPhysicalOptions(value=I2_DEFAULT_ADVANCED){
  ]));
  return Object.freeze({
   plannedOrders:config.plannedOrders,
-  scenario:Object.freeze({pickingOperators:config.pickingOperators}),
+  // null mantiene el modelo original: solo aplica un tope extra explícito.
+  pickingUnitCapacityLimit:config.pickingLimitSkuPerDay==='base'?null:
+   Number(config.pickingLimitSkuPerDay),
   openingStock:Object.freeze(openingStock),
   extraCapacityDailyCost:config.extraCapacityDailyCostCLP
  });
