@@ -38,6 +38,18 @@ test('I2-21: capacidad elegida pre-reveal nunca calcula demanda sorpresa ni cola
  assert.throws(()=>i2ReceivingCapacityPreview({...receivingState('normal'),confirmedAreas:['commercial']}),/I2-21/);
 });
 
+test('I2-21: volver desde Calidad mantiene disponible Recepción ya confirmada',()=>{
+ const opened=receivingState('normal');
+ const confirmed=navigateI2GameState(opened,'forward');
+ const again=navigateI2GameState(confirmed,'back');
+ assert.equal(again.phase,'area');
+ assert.equal(again.index,3);
+ assert.ok(again.confirmedAreas.includes('receiving'));
+ const preview=i2ReceivingCapacityPreview(again);
+ assert.equal(preview.choice,'normal');
+ assert.deepEqual(preview,i2ReceivingCapacityPreview(opened));
+});
+
 test('I2-21: 5 semillas × 3 turnos usan únicamente eventos físicos del escenario original',()=>{
  for(const seed of ['alpha-case-01','alpha-case-02','alpha-case-03','alpha-case-04','alpha-case-05'])
  for(const receiving of ['low','normal','extra']){
