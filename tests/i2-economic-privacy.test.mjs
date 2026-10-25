@@ -102,7 +102,7 @@ test('I2-06: exposed projection is allow-listed; no ledger, customer, tracking o
   'arrivalDay','coverage','advanced','confirmedAreas','reveal'
  ].sort());
  assert.deepEqual(Object.keys(saved.advanced).sort(),[
-  'plannedOrders','pickingOperators','stockProfile','extraCapacityDailyCostCLP'
+  'plannedOrders','pickingLimitSkuPerDay','stockProfile','extraCapacityDailyCostCLP'
  ].sort());
  assert.doesNotMatch(stored[0][1],
   /tracking|customer|physicalLedger|private@example.com|PII0001|confidential/i);
