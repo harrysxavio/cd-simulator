@@ -714,3 +714,52 @@ html,body{height:100%;overflow:hidden}
  }
  .mentor-response .mentor-question{border-left:3px solid Highlight}
 }
+
+
+/* I2-21 · Recepción, cola FIFO y recibos físicos (post-reveal). */
+.receiving-capacity-teaching,.receiving-outcome{
+ min-width:0;display:grid;gap:8px;margin:9px 0 12px;
+ padding:11px;border:1px solid var(--border);
+ background:var(--panel);border-radius:12px
+}
+.receiving-capacity-teaching>strong,.receiving-outcome>strong{
+ font-size:.89rem;line-height:1.4
+}
+.receiving-capacity-teaching p,.receiving-outcome p{
+ margin:0!important;font-size:.79rem;line-height:1.45
+}
+.receiving-capacity-numbers{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.receiving-capacity-number{
+ display:flex;flex-direction:column;gap:5px;min-width:0;
+ padding:9px;border:1px solid var(--border);
+ border-radius:10px;background:var(--detail-bg)
+}
+.receiving-capacity-number span{font-size:.72rem;color:var(--muted)}
+.receiving-capacity-number strong{
+ font-size:1rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.receiving-queue-explanation,.receiving-daily-details{
+ border:1px solid var(--border);border-radius:10px;
+ padding:6px 9px;background:var(--detail-bg)
+}
+.receiving-queue-explanation summary,.receiving-daily-details summary{
+ min-height:44px;align-content:center;cursor:pointer;
+ font-size:.8rem;font-weight:750
+}
+.receiving-queue-explanation summary:focus-visible,
+.receiving-daily-details summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.receiving-daily-row{padding:7px 0;border-top:1px solid var(--border)}
+.receiving-daily-row strong{font-size:.78rem}
+@media(max-width:340px){.receiving-capacity-numbers{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .receiving-capacity-teaching,.receiving-outcome,.receiving-capacity-number,
+ .receiving-queue-explanation,.receiving-daily-details{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .receiving-queue-explanation summary:focus-visible,
+ .receiving-daily-details summary:focus-visible{outline:3px solid Highlight}
+}
