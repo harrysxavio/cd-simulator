@@ -12,6 +12,8 @@ import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
 import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateObjectives} from '../src/i2-management-objectives.js';
 import {I2_CHALLENGES,i2ChallengeForSeed,i2ChallengeReveal} from '../src/i2-challenge-config.js';
+import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
+ i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_ADVANCED_FIELDS,i2ValidateAdvanced} from '../src/i2-advanced-settings.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
@@ -32,6 +34,7 @@ let preview=null;
 let objectives=i2ReadObjectives(window.localStorage);
 let showGuide=false;
 try{showGuide=readI2GuidePreference(window.localStorage)}catch{}
+let guideLevel=readI2NicoLevel(window.localStorage);
 
 /** Separate versioned game storage. Never write V1 or the physical event ledger. */
 function persist(){
@@ -66,7 +69,7 @@ function setActions({next='Continuar',onNext=null,back='',onBack=null}={}){
  secondary.textContent=back;secondary.hidden=!onBack;secondary.onclick=onBack;
 }
 function guideElement(){
- const advice=i2GuideHint(state);
+ const advice=i2NicoCoachTip(state,guideLevel);
  const wrapper=node('section',{className:'mentor-area',attrs:{id:'gameGuide'}});
  const toggle=node('button',{
   className:'mentor-toggle',
@@ -270,6 +273,44 @@ function advancedSummary(){
  ' · Stock '+({low:'75 %',standard:'100 %',high:'125 %'}[c.stockProfile])+
  ' · Refuerzo '+money.format(c.extraCapacityDailyCostCLP)+'/turno';
 }
+/** Presentación breve, independiente de revelar resultados y sin forzar consejos. */
+function nicoWelcome(){
+ const avatar=section('nico-avatar',[
+  node('span',{className:'nico-avatar-fallback',text:'NC',attrs:{'aria-hidden':'true'}}),
+  node('img',{attrs:{src:'./nico.svg',width:'40',height:'40',alt:'',loading:'lazy'}})
+ ]);
+ const intro=section('nico-intro-text',[
+  node('strong',{text:'Nico · Coordinador ficticio del CD'}),
+  p('Soy Nico. Puedo enseñarte cómo se conectan las áreas; tú tomas todas las decisiones.','nico-intro-line')
+ ]);
+ const card=section('nico-welcome',[
+  section('nico-welcome-head',[avatar,intro])
+ ]);
+ const detail=node('details',{className:'nico-lesson'});
+ detail.append(node('summary',{text:'Elegir nivel y ver tutorial (opcional)'}));
+ const group=section('management-field');
+ const sel=node('select',{attrs:{id:'nicoLevel'}});
+ for(const x of I2_NICO_LEVELS){
+  const option=node('option',{attrs:{value:x.id},text:x.label});
+  option.selected=x.id===guideLevel;
+  sel.append(option);
+ }
+ const steps=section('nico-tutorial-steps',i2NicoTutorial(guideLevel).map(line=>p(line)));
+ steps.id='nicoTutorialSteps';
+ sel.addEventListener('change',()=>{
+  try{
+   guideLevel=saveI2NicoLevel(window.localStorage,sel.value);
+   steps.replaceChildren(...i2NicoTutorial(guideLevel).map(line=>p(line)));
+   const current=root.querySelector('#gameGuide');
+   if(current)current.replaceWith(guideElement());
+  }catch(e){showError(e)}
+ });
+ group.append(node('label',{text:'Experiencia con Nico',attrs:{for:'nicoLevel'}}),sel,
+  p('El nivel modifica las explicaciones, no la dificultad ni el resultado.','footnote'));
+ detail.append(group,steps);
+ card.append(detail);
+ return card;
+}
 function intro(){
  const brief=i2FirstMissionBriefing(state);
  stage.textContent='Misión 01 · Tu primer turno';
@@ -288,6 +329,7 @@ function intro(){
    p('PARTIDA EN CURSO','intro-resume-title'),
    p(brief.resumeLabel+'. Puedes continuar sin perder lo que ya decidiste.','intro-resume')
   ]:[]),
+  nicoWelcome(),
   section('briefing-steps',[
    node('strong',{text:'Tu desafío en 3 pasos'}),
    ...brief.steps.map((step,index)=>section('briefing-step',[
