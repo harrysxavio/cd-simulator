@@ -7,6 +7,7 @@ on:
       - 'tests/i2-mvp-adapter.test.mjs'
       - 'tests/i2-challenge-config.test.mjs'
       - 'tests/i2-advanced-settings.test.mjs'
+      - 'tests/i2-nico-tutorial.test.mjs'
       - 'tests/browser-i2-*.e2e.mjs'
       - '.github/workflows/i2-mvp-smoke.yml'
   workflow_dispatch:
@@ -25,7 +26,7 @@ jobs:
         with:
           node-version: '22'
       - name: I2 physical adapter unit tests
-        run: node --experimental-default-type=module --test tests/i2-product-contract.test.mjs tests/i2-mvp-adapter.test.mjs tests/i2-game-campaign-adapter.test.mjs tests/i2-game-state.test.mjs tests/i2-economic-privacy.test.mjs tests/i2-visual-tokens.test.mjs tests/i2-game-navigation.test.mjs tests/i2-game-progress.test.mjs tests/i2-game-guide.test.mjs tests/i2-first-mission-briefing.test.mjs tests/i2-management-objectives.test.mjs tests/i2-challenge-config.test.mjs tests/i2-advanced-settings.test.mjs
+        run: node --experimental-default-type=module --test tests/i2-product-contract.test.mjs tests/i2-mvp-adapter.test.mjs tests/i2-game-campaign-adapter.test.mjs tests/i2-game-state.test.mjs tests/i2-economic-privacy.test.mjs tests/i2-visual-tokens.test.mjs tests/i2-game-navigation.test.mjs tests/i2-game-progress.test.mjs tests/i2-game-guide.test.mjs tests/i2-first-mission-briefing.test.mjs tests/i2-management-objectives.test.mjs tests/i2-challenge-config.test.mjs tests/i2-advanced-settings.test.mjs tests/i2-nico-tutorial.test.mjs
       - name: Install pinned browser test dependency
         run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.64.0
       - name: Focused game journey and entry
@@ -37,4 +38,4 @@ jobs:
             if curl --silent --fail http://127.0.0.1:8000/juego/ >/dev/null; then break; fi
             sleep 1
           done
-          node --experimental-default-type=module --test --test-concurrency=1 tests/browser-i2-game-route.e2e.mjs tests/browser-i2-entry-link.e2e.mjs tests/browser-i2-mvp-alpha.e2e.mjs tests/browser-i2-game-state.e2e.mjs tests/browser-i2-boundary.e2e.mjs tests/browser-i2-mobile-shell.e2e.mjs tests/browser-i2-navigation.e2e.mjs tests/browser-i2-help-dialog.e2e.mjs tests/browser-i2-chapter-progress.e2e.mjs tests/browser-i2-guide.e2e.mjs tests/browser-i2-first-briefing.e2e.mjs tests/browser-i2-management-objectives.e2e.mjs tests/browser-i2-challenges.e2e.mjs tests/browser-i2-advanced-settings.e2e.mjs
+          node --experimental-default-type=module --test --test-concurrency=1 tests/browser-i2-game-route.e2e.mjs tests/browser-i2-entry-link.e2e.mjs tests/browser-i2-mvp-alpha.e2e.mjs tests/browser-i2-game-state.e2e.mjs tests/browser-i2-boundary.e2e.mjs tests/browser-i2-mobile-shell.e2e.mjs tests/browser-i2-navigation.e2e.mjs tests/browser-i2-help-dialog.e2e.mjs tests/browser-i2-chapter-progress.e2e.mjs tests/browser-i2-guide.e2e.mjs tests/browser-i2-first-briefing.e2e.mjs tests/browser-i2-management-objectives.e2e.mjs tests/browser-i2-challenges.e2e.mjs tests/browser-i2-advanced-settings.e2e.mjs tests/browser-i2-nico-tutorial.e2e.mjs
