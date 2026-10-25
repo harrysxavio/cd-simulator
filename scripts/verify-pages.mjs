@@ -24,7 +24,7 @@ async function verify(attempt){
  if(!html.includes('id="gameEntry" href="./juego/"'))errors.push('HTML missing real game route link');
  if(!html.includes('Jugar Misión CD'))errors.push('HTML missing playable alpha entry label');
  if(errors.length)throw new Error(errors.join('; '));
- const [remoteManifest,app,check,gameHtml,gameCss,gameJs,mvpJs,sharedJs,stateJs,boundaryJs,progressJs,helpJs,guideJs,briefJs]=await Promise.all([
+ const [remoteManifest,app,check,gameHtml,gameCss,gameJs,mvpJs,sharedJs,stateJs,boundaryJs,progressJs,helpJs,guideJs,briefJs,nicoTutorialJs,nicoSprite]=await Promise.all([
   req('release.json',attempt),
   req('src/app.js?v='+release.assetRevision,attempt),
   req('src/release-status.js?v='+release.assetRevision,attempt),
@@ -38,7 +38,9 @@ async function verify(attempt){
   req('src/i2-game-progress.js',attempt),
   req('juego/help-dialog.js',attempt),
   req('src/i2-game-guide.js',attempt),
-  req('src/i2-first-mission-briefing.js',attempt)
+  req('src/i2-first-mission-briefing.js',attempt),
+  req('src/i2-nico-tutorial.js',attempt),
+  req('juego/nico.svg',attempt)
  ]);
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
@@ -70,7 +72,10 @@ async function verify(attempt){
   ||!gameJs.includes("from '../src/i2-game-guide.js'")
   ||!guideJs.includes('i2GuideHint')
   ||!briefJs.includes('i2FirstMissionBriefing')
-  ||!gameJs.includes("from '../src/i2-first-mission-briefing.js'"))
+  ||!gameJs.includes("from '../src/i2-first-mission-briefing.js'")
+  ||!gameJs.includes("from '../src/i2-nico-tutorial.js'")
+  ||!nicoTutorialJs.includes('i2NicoCoachTip')
+  ||!nicoSprite.includes('<svg')||!nicoSprite.includes('viewBox="0 0 32 32"'))
   throw new Error('Published game module dependency chain is missing or stale');
  console.log('PAGES LIVE VERIFIED: version',release.version,'asset revision',release.assetRevision,'URL',base);
 }
