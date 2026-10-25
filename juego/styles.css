@@ -653,3 +653,13 @@ html,body{height:100%;overflow:hidden}
  }
  .supplier-sku-detail summary:focus-visible{outline:3px solid Highlight}
 }
+
+/* Nico's 21 high-quality PNG originals are opt-in only after checksum verification. */
+.nico-scene-portrait{
+ display:block;width:112px;height:112px;object-fit:contain;
+ border-radius:12px;margin:4px auto 9px;
+ background:var(--detail-bg);border:1px solid var(--border);
+}
+.mentor-area>.nico-scene-portrait{width:88px;height:88px;float:left;margin:5px 11px 3px 0}
+@media(max-width:320px){.nico-scene-portrait{width:84px;height:84px}}
+@media(forced-colors:active){.nico-scene-portrait{border-color:CanvasText}}
