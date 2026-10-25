@@ -404,3 +404,41 @@ html,body{height:100%;overflow:hidden}
   outline:3px solid Highlight;
  }
 }
+
+
+/* I2-16 · Nico se presenta en la portada sin ocupar espacio en el footer. */
+.nico-welcome{
+ margin:9px 0 12px;padding:10px 11px;border:1px solid var(--border);
+ border-radius:12px;background:var(--detail-bg);
+}
+.nico-welcome-head{display:flex;align-items:center;gap:10px;min-width:0}
+.nico-avatar{
+ position:relative;display:grid;place-items:center;flex:0 0 40px;
+ width:40px;height:40px;overflow:hidden;border-radius:6px;
+ background:#163048;border:1px solid var(--border);
+}
+.nico-avatar img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.nico-avatar-fallback{color:#fbbf24;font-size:.8rem;font-weight:800}
+.nico-intro-text{min-width:0}
+.nico-intro-text strong{font-size:.84rem;line-height:1.3}
+.nico-intro-line{font-size:.78rem;line-height:1.35;margin:3px 0 0!important}
+.nico-lesson{margin-top:7px;font-size:.8rem}
+.nico-lesson summary{
+ display:list-item;cursor:pointer;min-height:44px;align-content:center;
+ font-weight:700;color:var(--detail-label);
+}
+.nico-lesson select{
+ width:100%;min-height:44px;padding:7px;border-radius:9px;
+ font:inherit;background:var(--panel);color:var(--text);
+ border:1px solid var(--border);
+}
+.nico-lesson summary:focus-visible,.nico-lesson select:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px;
+}
+.nico-tutorial-steps{margin:5px 0 0}
+.nico-tutorial-steps p{font-size:.78rem;line-height:1.4;margin:7px 0;color:var(--muted)}
+@media(max-width:300px){.nico-welcome{padding:8px}.nico-avatar{flex-basis:32px;width:32px;height:32px}}
+@media(forced-colors:active){
+ .nico-welcome,.nico-avatar,.nico-lesson select{border:1px solid CanvasText}
+ .nico-lesson :is(summary,select):focus-visible{outline:3px solid Highlight}
+}
