@@ -4,7 +4,7 @@
 
 ## Lectura educativa antes de revelar demanda
 
-Compras recibe cantidades originales **proyectadas** sobre el forecast y cobertura ya confirmados; no emite una PO real. Tres opciones canónicas de V1: proveedor económico con fill 75 %, confiable 95 %, express 100 %. Se aplica `Math.floor(cantidadOriginalPorSku*fill/100)`, igual que `deliveryTimeline` de V1, a cada SKU A/B/C sin conocer la demanda real. El usuario ve solicitado, cumplimiento supuesto, faltante proveedor y plazo estándar por SKU, con contenido desplegable.
+Compras recibe cantidades originales **proyectadas** sobre el forecast y cobertura ya confirmados; no emite una PO real. Tres opciones canónicas de V1: proveedor económico con fill 75 %, confiable 95 %, express 100 %. La tasa seleccionada (75/95/100 %) se transforma primero con `flow` de V1 sobre demanda **planificada** y unidades agregadas enteras (`entregado/agregado solicitado`). Luego se aplica `Math.floor(cantidadOriginalPorSku*tasaEfectiva/100)` a cada A/B/C, exactamente como `campaignSkuContract` y `deliveryTimeline`. Esta tasa efectiva puede ser ligeramente menor que la opción nominal por redondeo; la vista muestra ambas, sin revelar demanda real. El usuario ve solicitado, cumplimiento supuesto, faltante proveedor y plazo estándar por SKU, con contenido desplegable.
 
 **El cumplimiento del proveedor NO es mercancía físicamente recibida.** La llegada nominal no certifica documentación, descarga, ubicación ni liberación. Tampoco se confunde entrega al muelle con salida al cliente o pago efectivo.
 
