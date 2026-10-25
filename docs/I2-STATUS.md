@@ -43,7 +43,7 @@
 | I2-17 | Tres pestañas accesibles Decisión/Indicadores/Nico; dos supuestos trazables a V1, teclado, swipe opcional y footer fijo | [#103](https://github.com/harrysxavio/cd-simulator/pull/103) | Integrada técnicamente; Node, focused y Chromium general en PR aprobados |
 | I2-18 | Comercial: forecast 80/100/115 %, equivalente de muestra visible antes de la sorpresa, efectos sobre compras y comparación posreveal con compra original SKU congelada | [#104](https://github.com/harrysxavio/cd-simulator/pull/104) | Integrada técnicamente; Node, focused y Chromium general del PR verdes |
 | I2-19 | Planificación: cobertura 70/100/110 %, unidades y compromiso de compra SKU antes del shock, conciliación con PO original congelada tras la sorpresa | [#105](https://github.com/harrysxavio/cd-simulator/pull/105) | Integrada; Node, focused y Chromium general del PR aprobados |
-| I2-20 | Compras 75/95/100 % de cumplimiento nominal; tasa efectiva V1, entrega versus muelle versus recepción física SKU, y rutas de arte Nico protegidas | [#106](https://github.com/harrysxavio/cd-simulator/pull/106) | Integrada técnicamente; Node, focused y Chromium general del PR verdes. **21 PNG originales pendientes de upload** en [#107](https://github.com/harrysxavio/cd-simulator/issues/107) |
+| I2-20 | Compras 75/95/100 % de cumplimiento nominal; tasa efectiva V1, entrega versus muelle versus recepción física SKU, y rutas de arte Nico protegidas | [#106](https://github.com/harrysxavio/cd-simulator/pull/106) | Integrada técnicamente; Node, focused y Chromium general verdes. Arte original ya activado y verificado por [PR #108](https://github.com/harrysxavio/cd-simulator/pull/108) |
 
 ## Fases ejecutivas
 
@@ -102,8 +102,15 @@
 
 - [PR #106](https://github.com/harrysxavio/cd-simulator/pull/106), merge `ab8e2950708e2d2d81da178012de43a25c7a22f8`. Explica proveedor nominal 75/95/100 %, tasa efectiva redondeada desde `flow` de V1, cantidades originales SKU por proveedor, y audita en postreveal compromisos, llegadas, tránsito y recepción a bodega desde `supplierOrderLedger` y `receiptEvents`. Los cinco modos de recuperación conservan el mismo manifiesto original.
 - **Gates aprobados en PR:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40225695689), [I2 focused](https://github.com/harrysxavio/cd-simulator/actions/runs/40225695690) y [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40225695657). Pages/HTTP y Chromium postmerge de `main` se verifican separadamente.
-- Nico: atlas de 12 expresiones y cinco láminas de iconos indexado en `src/i2-nico-art.js`. Script `tools/install-nico-assets.py` verifica los 21 PNG por SHA-256 al instalarlos. **Los binarios originales NO están subidos todavía**: su carga y verificación están abiertas en [issue #107](https://github.com/harrysxavio/cd-simulator/issues/107). Hasta entonces el juego usa el SVG anterior y no dispara errores 404 por imágenes ausentes.
+- Nico: al integrar el PR #106 el atlas y el fallback estaban preparados, pero los PNG aún no habían llegado. **Estado vigente posterior: [PR #108](https://github.com/harrysxavio/cd-simulator/pull/108) recuperó y activó 21/21 PNG originales verificados byte a byte**; el Nico de cuerpo completo se muestra al inicio y las expresiones enriquecen ayuda, alerta, crisis y cierre. [Contrato de voz y arte](I2-NICO-ARTE-Y-VOZ.md).
 - **Avance formal 21/41 (51,2 %); F5 3/8.** Android físico/TalkBack y QA con novatos sigue abierto en [#67](https://github.com/harrysxavio/cd-simulator/issues/67). F7 y F8 no completadas.
+
+## Nico · arte original y consejos cercanos (25-10-2026, mejora transversal)
+
+- [PR #108](https://github.com/harrysxavio/cd-simulator/pull/108), merge `2cd69489c82888ad52fb869509a5db1f2add0061`: se cotejaron los 21 objetos Git PNG de `juego/assets/nico/` con los bytes originales del respaldo y sus 21 SHA-256. Se activó arte auténtico (retrato completo, expresiones por contexto, fallback local), manteniendo las cinco láminas de iconos como fuentes sin recortar.
+- Nico ahora explica cada una de las **ocho áreas en tres niveles** con frases amistosas, un ejemplo práctico y una pregunta orientadora. Evita spoilers de demanda, predicciones sin fuente y respuestas correctas automáticas. Los consejos continúan siendo optativos, el motor V1 y el estado I2 permanecen intactos.
+- **Gates PR aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40229536033), [Misión CD focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40229536032), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40229536097). Los checks de Pages y main posteriores al merge se revisan aparte.
+- Ajuste de calidad de **I2-12/I2-16/I2-17**, **NO incrementa** microfases integradas: permanece **21/41 (51,2 %) y F5 3/8**, siguiente **I2-21 Recepción**. Android físico/TalkBack y evaluación con usuarios (#67) siguen pendientes.
 
 ## MVP alfa: exactamente qué puede probarse
 
