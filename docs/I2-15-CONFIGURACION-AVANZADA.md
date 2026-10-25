@@ -7,7 +7,7 @@
 | Campo | Valores | Modelo efectivo |
 | --- | --- | --- |
 | Pedidos previstos en la muestra | 160, 200, 240 | `plannedSampleOrders` del contrato SKU, que escala también el tamaño de la cohorte observada según la semilla previamente fijada |
-| Tope físico de Picking por jornada | Según decisión de área (sin tope adicional), 40, 80 SKU/día | `pickingUnitCapacityLimit` reduce `pickingUnitCapacity` solo si es más estricto que la decisión en Picking; conserva la causalidad de las ocho áreas |
+| Tope físico de Picking por jornada | Según decisión de área (sin tope adicional), 10 (estrés) o 40 (restricción) SKU/día | `pickingUnitCapacityLimit` reduce `pickingUnitCapacity` solo si es más estricto que la decisión en Picking; conserva la causalidad de las ocho áreas |
 | Perfil de stock inicial físico A/B/C | 75 %, 100 %, 125 % del catálogo (redondeo hacia abajo) | `skuOpeningState({stock})` dentro del contrato físico SKU: A/B/C reales del modelo, nunca `scenario.initialStock` de la jornada agregada |
 | Costo del refuerzo activado | CLP 50.000, 70.000, 100.000 por jornada | `extraCapacityDailyCost` del mismo `recoveryComparison` de V1. Es costo incremental *parcial*, no P&L completo |
 
