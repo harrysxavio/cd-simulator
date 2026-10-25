@@ -52,7 +52,7 @@ test('I2-19: Comercial confirmado -> cobertura 70%, compras SKU previas y plan c
   assert.match(await page.locator('#gameScene h1').innerText(),/Algo cambió/);
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click(); // Reveal -> recover
-  assert.match(await page.locator('#gameScene').innerText(),/280 pedidos/);
+  assert.match(await page.locator('#gameScene').innerText(),/se observaron 280/);
   await page.locator('#gameNext').click(); // wait -> final results
   const final=page.locator('.planning-outcome');
   assert.equal(await final.count(),1);
