@@ -7,7 +7,7 @@
 
 ## Resumen
 
-- **I2-00–I2-20: 21 de 41 microfases con PR fusionado a main (~51,2 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **I2-00–I2-21: 22 de 41 microfases con PR fusionado a main (~53,7 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
 - **MVP alfa vertical integrado en PR #79.** Campaña inicial +40 % ampliada por PR #100 a cinco retos exógenos de demanda ±, ocho decisiones, revelación explícita, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-14 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
@@ -17,7 +17,7 @@
 
 [**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
 
-**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 21/41**. No se certifican KPI integrales ni fases I2-26/I2-35 por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-21**, Recepción y colas de muelle, conservando las metas de servicio, costos, capacidad y plazos.
+**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 22/41**. No se certifican KPI integrales ni fases I2-26/I2-35 por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-22**, Calidad y retenciones temporales, conservando las metas de servicio, costos, capacidad y plazos.
 
 ## Microfases integradas y evidencia
 
@@ -44,6 +44,7 @@
 | I2-18 | Comercial: forecast 80/100/115 %, equivalente de muestra visible antes de la sorpresa, efectos sobre compras y comparación posreveal con compra original SKU congelada | [#104](https://github.com/harrysxavio/cd-simulator/pull/104) | Integrada técnicamente; Node, focused y Chromium general del PR verdes |
 | I2-19 | Planificación: cobertura 70/100/110 %, unidades y compromiso de compra SKU antes del shock, conciliación con PO original congelada tras la sorpresa | [#105](https://github.com/harrysxavio/cd-simulator/pull/105) | Integrada; Node, focused y Chromium general del PR aprobados |
 | I2-20 | Compras 75/95/100 % de cumplimiento nominal; tasa efectiva V1, entrega versus muelle versus recepción física SKU, y rutas de arte Nico protegidas | [#106](https://github.com/harrysxavio/cd-simulator/pull/106) | Integrada técnicamente; Node, focused y Chromium general verdes. Arte original ya activado y verificado por [PR #108](https://github.com/harrysxavio/cd-simulator/pull/108) |
+| I2-21 | Recepción: capacidad diaria, FIFO, cola de muelle, conservación SKU y resultado por día del mismo ledger original, sin spoilers | [#109](https://github.com/harrysxavio/cd-simulator/pull/109) | Integrada técnicamente; Node, focused y Chromium general del PR aprobados |
 
 ## Fases ejecutivas
 
@@ -54,7 +55,7 @@
 | F2 · Motor/estado/economía | I2-04–06 | **Completada técnicamente** | Matriz 8×5, guardado migrable, privacidad y límites CLP verificados; Android/TalkBack pendiente fuera de fase |
 | F3 · UX móvil y guía | I2-07–12 | **Completada técnicamente (6/6)** | Tokens, viewport, navegación, ayuda modal, mapa y guía opcional integrados; Android físico y TalkBack pendientes de aceptación transversal |
 | F4 · Configuración y tutorial | I2-13–17 | **I2-13–17 integradas; F4 técnicamente completa (5/5)** | Briefing y retomar la partida verificados. Tutor, configuración y tres vistas integradas; Android/TalkBack pendiente en F8 |
-| F5 · Ocho áreas | I2-18–25 | **I2-18–20 integradas; 3/8 áreas profundizadas** | Comercial, Planificación y Compras: pronóstico, compromisos, fill, muelle y recepción. Recepción I2-21 siguiente; cinco áreas pendientes |
+| F5 · Ocho áreas | I2-18–25 | **I2-18–21 integradas; 4/8 áreas profundizadas** | Comercial, Planificación, Compras y Recepción: compromiso, abastecimiento, muelle y colas auditadas. Calidad I2-22 siguiente; cuatro áreas pendientes |
 | F6 · Demanda sorpresa y recuperación | I2-26–30 | **Recorrido alfa, no cerrado** | Revelación explícita y cinco estrategias; faltan diagnósticos completos y controles avanzados |
 | F7 · Resultados/gamificación | I2-31–35 | **Resultado básico alfa** | KPIs físicos y costos modelados parciales; faltan logros, reto, niveles y comparador más completo |
 | F8 · Certificación y publicación estable | I2-36–40 | **Pendiente** | Controles, múltiples dispositivos, accesibilidad/TalkBack, evaluación y release estable |
@@ -110,7 +111,14 @@
 - [PR #108](https://github.com/harrysxavio/cd-simulator/pull/108), merge `2cd69489c82888ad52fb869509a5db1f2add0061`: se cotejaron los 21 objetos Git PNG de `juego/assets/nico/` con los bytes originales del respaldo y sus 21 SHA-256. Se activó arte auténtico (retrato completo, expresiones por contexto, fallback local), manteniendo las cinco láminas de iconos como fuentes sin recortar.
 - Nico ahora explica cada una de las **ocho áreas en tres niveles** con frases amistosas, un ejemplo práctico y una pregunta orientadora. Evita spoilers de demanda, predicciones sin fuente y respuestas correctas automáticas. Los consejos continúan siendo optativos, el motor V1 y el estado I2 permanecen intactos.
 - **Gates PR aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40229536033), [Misión CD focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40229536032), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40229536097). Los checks de Pages y main posteriores al merge se revisan aparte.
-- Ajuste de calidad de **I2-12/I2-16/I2-17**, **NO incrementa** microfases integradas: permanece **21/41 (51,2 %) y F5 3/8**, siguiente **I2-21 Recepción**. Android físico/TalkBack y evaluación con usuarios (#67) siguen pendientes.
+- Ajuste de calidad de **I2-12/I2-16/I2-17** (en ese corte se mantenían **21/41 y F5 3/8**). **No sumó microfase**; el avance actual incorpora por separado I2-21, integrada posteriormente. Android físico/TalkBack y evaluación con usuarios (#67) siguen pendientes.
+
+## I2-21 · Recepción, capacidad y cola FIFO (25-10-2026)
+
+- [PR #109](https://github.com/harrysxavio/cd-simulator/pull/109), merge `50cee64eef1113a64b0a79be5f72fa5c9765711f`: tarjeta de capacidad de Recepción versus turno normal, explicación de cola FIFO desplegable sin filtración de demanda futura; resultado posterior con llegadas, ingresos físicos, cola al cierre y pico de espera en el mismo `comparison.base.ledger` SKU, con auditorías por día y SKU.
+- El modelo **no inventa una cola** si el tamaño de muestra no satura Recepción. Test físico de capacidad cero demuestra que ninguna llegada se convierte en stock ni crea recibos si la capacidad no alcanza; validación de regreso a decisiones ya confirmadas.
+- **Gates del PR aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40231764270), [Misión CD focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40231764234), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40231764251). Postmerge Pages/HTTP y Chromium de `main` se comprueban separadamente. [Contrato técnico](I2-21-RECEPCION-FIFO.md).
+- **Avance formal: 22/41 (53,7 %), F5 4/8.** Siguiente I2-22 Calidad. Android real/TalkBack y evaluación humana (#67) siguen pendientes.
 
 ## MVP alfa: exactamente qué puede probarse
 
@@ -124,7 +132,7 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-21** (Recepción: capacidad de muelle, cola de recepción y eventos físicos sin mezclar lo que arribó con lo procesado). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-22** (Calidad: cola de liberación, unidades retenidas y fecha de disponibilidad física sin inventar pérdidas). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
 
 ## Cierre técnico I2-04 e I2-05 (24-10-2026)
 
