@@ -25,11 +25,11 @@ test('I2-12: Nico is opt-in, persists per browser and never changes the campaign
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),guideKey),'shown');
   assert.deepEqual(await page.evaluate(([g,l])=>[localStorage.getItem(g),localStorage.getItem(l)],[campaignKey,legacyKey]),before);
   await page.locator('#gameNext').click();
-  assert.match(await page.locator('#gameGuideText').innerText(),/pronostica|Pronostica/);
+  assert.match(await page.locator('#gameGuideText').innerText(),/cuántos pedidos creemos que vendrán|pronóstico razonable/i);
   assert.doesNotMatch(await page.locator('#gameGuideText').innerText(),/280 pedidos|40 %/);
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'true');
-  assert.match(await page.locator('#gameGuideText').innerText(),/Pronostica/);
+  assert.match(await page.locator('#gameGuideText').innerText(),/cuántos pedidos creemos que vendrán|pronóstico razonable/i);
   await page.getByRole('tab',{name:'Nico'}).click();
   await page.locator('.mentor-toggle').click();
   assert.equal(await page.locator('#gameGuideText').isVisible(),false);
