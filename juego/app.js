@@ -772,7 +772,8 @@ function resultsScene(){
  replace([
   p('CIERRE DE CAMPAÑA · DÍA 12','eyebrow'),
   heading('Estas fueron las consecuencias de tus decisiones.'),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('analysis')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(evaluation.allGreen?'result':
+   score.recoveredOrders.value>0?'improvement':'analysis')]:[]),
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
   forecast,
