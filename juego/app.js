@@ -523,6 +523,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
   ...(area.id==='purchasing'?[p('La entrega del proveedor es una hipótesis; solo Recepción registra unidades físicas. Mira Indicadores para separar compromiso, cumplimiento y plazo.','commercial-brief')]:[]),
   ...(area.id==='planning'?[p('La cobertura elegida modifica la compra SKU planificada, no el stock disponible hoy. Revisa Indicadores para evaluar unidades y compromiso.','commercial-brief')]:[]),
   ...(area.id==='commercial'?[p('El forecast es una hipótesis de compra, no una venta garantizada. Mira Indicadores para ver la equivalencia de tu muestra.','commercial-brief')]:[]),
@@ -532,7 +533,8 @@ function areaScene(){
   p('Entradas previstas, no resultados','option-heading'),compare,
   ...(area.id==='commercial'?[commercialForecastTeaching()]:[]),
   ...(area.id==='planning'?[planningCoverageTeaching()]:[]),
-  ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[])
+  ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[]),
+  ...(area.id==='receiving'?[receivingDockTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
