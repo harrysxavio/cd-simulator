@@ -42,7 +42,8 @@ export function i2AreaSelection(choices={},campaignId='CD-I2-DEFAULT'){
 
 function validate({choices={},campaignId='CD-I2-DEFAULT',plannedOrders=200,
  policy='balanced',supplierDelay=false,scope=PLAN_SCOPE,horizonDays=DAYS,
- option='wait',urgentArrivalDay=2,purchaseCoveragePercent=100,scenario
+ option='wait',urgentArrivalDay=2,purchaseCoveragePercent=100,scenario,
+ openingStock=null,extraCapacityDailyCost=null
 }={}){
  if(scope!==PLAN_SCOPE||horizonDays!==DAYS)throw new Error('I2-04: alcance físico inválido');
  if(!isInt(plannedOrders,1,100000))throw new Error('I2-04: cantidad de pedidos planificados inválida');
@@ -50,6 +51,13 @@ function validate({choices={},campaignId='CD-I2-DEFAULT',plannedOrders=200,
  if(!I2_RECOVERIES.some(r=>r.optionId===option))throw new Error('I2-04: recuperación inválida');
  if(!isInt(urgentArrivalDay,1,365)||!isInt(purchaseCoveragePercent,0,100))
   throw new Error('I2-04: llegada o cobertura de compra inválida');
+ // Los parámetros físicos adicionales pasan por la frontera canónica y
+ // jamás se calculan por separado en el frontend.
+ if(openingStock!==null&&(!openingStock||typeof openingStock!=='object'
+  ||Array.isArray(openingStock)))throw new Error('I2-04: apertura SKU inválida');
+ if(extraCapacityDailyCost!==null&&(!Number.isSafeInteger(extraCapacityDailyCost)
+  ||extraCapacityDailyCost<0||extraCapacityDailyCost>1000000))
+  throw new Error('I2-04: costo SKU inválido');
  const decisions=i2AreaSelection(choices,campaignId);
  // Only registered fields from the canonical scenario may enter. No network,
  // literal PO amounts or already-simulated ledgers are accepted as inputs.
@@ -67,7 +75,8 @@ function validate({choices={},campaignId='CD-I2-DEFAULT',plannedOrders=200,
   throw new Error('I2-04: demanda fuera del rango didáctico');
  }
  return {decisions,campaignId,plannedOrders,policy,supplierDelay,scope,horizonDays,
-  option,urgentArrivalDay,purchaseCoveragePercent,scenario:safeScenario};
+  option,urgentArrivalDay,purchaseCoveragePercent,scenario:safeScenario,
+  openingStock,extraCapacityDailyCost};
 }
 
 export function createI2GameCampaignAdapter({cache=createSkuSessionCache({maxEntries:10})}={}){
@@ -87,7 +96,8 @@ export function createI2GameCampaignAdapter({cache=createSkuSessionCache({maxEnt
   const contract=campaignSkuContract({
    campaignId:x.campaignId,decisions:x.decisions,actions:{},
    scenario:x.scenario,policy:x.policy,supplierDelay:x.supplierDelay,
-   plannedSampleOrders:x.plannedOrders
+   plannedSampleOrders:x.plannedOrders,
+   openingStock:x.openingStock,extraCapacityDailyCost:x.extraCapacityDailyCost
   });
   const projection=cache.getProjection({
    contract,skuInputs:contract.skuInputs,
