@@ -25,9 +25,10 @@ test('I2-20: 3 proveedores por 3 coberturas, supuesto de proveedor no implica re
    assert.equal(x.rows.length,3);
    assert.equal(x.originalCommittedSkuUnits,
     x.modeledSupplierFulfilledSkuUnits+x.modeledSupplierShortfallSkuUnits);
+   assert.ok(x.effectiveSkuFillPercent<=x.supplierFillPercent);
    assert.equal(x.originalCommittedSkuUnits,x.rows.reduce((n,r)=>n+r.orderedSkuUnits,0));
    assert.equal(x.modeledSupplierFulfilledSkuUnits,x.rows.reduce((n,r)=>n+
-    Math.floor(r.orderedSkuUnits*x.supplierFillPercent/100),0));
+    Math.floor(r.orderedSkuUnits*x.effectiveSkuFillPercent/100),0));
    assert.equal(JSON.stringify(state),before);
    assert.equal(Object.isFrozen(x.rows),true);
    assert.equal(JSON.stringify(x).includes('actualOrders'),false);
