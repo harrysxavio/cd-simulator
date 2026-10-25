@@ -17,6 +17,7 @@ import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
 import {I2_ADVANCED_FIELDS,i2ValidateAdvanced} from '../src/i2-advanced-settings.js';
 import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-indicators.js';
 import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
+import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -372,6 +373,38 @@ function commercialForecastTeaching(){
   p('Fuente: '+lesson.source,'footnote')
  ]);
 }
+/** Planificación con compras proyectadas ANTES del shock (no PO emitida). */
+function planningCoverageTeaching(){
+ const model=i2PlanningCoveragePreview(state);
+ const manifest=node('details',{className:'planning-sku-detail'},[
+  node('summary',{text:'Revisar desglose de la compra por SKU'}),
+  ...model.rows.map(row=>section('planning-sku-row',[
+   node('strong',{text:'SKU '+row.skuId+' · '+num.format(row.plannedPurchaseSkuUnits)+' unidades'}),
+   p('Inicio: '+num.format(row.openingSkuUnits)+' SKU · Necesidad calculada: '+
+    num.format(row.policyNeedSkuUnits)+' SKU','footnote'),
+   p('Compromiso proyectado: '+money.format(row.commitmentCLP)+
+    ' · lead time nominal '+row.nominalLeadDays+' días','footnote')
+  ]))
+ ]);
+ return section('planning-coverage-teaching',[
+  node('strong',{text:'Cobertura '+model.coveragePercent+' % del faltante SKU'}),
+  p('Pronóstico confirmado por Comercial: '+num.format(model.forecastOrders)+' pedidos de muestra.','note'),
+  section('planning-coverage-numbers',[
+   section('planning-coverage-number',[
+    node('span',{text:'Compra original proyectada'}),
+    node('strong',{text:num.format(model.totalCommittedSkuUnits)+' SKU'})
+   ]),
+   section('planning-coverage-number',[
+    node('span',{text:'Compromiso valorizado'}),
+    node('strong',{text:money.format(model.totalCommittedValueCLP)})
+   ])
+  ]),
+  p(model.teaching,'note'),
+  manifest,
+  p(model.boundary,'footnote'),
+  p('Fuente: '+model.source,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -415,12 +448,14 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='planning'?[p('La cobertura elegida modifica la compra SKU planificada, no el stock disponible hoy. Revisa Indicadores para evaluar unidades y compromiso.','commercial-brief')]:[]),
   ...(area.id==='commercial'?[p('El forecast es una hipótesis de compra, no una venta garantizada. Mira Indicadores para ver la equivalencia de tu muestra.','commercial-brief')]:[]),
   lesson,consequence
  ]);
  const indicators=section('area-tab-panel',[
   p('Entradas previstas, no resultados','option-heading'),compare,
-  ...(area.id==='commercial'?[commercialForecastTeaching()]:[])
+  ...(area.id==='commercial'?[commercialForecastTeaching()]:[]),
+  ...(area.id==='planning'?[planningCoverageTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
@@ -622,6 +657,22 @@ function resultsScene(){
    ))
   ])
  ]);
+ const planning=section('planning-outcome',[
+  node('strong',{text:'Planificación · cobertura y compra original'}),
+  p('Pronóstico utilizado: '+num.format(data.planning.forecastOrders)+' pedidos de muestra · cobertura '+data.planning.coveragePercent+' %.','note'),
+  section('planning-coverage-numbers',[
+   section('planning-coverage-number',[node('span',{text:'Unidades SKU comprometidas'}),
+    node('strong',{text:num.format(data.planning.totalCommittedSkuUnits)})]),
+   section('planning-coverage-number',[node('span',{text:'Valor de compromiso'}),
+    node('strong',{text:money.format(data.planning.totalCommittedValueCLP)})])
+  ]),
+  p('El compromiso original se fijó antes de revelar la demanda y no cambió al seleccionar la recuperación. No equivale a pago ni costo total.','footnote'),
+  node('details',{className:'planning-sku-detail'},[
+   node('summary',{text:'Revisar el plan original por SKU'}),
+   ...data.planning.rows.map(row=>p('SKU '+row.skuId+': '+num.format(row.originalCommittedSkuUnits)+
+    ' unidades comprometidas · llegada prevista día '+row.nominalArrivalDay,'note'))
+  ])
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -642,6 +693,7 @@ function resultsScene(){
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
   forecast,
+  planning,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
