@@ -360,3 +360,47 @@ html,body{height:100%;overflow:hidden}
  .management-traffic{color:CanvasText;border:2px solid CanvasText}
  .management-traffic-row{border:1px solid CanvasText}
 }
+
+
+/* I2-15 · Editor de supuestos físicos aislado de la navegación del juego.
+   Solo el panel interno despliega campos; el pie sigue fijo en móvil. */
+.advanced-settings{
+ padding:9px 12px;margin:8px 0 14px;border-radius:12px;
+ border:1px solid var(--border);background:var(--detail-bg);
+}
+.advanced-settings summary{
+ cursor:pointer;min-height:44px;display:list-item;align-content:center;
+ font-size:.84rem;font-weight:750;
+}
+.advanced-settings summary:focus-visible,
+.advanced-actions button:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px;
+}
+.advanced-settings .management-field{margin:10px 0}
+.advanced-settings .management-field select{
+ width:100%;min-height:46px;padding:7px;border-radius:9px;
+ background:var(--panel);color:var(--text);
+ border:1px solid var(--border);font:inherit;font-size:.86rem;
+}
+.advanced-settings select:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px;
+}
+.advanced-settings select:disabled,.advanced-actions button:disabled{opacity:.6}
+.advanced-feedback{margin:10px 0;font-size:.78rem;color:var(--warning-text)}
+.advanced-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.advanced-actions button{
+ min-height:46px;min-width:0;padding:7px 6px;border:1px solid var(--border);
+ border-radius:10px;font:inherit;font-size:.78rem;font-weight:750;
+ overflow-wrap:anywhere;cursor:pointer;
+}
+#advancedSave{background:var(--primary);color:var(--action-label)}
+#advancedCancel{background:var(--panel);color:var(--text)}
+@media(max-width:350px){.advanced-actions{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .advanced-settings,.advanced-actions button,.advanced-settings select{
+  background:ButtonFace;color:ButtonText;border:2px solid ButtonText;
+ }
+ .advanced-settings :is(summary,select,button):focus-visible{
+  outline:3px solid Highlight;
+ }
+}
