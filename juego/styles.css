@@ -514,3 +514,55 @@ html,body{height:100%;overflow:hidden}
  .area-reference-light{color:CanvasText;border:2px solid CanvasText}
  .area-tab:focus-visible,.area-tab-panel:focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-18 · Hipótesis de forecast antes del shock; resultado auditado después.
+   Contenido secundario plegado para mantener vistas pequeñas en móvil. */
+.commercial-brief{
+ margin:9px 0 4px;padding:9px 11px;font-size:.78rem;line-height:1.4;
+ color:var(--detail-label);background:var(--detail-bg);
+ border-left:3px solid var(--primary);border-radius:8px;
+}
+.commercial-forecast-teaching,.commercial-result{
+ display:grid;gap:6px;min-width:0;
+ padding:11px;margin:9px 0 12px;
+ border-radius:12px;border:1px solid var(--border);background:var(--panel);
+}
+.commercial-forecast-teaching>strong,.commercial-result>strong{
+ font-size:.89rem;line-height:1.35;
+}
+.commercial-forecast-teaching p,.commercial-result p{
+ margin:0!important;line-height:1.45;font-size:.8rem;
+}
+.commercial-forecast-sub{font-weight:800;color:var(--warning-text)}
+.commercial-flow,.commercial-commitment-details{
+ margin:6px 0 0;border:1px solid var(--border);
+ border-radius:10px;padding:5px 8px;background:var(--detail-bg);
+}
+.commercial-flow summary,.commercial-commitment-details summary{
+ cursor:pointer;min-height:44px;align-content:center;font-size:.8rem;
+ font-weight:750;color:var(--detail-label);
+}
+.commercial-flow .commercial-flow-step,.commercial-commitment-details p{
+ margin:6px 0!important;font-size:.77rem!important;
+}
+.commercial-result-pair{
+ display:grid;gap:7px;grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.commercial-result-pair p{
+ padding:8px;border:1px solid var(--border);border-radius:8px;
+ overflow-wrap:anywhere;
+}
+:is(.commercial-flow,.commercial-commitment-details) summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px;
+}
+@media(max-width:350px){.commercial-result-pair{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .commercial-forecast-teaching,.commercial-result,
+ .commercial-flow,.commercial-commitment-details{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ :is(.commercial-flow,.commercial-commitment-details) summary:focus-visible{
+  outline:3px solid Highlight
+ }
+}
