@@ -12,6 +12,7 @@ import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
 import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateObjectives} from '../src/i2-management-objectives.js';
 import {I2_CHALLENGES,i2ChallengeForSeed,i2ChallengeReveal} from '../src/i2-challenge-config.js';
+import {I2_ADVANCED_FIELDS,i2ValidateAdvanced} from '../src/i2-advanced-settings.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -189,6 +190,83 @@ function objectivesSettings(){
  );
  return details;
 }
+/** I2-15: edición transaccional; los cambios no afectan al motor hasta Guardar. */
+function advancedSettings(){
+ const locked=state.confirmedAreas.length>0;
+ const details=node('details',{className:'advanced-settings'});
+ details.append(node('summary',{text:'Configuración avanzada · stock, capacidad y costo'}));
+ const draft={...state.advanced};
+ const opts=[
+  {key:'plannedOrders',id:'advancedOrders',label:'Pedidos planificados de muestra',
+   note:'Cambiar el tamaño de la muestra modifica la planificación y las compras originales.',
+   values:I2_ADVANCED_FIELDS.plannedOrders.map(x=>({value:x,label:x+' pedidos'}))},
+  {key:'pickingOperators',id:'advancedPicking',label:'Dotación de Picking supuesta',
+   note:'Ajusta el supuesto de capacidad mediante el motor canónico; no mide personas reales.',
+   values:I2_ADVANCED_FIELDS.pickingOperators.map(x=>({value:x,label:x+' operarios teóricos'}))},
+  {key:'stockProfile',id:'advancedStock',label:'Inventario físico inicial de los 3 SKU',
+   note:'Perfil conjunto A/B/C, separado del stock agregado del simulador clásico.',
+   values:[{value:'low',label:'Reducido · 75 %'},{value:'standard',label:'Base · 100 %'},
+    {value:'high',label:'Alto · 125 %'}]},
+  {key:'extraCapacityDailyCostCLP',id:'advancedCost',label:'Tarifa diaria de refuerzo',
+   note:'Costo CLP simulado por turno de refuerzo activado; no es costo total.',
+   values:I2_ADVANCED_FIELDS.extraCapacityDailyCostCLP.map(x=>({value:x,label:money.format(x)}))}
+ ];
+ const fields=opts.map(spec=>{
+  const group=section('management-field');
+  const input=node('select',{attrs:{id:spec.id}});
+  for(const choice of spec.values){
+   const option=node('option',{text:choice.label,attrs:{value:choice.value}});
+   option.selected=choice.value===draft[spec.key];input.append(option);
+  }
+  input.disabled=locked;
+  input.addEventListener('change',()=>{
+   draft[spec.key]=typeof state.advanced[spec.key]==='number'?Number(input.value):input.value;
+   message.textContent='Cambios sin guardar: pulsa Guardar para aplicarlos.';
+  });
+  group.append(node('label',{text:spec.label,attrs:{for:spec.id}}),input,
+   p(spec.note,'footnote'));
+  return group;
+ });
+ const message=p('Los cambios se aplican solo al guardar, antes de confirmar Comercial.','advanced-feedback');
+ message.id='advancedFeedback';message.setAttribute('role','status');
+ const actions=section('advanced-actions');
+ const save=node('button',{text:'Guardar configuración',attrs:{type:'button',id:'advancedSave'}});
+ const cancel=node('button',{text:'Cancelar cambios',attrs:{type:'button',id:'advancedCancel'}});
+ save.disabled=locked;cancel.disabled=locked;
+ save.addEventListener('click',()=>{
+  if(state.confirmedAreas.length>0)return;
+  try{
+   const next=i2ValidateAdvanced(draft);
+   state.advanced=next;
+   persist();
+   const label=root.querySelector('#advancedSummary');
+   if(label)label.textContent=advancedSummary();
+   const plan=root.querySelector('#gamePlanOrders');
+   if(plan)plan.textContent='Partimos con '+num.format(next.plannedOrders)+
+    ' pedidos previstos en una muestra. La demanda real sigue oculta.';
+   message.textContent='Configuración guardada. La nueva base se aplicará a esta misión.';
+  }catch(e){message.textContent='Revisa los valores: '+e.message}
+ });
+ cancel.addEventListener('click',()=>{
+  for(const spec of opts){
+   draft[spec.key]=state.advanced[spec.key];
+   const input=details.querySelector('#'+spec.id);
+   input.value=String(draft[spec.key]);
+  }
+  message.textContent='Edición descartada. La partida no cambió.';
+ });
+ actions.append(save,cancel);
+ details.append(p('Al guardar, cambias la base operativa de la misión; no la puntuación visual. No modifica V1.','footnote'),
+  ...fields,message,actions,
+  ...(locked?[p('Plan bloqueado: ya confirmaste al menos una decisión. Reinicia para cambiar los supuestos.','note')]:[]));
+ return details;
+}
+function advancedSummary(){
+ const c=state.advanced;
+ return 'Base: '+num.format(c.plannedOrders)+' pedidos · Picking '+c.pickingOperators+
+ ' · Stock '+({low:'75 %',standard:'100 %',high:'125 %'}[c.stockProfile])+
+ ' · Refuerzo '+money.format(c.extraCapacityDailyCostCLP)+'/turno';
+}
 function intro(){
  const brief=i2FirstMissionBriefing(state);
  stage.textContent='Misión 01 · Tu primer turno';
@@ -214,10 +292,12 @@ function intro(){
     p(step)
    ]))
   ]),
-  p('Partimos con '+num.format(brief.plannedOrders)+' pedidos previstos en una muestra. La demanda real sigue oculta.','note'),
+  node('p',{className:'note',text:'Partimos con '+num.format(brief.plannedOrders)+' pedidos previstos en una muestra. La demanda real sigue oculta.',attrs:{id:'gamePlanOrders'}}),
   node('p',{className:'management-target',text:objectivesSummary(),attrs:{id:'managementTarget'}}),
   node('p',{className:'footnote',text:'Reto activo: '+i2ChallengeForSeed(state.seed).level,attrs:{id:'gameChallengeLabel'}}),
   objectivesSettings(),
+  node('p',{className:'footnote',text:advancedSummary(),attrs:{id:'advancedSummary'}}),
+  advancedSettings(),
   p(brief.warning,'footnote')
  ]);
  updateFooter();
@@ -279,7 +359,7 @@ function resultFor(option){
  return i2MvpPhysicalResult({
   choices:state.choices,option:option??state.recovery,
   urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage,
-  seed:state.seed
+  seed:state.seed,advanced:state.advanced
  });
 }
 function labeledSelect(label,values,current,onChange){
@@ -295,7 +375,7 @@ function labeledSelect(label,values,current,onChange){
 }
 function recoveryScene(){
  if(!state.reveal){state.phase='reveal';render();return}
- const reveal=i2ChallengeReveal(state.seed,I2_MVP_CASE.plannedOrders);
+ const reveal=i2ChallengeReveal(state.seed,state.advanced.plannedOrders);
  stage.textContent='Crisis · Recuperación';progress.style.width='92%';
  replace([
   p('DEMANDA SORPRESA · CASO REPRODUCIBLE','eyebrow'),
@@ -437,6 +517,6 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed});preview=null;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced});preview=null;saveAndRender()}
 });
 render();
