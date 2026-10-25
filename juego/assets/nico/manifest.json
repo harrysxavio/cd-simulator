@@ -1,0 +1,92 @@
+{
+  "created": "2026-10-25",
+  "format": "png",
+  "status": "PENDING_UPLOAD",
+  "excluded_first_image": true,
+  "files": [
+    {
+      "path": "personaje/nico_chibi_cuerpo_completo.png",
+      "sha256": "bb06b0b68b2c672f53ff755c41c3d816bcd6033dde462622db74813dec3e1234"
+    },
+    {
+      "path": "iconos/areas_y_flujo.png",
+      "sha256": "a7e6d9be5657dc91e0ba552563b2f6363f423daf59dc504a5ff9249c173320ec"
+    },
+    {
+      "path": "iconos/operacion_y_equipos.png",
+      "sha256": "cc169d3cd0f69bdb7b94f1550bac2b3a9929109cda9c64677293b7c854039372"
+    },
+    {
+      "path": "iconos/logros_y_avances.png",
+      "sha256": "cbeb0121f2e05d37e42e332ff1d7cfd62534527e698fb9d3a7b07184568aa6d3"
+    },
+    {
+      "path": "iconos/alertas_y_riesgos.png",
+      "sha256": "e746c94461cfe8acaafb05b4e4b71824b10fc28f9e55d9e3d050e479b0b3372a"
+    },
+    {
+      "path": "iconos/kpis_y_semaforos.png",
+      "sha256": "513108dd703a1f061f0bb4fb30f6553b40e9cf21ed2823c05e7b14f0b054db52"
+    },
+    {
+      "path": "expresiones/nico_12_expresiones.png",
+      "sha256": "121277aa8514dedc32254e4daa84d57482780577a69cc40ba5775863ec46dfe6"
+    },
+    {
+      "path": "expresiones/nico_01_06.png",
+      "sha256": "9b35a7d41a110d200f6b8a2b5dc7f857824f307b0beeee3db927ca5ed4108b76"
+    },
+    {
+      "path": "expresiones/nico_07_12.png",
+      "sha256": "fcdf3c61f954405fe97247ae601cf8ff41dce9ad320cfff85460a201b71479ff"
+    },
+    {
+      "path": "expresiones/individual/01_saludo.png",
+      "sha256": "9e1501c42e9b63a2c1579e65b867664608dfb0b6e925dd7499db831ab78eef5c"
+    },
+    {
+      "path": "expresiones/individual/02_explicacion.png",
+      "sha256": "21fed3ef558f4612214810322f1b01f5a625e5bc005eec9a3d778e37a39c5970"
+    },
+    {
+      "path": "expresiones/individual/03_pista.png",
+      "sha256": "2ccc622a864a605c45e792096152ff1c3bd54acea3d2ff377e41e150f7da9305"
+    },
+    {
+      "path": "expresiones/individual/04_duda.png",
+      "sha256": "7743c52ccd22a581f1861849f216dd5e7c5c8850f5719d6fdf5e54c4bcb5945f"
+    },
+    {
+      "path": "expresiones/individual/05_alerta.png",
+      "sha256": "d6e7c5712614465b3b556c8ee2e9c0eec5cdc40c2096cea2235efdfd57dc83d0"
+    },
+    {
+      "path": "expresiones/individual/06_demanda_creciente.png",
+      "sha256": "6d2da1afc56a986350624e05b0deebebc2d1d16ca9d6258d9323eeabd38baf9c"
+    },
+    {
+      "path": "expresiones/individual/07_analisis_kpi.png",
+      "sha256": "d3535bc0e91e15b2ade67ff1bcf837bca0b715b9bbe8e9e8e9ea8fa1d55a99e5"
+    },
+    {
+      "path": "expresiones/individual/08_decision_correcta.png",
+      "sha256": "f844e781d423d1cb4ed244a6365672f859cb30f10b3180223077a687cdea08a8"
+    },
+    {
+      "path": "expresiones/individual/09_mejora.png",
+      "sha256": "4e964819c713e97a1fd5f4f9ff156f31c92388dea446335d7596af6ad68ba294"
+    },
+    {
+      "path": "expresiones/individual/10_desviacion.png",
+      "sha256": "85fe79e1d9f87fb1b15dd373cbd1a1da3a014a9b3b52c5e20d400b8d4f0b3272"
+    },
+    {
+      "path": "expresiones/individual/11_recuperacion.png",
+      "sha256": "25f5711ccb661a4b5da1c8838841ea8ffa38af53e14eb8b1ae1d4e5c463a3293"
+    },
+    {
+      "path": "expresiones/individual/12_meta_cumplida.png",
+      "sha256": "24f237e7c8d0f777e1071ba29f6ffa522d5216cdd8292fa9c57a4e31cb15e440"
+    }
+  ]
+}
