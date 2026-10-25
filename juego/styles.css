@@ -442,3 +442,75 @@ html,body{height:100%;overflow:hidden}
  .nico-welcome,.nico-avatar,.nico-lesson select{border:1px solid CanvasText}
  .nico-lesson :is(summary,select):focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-17 · three touch- and keyboard-accessible views, no mandatory swipes.
+ * Physically meaningful numbers in the Indicators tab are declared inputs,
+ * never revealed SKU results or an aggregate-to-SKU unit conversion. */
+.area-tabs-shell{min-width:0;max-width:100%}
+.area-tab-list{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
+ margin:9px 0 13px;padding:4px;border-radius:12px;
+ border:1px solid var(--border);background:var(--detail-bg);
+}
+.area-tab{
+ min-height:46px;min-width:0;padding:8px 4px;border:2px solid transparent;
+ background:transparent;color:var(--muted);border-radius:9px;
+ font:inherit;font-size:.79rem;font-weight:750;cursor:pointer;
+ overflow-wrap:anywhere;
+}
+.area-tab[aria-selected="true"]{
+ border-color:var(--primary);background:var(--choice-selected-bg);
+ color:var(--text);font-weight:850;
+}
+.area-tab:focus-visible,.area-tab-panel:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:2px;
+}
+.area-tab-panel{min-width:0}
+.area-tab-panel[hidden]{display:none!important}
+.area-tab-panel .mentor-area{margin:10px 0}
+.area-tab-panel>.option-heading{margin-top:4px}
+.area-assumption-summary{margin:5px 0 12px}
+.area-metric-pair{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+}
+.area-assumption-metric{
+ display:flex;flex-direction:column;gap:5px;padding:11px;
+ min-width:0;border-radius:12px;background:var(--panel);
+ border:1px solid var(--border);
+}
+.area-assumption-metric span{font-size:.73rem;color:var(--muted);line-height:1.35}
+.area-assumption-metric strong{
+ font-size:1.09rem;line-height:1.3;font-variant-numeric:tabular-nums;
+ overflow-wrap:anywhere;
+}
+.area-reference-row{
+ margin:10px 0;padding:9px;border:1px solid var(--border);
+ border-radius:12px;background:var(--detail-bg);
+ display:flex;gap:8px;align-items:flex-start;
+}
+.area-reference-row p{font-size:.77rem;margin:0;line-height:1.4}
+.area-reference-light{
+ flex:0 0 auto;padding:5px 7px;border-radius:8px;
+ font-size:.7rem;font-weight:800;border:1px solid currentColor;
+}
+.area-reference-light.under{color:var(--danger-text)}
+.area-reference-light.over{color:var(--warning-text)}
+.area-reference-light.reference{color:var(--success-text)}
+.area-assumption-summary>.footnote{margin:5px 0;font-size:.72rem}
+@media(max-width:350px){
+ .area-tab-list{gap:2px;padding:3px}
+ .area-tab{font-size:.74rem;padding-inline:2px}
+ .area-reference-row{flex-direction:column;gap:5px}
+ .area-assumption-metric{padding:9px}
+ .area-assumption-metric strong{font-size:.98rem}
+}
+@media(forced-colors:active){
+ .area-tab-list,.area-assumption-metric,.area-reference-row{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .area-tab{color:ButtonText}
+ .area-tab[aria-selected="true"]{background:Highlight;color:HighlightText;border:2px solid Highlight}
+ .area-reference-light{color:CanvasText;border:2px solid CanvasText}
+ .area-tab:focus-visible,.area-tab-panel:focus-visible{outline:3px solid Highlight}
+}
