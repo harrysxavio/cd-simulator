@@ -19,6 +19,7 @@ import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-ind
 import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
 import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
 import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
+import {i2ReceivingCapacityPreview} from '../src/i2-receiving-dock.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
