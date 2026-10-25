@@ -38,7 +38,7 @@ test('I2-21: capacidad de Recepción, FIFO opcional, revelación y muelle físic
   assert.equal(saved.reveal,false);
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('.game-choice.chosen').count(),1);
-  for(let i=4;i<8;i++)await page.locator('#gameNext').click();
+  for(let i=3;i<8;i++)await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene h1').innerText(),/Algo cambió/);
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click();
