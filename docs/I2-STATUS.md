@@ -7,7 +7,7 @@
 
 ## Resumen
 
-- **I2-00–I2-16: 17 de 41 microfases con PR fusionado a main (~41,5 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **I2-00–I2-17: 18 de 41 microfases con PR fusionado a main (~43,9 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
 - **MVP alfa vertical integrado en PR #79.** Campaña inicial +40 % ampliada por PR #100 a cinco retos exógenos de demanda ±, ocho decisiones, revelación explícita, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-14 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
@@ -17,7 +17,7 @@
 
 [**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
 
-**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 17/41**. No se certifican KPI integrales ni fases I2-26/I2-35 por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-17**, con tres vistas de decisión e indicadores; los criterios gerenciales ampliados permanecen vigentes.
+**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 18/41**. No se certifican KPI integrales ni fases I2-26/I2-35 por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-18**, profundidad gerencial de Comercial/forecast; los criterios de costos, servicio, capacidad y plazos ampliados permanecen vigentes.
 
 ## Microfases integradas y evidencia
 
@@ -40,6 +40,7 @@
 | I2-14 | Metas, presupuesto incremental, 5 retos seedados y replay idéntico | [#98](https://github.com/harrysxavio/cd-simulator/pull/98) + [#100](https://github.com/harrysxavio/cd-simulator/pull/100) | Integrada técnicamente; Node general, Chromium general y focused del PR #100 aprobados |
 | I2-15 | Configuración avanzada Guardar/Cancelar, muestra 160/200/240, Picking 10/40 SKU por jornada, stock físico A/B/C y tarifa de refuerzo | [#101](https://github.com/harrysxavio/cd-simulator/pull/101) | Integrada técnicamente; Node, Chromium completo y focused en PR aprobados |
 | I2-16 | Nico presentado, tutorial opcional por nivel, avatar SVG original y preferencias separadas del motor | [#102](https://github.com/harrysxavio/cd-simulator/pull/102) | Integrada técnicamente; Node, focused y Chromium general del PR #102 aprobados |
+| I2-17 | Tres pestañas accesibles Decisión/Indicadores/Nico; dos supuestos trazables a V1, teclado, swipe opcional y footer fijo | [#103](https://github.com/harrysxavio/cd-simulator/pull/103) | Integrada técnicamente; Node, focused y Chromium general en PR aprobados |
 
 ## Fases ejecutivas
 
@@ -49,7 +50,7 @@
 | F1 · Dos modos navegables | I2-01–03 | **Implementada** | Contrato, ruta y enlace integrados; validar publicación de la alfa |
 | F2 · Motor/estado/economía | I2-04–06 | **Completada técnicamente** | Matriz 8×5, guardado migrable, privacidad y límites CLP verificados; Android/TalkBack pendiente fuera de fase |
 | F3 · UX móvil y guía | I2-07–12 | **Completada técnicamente (6/6)** | Tokens, viewport, navegación, ayuda modal, mapa y guía opcional integrados; Android físico y TalkBack pendientes de aceptación transversal |
-| F4 · Configuración y tutorial | I2-13–17 | **I2-13–16 integradas; I2-17 siguiente** | Briefing y retomar la partida verificados. Nico y tutorial ya integrados; falta componente de decisión con pestañas accesibles (I2-17) |
+| F4 · Configuración y tutorial | I2-13–17 | **I2-13–17 integradas; F4 técnicamente completa (5/5)** | Briefing y retomar la partida verificados. Tutor, configuración y tres vistas integradas; Android/TalkBack pendiente en F8 |
 | F5 · Ocho áreas | I2-18–25 | **Recorrido alfa, no cerrado** | Alternativas reales y secuencia de ocho áreas; falta microaprendizaje y feedback específico por área |
 | F6 · Demanda sorpresa y recuperación | I2-26–30 | **Recorrido alfa, no cerrado** | Revelación explícita y cinco estrategias; faltan diagnósticos completos y controles avanzados |
 | F7 · Resultados/gamificación | I2-31–35 | **Resultado básico alfa** | KPIs físicos y costos modelados parciales; faltan logros, reto, niveles y comparador más completo |
@@ -74,6 +75,12 @@
 - [Node del PR](https://github.com/harrysxavio/cd-simulator/actions/runs/40196731088), [suite focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40196731096) y [Chromium completo](https://github.com/harrysxavio/cd-simulator/actions/runs/40196731124) aprobados. Verificaciones postmerge Pages/HTTP/Chromium en `main` deben registrarse por separado.
 - **Avance formal: 17/41 (41,5 %).** El arte es concepto inicial: aprobación estética/Android real/TalkBack y usuario principiante todavía pendientes (#67); costos integrales y tablero completo siguen fuera de esta microfase.
 
+## I2-17 · Cierre técnico de F4 (25-10-2026)
+
+- [PR #103](https://github.com/harrysxavio/cd-simulator/pull/103), merge `1032f80f75fed07b2283afa4a8de5b41602cf2d0`, añadió tabs ARIA Decisión/Indicadores/Nico, botones y navegación por teclado Home/End/flechas, swipe opcional, dos supuestos de planificación trazados a `NODES/PARAMETERS/DEFAULTS` V1, y señales relativas a la referencia **que no califican desempeño**. No cambia el motor, la cohorte SKU, el estado V1 o la semilla.
+- **Gates PR aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40209324856), [focused I2](https://github.com/harrysxavio/cd-simulator/actions/runs/40209324842), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40209324874). Los controles postmerge Pages/HTTP y browser de `main` se verifican separadamente.
+- **F4 I2-13–17 completada técnicamente (5/5). Avance formal total 18/41 = 43,9 %.** Android real/TalkBack y prueba humana (#67) continúan abiertos. El tablero de resultados multieje, costos integrales e interdependencias didácticas de cada área **NO** se cierran por este cambio; siguen en F5–F8.
+
 ## MVP alfa: exactamente qué puede probarse
 
 1. Abrir `/juego/` desde la raíz o mediante enlace directo; volver a V1 sin perder campaña.
@@ -86,7 +93,7 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-17**, componente de tres vistas Decisión/Indicadores/Nico con acción principal fija y sin gestos obligatorios. Android físico y TalkBack siguen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-18** (Comercial y forecast: microaprendizaje causal y riesgos de sub/sobreestimar). F4 está integrada técnicamente; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
 
 ## Cierre técnico I2-04 e I2-05 (24-10-2026)
 
