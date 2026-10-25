@@ -65,7 +65,14 @@ export function auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSam
   if(skuInputs[name]<0||skuInputs[name]>200)fail('tasa de gestión fuera de rango');
  }
  // Whitelist: do not accidentally pass aggregate output, costs or reserves.
+ // El único importe permitido es la tarifa didáctica de refuerzo SKU.
+ // No se permite transportar finanzas/costos de la jornada agregada.
+ if(Object.hasOwn(skuInputs,'extraCapacityDailyCost')
+  &&(!Number.isSafeInteger(skuInputs.extraCapacityDailyCost)
+    ||skuInputs.extraCapacityDailyCost<0||skuInputs.extraCapacityDailyCost>1000000))
+  fail('tarifa SKU fuera de rango');
  const allowed=['policy','plannedOrders','actualOrders','stock','delayDays',
+  'extraCapacityDailyCost',
   ...names,'supplierFill'];
  if(Object.keys(skuInputs).some(key=>!allowed.includes(key)))fail('campo agregado no autorizado en el replay SKU');
  if(!skuInputs.delayDays||typeof skuInputs.delayDays!=='object'
@@ -85,7 +92,7 @@ export function auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSam
  if(mappings.some((m,i)=>area.stages[i]?.id!==m.area))fail('orden de las ocho áreas no coincide');
  return freezeDeep({
   passed:true,scope:'sample-not-accounting',sourceScope:'aggregate-shift',targetScope:'sku-cohort',
-  physicalStockSource:'catalog-opening-only',sampleSizeRule:'round(plannedSampleOrders * actualShiftDemand / plannedShiftDemand)',
+  physicalStockSource:openingState.source==='catalog'?'catalog-opening-only':'explicit-sku-opening',sampleSizeRule:'round(plannedSampleOrders * actualShiftDemand / plannedShiftDemand)',
   sampleOrders:{planned:plannedSampleOrders,actual:expectedOrders},
   mappings,
   excluded:[
