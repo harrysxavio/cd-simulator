@@ -200,9 +200,11 @@ function advancedSettings(){
   {key:'plannedOrders',id:'advancedOrders',label:'Pedidos planificados de muestra',
    note:'Cambiar el tamaño de la muestra modifica la planificación y las compras originales.',
    values:I2_ADVANCED_FIELDS.plannedOrders.map(x=>({value:x,label:x+' pedidos'}))},
-  {key:'pickingOperators',id:'advancedPicking',label:'Dotación de Picking supuesta',
-   note:'Ajusta el supuesto de capacidad mediante el motor canónico; no mide personas reales.',
-   values:I2_ADVANCED_FIELDS.pickingOperators.map(x=>({value:x,label:x+' operarios teóricos'}))},
+  {key:'pickingLimitSkuPerDay',id:'advancedPicking',label:'Tope de Picking (SKU por jornada)',
+   note:'Limita físicamente las unidades que se preparan al día; no representa operarios.',
+   values:[{value:'base',label:'Según decisiones del CD'},
+    {value:'40',label:'Hasta 40 SKU / día'},
+    {value:'80',label:'Hasta 80 SKU / día'}]},
   {key:'stockProfile',id:'advancedStock',label:'Inventario físico inicial de los 3 SKU',
    note:'Perfil conjunto A/B/C, separado del stock agregado del simulador clásico.',
    values:[{value:'low',label:'Reducido · 75 %'},{value:'standard',label:'Base · 100 %'},
@@ -263,7 +265,8 @@ function advancedSettings(){
 }
 function advancedSummary(){
  const c=state.advanced;
- return 'Base: '+num.format(c.plannedOrders)+' pedidos · Picking '+c.pickingOperators+
+ return 'Base: '+num.format(c.plannedOrders)+' pedidos · Picking '+
+ (c.pickingLimitSkuPerDay==='base'?'según áreas':c.pickingLimitSkuPerDay+' SKU/día')+
  ' · Stock '+({low:'75 %',standard:'100 %',high:'125 %'}[c.stockProfile])+
  ' · Refuerzo '+money.format(c.extraCapacityDailyCostCLP)+'/turno';
 }
