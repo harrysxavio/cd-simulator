@@ -16,7 +16,7 @@ export function i2FirstMissionBriefing(raw){
   role:'Tu rol: jefe o jefa del CD',
   meaning:'Un centro de distribución (CD) recibe, organiza, prepara y despacha pedidos.',
   objective:'Tu misión es tomar decisiones con información incompleta y aprender de sus consecuencias.',
-  plannedOrders:I2_MVP_CASE.plannedOrders,
+  plannedOrders:state.advanced.plannedOrders,
   quickFacts:Object.freeze([
    Object.freeze({value:String(I2_AREAS.length),label:'áreas'}),
    Object.freeze({value:String(I2_PRODUCT_SCOPE.skuIds.length),label:'tipos de producto'}),
