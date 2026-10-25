@@ -19,6 +19,7 @@ import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-ind
 import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
 import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
 import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
+import {i2ReceivingCapacityPreview} from '../src/i2-receiving-dock.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
@@ -457,6 +458,28 @@ function supplierPurchasingTeaching(){
   p(model.boundary,'footnote')
  ]);
 }
+function receivingDockTeaching(){
+ const m=i2ReceivingCapacityPreview(state);
+ return section('receiving-capacity-teaching',[
+  node('strong',{text:'Recepción · cuánto podemos registrar por día'}),
+  section('receiving-capacity-numbers',[
+   section('receiving-capacity-number',[
+    node('span',{text:'Capacidad seleccionada'}),
+    node('strong',{text:num.format(m.modeledDailySkuCapacity)+' SKU/día'})]),
+   section('receiving-capacity-number',[
+    node('span',{text:'Cambio frente al turno normal'}),
+    node('strong',{text:(m.dailyDelta>0?'+':'')+num.format(m.dailyDelta)+' SKU/día'})])
+  ]),
+  p(m.queueRule,'note'),
+  node('details',{className:'receiving-queue-explanation'},[
+   node('summary',{text:'¿Qué se acumula si no alcanzamos a recibir?'}),
+   p('Los lotes que llegaron esperan en el muelle, en el orden de llegada (FIFO). No pasan a inventario hasta registrarlos físicamente.'),
+   p(m.example,'note'),
+   p('Al día siguiente seguimos con lo pendiente. Después de Recepción, Calidad aún debe liberar los productos.')
+  ]),
+  p(m.boundary,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -500,6 +523,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
   ...(area.id==='purchasing'?[p('La entrega del proveedor es una hipótesis; solo Recepción registra unidades físicas. Mira Indicadores para separar compromiso, cumplimiento y plazo.','commercial-brief')]:[]),
   ...(area.id==='planning'?[p('La cobertura elegida modifica la compra SKU planificada, no el stock disponible hoy. Revisa Indicadores para evaluar unidades y compromiso.','commercial-brief')]:[]),
   ...(area.id==='commercial'?[p('El forecast es una hipótesis de compra, no una venta garantizada. Mira Indicadores para ver la equivalencia de tu muestra.','commercial-brief')]:[]),
@@ -509,7 +533,8 @@ function areaScene(){
   p('Entradas previstas, no resultados','option-heading'),compare,
   ...(area.id==='commercial'?[commercialForecastTeaching()]:[]),
   ...(area.id==='planning'?[planningCoverageTeaching()]:[]),
-  ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[])
+  ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[]),
+  ...(area.id==='receiving'?[receivingDockTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
@@ -755,6 +780,35 @@ function resultsScene(){
   ]),
   p(data.purchasing.boundary,'footnote')
  ]);
+ const receive=data.receiving;
+ const receivingOutcome=section('receiving-outcome',[
+  node('strong',{text:'Recepción · qué sucedió en el muelle'}),
+  section('receiving-capacity-numbers',[
+   ...[['Llegaron al muelle',receive.totals.arrivedSkuUnits],
+      ['Recibidas físicamente',receive.totals.receivedSkuUnits],
+      ['Pendientes al cierre',receive.totals.waitingAtCutoffSkuUnits],
+      ['Pico de cola',receive.totals.peakDockQueueSkuUnits]]
+     .map(([label,value])=>section('receiving-capacity-number',[
+      node('span',{text:label}),node('strong',{text:num.format(value)+' SKU'})]))
+  ]),
+  p(receive.totals.peakDockQueueSkuUnits>0
+   ?'Hubo esperas en muelle: '+num.format(receive.totals.queueSkuDays)+
+    ' SKU-días acumulados antes del cierre.'
+   :'En esta muestra no se formó una cola de Recepción. Podrían existir faltantes o demoras en otras áreas.','note'),
+  node('details',{className:'receiving-daily-details'},[
+   node('summary',{text:'Ver llegadas y cola día por día'}),
+   ...receive.rows.filter(d=>d.arrivedSkuUnits>0||
+    d.receivedSkuUnits>0||d.endDockQueueSkuUnits>0)
+    .map(d=>section('receiving-daily-row',[
+     node('strong',{text:'Día '+d.day}),
+     p('Llegadas: '+num.format(d.arrivedSkuUnits)+
+       ' · Recepciones: '+num.format(d.receivedSkuUnits)+
+       ' · En muelle: '+num.format(d.endDockQueueSkuUnits)+' SKU'),
+     p('Espera más antigua: '+d.oldestWaitingDays+' días','footnote')
+    ]))
+  ]),
+  p(receive.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -779,6 +833,7 @@ function resultsScene(){
   forecast,
   planning,
   purchasing,
+  receivingOutcome,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
