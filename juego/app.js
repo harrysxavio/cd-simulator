@@ -19,6 +19,7 @@ import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-ind
 import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
 import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
 import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
+import {I2_NICO_ASSETS_READY,i2NicoPoseAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -73,6 +74,13 @@ function setActions({next='Continuar',onNext=null,back='',onBack=null}={}){
  primary.onclick=onNext;
  secondary.textContent=back;secondary.hidden=!onBack;secondary.onclick=onBack;
 }
+/** Art source PNGs are loaded only after hash-verified installation. */
+function nicoScenePortrait(kind){
+ if(!I2_NICO_ASSETS_READY)return null;
+ const art=i2NicoPoseAsset(kind);
+ return node('img',{className:'nico-scene-portrait',
+  attrs:{src:art.src,alt:'',width:'112',height:'112',loading:'lazy'}});
+}
 function guideElement(){
  const advice=i2NicoCoachTip(state,guideLevel);
  const wrapper=node('section',{className:'mentor-area',attrs:{id:'gameGuide'}});
@@ -92,7 +100,9 @@ function guideElement(){
   wrapper.replaceWith(guideElement());
   root.querySelector('.mentor-toggle')?.focus({preventScroll:true});
  });
- wrapper.append(toggle,adviceText);
+ wrapper.append(toggle);
+ if(showGuide){const art=nicoScenePortrait(state.phase==='area'?'explanation':'hint');if(art)wrapper.append(art)}
+ wrapper.append(adviceText);
  return wrapper;
 }
 function replace(children,{guide=true}={}){
@@ -283,7 +293,7 @@ function advancedSummary(){
 function nicoWelcome(){
  const avatar=section('nico-avatar',[
   node('span',{className:'nico-avatar-fallback',text:'NC',attrs:{'aria-hidden':'true'}}),
-  node('img',{attrs:{src:'./nico.svg',width:'40',height:'40',alt:'',loading:'lazy'}})
+  node('img',{attrs:{src:i2NicoPoseAsset('welcome').src,width:'40',height:'40',alt:'',loading:'lazy'}})
  ]);
  const intro=section('nico-intro-text',[
   node('strong',{text:'Nico · Coordinador ficticio del CD'}),
@@ -570,6 +580,7 @@ function revealScene(){
  replace([
   p('EL PLAN QUEDÓ CERRADO','eyebrow'),
   heading('Algo cambió mientras el CD se preparaba.'),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
   p('Tus decisiones comerciales, compras y capacidades ya están definidas. La demanda observada podría ser diferente del pronóstico.','lead'),
   section('guide-box',[
    node('strong',{text:'Mensaje del equipo'}),
@@ -604,6 +615,7 @@ function recoveryScene(){
  replace([
   p('DEMANDA SORPRESA · CASO REPRODUCIBLE','eyebrow'),
   heading(reveal.heading),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('reveal')]:[]),
   p('Se planificó una muestra de '+num.format(reveal.plannedOrders)+' pedidos, pero se observaron '+num.format(reveal.actualOrders)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
   p(reveal.context,'note'),
   section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
@@ -747,6 +759,7 @@ function resultsScene(){
  replace([
   p('CIERRE DE CAMPAÑA · DÍA 12','eyebrow'),
   heading('Estas fueron las consecuencias de tus decisiones.'),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('analysis')]:[]),
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
   forecast,
