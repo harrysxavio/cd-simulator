@@ -51,8 +51,9 @@ export function i2MvpPhysicalResult({
   plannedOrders:options.plannedOrders,
   openingStock:options.openingStock,
   extraCapacityDailyCost:options.extraCapacityDailyCost,
+  pickingUnitCapacityLimit:options.pickingUnitCapacityLimit,
   scenario:{
-   ...DEFAULT_SCENARIO,...options.scenario,
+   ...DEFAULT_SCENARIO,
    demand:1000,
    actualDemand:1000*(1+challenge.shockPercent/100),
    demandShockPercent:Math.abs(challenge.shockPercent)
