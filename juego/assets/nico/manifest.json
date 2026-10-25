@@ -1,7 +1,7 @@
 {
   "created": "2026-10-25",
   "format": "png",
-  "status": "PENDING_UPLOAD",
+  "status": "VERIFIED_BINARY_ASSETS",
   "excluded_first_image": true,
   "files": [
     {
@@ -88,5 +88,7 @@
       "path": "expresiones/individual/12_meta_cumplida.png",
       "sha256": "24f237e7c8d0f777e1071ba29f6ffa522d5216cdd8292fa9c57a4e31cb15e440"
     }
-  ]
+  ],
+  "installed_count": 21,
+  "verification": "Verified 21 Git blob SHA-1 against unmodified backup PNG bytes, and 21 backup SHA-256 checksums against manifest on 2026-10-25"
 }

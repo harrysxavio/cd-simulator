@@ -663,3 +663,54 @@ html,body{height:100%;overflow:hidden}
 .mentor-area>.nico-scene-portrait{width:88px;height:88px;float:left;margin:5px 11px 3px 0}
 @media(max-width:320px){.nico-scene-portrait{width:84px;height:84px}}
 @media(forced-colors:active){.nico-scene-portrait{border-color:CanvasText}}
+
+
+/* Nico original: conversational tutor in a compact, optional illustrated bubble.
+   We deliberately do NOT use sheet PNGs as icons; those need separate crops. */
+.nico-avatar{
+ flex:0 0 76px;width:76px;height:92px;border-radius:10px;
+ background:#f7f6f3;
+}
+.nico-avatar img{
+ position:absolute;inset:0;width:100%;height:100%;
+ object-fit:contain;object-position:center top;image-rendering:auto;
+}
+.nico-welcome-head{align-items:center;gap:12px}
+.nico-intro-text strong{font-size:.88rem;line-height:1.35}
+.nico-intro-line{font-size:.81rem;line-height:1.45}
+.mentor-response{
+ display:flow-root;margin:9px 0 0;padding:10px 11px;
+ border:1px solid var(--border);border-radius:12px;
+ background:var(--panel);color:var(--text);
+}
+.mentor-response[hidden]{display:none!important}
+.mentor-response .nico-scene-portrait{
+ float:left;margin:0 10px 7px 0;width:78px;height:78px;
+ object-fit:cover;border-radius:11px;background:#f8f6f0;
+ border:1px solid var(--border);
+}
+.mentor-response .mentor-copy{
+ padding:0!important;margin:0 0 7px!important;
+ border:0;background:transparent;color:var(--text);
+ font-size:.82rem!important;line-height:1.5!important;
+}
+.mentor-response .mentor-example{
+ margin:0 0 8px!important;font-size:.79rem;line-height:1.5;
+ color:var(--muted);
+}
+.mentor-response .mentor-question{
+ clear:both;margin:5px 0 0!important;padding:8px 10px;
+ font-size:.79rem;line-height:1.5;font-weight:700;
+ border-left:3px solid var(--primary);border-radius:7px;
+ background:var(--detail-bg);
+}
+@media(max-width:340px){
+ .nico-avatar{flex-basis:62px;width:62px;height:79px}
+ .mentor-response .nico-scene-portrait{width:64px;height:64px}
+}
+@media(forced-colors:active){
+ .mentor-response,.mentor-response .mentor-question,.nico-avatar{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText;
+ }
+ .mentor-response .mentor-question{border-left:3px solid Highlight}
+}

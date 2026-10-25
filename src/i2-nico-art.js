@@ -1,10 +1,8 @@
-/**
- * The original artwork was supplied as a ZIP of 21 PNGs.
- * The repo currently contains the inventory manifest, NOT their binary bytes.
- * Do not point <img> at missing paths: GitHub Pages 404s are regression failures.
- * The verified installer flips this bit only after copying/checking all files.
+/** Original Nico art, 21 image blobs verified byte-for-byte against the backup.
+ * Fall back to nico.svg only if a browser cannot load a particular PNG.
+ * Illustrations are decorative: textual tips remain accessible on their own.
  */
-export const I2_NICO_ASSETS_READY=false;
+export const I2_NICO_ASSETS_READY=true;
 
 const POSES=Object.freeze({
  welcome:'01_saludo',
@@ -51,4 +49,12 @@ export function i2NicoSheet(kind='kpi'){
    ?'./assets/nico/iconos/'+CATEGORIES[kind]+'.png'
    :null
  });
+}
+
+/** Full-body approved character for the welcome card (not the 12-expression sheet). */
+export function i2NicoPortraitAsset(){
+ return Object.freeze({ready:I2_NICO_ASSETS_READY,
+  src:I2_NICO_ASSETS_READY
+   ?'./assets/nico/personaje/nico_chibi_cuerpo_completo.png'
+   :'./nico.svg',alt:'Nico, coordinador del centro de distribución'});
 }

@@ -35,6 +35,13 @@ test('I2-16: 3 niveles x 8 áreas no revelan resultados ni cambian las decisione
    const hint=i2NicoCoachTip(state,id);
    assert.equal(hint.name,'Nico');
    assert.ok(hint.text.length<=135);
+   assert.ok(hint.example.length>=50&&hint.example.length<=220,
+    'Nico debe explicar con un ejemplo concreto, no repetir el KPI');
+   assert.ok(hint.question.length>20&&hint.question.endsWith('?'),
+    'Nico deja una pregunta para pensar antes de decidir');
+   assert.ok(['welcome','explanation','hint','doubt','alert','reveal',
+    'analysis','good','improvement','deviation','recovery','result'].includes(hint.pose));
+   assert.doesNotMatch(JSON.stringify(hint),/actualOrders|actualDemand|shippedOrders|economicProxyDelta|280 pedidos|300 pedidos/);
    assert.doesNotMatch(hint.text,/\b(40|50|280|300)\s*%|280 pedidos|300 pedidos|actualDemand|shippedOrders/);
    hints.push(hint.text);
   }
@@ -48,4 +55,22 @@ test('I2-16: 3 niveles x 8 áreas no revelan resultados ni cambian las decisione
   assert.equal(i2NicoCoachTip(state,id).name,'Nico');
   assert.deepEqual(i2MvpPhysicalResult({seed:'alpha-case-04'}),a);
  }
+});
+
+test('Nico mantiene tono cercano por fase, sin spoilers ni cambiar el escenario',()=>{
+ let state=newI2GameState({seed:'alpha-case-04'});
+ const before=JSON.stringify(state);
+ const intro=i2NicoCoachTip(state,'novato');
+ assert.match(intro.text,/¡Hola!|vamos/i);
+ assert.ok(intro.example&&intro.question&&intro.pose==='welcome');
+ state=navigateI2GameState(state,'start');
+ for(let i=0;i<8;i++)state=navigateI2GameState(state,'forward');
+ const reveal=i2NicoCoachTip(state,'novato');
+ assert.equal(reveal.pose,'alert');
+ assert.doesNotMatch(JSON.stringify(reveal),/actualOrders|280 pedidos|300 pedidos/);
+ state=navigateI2GameState(state,'reveal');
+ const recovery=i2NicoCoachTip(state,'novato');
+ assert.equal(recovery.pose,'recovery');
+ assert.match(recovery.text,/responder|recuperar|costará/);
+ assert.equal(JSON.stringify(newI2GameState({seed:'alpha-case-04'})),before);
 });
