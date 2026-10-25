@@ -1,5 +1,6 @@
 import {DEFAULTS} from './engine.js';
 import {DEFAULT_SCENARIO} from './scenario.js';
+import {i2ChallengeForSeed,I2_DEFAULT_SEED} from './i2-challenge-config.js';
 import {I2_AREAS,I2_RECOVERIES} from './i2-product-contract.js';
 import {createI2GameCampaignAdapter,i2AreaSelection} from './i2-game-campaign-adapter.js';
 
@@ -29,7 +30,8 @@ export function i2CanonicalChoices(choices){
  * Do NOT render actual-demand results in the planning/onboarding phases.
  */
 export function i2MvpPhysicalResult({
- choices=i2DefaultChoices(),option='wait',urgentArrivalDay=2,purchaseCoveragePercent=100
+ choices=i2DefaultChoices(),option='wait',urgentArrivalDay=2,purchaseCoveragePercent=100,
+ seed=I2_DEFAULT_SEED
 }={}){
  if(!I2_RECOVERIES.some(r=>r.optionId===option))
   throw new Error('Misión CD: recuperación inválida');
@@ -39,6 +41,8 @@ export function i2MvpPhysicalResult({
   throw new Error('Misión CD: plazo urgente inválido');
  if(![0,25,50,75,100].includes(purchaseCoveragePercent))
   throw new Error('Misión CD: cobertura urgente inválida');
+ // La semilla se fija antes de planificar y no depende de decisiones ni desempeño.
+ const challenge=i2ChallengeForSeed(seed);
  const canonical=shared.evaluate({
   revealed:true,choices,
   campaignId:I2_MVP_CASE.campaignId,
@@ -46,8 +50,8 @@ export function i2MvpPhysicalResult({
   scenario:{
    ...DEFAULT_SCENARIO,
    demand:1000,
-   actualDemand:1000*(1+I2_MVP_CASE.shockPercent/100),
-   demandShockPercent:I2_MVP_CASE.shockPercent
+   actualDemand:1000*(1+challenge.shockPercent/100),
+   demandShockPercent:Math.abs(challenge.shockPercent)
   },
   policy:'balanced',option,urgentArrivalDay,purchaseCoveragePercent
  });
@@ -61,7 +65,7 @@ export function i2MvpPhysicalResult({
   shippedOrders:comparison.recovered.completed,
   pendingOrders:comparison.recovered.pending,
   recoveredOrders:comparison.recovered.completed-comparison.base.completed,
-  option,urgentArrivalDay,purchaseCoveragePercent,
+  option,urgentArrivalDay,purchaseCoveragePercent,seed,
   incrementalExpenseCLP:comparison.incrementalExpense,
   committedPurchaseCLP:comparison.committedPurchaseValue,
   economicProxyDeltaCLP:comparison.economicProxyDelta,
