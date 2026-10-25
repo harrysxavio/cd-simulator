@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Nico, coordinador ficticio del CD, en pixel-art">
+<!-- Original, small inline SVG pixel character; no fonts, scripts, animation or external requests. -->
+<rect width="32" height="32" rx="3" fill="#163048"/>
+<path fill="#fbbf24" d="M10 5h12v3h3v5H7V8h3z"/>
+<path fill="#f97316" d="M7 11h18v3H7z"/>
+<path fill="#f2c29b" d="M10 14h12v10H10z"/>
+<path fill="#20334a" d="M12 17h3v2h-3zm6 0h3v2h-3z"/>
+<path fill="#9c5837" d="M14 21h5v1h-5z"/>
+<path fill="#1c4e63" d="M8 24h16v7H8z"/>
+<path fill="#f97316" d="M9 24h5v7H9zm9 0h5v7h-5z"/>
+<path fill="#fbbf24" d="M14 26h4v5h-4z"/>
+</svg>
