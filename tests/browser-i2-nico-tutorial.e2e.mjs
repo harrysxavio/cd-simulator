@@ -13,16 +13,17 @@ test('I2-16: Nico se presenta sin activar consejos y niveles no mutan campaña n
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
   await page.locator('#gameScene h1').filter({hasText:'Hoy tú diriges'}).waitFor();
   const card=page.locator('.nico-welcome');
-  assert.match(await card.innerText(),/coordinador ficticio del CD/i);
+  assert.match(await card.innerText(),/¡Hola! Soy Nico, tu compañero de misión/i);
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'false',
    'Mostrar el personaje no activa consejos automáticamente');
   const art=page.locator('.nico-avatar img');
   const expectedSrc=await page.evaluate(async()=>{
    const media=await import('/src/i2-nico-art.js');
-   return media.i2NicoPoseAsset('welcome').src;
+   return media.i2NicoPortraitAsset().src;
   });
   assert.equal(await art.getAttribute('src'),expectedSrc);
   assert.equal(await art.getAttribute('alt'),'');
+  await art.evaluate(img=>img.decode());
   assert.equal(await art.evaluate(img=>img.complete&&img.naturalWidth>0),true);
   await page.evaluate(()=>localStorage.setItem('supply-lab-v90','keep-v1'));
   const before=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
@@ -37,6 +38,9 @@ test('I2-16: Nico se presenta sin activar consejos y niveles no mutan campaña n
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-v90')),'keep-v1');
   await page.locator('.mentor-toggle').click();
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'true');
+  assert.match(await page.locator('.mentor-response').innerText(),/Por ejemplo:/);
+  assert.equal(await page.locator('.mentor-question').count(),1);
+  assert.match(await page.locator('.mentor-question').innerText(),/\\?/);
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameGuideText').innerText(),/demanda prevista|demanda observada/);
   assert.doesNotMatch(await page.locator('#gameGuideText').innerText(),/300 pedidos|50 %/);
