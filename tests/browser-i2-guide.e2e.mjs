@@ -30,6 +30,7 @@ test('I2-12: Nico is opt-in, persists per browser and never changes the campaign
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'true');
   assert.match(await page.locator('#gameGuideText').innerText(),/Pronostica/);
+  await page.getByRole('tab',{name:'Nico'}).click();
   await page.locator('.mentor-toggle').click();
   assert.equal(await page.locator('#gameGuideText').isVisible(),false);
   assert.equal(await page.evaluate(k=>localStorage.getItem(k),guideKey),'hidden');
