@@ -8,7 +8,7 @@ import {SKU_COST_DEFAULTS} from './sku-cost-catalog.js';
  */
 export const I2_ADVANCED_FIELDS=Object.freeze({
  plannedOrders:Object.freeze([160,200,240]),
- pickingLimitSkuPerDay:Object.freeze(['base','40','80']),
+ pickingLimitSkuPerDay:Object.freeze(['base','10','40']),
  stockProfile:Object.freeze(['low','standard','high']),
  extraCapacityDailyCostCLP:Object.freeze([50000,70000,100000])
 });
