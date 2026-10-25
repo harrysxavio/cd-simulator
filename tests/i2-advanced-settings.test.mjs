@@ -71,10 +71,10 @@ test('I2-15: configuración cambia base canónica y costo sin inventar gasto int
  const highDemand=i2MvpPhysicalResult({choices,seed:'alpha-case-04',
   advanced:{...I2_DEFAULT_ADVANCED,plannedOrders:240,stockProfile:'high'}});
  const constrained=i2MvpPhysicalResult({choices,seed:'alpha-case-04',
-  advanced:{...I2_DEFAULT_ADVANCED,plannedOrders:240,stockProfile:'high',pickingLimitSkuPerDay:'40'}});
+  advanced:{...I2_DEFAULT_ADVANCED,plannedOrders:240,stockProfile:'high',pickingLimitSkuPerDay:'10'}});
  assert.equal(constrained.actualOrders,highDemand.actualOrders);
  assert.ok(constrained.shippedOrders<highDemand.shippedOrders,
-  'El límite de 40 unidades SKU/día debe reducir expedición de pedidos completos');
+  'El límite de 10 unidades SKU/día debe reducir expedición de pedidos completos');
  assert.notEqual(constrained.baselineKey,highDemand.baselineKey);
  // Tarifa diaria: cambia la economía modelada, no existencias ni capacidad.
  const highCost={...custom,extraCapacityDailyCostCLP:100000};
