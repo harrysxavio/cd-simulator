@@ -458,6 +458,28 @@ function supplierPurchasingTeaching(){
   p(model.boundary,'footnote')
  ]);
 }
+function receivingDockTeaching(){
+ const m=i2ReceivingCapacityPreview(state);
+ return section('receiving-capacity-teaching',[
+  node('strong',{text:'Recepción · cuánto podemos registrar por día'}),
+  section('receiving-capacity-numbers',[
+   section('receiving-capacity-number',[
+    node('span',{text:'Capacidad seleccionada'}),
+    node('strong',{text:num.format(m.modeledDailySkuCapacity)+' SKU/día'})]),
+   section('receiving-capacity-number',[
+    node('span',{text:'Cambio frente al turno normal'}),
+    node('strong',{text:(m.dailyDelta>0?'+':'')+num.format(m.dailyDelta)+' SKU/día'})])
+  ]),
+  p(m.queueRule,'note'),
+  node('details',{className:'receiving-queue-explanation'},[
+   node('summary',{text:'¿Qué se acumula si no alcanzamos a recibir?'}),
+   p('Los lotes que llegaron esperan en el muelle, en el orden de llegada (FIFO). No pasan a inventario hasta registrarlos físicamente.'),
+   p(m.example,'note'),
+   p('Al día siguiente seguimos con lo pendiente. Después de Recepción, Calidad aún debe liberar los productos.')
+  ]),
+  p(m.boundary,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
