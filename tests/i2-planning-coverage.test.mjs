@@ -77,7 +77,7 @@ test('I2-19: el compromiso original no cambia por sorpresa, recuperación o fech
   assert.deepEqual(observed.planning,base.planning);
   assert.equal(observed.commercial.forecastOrders,base.commercial.forecastOrders);
  }
- for(const option of ['wait','emergency','extra-capacity','reserve','combined']){
+ for(const option of ['wait','emergency','overtime','reserve','combined']){
   const result=i2MvpPhysicalResult({choices,seed:'alpha-case-01',option,
    urgentArrivalDay:13,purchaseCoveragePercent:50});
   assert.deepEqual(result.planning,base.planning);
