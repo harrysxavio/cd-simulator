@@ -23,6 +23,7 @@ import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
 import {i2ReceivingCapacityPreview} from '../src/i2-receiving-dock.js';
 import {i2QualityReleasePreview} from '../src/i2-quality-release.js';
 import {i2InventoryAccuracyPreview} from '../src/i2-inventory-physical.js';
+import {i2WhySkuAndDays,i2PickingCapacityPreview} from '../src/i2-picking-bom.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
@@ -581,6 +582,31 @@ function inventoryTeaching(){
   p(model.boundary,'footnote')
  ]);
 }
+/** Physical picking capacity in SKU per day, not orders or worker productivity. */
+function pickingTeaching(){
+ const model=i2PickingCapacityPreview(state),sku=i2WhySkuAndDays();
+ return section('picking-capacity-teaching',[
+  node('strong',{text:'Picking · completar cada pedido antes de enviarlo'}),
+  section('picking-metric-grid',[
+   section('picking-metric',[
+    node('span',{text:'Capacidad nominal del turno'}),
+    node('strong',{text:num.format(model.nominalSkuUnitsPerDay)+' SKU/día'})]),
+   section('picking-metric',[
+    node('span',{text:'Cambio frente al turno normal'}),
+    node('strong',{text:(model.deltaSkuUnitsPerDay>0?'+':'')+
+     num.format(model.deltaSkuUnitsPerDay)+' SKU/día'})])
+  ]),
+  p(model.note,'note'),
+  node('details',{className:'picking-bom-details'},[
+   node('summary',{text:'¿Por qué simulamos tres SKU y doce días?'}),
+   p(sku.story),
+   ...sku.templates.map(row=>p(row.title+': '+row.formula+
+      ' · '+row.unitsPerOrder+' unidades por pedido.','note')),
+   p(sku.timing),p(sku.consumer,'note'),p(sku.label,'footnote')
+  ]),
+  p(model.boundaries,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -624,6 +650,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='picking'?[p('Picking necesita todos los SKU del pedido completo; reforzar operarios no repara faltantes ni asegura salida del CD.','commercial-brief')]:[]),
   ...(area.id==='inventory'?[p('Una caja puede existir físicamente y aun así no estar localizada o lista para Picking. Conciliar mejora lo que podemos prometer, no inventa unidades.','commercial-brief')]:[]),
   ...(area.id==='quality'?[p('Calidad revisa los productos que ya entraron al CD. Una unidad retenida está esperando revisión: no significa que esté dañada o perdida.','commercial-brief')]:[]),
   ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
@@ -639,7 +666,8 @@ function areaScene(){
   ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[]),
   ...(area.id==='receiving'?[receivingDockTeaching()]:[]),
   ...(area.id==='quality'?[qualityTeaching()]:[]),
-  ...(area.id==='inventory'?[inventoryTeaching()]:[])
+  ...(area.id==='inventory'?[inventoryTeaching()]:[]),
+  ...(area.id==='picking'?[pickingTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
@@ -981,6 +1009,34 @@ function resultsScene(){
   ]),
   p(inventory.boundary,'footnote')
  ]);
+ const picking=data.picking;
+ const pickingOutcome=section('picking-outcome',[
+  node('strong',{text:'Picking · plan original antes de tu recuperación'}),
+  p('Estas cifras vienen del escenario sin intervención. El resumen de la misión sí incorpora la acción que elegiste. Úsalas para entender dónde comenzaste, no como resultado final de tu recuperación.','note'),
+  section('picking-metric-grid',[
+   ...[['Pedidos que esperaban',picking.totals.requestedOrders],
+      ['Preparados completos',picking.totals.preparedOrders],
+      ['Salieron sin intervención',picking.totals.dispatchedOrders],
+      ['Preparados aún sin salir',picking.totals.preparedNotDispatchedOrders]]
+    .map(([label,value])=>section('picking-metric',[
+     node('span',{text:label}),node('strong',{text:num.format(value)+' pedidos'})
+    ]))
+  ]),
+  p('Antes de intervenir, no alcanzaron a prepararse '+num.format(picking.totals.neverPreparedOrders)+
+   ' pedidos. Eso puede deberse a falta de un SKU, capacidad u otra restricción; no se atribuye una causa única sin evidencia.','note'),
+  node('details',{className:'picking-bom-details'},[
+   node('summary',{text:'Ver pedidos y días del plan original (sin recuperación)'}),
+   ...picking.byTemplate.map(row=>section('picking-type-row',[
+    node('strong',{text:row.title+' · '+row.formula}),
+    p('Pedidos '+num.format(row.requested)+' · completos '+num.format(row.prepared)+
+      ' · expedidos '+num.format(row.dispatched))
+   ])),
+   ...picking.rows.filter(row=>row.preparedOrders||row.dispatchedOrders)
+    .map(row=>p('Día '+row.day+': preparados '+num.format(row.preparedOrders)+
+      ' · expedidos '+num.format(row.dispatchedOrders)+' pedidos','footnote'))
+  ]),
+  p(picking.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -1008,6 +1064,7 @@ function resultsScene(){
   receivingOutcome,
   qualityOutcome,
   inventoryOutcome,
+  pickingOutcome,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
