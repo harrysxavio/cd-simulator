@@ -57,7 +57,7 @@ test('I2-24: 5 demandas exógenas × 3 turnos: órdenes completas y eventos orig
    data.totals.shippedOrders+data.totals.awaitingDispatchOrders);
   assert.equal(data.totals.pendingOrders,
    data.totals.unpreparedOrders+data.totals.awaitingDispatchOrders);
-  assert.equal(data.totals.shippedOrders,baseline.scorecard.shippedOrders.value);
+  assert.equal(data.totals.shippedOrders,baseline.baselineShipped);
   assert.equal(data.totals.preparedSkuUnits,data.rows.reduce((n,d)=>n+d.preparedSkuUnits,0));
   assert.equal(data.totals.shippedSkuUnits,data.rows.reduce((n,d)=>n+d.shippedSkuUnits,0));
   assert.equal(data.totals.shippedSkuUnits,
