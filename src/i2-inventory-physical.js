@@ -95,9 +95,12 @@ export function i2InventoryPhysicalReading(comparison){
   for(const e of d.shipmentEvents){
    if(e.day!==i||!int(e.units)||e.units===0||!e.lines)
     fail('expedición física inválida');
-   quantities(e.lines,'Líneas expedidas');
-   if(sumSku(e.lines)!==e.units)fail('expedición inconsistente por SKU');
-   for(const id of IDS)shipped[id]+=e.lines[id];
+   if(typeof e.lines!=='object'||Array.isArray(e.lines)||
+    Object.keys(e.lines).some(id=>!IDS.includes(id)||!int(e.lines[id])||e.lines[id]===0))
+    fail('líneas expedidas inválidas');
+   if(Object.values(e.lines).reduce((n,x)=>n+x,0)!==e.units)
+    fail('expedición inconsistente por SKU');
+   for(const id of IDS)shipped[id]+=e.lines[id]??0;
   }
   const bySku=IDS.map(id=>{
    const physical=stock[id]+reserve[id]+held[id]+staged[id];
