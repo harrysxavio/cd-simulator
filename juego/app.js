@@ -22,6 +22,9 @@ import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
 import {i2ReceivingCapacityPreview} from '../src/i2-receiving-dock.js';
 import {i2QualityReleasePreview} from '../src/i2-quality-release.js';
 import {i2InventoryAccuracyPreview} from '../src/i2-inventory-physical.js';
+import {i2WhySkuAndDays,i2PickingCapacityPreview} from '../src/i2-picking-bom.js';
+import {i2ManagerOrientation} from '../src/i2-manager-orientation.js';
+import {i2ManagerAreaGuide} from '../src/i2-manager-area-guides.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
@@ -305,6 +308,43 @@ function advancedSummary(){
  ' · Refuerzo '+money.format(c.extraCapacityDailyCostCLP)+'/turno';
 }
 /** Presentación breve, independiente de revelar resultados y sin forzar consejos. */
+/** Reopenable, optional full manager tutorial; no game state or simulation touched. */
+function managerTutorial(){
+ const model=i2ManagerOrientation();
+ const details=node('details',{className:'manager-tutorial',attrs:{id:'managerTutorial'}});
+ details.append(node('summary',{text:'Conocer mi misión con Nico (tutorial opcional)'}));
+ const inner=section('manager-tutorial-content',[
+  p('¡Qué bueno que quieras entender el CD! Puedes leer los capítulos que necesites y comenzar cuando quieras.','note'),
+  ...model.chapters.map(item=>section('manager-tutorial-chapter',[
+   node('strong',{text:item.title}),
+   p(item.body),p(item.question,'mentor-question')
+  ])),
+  p('Ejemplo de combinación de productos: '+model.skuExample.formula+'.','note'),
+  p(model.disclaimer,'footnote')
+ ]);
+ const skip=node('button',{className:'tutorial-skip',text:'Saltar tutorial / Empezar ahora',
+  attrs:{type:'button'}});
+ skip.addEventListener('click',()=>primary.click());
+ inner.append(skip);details.append(inner);
+ return details;
+}
+/** Guía con mirada gerencial, separada de la pista breve. */
+function managerAreaLesson(areaId){
+ const g=i2ManagerAreaGuide(areaId);
+ return node('details',{className:'manager-area-guide'},[
+  node('summary',{text:'Entender esta área con Nico · mirada de gerente'}),
+  section('manager-area-guide-content',[
+   node('strong',{text:g.title}),
+   p(g.what),
+   node('strong',{text:'Lo que tú puedes controlar'}),p(g.manager),
+   node('strong',{text:'En qué indicadores fijarte'}),p(g.kpi),
+   node('strong',{text:'Lo bueno, el riesgo y el costo'}),p(g.tradeoff),
+   node('strong',{text:'Imaginemos una situación'}),p(g.example),
+   p(g.question,'mentor-question'),
+   p(g.note,'footnote')
+  ])
+ ]);
+}
 function nicoWelcome(){
  const avatar=section('nico-avatar',[
   node('span',{className:'nico-avatar-fallback',text:'NC',attrs:{'aria-hidden':'true'}}),
@@ -361,6 +401,7 @@ function intro(){
    p(brief.resumeLabel+'. Puedes continuar sin perder lo que ya decidiste.','intro-resume')
   ]:[]),
   nicoWelcome(),
+  managerTutorial(),
   section('briefing-steps',[
    node('strong',{text:'Tu desafío en 3 pasos'}),
    ...brief.steps.map((step,index)=>section('briefing-step',[
@@ -568,6 +609,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='picking'?[p('Picking necesita todos los SKU del pedido completo; reforzar operarios no repara faltantes ni asegura salida del CD.','commercial-brief')]:[]),
   ...(area.id==='inventory'?[p('Una caja puede existir físicamente y aun así no estar localizada o lista para Picking. Conciliar mejora lo que podemos prometer, no inventa unidades.','commercial-brief')]:[]),
   ...(area.id==='quality'?[p('Calidad revisa los productos que ya entraron al CD. Una unidad retenida está esperando revisión: no significa que esté dañada o perdida.','commercial-brief')]:[]),
   ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
@@ -583,12 +625,15 @@ function areaScene(){
   ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[]),
   ...(area.id==='receiving'?[receivingDockTeaching()]:[]),
   ...(area.id==='quality'?[qualityTeaching()]:[]),
-  ...(area.id==='inventory'?[inventoryTeaching()]:[])
+  ...(area.id==='inventory'?[inventoryTeaching()]:[]),
+  ...(area.id==='picking'?[pickingTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
   p('¿Lo vemos juntos? Te cuento qué puede pasar con esta decisión y te dejo una pregunta para pensar.','note'),
   guideElement(),
+  managerAreaLesson(area.id),
+  managerTutorial(),
   p('Si mis consejos no te sirven, puedes dejarlos ocultos y continuar.','footnote')
  ]);
  const content=[decision,indicators,nico];
