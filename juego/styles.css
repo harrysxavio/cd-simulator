@@ -843,3 +843,54 @@ html,body{height:100%;overflow:hidden}
  }
  .inventory-explanation summary:focus-visible,.inventory-details summary:focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-24: BOM completa y explicación gerencial opcional, sin extender la página. */
+.picking-bom-teaching,.picking-outcome,.picking-manager-guide{
+ display:grid;gap:8px;min-width:0;margin:9px 0 12px;padding:11px;
+ background:var(--panel);border:1px solid var(--border);border-radius:12px
+}
+.picking-bom-teaching>strong,.picking-outcome>strong,
+.picking-manager-guide>strong{font-size:.9rem;line-height:1.4}
+.picking-bom-teaching p,.picking-outcome p,.picking-manager-guide p{
+ font-size:.78rem;line-height:1.5;margin:0!important
+}
+.picking-bom-metrics{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.picking-bom-metric{
+ min-width:0;display:flex;flex-direction:column;gap:5px;padding:9px;
+ border:1px solid var(--border);border-radius:10px;background:var(--detail-bg)
+}
+.picking-bom-metric span{font-size:.71rem;color:var(--muted)}
+.picking-bom-metric strong{
+ font-size:.98rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.picking-bom-details,.picking-manager-details{
+ border:1px solid var(--border);border-radius:10px;
+ padding:6px 9px;background:var(--detail-bg)
+}
+.picking-bom-details summary,.picking-manager-details summary{
+ min-height:44px;align-content:center;font-size:.8rem;font-weight:750;cursor:pointer
+}
+.picking-bom-details summary:focus-visible,.picking-manager-details summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.picking-template-row{border-top:1px solid var(--border);padding:7px 0}
+.picking-template-row strong{font-size:.79rem}
+.picking-manager-guide{margin:4px 0;background:var(--panel)}
+.picking-manager-guide .picking-manager-question{
+ padding:8px 10px;border-left:3px solid var(--primary);border-radius:8px;
+ background:var(--detail-bg);font-weight:750
+}
+@media(max-width:340px){.picking-bom-metrics{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .picking-bom-teaching,.picking-outcome,.picking-manager-guide,.picking-bom-metric,
+ .picking-bom-details,.picking-manager-details{
+  color:CanvasText;background:Canvas;border:1px solid CanvasText
+ }
+ .picking-manager-guide .picking-manager-question{border-left-color:Highlight}
+ .picking-bom-details summary:focus-visible,.picking-manager-details summary:focus-visible{
+  outline:3px solid Highlight
+ }
+}
