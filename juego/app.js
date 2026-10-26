@@ -21,6 +21,7 @@ import {i2PlanningCoveragePreview} from '../src/i2-planning-coverage.js';
 import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
 import {i2ReceivingCapacityPreview} from '../src/i2-receiving-dock.js';
 import {i2QualityReleasePreview} from '../src/i2-quality-release.js';
+import {i2InventoryAccuracyPreview} from '../src/i2-inventory-physical.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
@@ -504,6 +505,26 @@ function qualityTeaching(){
   p(m.boundary,'footnote')
  ]);
 }
+/** I2-23 · La exactitud elegida limita la promesa; no hace desaparecer stock. */
+function inventoryTeaching(){
+ const model=i2InventoryAccuracyPreview(state);
+ return section('inventory-accuracy-teaching',[
+  node('strong',{text:'Inventario · ¿cuánto stock podemos encontrar?'}),
+  section('inventory-metric-grid',[
+   section('inventory-metric',[node('span',{text:'Stock verificable supuesto'}),
+    node('strong',{text:model.accuracyPercent+' %'})]),
+   section('inventory-metric',[node('span',{text:'Frente al control normal'}),
+    node('strong',{text:(model.differencePoints>0?'+':'')+model.differencePoints+' pp'})])
+  ]),
+  p(model.interpretation,'note'),
+  node('details',{className:'inventory-explanation'},[
+   node('summary',{text:'¿Por qué existe stock que aún no podemos prometer?'}),
+   p(model.example),
+   p('RESERVA-CD es stock físico ubicado aparte. Solo un traslado al área de preparación lo pone en PICK-FACE; mover una caja no crea otra.','note')
+  ]),
+  p(model.boundary,'footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -547,6 +568,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='inventory'?[p('Una caja puede existir físicamente y aun así no estar localizada o lista para Picking. Conciliar mejora lo que podemos prometer, no inventa unidades.','commercial-brief')]:[]),
   ...(area.id==='quality'?[p('Calidad revisa los productos que ya entraron al CD. Una unidad retenida está esperando revisión: no significa que esté dañada o perdida.','commercial-brief')]:[]),
   ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
   ...(area.id==='purchasing'?[p('La entrega del proveedor es una hipótesis; solo Recepción registra unidades físicas. Mira Indicadores para separar compromiso, cumplimiento y plazo.','commercial-brief')]:[]),
@@ -560,7 +582,8 @@ function areaScene(){
   ...(area.id==='planning'?[planningCoverageTeaching()]:[]),
   ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[]),
   ...(area.id==='receiving'?[receivingDockTeaching()]:[]),
-  ...(area.id==='quality'?[qualityTeaching()]:[])
+  ...(area.id==='quality'?[qualityTeaching()]:[]),
+  ...(area.id==='inventory'?[inventoryTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
@@ -868,6 +891,38 @@ function resultsScene(){
   ]),
   p(q.boundary,'footnote')
  ]);
+ const inventory=data.inventory;
+ const inventoryOutcome=section('inventory-outcome',[
+  node('strong',{text:'Inventario · dónde quedaron las unidades'}),
+  p('Estado al cierre del día 12, a partir del movimiento físico original del CD.','note'),
+  section('inventory-metric-grid',[
+   ...[['Físicamente en el CD',inventory.totals.physicallyOnSiteSkuUnits],
+      ['Disponibles en PICK-FACE',inventory.totals.pickFaceSkuUnits],
+      ['Verificables para Picking',inventory.totals.verifiableSkuUnits],
+      ['Por conciliar en PICK-FACE',inventory.totals.notVerifiableSkuUnits],
+      ['En RESERVA-CD',inventory.totals.reserveSkuUnits],
+      ['Esperando Calidad',inventory.totals.heldQualitySkuUnits]]
+    .map(([label,value])=>section('inventory-metric',[
+     node('span',{text:label}),node('strong',{text:num.format(value)+' SKU'})
+    ]))
+  ]),
+  p('Los verificables son parte del stock físico en PICK-FACE. Lo pendiente de conciliar no está perdido. Las unidades retenidas por Calidad y las de reserva también pertenecen al CD.','note'),
+  node('details',{className:'inventory-details'},[
+   node('summary',{text:'Consultar unidades por SKU y ubicación'}),
+   ...inventory.bySku.map(row=>section('inventory-sku-row',[
+    node('strong',{text:'SKU '+row.skuId}),
+    p('PICK-FACE '+num.format(row.pickFaceSkuUnits)+' · verificables '+
+      num.format(row.verifiableSkuUnits)+' · por conciliar '+
+      num.format(row.notVerifiableSkuUnits)),
+    p('Reserva '+num.format(row.reserveSkuUnits)+' · Calidad '+
+      num.format(row.heldQualitySkuUnits)+' · preparados en staging '+
+      num.format(row.stagingSkuUnits),'footnote')
+   ])),
+   p('Traslados desde reserva durante la misión: '+num.format(inventory.totals.movedFromReserveSkuUnits)+
+     ' SKU (no suman stock nuevo).','footnote')
+  ]),
+  p(inventory.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -894,6 +949,7 @@ function resultsScene(){
   purchasing,
   receivingOutcome,
   qualityOutcome,
+  inventoryOutcome,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
