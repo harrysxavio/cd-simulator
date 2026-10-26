@@ -808,3 +808,38 @@ html,body{height:100%;overflow:hidden}
  }
  .quality-explanation summary:focus-visible,.quality-daily-details summary:focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-23 · Inventario por ubicación: verificable es subconjunto físico. */
+.inventory-accuracy-teaching,.inventory-outcome{
+ display:grid;gap:8px;min-width:0;margin:9px 0 12px;padding:11px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel)
+}
+.inventory-accuracy-teaching>strong,.inventory-outcome>strong{font-size:.89rem;line-height:1.4}
+.inventory-accuracy-teaching p,.inventory-outcome p{font-size:.78rem;line-height:1.48;margin:0!important}
+.inventory-metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.inventory-metric{
+ display:flex;flex-direction:column;gap:5px;min-width:0;padding:9px;
+ border:1px solid var(--border);border-radius:10px;background:var(--detail-bg)
+}
+.inventory-metric span{font-size:.71rem;color:var(--muted)}
+.inventory-metric strong{font-size:1rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.inventory-explanation,.inventory-details{
+ border:1px solid var(--border);border-radius:10px;padding:6px 9px;background:var(--detail-bg)
+}
+.inventory-explanation summary,.inventory-details summary{
+ min-height:44px;align-content:center;font-size:.79rem;font-weight:750;cursor:pointer
+}
+.inventory-explanation summary:focus-visible,.inventory-details summary:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.inventory-sku-row{padding:7px 0;border-top:1px solid var(--border)}
+.inventory-sku-row strong{font-size:.78rem}
+@media(max-width:340px){.inventory-metric-grid{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .inventory-accuracy-teaching,.inventory-outcome,.inventory-metric,
+ .inventory-explanation,.inventory-details{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .inventory-explanation summary:focus-visible,.inventory-details summary:focus-visible{outline:3px solid Highlight}
+}
