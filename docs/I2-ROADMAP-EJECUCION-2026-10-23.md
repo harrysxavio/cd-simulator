@@ -2,6 +2,8 @@
 
 > **Documento ejecutivo y de entrega.** El inventario técnico canónico sigue siendo [I2-PLAN-MAESTRO.md](I2-PLAN-MAESTRO.md), con 41 microfases **I2-00 a I2-40**. Este documento no duplica IDs ni declara funciones implementadas por haber escrito un plan. [Estado verificable](I2-STATUS.md).
 
+**Corrección gerencial vinculante (26-10-2026):** [Contrato pedagógico, guía profunda de Nico, tutorial saltable, explicación de SKU/12 días, recuperación multiacción y cierre de gerencia](I2-REVISION-PEDAGOGICA-GERENCIAL-2026-10-26.md). Alinea F4–F8 sin sumar ni cerrar microfases. **Importante:** el selector de cinco recuperaciones existente aún es exclusivo: las palancas combinables, su modelo físico y el informe profundo están pendientes de I2-28–35. El usuario aprenderá sobre servicio, inventario, cola, capacidad, gasto incremental y consecuencias potenciales para quien recibe el paquete, sin inventar entrega al cliente, persona-hora ni costo total.
+
 **Revisión vinculante (24-10-2026):** [Auditoría gerencial del juego y plan de mejora](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). Conserva F0–F8 e I2-00–I2-40; eleva los criterios F4–F7 para evitar una «alfa bonita» que solo muestre pedidos expedidos y olvide costos, capacidad, stock y tiempo. La semilla del reto se fija antes de jugar, con variaciones +/− reproducibles y sin castigar artificialmente buenas decisiones. Arte pixel sobrio y Nico son recursos didácticos, no reemplazo del modelo.
 
 ## 1. Decisión de producto y alcance
@@ -40,10 +42,10 @@ El simulador V1 **v11.68 r177** es un laboratorio valioso por sus decisiones, da
 | **F1 · Dos modos navegables** | I2-01–03 | Contratos definidos; ruta del juego real; botón Jugar y Volver | Sesiones independientes; URL y vuelta atrás; V1 sin regresión |
 | **F2 · Datos seguros y mismos números** | I2-04–06 | Adaptador puro, storage aislado, guardas SKU/economía | Igualdad exacta baseline/PO/ledger entre V1 y juego; recarga/corrupción |
 | **F3 · Ergonomía móvil y guía** | I2-07–12 | Orange theme, shell, footer fijo, progreso, ayuda/guía opcional | En 360×760 elegir y continuar con **0 scroll externo**; teclado, foco, 320 px |
-| **F4 · Primera misión configurada** | I2-13–17 | Portada, modos novato/experto, configurar, briefing, decisión reusable | Empezar sin configurar; ayuda saltable; editar/cancelar; una elección real |
+| **F4 · Primera misión configurada** | I2-13–17 | Portada, modos, briefing, tutorial de gerente opcional/reabrible como refuerzo transversal | Empezar sin configurar; saltar/reabrir guía, explicar CD/cliente/8 áreas/3 SKU/12 días sin alterar simulación |
 | **F5 · Ocho áreas jugables** | I2-18–25 | Cada área Entender → Decidir → (Impacto opcional) → Confirmar | Consecuencias trazadas, una opción activa, forecast previo al shock, sin doble motor |
-| **F6 · Sorpresa y recuperación** | I2-26–30 | Revelar, diagnosticar y gerenciar 5 recuperaciones | Misma cohorte/base, compras originales congeladas, deadlines y costos correctos |
-| **F7 · Resultados y juego pedagógico** | I2-31–35 | Cierre, timeline, economía honesta, insignias, niveles y replay | Reintento con seed; diferencia intervención/baseline trazada; sin puntaje ficticio |
+| **F6 · Sorpresa y recuperación** | I2-26–30 | Revelar, diagnosticar y **combinar palancas de recuperación** compatibles (refuerzo de contrato; no sumas de deltas) | Misma cohorte/base, compra original congelada, 0/1/varias palancas, plazo/costo y persistencia probados |
+| **F7 · Resultados y juego pedagógico** | I2-31–35 | Cierre multieje y **«La mirada de Nico como gerente»**, timeline SKU/día y aprendizaje por escenarios/estrategia | Fortalezas, fallos, costos, tiempo y propuesta de mejora basada en evidencia; ninguna receta universal |
 | **F8 · QA, usuarios y publicación** | I2-36–40 | Matriz exhaustiva, pruebas físicas, accesibilidad y release controlado | Node/E2E/HTTP + Android/TalkBack + comprensión humana + V1 intacta |
 
 **Estado de F0 (23-10):** técnicamente concluida, con documentación de seguimiento regularizada en esta propuesta. F1–F8 no desarrolladas. **1/41 = 2,4 %** de entregas integradas; esto no significa 2,4 % de esfuerzo ni que el modo juego exista.
