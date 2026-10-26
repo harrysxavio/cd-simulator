@@ -385,7 +385,7 @@ function nicoWelcome(){
  group.append(node('label',{text:'Experiencia con Nico',attrs:{for:'nicoLevel'}}),sel,
   p('El nivel modifica las explicaciones, no la dificultad ni el resultado.','footnote'));
  detail.append(group,steps);
- card.append(detail);
+ card.append(detail,nicoManagerTutorial());
  return card;
 }
 function intro(){
@@ -635,6 +635,8 @@ function areaScene(){
   p('Nico · coordinador ficticio del CD','option-heading'),
   p('¿Lo vemos juntos? Te cuento qué puede pasar con esta decisión y te dejo una pregunta para pensar.','note'),
   guideElement(),
+  nicoManagerArea(area.id),
+  nicoManagerTutorial({duringGame:true}),
   p('Si mis consejos no te sirven, puedes dejarlos ocultos y continuar.','footnote')
  ]);
  const content=[decision,indicators,nico];
