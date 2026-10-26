@@ -102,3 +102,28 @@ Semáforos en servicio/tiempo/capacidad y gasto conocido, con definiciones, obje
 8. Una persona principiante puede explicar por qué 3 SKU y 12 días afectan un pedido completo y una decisión de gerente (I2-38, evaluación humana).
 
 **Estado de esta revisión:** solo contrato y plan. No declarar implementada la multiacción, tutorial ampliado ni informes extensos hasta tener UI, motor y tests en verde.
+
+
+## Consideraciones complementarias tras auditoría de viabilidad (sin nuevas microfases)
+
+Estas son comprobaciones adicionales, no una reescritura ni una duplicación del plan anterior:
+
+1. **Cuatro momentos de aprendizaje diferenciados.** Antes de decidir: supuestos conocidos. Al revelar: hechos observados, con horizonte. Al intervenir: contrafactual del baseline fijo. Al concluir: qué se aprendió, con evidencias y límites. Nunca usar el mismo color o rótulo para una hipótesis y un hecho.
+2. **Mapa de dependencias causales.** Una intervención se evalúa contra el cuello de botella real. Si Inventario bloquea por ausencia de B, reforzar Picking no recupera un pedido que exige B. Las fichas pedagógicas deben enlazar explícitamente salida de un área con entrada de la siguiente.
+3. **Costo de oportunidad y sobrecapacidad.** También debe poder resultar acertado *no intervenir*: demanda baja, tiempos irreparables o gasto incremental sin ganancia. Asegurar casos donde comprar de más empeora el balance gerencial sin inventar contabilidad total.
+4. **Presupuesto: distinguir restricción y evaluación.** Definir si el monto es un límite duro del motor o una meta/semáforo de evaluación; la interfaz no debe bloquear una decisión si el modelo solo lo usa como umbral. Reportar consumos de compras, turnos y traslados separadamente cuando existan fuentes, sin sumar doble.
+5. **Multiacción con efectos no aditivos.** Las palancas deben compartir un único calendario, stock, pedidos y capacidad. Si dos palancas compiten por el mismo lote o jornada, no pueden ambas reclamar su mejora independiente. Probar costo y utilidad marginal de agregar la segunda palanca sobre la primera.
+6. **Transparencia del modelo de aprendizaje.** Mostrar qué es simplificación (3 SKU, mezcla fija de pedidos, 12 días, capacidad modelo) y qué no está simulado: entrega al destinatario, NPS, horas-persona, merma real y costo integral. Nunca presentar estas ausencias como cero.
+7. **Gerente novato versus experto.** El mismo ejemplo y las mismas decisiones físicas; solo cambia el vocabulario y la profundidad de la explicación. Medir si el usuario puede explicar el impacto **sin que Nico le indique una respuesta ganadora**.
+8. **Revisión después del cierre.** Permitir estudiar la misma semilla, formular una hipótesis («el cuello fue B o fue Transporte»), reintentar y comprobarla. Separar factores que el gerente controla de la demanda exógena. La evaluación premia justificación y balance, no volumen de clics.
+
+**Orden de entrega recomendado sin añadir IDs:**
+
+- **Refuerzo pedagógico A (transversal, sin contabilizar microfase):** tutorial 7 capítulos opcional/reabrible + ocho fichas de gerente, con Node/E2E y accesibilidad básica. El consejo breve permanece y el motor no cambia.
+- **I2-24–25:** mostrar una BOM completa de ejemplo y completar Picking/Transporte con su consecuencia sobre pedidos, staging y salida.
+- **Refuerzo pedagógico B, integrado al diseño de I2-26–27:** distinguir supuesto/real/contrafactual, guiar lectura de 3 SKU y día 0–12, prueba de comprensión de cuello de botella.
+- **I2-28a/b/c–30:** contrato conjunto de acciones, validación física, UI multipalanca, calendario/presupuesto y reintento; cada sub-PR pequeño con regresión, sin sumar al contador hasta que cumpla el gate entero de I2-28.
+- **I2-31–35:** «La mirada de Nico» con evidencia, fortalezas/debilidades, costo incremental, servicio, cuellos y alternativas razonables. Separar causa demostrada de hipótesis.
+- **I2-36–40:** E2E combinatorio, Android físico/TalkBack y prueba humana de comprensión, además de auditoría V1.
+
+**Aceptación nueva para el refuerzo A:** el usuario puede empezar sin abrir ninguna lectura, ver siete capítulos en orden opcional, recorrer y reabrir la guía durante cualquier área, acceder a ocho fichas con qué hace/qué controla/KPI/riesgo/ejemplo/pregunta, cambiar nivel sin alterar semillas ni motor, y conservar el footer móvil. La guía no debe hacer afirmaciones sobre el futuro de su escenario.
