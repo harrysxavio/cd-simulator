@@ -30,7 +30,8 @@ const empty=()=>({
  */
 export function i2NormalizeMultiRecovery(input=empty()){
  if(!input||typeof input!=='object'||Array.isArray(input)
-  ||Object.keys(input).sort().join(',')!=='capacityBoost,reserveTransfer,urgentPurchase')
+  ||Object.keys(input).filter(k=>k!=='schema').sort().join(',')!=='capacityBoost,reserveTransfer,urgentPurchase'
+  ||(input.schema!==undefined&&input.schema!==I2_MULTI_RECOVERY_VERSION))
   fail('palancas adicionales o estructura incorrecta');
  const u=input.urgentPurchase,r=input.reserveTransfer,c=input.capacityBoost;
  if(!u||typeof u!=='object'||Array.isArray(u)
