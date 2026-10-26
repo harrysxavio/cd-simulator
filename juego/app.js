@@ -13,6 +13,7 @@ import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
 import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateObjectives} from '../src/i2-management-objectives.js';
 import {I2_CHALLENGES,i2ChallengeForSeed} from '../src/i2-challenge-config.js';
 import {i2DemandEventSealed,i2DemandEventObserved} from '../src/i2-demand-event.js';
+import {i2ManagementDiagnosis} from '../src/i2-management-diagnosis.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_NICO_MANAGER_TOUR,i2NicoManagerGuide} from '../src/i2-nico-manager-learning.js';
@@ -812,10 +813,65 @@ function labeledSelect(label,values,current,onChange){
  select.addEventListener('change',()=>onChange(Number(select.value)));
  wrap.append(lab,select);return wrap;
 }
+/**
+ * Diagnóstico consultable: las dos cifras principales siguen visibles arriba.
+ * Las evidencias y preguntas de Nico NO cambian la corrida física original.
+ */
+function managementDiagnosisPanel(model){
+ const panel=node('details',{className:'management-diagnosis'});
+ const sku=i2WhySkuAndDays();
+ panel.append(
+  node('summary',{text:'Diagnóstico de Nico · ¿dónde se detienen los pedidos?'}),
+  p(model.coach.observation,'note'),
+  p('Esto es una lectura del plan original, sin recuperación; ninguna señal prueba por sí sola qué intervención funcionará.','footnote'),
+  section('diagnosis-metric-grid',[
+   ...[
+    ['Servicio original',model.kpis.dispatchServicePercent===null?'Sin denominador':
+     model.kpis.dispatchServicePercent.toFixed(1).replace('.',',')+' %'],
+    ['Error del pronóstico',(model.kpis.forecastVarianceOrders>0?'+':'')+
+     num.format(model.kpis.forecastVarianceOrders)+' pedidos'],
+    ['Pendientes al cierre',num.format(model.kpis.pendingOrders)+' pedidos'],
+    ['Compra comprometida',money.format(model.economics.originalPurchaseCommitmentCLP)]
+   ].map(([label,value])=>section('diagnosis-metric',[
+    node('span',{text:label}),node('strong',{text:value})
+   ]))
+  ]),
+  p('Servicio original = '+num.format(model.kpis.dispatchedOrders)+' expedidos / '+
+   num.format(model.kpis.actualOrders)+' observados. Pronóstico comercial = '+
+   num.format(model.kpis.forecastOrders)+' pedidos, que puede diferir del plan base.','note'),
+  p(model.riskSummary,'note'),
+  node('details',{className:'diagnosis-evidence'},[
+   node('summary',{text:'Ver evidencias físicas en seis áreas'}),
+   ...model.evidence.map(item=>section('diagnosis-evidence-row',[
+    node('strong',{text:item.title+' · '+num.format(item.value)+' '+item.unit}),
+    p(item.observed,'note'),
+    ...(item.peak===undefined?[]:[p('Pico observado: '+num.format(item.peak)+' SKU.','note')]),
+    p('Interpretación: '+item.guidance,'footnote'),
+    p('Fuente: '+item.source,'footnote')
+   ]))
+  ]),
+  node('details',{className:'diagnosis-hypotheses'},[
+   node('summary',{text:'Nico: preguntas para investigar, no causas confirmadas'}),
+   p(model.coach.analysis,'note'),
+   ...model.hypotheses.map((question,i)=>p((i+1)+'. '+question,'note')),
+   p(model.coach.consumer,'footnote')
+  ]),
+  p('Economía: '+model.economics.boundary,'footnote'),
+  p(model.boundary,'footnote'),
+  node('details',{className:'diagnosis-sku-explainer'},[
+   node('summary',{text:'¿Por qué tres SKU y doce días?'}),
+   p(sku.story,'note'),p(sku.timing,'note')
+  ]),
+  nicoManagerTutorial({duringGame:true})
+ );
+ return panel;
+}
 function recoveryScene(){
  if(!state.reveal){state.phase='reveal';render();return}
  // Único acceso al evento observado, permitido solo tras la transición reveal.
  const reveal=i2DemandEventObserved(state);
+ // Construir siempre el mismo plan original sin intervención para diagnosticar.
+ const diagnosis=i2ManagementDiagnosis(state,resultFor('wait'));
  stage.textContent='Crisis · Recuperación';progress.style.width='92%';
  replace([
   p('DEMANDA SORPRESA · CASO REPRODUCIBLE','eyebrow'),
@@ -834,6 +890,7 @@ function recoveryScene(){
   p(reveal.teaching,'note'),
   p(reveal.context,'note'),
   p(reveal.boundary,'footnote'),
+  managementDiagnosisPanel(diagnosis),
   section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
   p('Tu acción gerencial','option-heading'),
   section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
