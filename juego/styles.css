@@ -898,3 +898,13 @@ html,body{height:100%;overflow:hidden}
   outline:3px solid Highlight
  }
 }
+
+.nico-manager-option{
+ padding:8px 9px;margin-top:7px;border:1px solid var(--border);
+ border-radius:8px;background:var(--detail-bg)
+}
+.nico-manager-option strong{font-size:.79rem}
+.nico-manager-option p{margin:4px 0 0!important}
+@media(forced-colors:active){
+ .nico-manager-option{background:Canvas;color:CanvasText;border:1px solid CanvasText}
+}
