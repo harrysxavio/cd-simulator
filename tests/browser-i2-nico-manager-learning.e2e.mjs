@@ -30,7 +30,8 @@ test('Tutorial de Nico puede saltarse o abrirse, y ocho áreas tienen guía prof
   assert.equal(await guide.count(),1);
   assert.equal(await guide.getAttribute('open'),null);
   await guide.locator('summary').click();
-  assert.equal(await guide.locator('.nico-manager-topic').count(),7);
+  assert.equal(await guide.locator('.nico-manager-topic').count(),8);
+  assert.equal(await guide.locator('.nico-manager-option').count(),3);
   assert.match(await guide.innerText(),/pronóstico|Comercial/i);
   assert.match(await guide.innerText(),/¿Qué podría salir bien o mal\?/);
   const stepBefore=await page.evaluate(()=>JSON.stringify(JSON.parse(localStorage.getItem('supply-lab-i2-v1'))));
@@ -42,7 +43,8 @@ test('Tutorial de Nico puede saltarse o abrirse, y ocho áreas tienen guía prof
    const areaGuide=page.locator('.nico-manager-area');
    assert.equal(await areaGuide.count(),1);
    await areaGuide.locator('summary').click();
-   assert.equal(await areaGuide.locator('.nico-manager-topic').count(),7);
+   assert.equal(await areaGuide.locator('.nico-manager-topic').count(),8);
+   assert.equal(await areaGuide.locator('.nico-manager-option').count(),3);
    assert.doesNotMatch(await areaGuide.innerText(),/demanda real 280|se observaron 280/);
    if(i<7)await page.locator('#gameNext').click();
   }
