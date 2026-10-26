@@ -997,20 +997,21 @@ function resultsScene(){
  ]);
  const picking=data.picking;
  const pickingOutcome=section('picking-outcome',[
-  node('strong',{text:'Picking · pedidos completos, no solo unidades'}),
+  node('strong',{text:'Picking · plan original antes de tu recuperación'}),
+  p('Estas cifras vienen del escenario sin intervención. El resumen de la misión sí incorpora la acción que elegiste. Úsalas para entender dónde comenzaste, no como resultado final de tu recuperación.','note'),
   section('picking-metric-grid',[
    ...[['Pedidos que esperaban',picking.totals.requestedOrders],
       ['Preparados completos',picking.totals.preparedOrders],
-      ['Salieron del CD',picking.totals.dispatchedOrders],
+      ['Salieron sin intervención',picking.totals.dispatchedOrders],
       ['Preparados aún sin salir',picking.totals.preparedNotDispatchedOrders]]
     .map(([label,value])=>section('picking-metric',[
      node('span',{text:label}),node('strong',{text:num.format(value)+' pedidos'})
     ]))
   ]),
-  p('No alcanzaron a prepararse: '+num.format(picking.totals.neverPreparedOrders)+
+  p('Antes de intervenir, no alcanzaron a prepararse '+num.format(picking.totals.neverPreparedOrders)+
    ' pedidos. Eso puede deberse a falta de un SKU, capacidad u otra restricción; no se atribuye una causa única sin evidencia.','note'),
   node('details',{className:'picking-bom-details'},[
-   node('summary',{text:'Ver los cuatro tipos de pedido y los doce días'}),
+   node('summary',{text:'Ver pedidos y días del plan original (sin recuperación)'}),
    ...picking.byTemplate.map(row=>section('picking-type-row',[
     node('strong',{text:row.title+' · '+row.formula}),
     p('Pedidos '+num.format(row.requested)+' · completos '+num.format(row.prepared)+
