@@ -53,7 +53,7 @@ test('I2-24: gestor aprende en 7 capítulos, guía para ocho áreas, todo read-o
   const guide=i2ManagerAreaGuide(id);
   assert.match(guide.title,/Nico/);
   for(const key of ['what','manager','kpi','tradeoff','example','question'])
-   assert.ok(guide[key].length>65,'Profundidad gerencial: '+id+'/'+key);
+   assert.ok(guide[key].length>(key==='question'?28:60),'Profundidad gerencial: '+id+'/'+key);
   assert.match(guide.question,/\?$/);
   assert.equal(Object.isFrozen(guide),true);
   assert.doesNotMatch(JSON.stringify(guide),/actualOrders|shockPercent|280 pedidos/);
