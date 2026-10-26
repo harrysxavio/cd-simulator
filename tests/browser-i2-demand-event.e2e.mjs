@@ -44,7 +44,7 @@ for(const sample of [
    assert.match(await page.locator('#gameScene h1').innerText(),sample.heading);
    const observed=page.locator('.i2-observed-demand');
    assert.match(await observed.innerText(),new RegExp(String(sample.expected)+' pedidos'));
-   assert.match(await observed.innerText(),new RegExp(sample.variance+' pedidos'.replace('+','\\+')));
+   assert.match(await observed.innerText(),new RegExp(sample.variance.replace('+','\\+')+' pedidos'));
    assert.match(await page.locator('#gameScene').innerText(),/no por tu desempeño/);
    await page.reload({waitUntil:'networkidle'});
    assert.match(await page.locator('.i2-observed-demand').innerText(),
