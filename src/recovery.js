@@ -87,7 +87,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
    if(qty)urgent.push({id:p.id,qty,day:effectiveArrivalDay,unitCost:p.unitCost});
   }
  }
- if(effective.releaseReserve&&baseline.openingState.totals.reserveSkuUnits===0)
+ if(option==='multi'&&effective.releaseReserve&&baseline.openingState.totals.reserveSkuUnits===0)
   throw new Error('No existe reserva física SKU habilitable en el escenario original');
  const capacity=dailyCapacity+effective.extraCapacity;
  // Waiting makes NO intervention: reuse the exact event book of the
