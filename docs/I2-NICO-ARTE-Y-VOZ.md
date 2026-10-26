@@ -23,6 +23,10 @@ El usuario subió **exactamente los 21 PNG** a `juego/assets/nico` (no `juegos/`
 - **Límites de honestidad:** Nico no conoce la demanda futura, no usa una simulación física para aconsejar antes del reveal y no promete que comprar más produzca más ventas. Compra comprometida ≠ dinero pagado; llegada ≠ recepción; preparado ≠ despachado; despacho ≠ entrega al cliente. Costo total desconocido ≠ $0.
 - **Opt-in y accesibilidad:** consejos ocultos inicialmente, con botón para ver/ocultar, foco visible y texto entendible incluso si no carga la ilustración. La preferencia y el nivel se guardan aislados de V1 y del estado de decisiones I2.
 
+## 2 bis. Evolución pendiente: Nico como mentor de gestión
+
+**Corte 26-10-2026:** el consejo corto actual de Nico está implementado, pero **no equivale a una guía completa de gerencia**. La nueva especificación vinculante en [Revisión pedagógica y gerencial](I2-REVISION-PEDAGOGICA-GERENCIAL-2026-10-26.md) exige una segunda capa opcional «Entender esta área con Nico» para cada una de las ocho áreas con propósito, secuencia operacional, palancas de gerente, indicadores auditables, riesgo, efecto sobre cliente y ejemplo por SKU/día. No reducir esa ficha a 1–2 frases ni sustituir el consejo breve ya probado. Tutorial de CD/rol/roadmap/variables saltable y reabrible; informe «La mirada de Nico como gerente» tras recuperar con fortalezas, debilidades y estrategias alternativas, fundadas en ledger. **Todo esto sigue pendiente de implementación y prueba**, incluidos accesibilidad y comprensión real; no marcarlo listo por editar este documento.
+
 ## 3. Correspondencia visual con escenas
 
 | Contexto | Nico visual | Mensaje deseado |
