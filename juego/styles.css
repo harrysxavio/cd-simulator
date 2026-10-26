@@ -955,3 +955,38 @@ html,body{height:100%;overflow:hidden}
 @media(forced-colors:active){
  .transport-outcome{border:1px solid CanvasText;background:Canvas;color:CanvasText}
 }
+
+
+/* I2-27: diagnóstico progresivo; prioriza el espacio de pantalla del teléfono. */
+.management-diagnosis{
+ min-width:0;margin:10px 0;padding:10px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel)
+}
+.management-diagnosis>summary{
+ cursor:pointer;font-size:.86rem;font-weight:750;line-height:1.45;
+ padding:8px 0;min-height:44px
+}
+.management-diagnosis p{font-size:.78rem;line-height:1.5;overflow-wrap:anywhere}
+.diagnosis-metric-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0
+}
+.diagnosis-metric{
+ display:flex;flex-direction:column;min-width:0;gap:6px;
+ border:1px solid var(--border);border-radius:9px;background:var(--detail-bg);
+ padding:9px
+}
+.diagnosis-metric span{font-size:.7rem;color:var(--muted)}
+.diagnosis-metric strong{font-size:.83rem;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.diagnosis-evidence,.diagnosis-hypotheses,.diagnosis-sku-explainer{
+ min-width:0;border-top:1px solid var(--border);margin-top:10px;padding-top:7px
+}
+.diagnosis-evidence>summary,.diagnosis-hypotheses>summary,.diagnosis-sku-explainer>summary{
+ font-size:.8rem;line-height:1.45;font-weight:700;min-height:44px;padding:8px 0;cursor:pointer
+}
+.diagnosis-evidence-row{border-top:1px solid var(--border);padding:8px 0;min-width:0}
+.diagnosis-evidence-row strong{font-size:.79rem}
+@media(max-width:340px){.diagnosis-metric-grid{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .management-diagnosis,.diagnosis-metric{background:Canvas;color:CanvasText;border:1px solid CanvasText}
+ .management-diagnosis summary:focus-visible{outline:3px solid Highlight}
+}
