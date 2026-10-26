@@ -1060,7 +1060,7 @@ function resultsScene(){
   p(picking.boundary,'footnote')
  ]);
  const transport=data.transport;
- const transportOutcome=section('picking-outcome transport-outcome',[
+ const transportOutcome=section('transport-outcome',[
   node('strong',{text:'Transporte · expedición del plan original sin recuperación'}),
   p('Estas cifras son del plan original, no de la recuperación seleccionada. No se suman con el resultado final.','note'),
   section('picking-metric-grid',[
