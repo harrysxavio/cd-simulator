@@ -11,9 +11,7 @@ export const RECOVERY_OPTIONS={
  overtime:{label:'Refuerzo operativo',extraCapacity:80,urgent:false},
  reserve:{label:'Habilitar reserva ubicada',extraCapacity:0,urgent:false,releaseReserve:true},
  emergency:{label:'Compra urgente SKU',extraCapacity:0,urgent:true},
- combined:{label:'Compra urgente + refuerzo',extraCapacity:80,urgent:true},
- // Opt-in I2-28: only valid alongside explicitly normalized multiActions.
- multi:{label:'Intervenciones conjuntas auditadas',extraCapacity:0,urgent:false}
+ combined:{label:'Compra urgente + refuerzo',extraCapacity:80,urgent:true}
 };
 /** Incremental, illustrative recovery comparison. Extra purchases arrive day 1.
  * A user-selected fraction of physical SKU shortages is bought, not the full gross demand.
@@ -23,7 +21,8 @@ export const RECOVERY_OPTIONS={
  */
 export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,option='wait',unitRevenue=SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder,emergencySurchargeRate=SKU_COST_DEFAULTS.recovery.urgentSurchargeRate,extraCapacityDailyCost=SKU_COST_DEFAULTS.recovery.addedCapacityCLPPerDay,latePenaltyPerOrderDay=SKU_COST_DEFAULTS.recovery.backlogPenaltyCLPPerOrderDay,holdingRatePerDay=SKU_COST_DEFAULTS.recovery.holdingFractionPerCLPDay,urgentArrivalDay=1,purchaseCoveragePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,stock=null,reservePercent=0,separateTransport=false,baselineSnapshot=null,multiActions=null}={}){
  if(typeof separateTransport!=='boolean')throw new Error('Modo staging inválido');
- const choice=RECOVERY_OPTIONS[option];
+ // Modo interno I2: no modificar el catálogo público de las 5 recuperaciones V1.
+ const choice=option==='multi'?{label:'Intervenciones conjuntas auditadas',extraCapacity:0,urgent:false}:RECOVERY_OPTIONS[option];
  if(!choice)throw new Error('Recuperación desconocida');
  // Additive interface: existing V1 options retain precisely their behavior.
  if((option==='multi')!==(multiActions!==null))
