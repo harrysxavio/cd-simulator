@@ -348,7 +348,17 @@ function nicoManagerArea(areaId){
  ];
  doc.append(...sections.map(([title,body])=>section('nico-manager-topic',[
   node('strong',{text:title}),p(body)
- ])),p(guide.boundary,'footnote'));
+ ])));
+ const options=NODES.find(area=>area.id===areaId)?.choices??[];
+ doc.append(section('nico-manager-topic',[
+  node('strong',{text:'Qué significa cada alternativa'}),
+  p('Te cuento qué cambia en el modelo; ninguna opción garantiza un resultado por sí sola.','note'),
+  ...options.map(choice=>section('nico-manager-option',[
+   node('strong',{text:choice.label+
+    (state.choices[areaId]===choice.id?' · tu elección':'')}),
+   p(choice.note??'Su efecto depende también de las otras áreas y del tiempo.')
+  ]))
+ ]),p(guide.boundary,'footnote'));
  return doc;
 }
 function nicoWelcome(){
