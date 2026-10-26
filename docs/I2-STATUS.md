@@ -7,7 +7,7 @@
 
 ## Resumen
 
-- **I2-00–I2-22: 23 de 41 microfases con PR fusionado a main (~56,1 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **I2-00–I2-23: 24 de 41 microfases con PR fusionado a main (~58,5 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
 - **MVP alfa vertical integrado en PR #79.** Campaña inicial +40 % ampliada por PR #100 a cinco retos exógenos de demanda ±, ocho decisiones, revelación explícita, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-14 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
@@ -17,7 +17,7 @@
 
 [**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
 
-**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 23/41**. No se certifican KPI integrales ni fases I2-26/I2-35 por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-23**, Inventario físico y verificable, conservando las metas de servicio, costos, capacidad y plazos.
+**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 24/41**. No se certifican KPI integrales ni fases I2-26/I2-35 por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-24**, Picking y preparación de pedidos completos, conservando las metas de servicio, costos, capacidad y plazos.
 
 ## Microfases integradas y evidencia
 
@@ -46,6 +46,7 @@
 | I2-20 | Compras 75/95/100 % de cumplimiento nominal; tasa efectiva V1, entrega versus muelle versus recepción física SKU, y rutas de arte Nico protegidas | [#106](https://github.com/harrysxavio/cd-simulator/pull/106) | Integrada técnicamente; Node, focused y Chromium general verdes. Arte original ya activado y verificado por [PR #108](https://github.com/harrysxavio/cd-simulator/pull/108) |
 | I2-21 | Recepción: capacidad diaria, FIFO, cola de muelle, conservación SKU y resultado por día del mismo ledger original, sin spoilers | [#109](https://github.com/harrysxavio/cd-simulator/pull/109) | Integrada técnicamente; Node, focused y Chromium general del PR aprobados |
 | I2-22 | Calidad: liberación 75/95/100 %, lotes originales auditados por SKU/día, retención temporal, tiempos de espera y extremos 0/100 sin inventar merma | [#110](https://github.com/harrysxavio/cd-simulator/pull/110) | Integrada técnicamente; Node, focused y Chromium general del PR aprobados |
+| I2-23 | Inventario: exactitud 85/95/99 %, stock físico, verificable, no verificable y RESERVA-CD por SKU/día sin crear unidades | [#111](https://github.com/harrysxavio/cd-simulator/pull/111) | Integrada técnicamente; Node, focused y Chromium general del PR aprobados |
 
 ## Fases ejecutivas
 
@@ -56,7 +57,7 @@
 | F2 · Motor/estado/economía | I2-04–06 | **Completada técnicamente** | Matriz 8×5, guardado migrable, privacidad y límites CLP verificados; Android/TalkBack pendiente fuera de fase |
 | F3 · UX móvil y guía | I2-07–12 | **Completada técnicamente (6/6)** | Tokens, viewport, navegación, ayuda modal, mapa y guía opcional integrados; Android físico y TalkBack pendientes de aceptación transversal |
 | F4 · Configuración y tutorial | I2-13–17 | **I2-13–17 integradas; F4 técnicamente completa (5/5)** | Briefing y retomar la partida verificados. Tutor, configuración y tres vistas integradas; Android/TalkBack pendiente en F8 |
-| F5 · Ocho áreas | I2-18–25 | **I2-18–22 integradas; 5/8 áreas profundizadas** | Comercial, Planificación, Compras, Recepción y Calidad. Inventario I2-23 siguiente; tres áreas pendientes |
+| F5 · Ocho áreas | I2-18–25 | **I2-18–23 integradas; 6/8 áreas profundizadas** | Comercial, Planificación, Compras, Recepción, Calidad e Inventario. Picking I2-24 siguiente; dos áreas pendientes |
 | F6 · Demanda sorpresa y recuperación | I2-26–30 | **Recorrido alfa, no cerrado** | Revelación explícita y cinco estrategias; faltan diagnósticos completos y controles avanzados |
 | F7 · Resultados/gamificación | I2-31–35 | **Resultado básico alfa** | KPIs físicos y costos modelados parciales; faltan logros, reto, niveles y comparador más completo |
 | F8 · Certificación y publicación estable | I2-36–40 | **Pendiente** | Controles, múltiples dispositivos, accesibilidad/TalkBack, evaluación y release estable |
@@ -128,6 +129,13 @@
 - **Gates del PR aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40245871613), [Misión CD focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40245871532), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40245871521); revisión automática sin hallazgos. Publicación y verificaciones posteriores al merge de `main` se inspeccionan separadamente. [Contrato](I2-22-CALIDAD-LOTES.md).
 - **Estado actual 23/41 (56,1 %) y F5 5/8**; siguiente I2-23 Inventario. F6–F8 y QA Android/TalkBack (#67) no quedan certificadas por este avance.
 
+## I2-23 · Inventario físico, verificable y reserva (25-10-2026)
+
+- [PR #111](https://github.com/harrysxavio/cd-simulator/pull/111), merge `3fd25d4dddc631dec71b81a5aa878a557bba3f1d`: Inventario 85/95/99 % explicado por Nico, con compromiso previo sin revelar shock. Después de revelar, lectura original auditada de PICK-FACE físico, unidades verificables y por conciliar, RESERVA-CD, Calidad y STAGING-CD, por SKU y jornada.
+- Pruebas de conservación `apertura + recepciones = stock físico en CD + expediciones` para cada día/SKU, traslados internos sin sumar unidades y extremos 0/100 % de exactitud. Una fracción no verificable no se declara perdida ni se considera merma. La recuperación urgente no reescribe el baseline.
+- **Gates del PR aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40248044699), [Misión CD focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40248044629), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40248044638). Hubo un fallo textual del E2E sobre el vocabulario de Nico; se corrigió y las tres suites se volvieron a ejecutar en verde. Publicación y CI postmerge se comprobarán de forma separada. [Contrato I2-23](I2-23-INVENTARIO-FISICO.md).
+- **Avance formal 24/41 (58,5 %); F5 6/8.** Siguiente I2-24 Picking, luego Transporte I2-25. Android físico, TalkBack y prueba humana (#67) siguen pendientes.
+
 ## MVP alfa: exactamente qué puede probarse
 
 1. Abrir `/juego/` desde la raíz o mediante enlace directo; volver a V1 sin perder campaña.
@@ -140,7 +148,7 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-23** (Inventario: stock físico y verificable, reserva, trazabilidad y promesa de Picking sin crear stock). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-24** (Picking: productos BOM de pedidos completos, preparación y transferencia a staging sin confundirlo con expedición). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
 
 ## Cierre técnico I2-04 e I2-05 (24-10-2026)
 
