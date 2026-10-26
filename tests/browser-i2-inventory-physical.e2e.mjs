@@ -29,7 +29,7 @@ test('I2-23: inventario verificable y reserva, Nico, sorpresa sellada y cierre f
   assert.equal(await page.evaluate(k=>localStorage.getItem(k),KEY),before);
   await page.getByRole('tab',{name:'Nico'}).click();
   await page.locator('.mentor-toggle').click();
-  assert.match(await page.locator('.mentor-response').innerText(),/stock|inventario/i);
+  assert.match(await page.locator('.mentor-response').innerText(),/caja mal ubicada|bodega|encontrar lo que tenemos/i);
   await page.getByRole('tab',{name:'Decisión'}).click();
   await page.locator('.game-choice').first().click();
   await page.getByRole('tab',{name:'Indicadores'}).click();
