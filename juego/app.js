@@ -11,7 +11,8 @@ import {i2ProgressView} from '../src/i2-game-progress.js';
 import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
 import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateObjectives} from '../src/i2-management-objectives.js';
-import {I2_CHALLENGES,i2ChallengeForSeed,i2ChallengeReveal} from '../src/i2-challenge-config.js';
+import {I2_CHALLENGES,i2ChallengeForSeed} from '../src/i2-challenge-config.js';
+import {i2DemandEventSealed,i2DemandEventObserved} from '../src/i2-demand-event.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_NICO_MANAGER_TOUR,i2NicoManagerGuide} from '../src/i2-nico-manager-learning.js';
@@ -771,12 +772,20 @@ function areaScene(){
  updateFooter();
 }
 function revealScene(){
+ // Lectura pública: no contiene datos reales, signo ni porcentaje de sorpresa.
+ const sealed=i2DemandEventSealed(state);
  stage.textContent='Diagnóstico · Sorpresa';progress.style.width='84%';
  replace([
   p('EL PLAN QUEDÓ CERRADO','eyebrow'),
   heading('Algo cambió mientras el CD se preparaba.'),
   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
   p('Tus decisiones comerciales, compras y capacidades ya están definidas. La demanda observada podría ser diferente del pronóstico.','lead'),
+  section('guide-box i2-sealed-demand',[
+   node('strong',{text:sealed.headline}),
+   p('Reto '+sealed.missionLabel+' · '+sealed.level+'.','note'),
+   p('Base conocida: '+num.format(sealed.plannedOrders)+' pedidos previstos de muestra.'),
+   p(sealed.why,'note'),p(sealed.limitation,'footnote')
+  ]),
   section('guide-box',[
    node('strong',{text:'Mensaje del equipo'}),
    p('Gerencia, llegó el momento de comparar la planificación con lo que realmente ocurrió. Las órdenes de compra iniciales no pueden reescribirse retroactivamente.')
@@ -805,14 +814,26 @@ function labeledSelect(label,values,current,onChange){
 }
 function recoveryScene(){
  if(!state.reveal){state.phase='reveal';render();return}
- const reveal=i2ChallengeReveal(state.seed,state.advanced.plannedOrders);
+ // Único acceso al evento observado, permitido solo tras la transición reveal.
+ const reveal=i2DemandEventObserved(state);
  stage.textContent='Crisis · Recuperación';progress.style.width='92%';
  replace([
   p('DEMANDA SORPRESA · CASO REPRODUCIBLE','eyebrow'),
   heading(reveal.heading),
   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('reveal')]:[]),
-  p('Se planificó una muestra de '+num.format(reveal.plannedOrders)+' pedidos, pero se observaron '+num.format(reveal.actualOrders)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
+  p('Se planificó una muestra de '+num.format(reveal.plannedOrders)+' pedidos, pero se observaron '+num.format(reveal.observedOrders)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
+  section('metrics-grid i2-observed-demand',[
+   section('metric-card',[
+    node('span',{text:'Demanda observada'}),node('strong',{text:num.format(reveal.observedOrders)+' pedidos'})
+   ]),
+   section('metric-card',[
+    node('span',{text:'Diferencia con lo previsto'}),
+    node('strong',{text:(reveal.varianceOrders>0?'+':'')+num.format(reveal.varianceOrders)+' pedidos'})
+   ])
+  ]),
+  p(reveal.teaching,'note'),
   p(reveal.context,'note'),
+  p(reveal.boundary,'footnote'),
   section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
   p('Tu acción gerencial','option-heading'),
   section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
