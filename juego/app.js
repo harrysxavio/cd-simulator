@@ -14,6 +14,7 @@ import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateO
 import {I2_CHALLENGES,i2ChallengeForSeed,i2ChallengeReveal} from '../src/i2-challenge-config.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
+import {I2_NICO_MANAGER_TOUR,i2NicoManagerGuide} from '../src/i2-nico-manager-learning.js';
 import {I2_ADVANCED_FIELDS,i2ValidateAdvanced} from '../src/i2-advanced-settings.js';
 import {I2_AREA_TABS,i2AreaPlanningIndicators} from '../src/i2-area-planning-indicators.js';
 import {i2CommercialForecastLesson} from '../src/i2-commercial-forecast-lesson.js';
@@ -305,6 +306,51 @@ function advancedSummary(){
  ' · Refuerzo '+money.format(c.extraCapacityDailyCostCLP)+'/turno';
 }
 /** Presentación breve, independiente de revelar resultados y sin forzar consejos. */
+/** Extra pedagógica opcional. Su lectura no toca las decisiones ni el motor. */
+function nicoManagerTutorial({duringGame=false}={}){
+ const panel=node('details',{className:'nico-manager-tutorial'});
+ panel.append(node('summary',{text:duringGame
+  ?'Reabrir tutorial: cómo funciona un CD'
+  :'Conocer mi misión con Nico · tutorial de gerente'}));
+ const chapters=section('nico-manager-chapters',
+  I2_NICO_MANAGER_TOUR.map(item=>{
+   const chapter=node('details',{className:'nico-manager-chapter'});
+   chapter.append(node('summary',{text:item.title}),
+    p(item.body),p('Por ejemplo: '+item.example,'note'),
+    p('Como gerente, mira esto: '+item.watch,'mentor-example'),
+    p('¿Y el cliente? '+item.consumer,'footnote'));
+   return chapter;
+  }));
+ panel.append(
+  p('Este recorrido es voluntario. Puedes abrir solo los capítulos que te interesen, cerrarlo y seguir jugando.','footnote'),
+  chapters
+ );
+ if(!duringGame){
+  const skip=node('button',{className:'nico-skip-tutorial',text:'Saltar tutorial y empezar ahora',attrs:{type:'button'}});
+  skip.addEventListener('click',()=>gameTransition('start'));
+  panel.append(skip);
+ }
+ return panel;
+}
+function nicoManagerArea(areaId){
+ const guide=i2NicoManagerGuide(areaId,guideLevel);
+ const doc=node('details',{className:'nico-manager-area'});
+ doc.append(node('summary',{text:'Entender '+guide.name+' con Nico · mirada de gerente'}),
+  p('Te cuento cómo funciona esta parte del CD y en qué vale la pena fijarte.','note'));
+ const sections=[
+  ['¿Qué hace esta área?',guide.job],
+  ['¿Qué decides tú como gerente?',guide.controls],
+  ['¿Cómo sabes si está funcionando?',guide.metrics],
+  ['¿Qué podría salir bien o mal?',guide.risks],
+  ['Un ejemplo para imaginarlo',guide.example],
+  ['Piensa antes de decidir',guide.question],
+  ['Para tu nivel',guide.lens]
+ ];
+ doc.append(...sections.map(([title,body])=>section('nico-manager-topic',[
+  node('strong',{text:title}),p(body)
+ ])),p(guide.boundary,'footnote'));
+ return doc;
+}
 function nicoWelcome(){
  const avatar=section('nico-avatar',[
   node('span',{className:'nico-avatar-fallback',text:'NC',attrs:{'aria-hidden':'true'}}),
