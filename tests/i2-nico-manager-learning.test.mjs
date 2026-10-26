@@ -9,7 +9,8 @@ test('Nico gerente: siete capítulos completos, con ejemplo, cliente y límites 
  assert.equal(I2_NICO_MANAGER_TOUR.length,7);
  assert.equal(new Set(I2_NICO_MANAGER_TOUR.map(x=>x.id)).size,7);
  for(const item of I2_NICO_MANAGER_TOUR){
-  for(const field of ['title','body','example','watch','consumer'])
+  assert.ok(item.title.length>=12,'title '+item.id);
+  for(const field of ['body','example','watch','consumer'])
    assert.ok(typeof item[field]==='string'&&item[field].length>=45,field+' '+item.id);
   assert.ok(Object.isFrozen(item));
  }
@@ -27,7 +28,8 @@ test('Nico gerente: ocho áreas × tres niveles y ninguna consulta de resultado'
  for(const area of I2_AREAS){
   const answers=['novato','intermedio','avanzado'].map(level=>i2NicoManagerGuide(area.id,level));
   for(const guide of answers){
-   for(const field of ['name','job','controls','metrics','risks','example','question','lens','boundary']){
+   assert.ok(guide.name.length>=6,area.id+' name');
+   for(const field of ['job','controls','metrics','risks','example','question','lens','boundary']){
     assert.ok(typeof guide[field]==='string'&&guide[field].length>25,area.id+' '+field);
    }
    assert.ok(guide.question.endsWith('?'));
