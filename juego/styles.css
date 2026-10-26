@@ -843,3 +843,73 @@ html,body{height:100%;overflow:hidden}
  }
  .inventory-explanation summary:focus-visible,.inventory-details summary:focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-24 · Nico como mentor gerencial: lectura profunda siempre optativa. */
+.manager-tutorial,.manager-area-guide,.picking-bom-details{
+ margin:8px 0;border:1px solid var(--border);border-radius:12px;
+ padding:6px 10px;background:var(--detail-bg);color:var(--text);min-width:0
+}
+.manager-tutorial summary,.manager-area-guide summary,.picking-bom-details summary{
+ cursor:pointer;font-size:.81rem;font-weight:750;line-height:1.4;
+ min-height:44px;align-content:center
+}
+.manager-tutorial summary:focus-visible,.manager-area-guide summary:focus-visible,
+.picking-bom-details summary:focus-visible,.tutorial-skip:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.manager-tutorial-content,.manager-area-guide-content{
+ display:grid;gap:9px;padding:6px 2px 10px;min-width:0
+}
+.manager-tutorial-chapter{
+ padding:9px;border:1px solid var(--border);border-radius:10px;background:var(--panel);
+ display:grid;gap:5px
+}
+.manager-tutorial-chapter strong,.manager-area-guide-content strong{
+ font-size:.84rem;line-height:1.4
+}
+.manager-tutorial-content p,.manager-area-guide-content p{
+ margin:0!important;font-size:.8rem;line-height:1.55
+}
+.manager-tutorial-content .mentor-question,.manager-area-guide-content .mentor-question{
+ padding:7px 9px;margin:0!important;border-left:3px solid var(--primary);
+ background:var(--detail-bg);border-radius:6px;font-weight:650
+}
+.tutorial-skip{
+ font:inherit;font-size:.85rem;font-weight:750;min-height:44px;
+ border:1px solid var(--border);border-radius:10px;
+ padding:10px 12px;color:var(--text);background:var(--panel);cursor:pointer
+}
+.picking-capacity-teaching,.picking-outcome{
+ display:grid;gap:8px;min-width:0;margin:9px 0 12px;padding:11px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel)
+}
+.picking-capacity-teaching>strong,.picking-outcome>strong{
+ font-size:.89rem;line-height:1.4
+}
+.picking-capacity-teaching p,.picking-outcome p{
+ font-size:.78rem;line-height:1.5;margin:0!important
+}
+.picking-metric-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.picking-metric{
+ display:flex;flex-direction:column;gap:5px;min-width:0;
+ padding:9px;border:1px solid var(--border);border-radius:10px;
+ background:var(--detail-bg)
+}
+.picking-metric span{font-size:.7rem;color:var(--muted)}
+.picking-metric strong{
+ font-size:.96rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.picking-type-row{border-top:1px solid var(--border);padding:8px 0}
+.picking-type-row strong{font-size:.78rem}
+@media(max-width:340px){.picking-metric-grid{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .manager-tutorial,.manager-area-guide,.picking-bom-details,
+ .manager-tutorial-chapter,.picking-capacity-teaching,.picking-outcome,.picking-metric{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .manager-tutorial summary:focus-visible,.manager-area-guide summary:focus-visible,
+ .picking-bom-details summary:focus-visible{outline:3px solid Highlight}
+}
