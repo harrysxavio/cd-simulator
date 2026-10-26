@@ -943,3 +943,15 @@ html,body{height:100%;overflow:hidden}
  .manager-tutorial summary:focus-visible,.manager-area-guide summary:focus-visible,
  .picking-bom-details summary:focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-25: reutiliza patrones visuales, con selector aislado de Picking. */
+.transport-outcome{
+ display:grid;gap:8px;min-width:0;margin:9px 0 12px;padding:11px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel)
+}
+.transport-outcome>strong{font-size:.89rem;line-height:1.4}
+.transport-outcome p{font-size:.78rem;line-height:1.5;margin:0!important}
+@media(forced-colors:active){
+ .transport-outcome{border:1px solid CanvasText;background:Canvas;color:CanvasText}
+}
