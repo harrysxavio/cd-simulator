@@ -19,10 +19,40 @@ export const RECOVERY_OPTIONS={
  * Reserve reallocation is a dated internal movement of catalog opening stock,
  * not new stock or a supplier receipt. No movement is modeled without stock.
  */
-export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,option='wait',unitRevenue=SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder,emergencySurchargeRate=SKU_COST_DEFAULTS.recovery.urgentSurchargeRate,extraCapacityDailyCost=SKU_COST_DEFAULTS.recovery.addedCapacityCLPPerDay,latePenaltyPerOrderDay=SKU_COST_DEFAULTS.recovery.backlogPenaltyCLPPerOrderDay,holdingRatePerDay=SKU_COST_DEFAULTS.recovery.holdingFractionPerCLPDay,urgentArrivalDay=1,purchaseCoveragePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,stock=null,reservePercent=0,separateTransport=false,baselineSnapshot=null}={}){
+export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,option='wait',unitRevenue=SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder,emergencySurchargeRate=SKU_COST_DEFAULTS.recovery.urgentSurchargeRate,extraCapacityDailyCost=SKU_COST_DEFAULTS.recovery.addedCapacityCLPPerDay,latePenaltyPerOrderDay=SKU_COST_DEFAULTS.recovery.backlogPenaltyCLPPerOrderDay,holdingRatePerDay=SKU_COST_DEFAULTS.recovery.holdingFractionPerCLPDay,urgentArrivalDay=1,purchaseCoveragePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,stock=null,reservePercent=0,separateTransport=false,baselineSnapshot=null,multiActions=null}={}){
  if(typeof separateTransport!=='boolean')throw new Error('Modo staging inválido');
- const choice=RECOVERY_OPTIONS[option];
+ // Modo interno I2: no modificar el catálogo público de las 5 recuperaciones V1.
+ const choice=option==='multi'?{label:'Intervenciones conjuntas auditadas',extraCapacity:0,urgent:false}:RECOVERY_OPTIONS[option];
  if(!choice)throw new Error('Recuperación desconocida');
+ // Additive interface: existing V1 options retain precisely their behavior.
+ if((option==='multi')!==(multiActions!==null))
+  throw new Error('Multiacción SKU exige un contrato explícito y exclusivo');
+ if(multiActions!==null&&(
+  !multiActions||typeof multiActions!=='object'||Array.isArray(multiActions)
+  ||Object.keys(multiActions).sort().join(',')!=='capacityBoost,reserveTransfer,urgentPurchase'
+  ||!multiActions.urgentPurchase||typeof multiActions.urgentPurchase!=='object'
+  ||Object.keys(multiActions.urgentPurchase).sort().join(',')!=='arrivalDay,coveragePercent,enabled'
+  ||!multiActions.reserveTransfer||typeof multiActions.reserveTransfer!=='object'
+  ||Object.keys(multiActions.reserveTransfer).sort().join(',')!=='enabled,releaseDay'
+  ||!multiActions.capacityBoost||typeof multiActions.capacityBoost!=='object'
+  ||Object.keys(multiActions.capacityBoost).join(',')!=='enabled'
+  ||[multiActions.urgentPurchase.enabled,multiActions.reserveTransfer.enabled,
+      multiActions.capacityBoost.enabled].some(flag=>typeof flag!=='boolean')
+  ||!Number.isSafeInteger(multiActions.urgentPurchase.arrivalDay)
+  ||multiActions.urgentPurchase.arrivalDay<1||multiActions.urgentPurchase.arrivalDay>365
+  ||!Number.isSafeInteger(multiActions.urgentPurchase.coveragePercent)
+  ||multiActions.urgentPurchase.coveragePercent<0||multiActions.urgentPurchase.coveragePercent>100
+  ||!Number.isSafeInteger(multiActions.reserveTransfer.releaseDay)
+  ||multiActions.reserveTransfer.releaseDay<1||multiActions.reserveTransfer.releaseDay>365
+ ))throw new Error('Contrato de palancas múltiples inválido');
+ const effective=multiActions===null?choice:{
+  urgent:multiActions.urgentPurchase.enabled,
+  extraCapacity:multiActions.capacityBoost.enabled?80:0,
+  releaseReserve:multiActions.reserveTransfer.enabled
+ };
+ const effectiveArrivalDay=multiActions?.urgentPurchase.arrivalDay??urgentArrivalDay;
+ const effectiveCoveragePercent=multiActions?.urgentPurchase.coveragePercent??purchaseCoveragePercent;
+ const effectiveReserveDay=multiActions?.reserveTransfer.releaseDay??urgentArrivalDay;
  if(!Number.isInteger(urgentArrivalDay)||urgentArrivalDay<1||urgentArrivalDay>365)throw new Error('Plazo de reposición urgente inválido');
  if(!Number.isInteger(purchaseCoveragePercent)||purchaseCoveragePercent<0||purchaseCoveragePercent>100)throw new Error('Cobertura de compra urgente inválida');
  if(!Number.isInteger(reservePercent)||reservePercent<0||reservePercent>50)throw new Error('Porcentaje de reserva ubicada inválido');
@@ -40,7 +70,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const reserveStock=openingState.reserveBySku;
  const base=baseline.integrated;
  const urgent=[];
- if(choice.urgent){
+ if(effective.urgent){
   // Calculate unmet BOM demand from actual orders minus stock and original purchases.
   const split=ORDER_TEMPLATES.map((t,i)=>{const exact=actualOrders*t.share/100;return {i,t,count:Math.floor(exact),rem:exact%1}});
   let left=actualOrders-split.reduce((n,x)=>n+x.count,0);
@@ -52,14 +82,17 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
    const ordinaryDelivered=base.actual.deliveries.find(d=>d.id===p.id).received;
    const supply=base.actual.initial[p.id]+ordinaryDelivered;
    const shortage=Math.max(0,demand[p.id]-supply);
-   const qty=Math.ceil(shortage*purchaseCoveragePercent/100);
-   if(qty)urgent.push({id:p.id,qty,day:urgentArrivalDay,unitCost:p.unitCost});
+   const qty=Math.ceil(shortage*effectiveCoveragePercent/100);
+   if(qty)urgent.push({id:p.id,qty,day:effectiveArrivalDay,unitCost:p.unitCost});
   }
  }
- const capacity=dailyCapacity+choice.extraCapacity;
+ if(option==='multi'&&effective.releaseReserve&&baseline.openingState.totals.reserveSkuUnits===0)
+  throw new Error('No existe reserva física SKU habilitable en el escenario original');
+ const capacity=dailyCapacity+effective.extraCapacity;
  // Waiting makes NO intervention: reuse the exact event book of the
  // frozen actual-demand baseline, including the same Picking/Transport mode.
- const recovered=option==='wait'?base.actual:eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,stock:openingStock,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent,reserveStock,reserveReleaseDay:choice.releaseReserve?urgentArrivalDay:null,separateTransport});
+ const isNoAction=option==='wait'||(option==='multi'&&!effective.urgent&&!effective.releaseReserve&&!effective.extraCapacity);
+ const recovered=isNoAction?base.actual:eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,stock:openingStock,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent,reserveStock,reserveReleaseDay:effective.releaseReserve?effectiveReserveDay:null,separateTransport});
  // A recovery option may create a SEPARATE urgent PO, but cannot rewrite
  // an original supplier commitment (including its expected arrival day).
  assertFrozenOriginalPurchases(base.originalPurchaseOrders,recovered);
@@ -67,7 +100,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const urgentSurcharge=urgentBase*emergencySurchargeRate;
  const operationalCost=operationalCapacityCostReadModel({
   recovered,baseline:base.actual,option,
-  extraCapacity:choice.extraCapacity,dailyCapacity,extraCapacityDailyCost
+  extraCapacity:effective.extraCapacity,dailyCapacity,extraCapacityDailyCost
  });
  const extraLabor=operationalCost.totals.totalCostCLP;
  const incrementalRevenue=(recovered.completed-base.actual.completed)*unitRevenue;
@@ -88,7 +121,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
    if(observed[skuId]!==qty)throw new Error('La apertura SKU cambia entre escenarios');
   }
  }
- const comparison={option,label:choice.label,unitRevenue,baselineSnapshot:baseline,baselineKey:baseline.scenarioKey,separateTransport,urgentArrivalDay,purchaseCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,operationalCost,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,originalPurchaseOrders:base.originalPurchaseOrders,planningCommitment:base.planningCommitment,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
+ const comparison={option,label:choice.label,multiActions,unitRevenue,baselineSnapshot:baseline,baselineKey:baseline.scenarioKey,separateTransport,urgentArrivalDay:effectiveArrivalDay,purchaseCoveragePercent:effectiveCoveragePercent,reservePercent,openingState,reserveStock,integrated:base,base:base.actual,recovered,urgent,urgentBase,urgentSurcharge,operationalCost,extraLabor,incrementalRevenue,incrementalExpense,netCashDelta,penaltyBase,penaltyRecovered,penaltySaved,backlogDaysBase:backlogDays(base.actual),backlogDaysRecovered:backlogDays(recovered),holdingBase,holdingRecovered,holdingDelta,economicProxyDelta,committedPurchaseValue:base.committedPurchaseValue,originalPurchaseOrders:base.originalPurchaseOrders,planningCommitment:base.planningCommitment,plannedForecastPercent,planningCoveragePercent,forecastOrders:base.forecastOrders,originalPurchase:base.purchase,
   assumptions:'Comparación incremental de caja simplificada, NO margen contable: ingresos adicionales menos desembolso de compra urgente, recargo y refuerzo diario. Refuerzo de capacidad de pedidos: se activa y cobra una jornada solo cuando existe Picking o expedición efectivamente simulada ese día; si se activa se cobra la tarifa diaria aun con cupos ociosos. No equivale a horas ni personas reales y no cubre tarifas operativas base no calibradas. Compra urgente llega el día configurado y no mejora cumplimiento anterior a la recepción. Penalidad por pedido pendiente/día y tenencia por valor de stock/día son proxies didácticos, no gastos verificados ni asientos contables. Reserva interna: una partición del stock inicial ubicado en RESERVA-CD; un traslado la hace disponible para Picking en el día seleccionado, sin sumar inventario ni costo de compra. No hay devoluciones, IVA ni costos de transporte. El staging opt-in no añade una tasa de almacenamiento nueva; suma su stock físico al proxy de tenencia existente.'};
  if(option==='wait')comparison.waitEvidence=waitWithoutInterventionReadModel({baseline,recovered,comparison});
  return comparison;

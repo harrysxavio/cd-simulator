@@ -29,7 +29,7 @@ export function operationalCapacityCostReadModel({
  recovered,baseline,extraCapacity=0,dailyCapacity,
  extraCapacityDailyCost,option
 }={}){
- if(!recovered||!baseline||!['wait','reserve','overtime','emergency','combined'].includes(option)
+ if(!recovered||!baseline||!['wait','reserve','overtime','emergency','combined','multi'].includes(option)
   ||!integer(extraCapacity)||!integer(dailyCapacity)
   ||!amount(extraCapacityDailyCost)
   ||!integer(recovered.days)||recovered.days>365
@@ -37,7 +37,7 @@ export function operationalCapacityCostReadModel({
   ||recovered.days!==baseline.days
   ||recovered.ledger.length!==recovered.days+1
   ||baseline.ledger.length!==recovered.days+1
-  ||((option==='overtime'||option==='combined')!==(extraCapacity>0))){
+  ||(option!=='multi'&&((option==='overtime'||option==='combined')!==(extraCapacity>0)))){
   fail('opción, recursos o calendario incompatibles');
  }
  const rows=[];
