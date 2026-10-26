@@ -74,7 +74,8 @@ test('I2-25: rechazar diarios alterados y resultados de horizonte incompatible',
  const active=alteredUnits.ledger.find(d=>d.shipmentEvents.length);
  assert.ok(active);
  active.shippedUnits+=1;
- assert.throws(()=>i2TransportDispatchReading({base:alteredUnits}),/I2-25/);
+ // El auditor físico reutilizado de Picking también puede detectar el evento corrupto.
+ assert.throws(()=>i2TransportDispatchReading({base:alteredUnits}),/I2-2[45]/);
  const impossible=structuredClone(source);
  impossible.transportUnitCapacity=0;
  assert.throws(()=>i2TransportDispatchReading({base:impossible}),/I2-25/);
