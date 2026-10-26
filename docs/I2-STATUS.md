@@ -141,8 +141,15 @@
 [Auditoría de observaciones y contrato de aceptación](I2-REVISION-PEDAGOGICA-GERENCIAL-2026-10-26.md). Se comprobó qué estaba previsto y qué no: el tutorial actual es breve y Nico entrega pistas con ejemplo, pero faltan enseñanza completa del CD, ficha gerencial por cada área, explicación útil de los tres SKU y 12 días, informe de aprendizaje por estrategia y, **principalmente, permitir varias acciones compatibles en la recuperación**. El selector actual de 5 alternativas es exclusivo (una opción + fecha/cobertura), NO simula una intervención múltiple conjunta.
 
 - Ajustes incorporados al plan maestro y roadmap existente: refuerzo tutorial/mentor de F4–F5 desde I2-24–27; I2-24/25 BOM y cliente; I2-28–30 contrato/costos/confirmación multiacción con un solo replay físico por combinación; I2-31–35 informe «La mirada de Nico como gerente», resultados multieje y escenarios sin respuesta universal; I2-36–40 pruebas humanas/seguridad.
-- **Ninguno de esos nuevos requisitos se considera implementado por escribir el plan.** Se mantienen **24/41 (58,5 %) y F5 6/8** hasta nuevos PR con pruebas. No se modifica V1 ni la semilla de demanda.
+- **Primer refuerzo ya implementado mediante [PR #114](https://github.com/harrysxavio/cd-simulator/pull/114)**: tutorial de siete capítulos, saltable y reabrible, y ocho fichas gerenciales profundas con tres alternativas cada una. Sigue pendiente implementar recuperación multiacción y los informes «La mirada de Nico» basados en resultados físicos. **El contador formal permanece 24/41 (58,5 %) y F5 6/8**, porque es un refuerzo transversal, no una microfase I2-24 terminada.
 - Mayor prioridad: preservar la profundidad de gestión (costo, servicio, tiempo, stock, capacidad), pero exponerla por capas sin saturar la pantalla del teléfono.
+
+## Refuerzo pedagógico de Nico y tutorial gerencial (25-10-2026)
+
+- [PR #114](https://github.com/harrysxavio/cd-simulator/pull/114), merge `21111104d3f8aac44c40f806370dcbc5bb3f564f`: tutorial introductorio opcional de **7 capítulos**, ejemplos basados en BOM real A/B y horizonte de 12 días; botón de saltar e iniciar; reapertura durante la campaña desde la vista Nico.
+- Las **8 áreas** ahora incluyen «Entender [área] con Nico»: función y traspaso al siguiente eslabón, controles del gerente, KPI y límites, riesgos de cada alternativa, ejemplo, pregunta y lectura por nivel (novato/intermedio/avanzado). Se conservan los consejos cortos optativos y el personaje original.
+- **Gates aprobados en el PR:** [Node general](https://github.com/harrysxavio/cd-simulator/actions/runs/40253105040), [Misión CD focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40253105015), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40253105019). Tutorial/ayuda no revelan el shock ni alteran decisiones o V1. QA humana Android/TalkBack permanece pendiente.
+- **No se ha implementado aún** la combinación de intervenciones reales de I2-28–30, informe gerencial basado en evidencia I2-31–33 ni evaluación de casos/replay I2-34–35. [Contrato detallado](I2-REVISION-PEDAGOGICA-GERENCIAL-2026-10-26.md). Sigue **24/41**, siguiente **I2-24 Picking**.
 
 ## MVP alfa: exactamente qué puede probarse
 
