@@ -908,3 +908,38 @@ html,body{height:100%;overflow:hidden}
 @media(forced-colors:active){
  .nico-manager-option{background:Canvas;color:CanvasText;border:1px solid CanvasText}
 }
+
+
+\n\n/* I2-24: only Picking styles; reuse existing Nico components from PR #114. */\n.picking-capacity-teaching,.picking-outcome{
+ display:grid;gap:8px;min-width:0;margin:9px 0 12px;padding:11px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel)
+}
+.picking-capacity-teaching>strong,.picking-outcome>strong{
+ font-size:.89rem;line-height:1.4
+}
+.picking-capacity-teaching p,.picking-outcome p{
+ font-size:.78rem;line-height:1.5;margin:0!important
+}
+.picking-metric-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px
+}
+.picking-metric{
+ display:flex;flex-direction:column;gap:5px;min-width:0;
+ padding:9px;border:1px solid var(--border);border-radius:10px;
+ background:var(--detail-bg)
+}
+.picking-metric span{font-size:.7rem;color:var(--muted)}
+.picking-metric strong{
+ font-size:.96rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.picking-type-row{border-top:1px solid var(--border);padding:8px 0}
+.picking-type-row strong{font-size:.78rem}
+@media(max-width:340px){.picking-metric-grid{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .manager-tutorial,.manager-area-guide,.picking-bom-details,
+ .manager-tutorial-chapter,.picking-capacity-teaching,.picking-outcome,.picking-metric{
+  border:1px solid CanvasText;background:Canvas;color:CanvasText
+ }
+ .manager-tutorial summary:focus-visible,.manager-area-guide summary:focus-visible,
+ .picking-bom-details summary:focus-visible{outline:3px solid Highlight}
+}
