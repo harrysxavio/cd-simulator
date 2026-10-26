@@ -309,7 +309,7 @@ function advancedSummary(){
 }
 /** Presentación breve, independiente de revelar resultados y sin forzar consejos. */
 /** Reopenable, optional full manager tutorial; no game state or simulation touched. */
-function managerTutorial(){
+function managerTutorial(allowStart=false){
  const model=i2ManagerOrientation();
  const details=node('details',{className:'manager-tutorial',attrs:{id:'managerTutorial'}});
  details.append(node('summary',{text:'Conocer mi misión con Nico (tutorial opcional)'}));
@@ -325,7 +325,8 @@ function managerTutorial(){
  const skip=node('button',{className:'tutorial-skip',text:'Saltar tutorial / Empezar ahora',
   attrs:{type:'button'}});
  skip.addEventListener('click',()=>primary.click());
- inner.append(skip);details.append(inner);
+ if(allowStart)inner.append(skip);
+ details.append(inner);
  return details;
 }
 /** Guía con mirada gerencial, separada de la pista breve. */
@@ -401,7 +402,7 @@ function intro(){
    p(brief.resumeLabel+'. Puedes continuar sin perder lo que ya decidiste.','intro-resume')
   ]:[]),
   nicoWelcome(),
-  managerTutorial(),
+  managerTutorial(true),
   section('briefing-steps',[
    node('strong',{text:'Tu desafío en 3 pasos'}),
    ...brief.steps.map((step,index)=>section('briefing-step',[
@@ -564,6 +565,31 @@ function inventoryTeaching(){
    p('RESERVA-CD es stock físico ubicado aparte. Solo un traslado al área de preparación lo pone en PICK-FACE; mover una caja no crea otra.','note')
   ]),
   p(model.boundary,'footnote')
+ ]);
+}
+/** Physical picking capacity in SKU per day, not orders or worker productivity. */
+function pickingTeaching(){
+ const model=i2PickingCapacityPreview(state),sku=i2WhySkuAndDays();
+ return section('picking-capacity-teaching',[
+  node('strong',{text:'Picking · completar cada pedido antes de enviarlo'}),
+  section('picking-metric-grid',[
+   section('picking-metric',[
+    node('span',{text:'Capacidad nominal del turno'}),
+    node('strong',{text:num.format(model.nominalSkuUnitsPerDay)+' SKU/día'})]),
+   section('picking-metric',[
+    node('span',{text:'Cambio frente al turno normal'}),
+    node('strong',{text:(model.deltaSkuUnitsPerDay>0?'+':'')+
+     num.format(model.deltaSkuUnitsPerDay)+' SKU/día'})])
+  ]),
+  p(model.note,'note'),
+  node('details',{className:'picking-bom-details'},[
+   node('summary',{text:'¿Por qué simulamos tres SKU y doce días?'}),
+   p(sku.story),
+   ...sku.templates.map(row=>p(row.title+': '+row.formula+
+      ' · '+row.unitsPerOrder+' unidades por pedido.','note')),
+   p(sku.timing),p(sku.consumer,'note'),p(sku.label,'footnote')
+  ]),
+  p(model.boundaries,'footnote')
  ]);
 }
 function areaScene(){
@@ -750,6 +776,7 @@ function recoveryScene(){
   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('reveal')]:[]),
   p('Se planificó una muestra de '+num.format(reveal.plannedOrders)+' pedidos, pero se observaron '+num.format(reveal.actualOrders)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
   p(reveal.context,'note'),
+  managerTutorial(),
   section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
   p('Tu acción gerencial','option-heading'),
   section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
@@ -968,6 +995,33 @@ function resultsScene(){
   ]),
   p(inventory.boundary,'footnote')
  ]);
+ const picking=data.picking;
+ const pickingOutcome=section('picking-outcome',[
+  node('strong',{text:'Picking · pedidos completos, no solo unidades'}),
+  section('picking-metric-grid',[
+   ...[['Pedidos que esperaban',picking.totals.requestedOrders],
+      ['Preparados completos',picking.totals.preparedOrders],
+      ['Salieron del CD',picking.totals.dispatchedOrders],
+      ['Preparados aún sin salir',picking.totals.preparedNotDispatchedOrders]]
+    .map(([label,value])=>section('picking-metric',[
+     node('span',{text:label}),node('strong',{text:num.format(value)+' pedidos'})
+    ]))
+  ]),
+  p('No alcanzaron a prepararse: '+num.format(picking.totals.neverPreparedOrders)+
+   ' pedidos. Eso puede deberse a falta de un SKU, capacidad u otra restricción; no se atribuye una causa única sin evidencia.','note'),
+  node('details',{className:'picking-bom-details'},[
+   node('summary',{text:'Ver los cuatro tipos de pedido y los doce días'}),
+   ...picking.byTemplate.map(row=>section('picking-type-row',[
+    node('strong',{text:row.title+' · '+row.formula}),
+    p('Pedidos '+num.format(row.requested)+' · completos '+num.format(row.prepared)+
+      ' · expedidos '+num.format(row.dispatched))
+   ])),
+   ...picking.rows.filter(row=>row.preparedOrders||row.dispatchedOrders)
+    .map(row=>p('Día '+row.day+': preparados '+num.format(row.preparedOrders)+
+      ' · expedidos '+num.format(row.dispatchedOrders)+' pedidos','footnote'))
+  ]),
+  p(picking.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -995,6 +1049,8 @@ function resultsScene(){
   receivingOutcome,
   qualityOutcome,
   inventoryOutcome,
+  pickingOutcome,
+  managerTutorial(),
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
