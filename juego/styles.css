@@ -843,3 +843,58 @@ html,body{height:100%;overflow:hidden}
  }
  .inventory-explanation summary:focus-visible,.inventory-details summary:focus-visible{outline:3px solid Highlight}
 }
+
+/* Nico · tutorial gerencial por capítulos, voluntario y reabrible. */
+.nico-manager-tutorial,.nico-manager-area{
+ margin:10px 0;padding:7px 10px;min-width:0;
+ border:1px solid var(--border);border-radius:12px;
+ background:var(--panel)
+}
+.nico-manager-tutorial>summary,.nico-manager-area>summary{
+ min-height:44px;align-content:center;cursor:pointer;
+ font-size:.83rem;font-weight:780;line-height:1.4
+}
+.nico-manager-tutorial summary:focus-visible,
+.nico-manager-area summary:focus-visible,
+.nico-skip-tutorial:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px
+}
+.nico-manager-tutorial p,.nico-manager-area p{
+ margin:6px 0!important;font-size:.79rem;line-height:1.5
+}
+.nico-manager-chapters{
+ display:grid;gap:7px;min-width:0;
+ max-height:min(40dvh,390px);overflow-y:auto;
+ padding:5px 3px 8px;overscroll-behavior:contain
+}
+.nico-manager-chapter{
+ border:1px solid var(--border);border-radius:10px;
+ background:var(--detail-bg);padding:4px 9px
+}
+.nico-manager-chapter summary{
+ min-height:42px;align-content:center;cursor:pointer;
+ font-weight:700;font-size:.8rem;line-height:1.4
+}
+.nico-manager-chapter .mentor-example{font-size:.77rem}
+.nico-skip-tutorial{
+ width:100%;min-height:44px;margin:8px 0 2px;
+ font:inherit;font-size:.81rem;font-weight:750;
+ border:1px solid var(--border);border-radius:10px;
+ color:var(--text);background:var(--detail-bg);cursor:pointer
+}
+.nico-manager-topic{
+ border-top:1px solid var(--border);padding:9px 0 4px
+}
+.nico-manager-topic strong{font-size:.81rem;line-height:1.4}
+.nico-manager-topic p{overflow-wrap:anywhere}
+@media(forced-colors:active){
+ .nico-manager-tutorial,.nico-manager-area,
+ .nico-manager-chapter,.nico-skip-tutorial{
+  color:CanvasText;background:Canvas;border:1px solid CanvasText
+ }
+ .nico-manager-chapter summary:focus-visible,
+ .nico-manager-tutorial summary:focus-visible,
+ .nico-manager-area summary:focus-visible{
+  outline:3px solid Highlight
+ }
+}
