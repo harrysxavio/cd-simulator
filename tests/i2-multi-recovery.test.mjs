@@ -4,6 +4,7 @@ import {newI2GameState} from '../src/i2-game-state.js';
 import {navigateI2GameState} from '../src/i2-game-navigation.js';
 import {I2_DEFAULT_ADVANCED} from '../src/i2-advanced-settings.js';
 import {i2MvpPhysicalResult} from '../src/i2-mvp-adapter.js';
+import {RECOVERY_OPTIONS} from '../src/recovery.js';
 import {i2NormalizeMultiRecovery,i2EmptyRecoveryActions,
  i2LegacyRecoveryToMultiActions,i2CompareMultiRecovery
 } from '../src/i2-multi-recovery.js';
@@ -21,6 +22,7 @@ const plan=({buy=false,arrival=2,coverage=100,reserve=false,release=2,boost=fals
 });
 
 test('I2-28: contrato versionado canónico, migración opciones históricas y no-acción exclusivo',()=>{
+ assert.deepEqual(Object.keys(RECOVERY_OPTIONS),['wait','overtime','reserve','emergency','combined']);
  const none=i2EmptyRecoveryActions();
  assert.equal(none.schema,1);
  assert.deepEqual(i2NormalizeMultiRecovery(none),none);
