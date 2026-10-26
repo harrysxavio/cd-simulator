@@ -22,6 +22,7 @@ import {i2SupplierCommitmentPreview} from '../src/i2-supplier-purchasing.js';
 import {i2ReceivingCapacityPreview} from '../src/i2-receiving-dock.js';
 import {i2QualityReleasePreview} from '../src/i2-quality-release.js';
 import {i2InventoryAccuracyPreview} from '../src/i2-inventory-physical.js';
+import {i2PickingBOMPreview} from '../src/i2-picking-bom.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
@@ -525,6 +526,51 @@ function inventoryTeaching(){
   p(model.boundary,'footnote')
  ]);
 }
+/** I2-24: explica 3 SKU y días como entradas conocidas, jamás datos de demanda real. */
+function pickingBOMTeaching(){
+ const model=i2PickingBOMPreview(state);
+ return section('picking-bom-teaching',[
+  node('strong',{text:'Picking · completar pedidos, no solo mover unidades'}),
+  section('picking-bom-metrics',[
+   section('picking-bom-metric',[
+    node('span',{text:'Capacidad nominal elegida'}),
+    node('strong',{text:num.format(model.nominalShiftUnitCapacity)+' u./jornada'})]),
+   section('picking-bom-metric',[
+    node('span',{text:'Frente al turno normal'}),
+    node('strong',{text:(model.nominalShiftDelta>0?'+':'')+
+     num.format(model.nominalShiftDelta)+' u./jornada'})])
+  ]),
+  p(model.example,'note'),
+  node('details',{className:'picking-bom-details'},[
+   node('summary',{text:'¿Por qué simulamos 3 SKU y 12 días?'}),
+   p(model.explanation),
+   ...model.templateExamples.map(t=>section('picking-template-row',[
+    node('strong',{text:t.name}),
+    p(Object.entries(t.lines).map(([sku,qty])=>qty+' × SKU '+sku).join(' + ')+
+     ' · '+t.unitsPerCompleteOrder+' unidades por pedido completo','note')
+   ])),
+   p('Los proveedores tienen plazos distintos: '+
+    model.skuLeadDays.map(r=>'SKU '+r.id+' '+r.leadDays+' días').join(' · ')+
+    '. Por eso elegir cuándo y cuánto comprar afecta la preparación.','note'),
+   p('Ejemplos del catálogo didáctico, NO pedidos observados de tu campaña.','footnote')
+  ]),
+  p(model.boundary,'footnote')
+ ]);
+}
+function pickingManagerGuide(){
+ const m=i2PickingBOMPreview(state);
+ return section('picking-manager-guide',[
+  node('strong',{text:'Nico · aprende a mirar Picking como gerente'}),
+  p('¿Qué hacemos aquí? Reunimos TODOS los productos que requiere cada pedido. Si falta aunque sea un SKU, ese pedido queda pendiente; preparar unidades sueltas no equivale a atender al cliente.','note'),
+  p('¿Cómo llega el trabajo? Compras y Recepción traen cajas; Calidad las libera e Inventario permite localizarlas. Picking las convierte en pedidos completos. Transporte todavía debe poder sacarlos del CD.'),
+  p('¿Qué puedes decidir? Cuánta capacidad de preparación destinas y cuánto recurso adicional comprometes. Un turno grande puede resultar caro y estar ocioso si faltan productos o Transporte está lleno.'),
+  p('¿Qué mirar? Compara pedidos completos preparados, unidades de sus BOM, capacidad de jornada y pedidos pendientes. Es distinto de productividad persona-hora: aquí no tenemos horas reales por trabajador.'),
+  p('Un ejemplo: '+m.example+' Si el SKU B se recibe tarde, ampliar el turno de Picking no adelanta la llegada de B.'),
+  p('¿Y la persona que espera? Puede ver retrasado su pedido completo. La salida del CD no demuestra su entrega final.','note'),
+  p(m.question,'picking-manager-question'),
+  p('Este consejo explica opciones conocidas, no conoce la sorpresa de demanda ni te dicta una única respuesta.','footnote')
+ ]);
+}
 function areaScene(){
  const area=I2_AREAS[state.index],original=NODES[state.index];
  stage.textContent='Planificación · Área '+(state.index+1)+' de 8';
@@ -568,6 +614,7 @@ function areaScene(){
  const decision=section('area-tab-panel',[
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  ...(area.id==='picking'?[p('Aquí importa completar todos los artículos de cada pedido. Más dotación no arregla un SKU faltante ni garantiza que Transporte pueda sacar lo preparado.','commercial-brief')]:[]),
   ...(area.id==='inventory'?[p('Una caja puede existir físicamente y aun así no estar localizada o lista para Picking. Conciliar mejora lo que podemos prometer, no inventa unidades.','commercial-brief')]:[]),
   ...(area.id==='quality'?[p('Calidad revisa los productos que ya entraron al CD. Una unidad retenida está esperando revisión: no significa que esté dañada o perdida.','commercial-brief')]:[]),
   ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
@@ -583,12 +630,17 @@ function areaScene(){
   ...(area.id==='purchasing'?[supplierPurchasingTeaching()]:[]),
   ...(area.id==='receiving'?[receivingDockTeaching()]:[]),
   ...(area.id==='quality'?[qualityTeaching()]:[]),
-  ...(area.id==='inventory'?[inventoryTeaching()]:[])
+  ...(area.id==='inventory'?[inventoryTeaching()]:[]),
+  ...(area.id==='picking'?[pickingBOMTeaching()]:[])
  ]);
  const nico=section('area-tab-panel',[
   p('Nico · coordinador ficticio del CD','option-heading'),
   p('¿Lo vemos juntos? Te cuento qué puede pasar con esta decisión y te dejo una pregunta para pensar.','note'),
   guideElement(),
+  ...(area.id==='picking'?[node('details',{className:'picking-manager-details'},[
+   node('summary',{text:'Entender esta área con Nico · mirada de gerente'}),
+   pickingManagerGuide()
+  ])]:[]),
   p('Si mis consejos no te sirven, puedes dejarlos ocultos y continuar.','footnote')
  ]);
  const content=[decision,indicators,nico];
@@ -923,6 +975,39 @@ function resultsScene(){
   ]),
   p(inventory.boundary,'footnote')
  ]);
+ const picking=data.picking;
+ const pickingOutcome=section('picking-outcome',[
+  node('strong',{text:'Picking · pedidos completos preparados'}),
+  section('picking-bom-metrics',[
+   ...[['Pedidos preparados',picking.totals.preparedOrders],
+      ['Expedidos del CD',picking.totals.shippedOrders],
+      ['Sin preparar al cierre',picking.totals.unpreparedOrders],
+      ['Preparados y sin expedir',picking.totals.awaitingDispatchOrders]]
+     .map(([label,count])=>section('picking-bom-metric',[
+      node('span',{text:label}),node('strong',{text:num.format(count)+' pedidos'})]))
+  ]),
+  p(picking.separateTransport
+    ?'Aquí la preparación y la expedición son etapas físicas distintas. Una orden puede quedar en staging esperando transporte.'
+    :'En este caso el modelo acopla preparación y expedición en el mismo día: no se genera una cola física independiente de staging.','note'),
+  node('details',{className:'picking-bom-details'},[
+   node('summary',{text:'Ver 3 SKU, pedidos completos y jornadas'}),
+   ...picking.byTemplate.map(t=>section('picking-template-row',[
+    node('strong',{text:t.name}),
+    p('BOM: '+Object.entries(t.lines).map(([id,qty])=>qty+' × '+id).join(' + ')+
+      ' · solicitados '+num.format(t.requestedOrders)+
+      ' · preparados '+num.format(t.preparedOrders)+
+      ' · expedidos '+num.format(t.shippedOrders))
+   ])),
+   ...picking.rows.filter(d=>d.preparedOrders>0||d.shippedOrders>0||
+    d.awaitingDispatchOrders>0).map(d=>section('picking-template-row',[
+    node('strong',{text:'Día '+d.day}),
+    p('Preparados '+num.format(d.preparedOrders)+
+      ' pedidos ('+num.format(d.preparedSkuUnits)+' SKU) · expedidos '+
+      num.format(d.shippedOrders)+' · esperan salida '+num.format(d.awaitingDispatchOrders))
+   ]))
+  ]),
+  p(picking.boundary,'footnote')
+ ]);
  const overview=section('metrics-grid',[
   section('metric-card',[node('span',{text:'Expedidos del CD'}),node('strong',{text:num.format(score.shippedOrders.value)})]),
   section('metric-card',[node('span',{text:'Pendientes'}),node('strong',{text:num.format(score.pendingOrders.value)})])
@@ -950,6 +1035,7 @@ function resultsScene(){
   receivingOutcome,
   qualityOutcome,
   inventoryOutcome,
+  pickingOutcome,
   section('management-evaluation',[
    node('strong',{text:'Tu gestión frente a las metas'}),
    ...[['Servicio de expedición',evaluation.service.status,
