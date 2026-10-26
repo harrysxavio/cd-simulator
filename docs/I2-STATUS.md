@@ -136,6 +136,14 @@
 - **Gates del PR aprobados:** [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40248044699), [Misión CD focalizada](https://github.com/harrysxavio/cd-simulator/actions/runs/40248044629), [Chromium general](https://github.com/harrysxavio/cd-simulator/actions/runs/40248044638). Hubo un fallo textual del E2E sobre el vocabulario de Nico; se corrigió y las tres suites se volvieron a ejecutar en verde. Publicación y CI postmerge se comprobarán de forma separada. [Contrato I2-23](I2-23-INVENTARIO-FISICO.md).
 - **Avance formal 24/41 (58,5 %); F5 6/8.** Siguiente I2-24 Picking, luego Transporte I2-25. Android físico, TalkBack y prueba humana (#67) siguen pendientes.
 
+## Corrección de criterios gerenciales/pedagógicos (26-10-2026; **no suma microfase**)
+
+[Auditoría de observaciones y contrato de aceptación](I2-REVISION-PEDAGOGICA-GERENCIAL-2026-10-26.md). Se comprobó qué estaba previsto y qué no: el tutorial actual es breve y Nico entrega pistas con ejemplo, pero faltan enseñanza completa del CD, ficha gerencial por cada área, explicación útil de los tres SKU y 12 días, informe de aprendizaje por estrategia y, **principalmente, permitir varias acciones compatibles en la recuperación**. El selector actual de 5 alternativas es exclusivo (una opción + fecha/cobertura), NO simula una intervención múltiple conjunta.
+
+- Ajustes incorporados al plan maestro y roadmap existente: refuerzo tutorial/mentor de F4–F5 desde I2-24–27; I2-24/25 BOM y cliente; I2-28–30 contrato/costos/confirmación multiacción con un solo replay físico por combinación; I2-31–35 informe «La mirada de Nico como gerente», resultados multieje y escenarios sin respuesta universal; I2-36–40 pruebas humanas/seguridad.
+- **Ninguno de esos nuevos requisitos se considera implementado por escribir el plan.** Se mantienen **24/41 (58,5 %) y F5 6/8** hasta nuevos PR con pruebas. No se modifica V1 ni la semilla de demanda.
+- Mayor prioridad: preservar la profundidad de gestión (costo, servicio, tiempo, stock, capacidad), pero exponerla por capas sin saturar la pantalla del teléfono.
+
 ## MVP alfa: exactamente qué puede probarse
 
 1. Abrir `/juego/` desde la raíz o mediante enlace directo; volver a V1 sin perder campaña.
