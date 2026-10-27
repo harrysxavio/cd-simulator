@@ -2,6 +2,9 @@ import {normalizeI2GameState} from './i2-game-state.js';
 import {i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
 import {i2CompareMultiRecovery} from './i2-multi-recovery.js';
 import {i2SafeScorecard} from './i2-result-boundary.js';
+import {campaignSnapshot} from './campaign.js';
+import {I2_MVP_CASE} from './i2-mvp-adapter.js';
+import {i2EconomicEvidence} from './i2-economic-manager.js';
 
 const fail=message=>{throw new Error('I2-30: '+message)};
 const frozen=x=>{
@@ -72,9 +75,14 @@ export function i2ConfirmedMultiOutcome(state){
   economicProxyDeltaCLP:row.economicProxyDeltaCLP
  };
  const scorecard=i2SafeScorecard(result);
+ // Reuse V1's audit on the SAME already simulated comparison, not a new replay.
+ const campaign=campaignSnapshot({comparison:multi.results[0].comparison,
+  campaignId:I2_MVP_CASE.campaignId,plannedOrders:event.plannedOrders});
+ const economicEvidence=i2EconomicEvidence({campaign,
+  comparison:multi.results[0].comparison,baselineKey:multi.baselineKey});
  return frozen({
   kind:'confirmed-multi-recovery',source:'I2-28 physical single replay',
-  event,reading:row,scorecard,
+  event,reading:row,scorecard,economicEvidence,
   baselineKey:multi.baselineKey,
   note:'Combinación confirmada, recalculada desde el mismo motor SKU. El evento guardado NO incluye stock, PO nueva, movimientos, valores de resultado ni datos personales.'
  });
