@@ -7,11 +7,20 @@
 
 ## Resumen
 
-- **I2-00–I2-32: 33 de 41 microfases fusionadas a main (~80,5 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **I2-00–I2-33: 34 de 41 microfases fusionadas a main (~82,9 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
 - **MVP alfa vertical integrado en PR #79.** Campaña inicial +40 % ampliada por PR #100 a cinco retos exógenos de demanda ±, ocho decisiones, revelación explícita, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-14 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
 - **Validación humana aún abierta:** [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67): Android físico, TalkBack, comprensión pedagógica con usuario principiante. Ninguna prueba en Chromium emulado reemplaza esta aceptación.
+
+## I2-33 · Auditoría económica SKU y mirada gerencial (27-10-2026)
+
+- **[PR #125](https://github.com/harrysxavio/cd-simulator/pull/125) fusionada** a `main`, squash `9be409abade7f2c4ef1de14de89800ddb3aa1b7a`. [Contrato](I2-33-ECONOMIA-SKU-AUDITADA.md).
+- **Reutiliza directamente `skuEconomicAuditReadModel` de V1** mediante `campaignSnapshot` del mismo replay físico (no un motor alterno) en recuperaciones clásicas y combinaciones confirmadas; adapta las tres auditorías V1 de compra urgente, reserva y refuerzo al contrato multiacción sin modificar el catálogo público de cinco recuperaciones clásicas.
+- El panel plegable de resultado muestra valor **ilustrativo** de pedidos completos expedidos, costo estándar de SKU realmente expedidos, refuerzos activados y **contribución parcial didáctica** (no utilidad). Compara referencia sin intervención y escenario elegido; CLP incremental por pedido recuperado solo si Δ pedidos es positivo, o «no calculable» si no.
+- Desglosa PO originales y urgentes comprometidas, recepciones, muelle, tránsito/faltantes y balance físico valorizado **apertura + recibido = material expedido + stock final**. No descuenta otra vez las compras como gasto consumido. 13 jornadas con valores conciliados y Nico explica ausencia de comprobantes de pago, factura, horas-persona, fletes, costo total o EBITDA.
+- **Tres gates finales verdes:** [Node completo](https://github.com/harrysxavio/cd-simulator/actions/runs/40582207579), [I2 focused](https://github.com/harrysxavio/cd-simulator/actions/runs/40582207538) y [Chromium integral](https://github.com/harrysxavio/cd-simulator/actions/runs/40582207560). Se corrigieron antes del merge la admisión de intervenciones multiacción en auditorías V1 y una explicación de pagos explícita solicitada por pruebas móviles.
+- **34/41 (82,9 %); F7 3/5 técnicamente integradas. Próxima I2-34.** Publicación HTTP de Pages posterior al merge, Android real/TalkBack y usuarios principiantes siguen pendientes.
 
 ## I2-32 · Ocho áreas, cronología física, pedidos/lotes y Nico (27-10-2026)
 
@@ -75,7 +84,7 @@
 
 [**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
 
-**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 33/41**. F7 2/5; F8 sigue pendiente, sin certificación humana por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-33**, economía SKU auditada, conservando las metas de servicio, costos, capacidad y plazos.
+**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 34/41**. F7 3/5; F8 sigue pendiente, sin certificación humana por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-34**, aprendizajes e insignias basados en hechos, conservando las metas de servicio, costos, capacidad y plazos.
 
 ## Microfases integradas y evidencia
 
@@ -119,7 +128,7 @@
 | F4 · Configuración y tutorial | I2-13–17 | **I2-13–17 integradas; F4 técnicamente completa (5/5)** | Briefing y retomar la partida verificados. Tutor, configuración y tres vistas integradas; Android/TalkBack pendiente en F8 |
 | F5 · Ocho áreas | I2-18–25 | **Completada técnicamente (8/8)** | Comercial, Planificación, Compras, Recepción, Calidad, Inventario, Picking y Transporte integrados. Validación humana Android/TalkBack aún abierta |
 | F6 · Demanda sorpresa y recuperación | I2-26–30 | **I2-26–30 integradas; 5/5 técnicamente** | Demanda revelada, diagnóstico, contrato y comparador móvil de 0/1/varias acciones. Confirmación, persistencia y replay I2-30 integrados; falta QA humana |
-| F7 · Resultados/gamificación | I2-31–35 | **I2-31–32 integradas; 2/5 técnicamente** | Tablero gerencial y cronología física de ocho áreas; pendientes I2-33–35: economía, aprendizaje e insignias |
+| F7 · Resultados/gamificación | I2-31–35 | **I2-31–33 integradas; 3/5 técnicamente** | Tablero gerencial, ocho áreas y economía auditada. Pendientes I2-34–35: aprendizaje, logros y retos |
 | F8 · Certificación y publicación estable | I2-36–40 | **Pendiente** | Controles, múltiples dispositivos, accesibilidad/TalkBack, evaluación y release estable |
 
 ## I2-14 · Cierre técnico (25-10-2026)
@@ -239,7 +248,7 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-33** (auditoría económica SKU real de V1, valor ilustrativo expedido vs compras comprometidas y costo incremental). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-34** (aprendizajes e insignias por evidencia real de servicio, costos y espera, no por clics). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
 
 ## Cierre técnico I2-04 e I2-05 (24-10-2026)
 
