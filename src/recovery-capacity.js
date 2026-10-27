@@ -16,10 +16,11 @@ export function capacityReinforcementTraceReadModel({
  comparison,operationalCost,picks,shipments,inventoryLedger
 }={}){
  const base=comparison?.baselineSnapshot,actual=comparison?.recovered,prior=comparison?.base;
- const option=comparison?.option,enabled=option==='overtime'||option==='combined';
+ const option=comparison?.option,enabled=option==='overtime'||option==='combined'||
+ (option==='multi'&&comparison.multiActions?.capacityBoost?.enabled===true);
  const max=operationalCost?.extraCapacityOrdersPerDay,baselineCap=operationalCost?.baselineCapacityOrdersPerDay;
  const rate=operationalCost?.rateCLPPerActivatedShift;
- if(!['wait','reserve','emergency','overtime','combined'].includes(option)
+ if(!['wait','reserve','emergency','overtime','combined','multi'].includes(option)
   ||base?.scope!=='sku-cohort'||!Object.isFrozen(base)
   ||base.integrated!==comparison.integrated||prior!==base.integrated.actual
   ||comparison.originalPurchaseOrders!==base.integrated.originalPurchaseOrders
