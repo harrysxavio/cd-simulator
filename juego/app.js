@@ -274,7 +274,7 @@ function advancedSettings(){
   }
   input.disabled=locked;
   input.addEventListener('change',()=>{
-   draft[spec.key]=typeof state.advanced[spec.key]==='number'?Number(input.value):input.value;
+   draft[spec.key]=typeof draft[spec.key]==='number'?Number(input.value):input.value;
    message.textContent='Cambios sin guardar: pulsa Guardar para aplicarlos.';
   });
   group.append(node('label',{text:spec.label,attrs:{for:spec.id}}),input,
