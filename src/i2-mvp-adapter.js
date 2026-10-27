@@ -12,6 +12,7 @@ import {i2InventoryPhysicalReading} from './i2-inventory-physical.js';
 import {i2PickingFulfillmentReading} from './i2-picking-bom.js';
 import {i2TransportDispatchReading} from './i2-transport-dispatch.js';
 import {I2_AREAS,I2_RECOVERIES} from './i2-product-contract.js';
+import {i2EconomicEvidence} from './i2-economic-manager.js';
 import {createI2GameCampaignAdapter,i2AreaSelection} from './i2-game-campaign-adapter.js';
 
 /**
@@ -71,6 +72,8 @@ export function i2MvpPhysicalResult({
   policy:'balanced',option,urgentArrivalDay,purchaseCoveragePercent
  });
  const {contract,comparison,areaModel}=canonical;
+ const economicEvidence=i2EconomicEvidence({campaign:canonical.campaign,
+  comparison,baselineKey:comparison.baselineKey});
  const planning=i2PlanningCoverageOutcome(comparison.planningCommitment);
  const purchasing=i2SupplierOutcomeReading(comparison);
  const receiving=i2ReceivingOutcomeReading(comparison);
@@ -122,7 +125,7 @@ export function i2MvpPhysicalResult({
   skuIds:Object.freeze(Object.keys(contract.skuInputs.stock)),
   originalPurchaseOrders:comparison.originalPurchaseOrders,
   commercial,planning,purchasing,receiving,quality,inventory,picking,transport,
-  areaRows:areaModel.stages,physicalExamples,
+  areaRows:areaModel.stages,physicalExamples,economicEvidence,
   baselineKey:comparison.baselineKey
  });
 }
