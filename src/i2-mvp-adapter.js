@@ -78,6 +78,28 @@ export function i2MvpPhysicalResult({
  const inventory=i2InventoryPhysicalReading(comparison);
  const picking=i2PickingFulfillmentReading(comparison);
  const transport=i2TransportDispatchReading(comparison);
+ // Read-only examples from the already audited ORIGINAL replay. They do not
+ // represent intervention results, nor do they introduce synthetic events.
+ const originalLedger=comparison.base.ledger;
+ const firstReceipt=originalLedger.flatMap(day=>day.receiptEvents)
+  .find(e=>!e.urgent)??null;
+ const firstPicked=originalLedger.flatMap(day=>day.pickEvents)[0]??null;
+ const originalOrder=(firstPicked
+  ?comparison.base.ordersDetail.find(o=>o.id===firstPicked.orderId)
+  :comparison.base.ordersDetail[0])??null;
+ const physicalExamples=Object.freeze({
+  lot:firstReceipt?Object.freeze({
+   lotId:firstReceipt.lotId,skuId:firstReceipt.skuId,
+   purchaseOrderId:firstReceipt.purchaseOrderId,
+   receivedDay:firstReceipt.day,receivedSkuUnits:firstReceipt.qty
+  }):null,
+  order:originalOrder?Object.freeze({
+   id:originalOrder.id,templateId:originalOrder.templateId,
+   lines:Object.freeze({...originalOrder.lines}),
+   pickedDay:originalOrder.pickedDay,shippedDay:originalOrder.fulfilledDay
+  }):null,
+  source:'comparison.base.ledger.receiptEvents + comparison.base.ordersDetail + pickEvents (original solo)'
+ });
  // Reusar el manifiesto físico original e inmutable del motor SKU.
  const commercial=i2CommercialOutcomeReading(commercialPlanningReading(
   comparison.planningCommitment,{actualOrders:contract.actualSampleOrders,
@@ -100,7 +122,7 @@ export function i2MvpPhysicalResult({
   skuIds:Object.freeze(Object.keys(contract.skuInputs.stock)),
   originalPurchaseOrders:comparison.originalPurchaseOrders,
   commercial,planning,purchasing,receiving,quality,inventory,picking,transport,
-  areaRows:areaModel.stages,
+  areaRows:areaModel.stages,physicalExamples,
   baselineKey:comparison.baselineKey
  });
 }
