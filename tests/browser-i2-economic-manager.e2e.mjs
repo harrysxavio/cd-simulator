@@ -34,7 +34,7 @@ for(const mode of ['classic','multi']){
    assert.equal(await economic.count(),1);
    assert.equal(await economic.evaluate(x=>x.open),false);
    const saved=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
-   await economic.locator('> summary').click();
+   await page.locator('.economic-manager-panel > summary').click();
    assert.equal(await economic.locator('.economic-manager-card').count(),4);
    assert.match(await economic.innerText(),/Contribución parcial/i);
    assert.match(await economic.innerText(),/Compras|comprometido/i);
