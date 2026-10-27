@@ -22,8 +22,9 @@ export function reserveTransferTraceReadModel({
  comparison,reserveTransfers,inventoryLedger,inventoryValuation,purchaseOrders
 }={}){
  const baseline=comparison?.baselineSnapshot,replay=comparison?.recovered;
- const horizon=replay?.days,selected=comparison?.option==='reserve';
- if(!['wait','reserve','overtime','emergency','combined'].includes(comparison?.option)
+ const horizon=replay?.days,selected=comparison?.option==='reserve'||
+ (comparison?.option==='multi'&&comparison.multiActions?.reserveTransfer?.enabled===true);
+ if(!['wait','reserve','overtime','emergency','combined','multi'].includes(comparison?.option)
   ||baseline?.scope!=='sku-cohort'
   ||baseline.integrated!==comparison.integrated
   ||baseline.integrated.actual!==comparison.base
@@ -40,7 +41,8 @@ export function reserveTransferTraceReadModel({
   fail('faltan fuentes canónicas compatibles');
  }
  const ids=SKU_CATALOG.map(x=>x.id),known=new Set(ids);
- const expectedDay=selected?comparison.urgentArrivalDay:null;
+ const expectedDay=selected?(comparison.option==='multi'
+  ?comparison.multiActions.reserveTransfer.releaseDay:comparison.urgentArrivalDay):null;
  const eventsBySku=new Map(ids.map(id=>[id,[]]));
  const knownEventIds=new Set(),uniqueDaySku=new Set();
  for(const movement of reserveTransfers){
@@ -142,7 +144,7 @@ export function reserveTransferTraceReadModel({
   ||inventoryValuation.daily.reduce((n,d)=>n+d.totals.transferredTodayCLP,0)!==standardMoved
   ||daily.at(-1).remainingReserveSkuUnits!==inventoryLedger.totals.reserveSkuUnits
   ||!selected&&totalMoved!==0
-  ||selected&&(comparison.urgent.length!==0
+  ||comparison.option==='reserve'&&(comparison.urgent.length!==0
    ||purchaseOrders.some(po=>po.source==='urgent')
    ||comparison.urgentBase!==0||comparison.urgentSurcharge!==0
    ||comparison.extraLabor!==0||comparison.incrementalExpense!==0)){
