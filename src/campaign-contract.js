@@ -18,7 +18,7 @@ import {auditSkuDecisionBoundary} from './sku-boundary-audit.js';
 export function campaignSkuContract({
  decisions={},actions={},scenario={},policy='balanced',
  supplierDelay=false,plannedSampleOrders=200,campaignId='SKU-LAB',
- openingStock=null,extraCapacityDailyCost=null,pickingUnitCapacityLimit=null
+ openingStock=null,extraCapacityDailyCost=null,pickingUnitCapacityLimit=null,reservePercent=0
 }={}){
  if(!['lean','balanced','service'].includes(policy))throw new Error('Política SKU inválida');
  if(!Number.isSafeInteger(plannedSampleOrders)||plannedSampleOrders<1||plannedSampleOrders>100000)throw new Error('Tamaño de muestra SKU inválido');
@@ -49,12 +49,13 @@ export function campaignSkuContract({
  // A single SKU opening is shared across policy, recovery and recorded events.
  // Aggregate scenario.initialStock remains separate until a later explicit mapping.
  // La apertura es explícitamente SKU; jamás convertir stock agregado a SKU.
- const openingState=skuOpeningState({stock:openingStock});
+ const openingState=skuOpeningState({stock:openingStock,reservePercent});
  const skuInputs={
   policy,plannedOrders:plannedSampleOrders,actualOrders:actualSampleOrders,stock:openingState.openingBySku,
   delayDays:supplierDelay?{A:8}:{},...skuAreaCapacity,
   ...(extraCapacityDailyCost===null?{}:{extraCapacityDailyCost}),
-  ...(pickingUnitCapacityLimit===null?{}:{pickingUnitCapacityLimit})
+  ...(pickingUnitCapacityLimit===null?{}:{pickingUnitCapacityLimit}),
+  ...(reservePercent===0?{}:{reservePercent})
  };
  // Prove each managerial proxy is separated from physical quantities and costs.
  const boundaryAudit=auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSampleOrders,

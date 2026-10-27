@@ -10,7 +10,8 @@ export const I2_ADVANCED_FIELDS=Object.freeze({
  plannedOrders:Object.freeze([160,200,240]),
  pickingLimitSkuPerDay:Object.freeze(['base','10','40']),
  stockProfile:Object.freeze(['low','standard','high']),
- extraCapacityDailyCostCLP:Object.freeze([50000,70000,100000])
+ extraCapacityDailyCostCLP:Object.freeze([50000,70000,100000]),
+ reservePercent:Object.freeze([0,25])
 });
 export const I2_DEFAULT_ADVANCED=Object.freeze({
  plannedOrders:200,pickingLimitSkuPerDay:'base',stockProfile:'standard',
@@ -18,14 +19,17 @@ export const I2_DEFAULT_ADVANCED=Object.freeze({
 });
 
 export function i2ValidateAdvanced(value){
- if(!value||typeof value!=='object'||Array.isArray(value)
-  ||Object.keys(value).some(key=>!Object.hasOwn(I2_ADVANCED_FIELDS,key))
-  ||Object.keys(I2_ADVANCED_FIELDS).some(key=>!I2_ADVANCED_FIELDS[key].includes(value[key]))){
+ const normalized=value&&typeof value==='object'&&!Array.isArray(value)
+  ?{...value,reservePercent:value.reservePercent??0}:value;
+ if(!normalized||typeof normalized!=='object'||Array.isArray(normalized)
+  ||Object.keys(normalized).some(key=>!Object.hasOwn(I2_ADVANCED_FIELDS,key))
+  ||Object.keys(I2_ADVANCED_FIELDS).some(key=>!I2_ADVANCED_FIELDS[key].includes(normalized[key]))){
   throw new Error('I2-15: configuración avanzada inválida');
  }
  return Object.freeze({
   plannedOrders:value.plannedOrders,pickingLimitSkuPerDay:value.pickingLimitSkuPerDay,
-  stockProfile:value.stockProfile,extraCapacityDailyCostCLP:value.extraCapacityDailyCostCLP
+  stockProfile:value.stockProfile,extraCapacityDailyCostCLP:value.extraCapacityDailyCostCLP,
+  ...(normalized.reservePercent?{reservePercent:normalized.reservePercent}:{})
  });
 }
 
@@ -45,6 +49,7 @@ export function i2AdvancedPhysicalOptions(value=I2_DEFAULT_ADVANCED){
   pickingUnitCapacityLimit:config.pickingLimitSkuPerDay==='base'?null:
    Number(config.pickingLimitSkuPerDay),
   openingStock:Object.freeze(openingStock),
-  extraCapacityDailyCost:config.extraCapacityDailyCostCLP
+  extraCapacityDailyCost:config.extraCapacityDailyCostCLP,
+  reservePercent:config.reservePercent??0
  });
 }

@@ -43,7 +43,7 @@ export function i2AreaSelection(choices={},campaignId='CD-I2-DEFAULT'){
 function validate({choices={},campaignId='CD-I2-DEFAULT',plannedOrders=200,
  policy='balanced',supplierDelay=false,scope=PLAN_SCOPE,horizonDays=DAYS,
  option='wait',urgentArrivalDay=2,purchaseCoveragePercent=100,scenario,
- openingStock=null,extraCapacityDailyCost=null,pickingUnitCapacityLimit=null
+ openingStock=null,extraCapacityDailyCost=null,pickingUnitCapacityLimit=null,reservePercent=0
 }={}){
  if(scope!==PLAN_SCOPE||horizonDays!==DAYS)throw new Error('I2-04: alcance físico inválido');
  if(!isInt(plannedOrders,1,100000))throw new Error('I2-04: cantidad de pedidos planificados inválida');
@@ -60,6 +60,7 @@ function validate({choices={},campaignId='CD-I2-DEFAULT',plannedOrders=200,
   throw new Error('I2-04: costo SKU inválido');
  if(pickingUnitCapacityLimit!==null&&(!isInt(pickingUnitCapacityLimit,1,100000)))
   throw new Error('I2-04: límite SKU Picking inválido');
+ if(![0,25].includes(reservePercent))throw new Error('I2-04: reserva física inicial inválida');
  const decisions=i2AreaSelection(choices,campaignId);
  // Only registered fields from the canonical scenario may enter. No network,
  // literal PO amounts or already-simulated ledgers are accepted as inputs.
@@ -78,7 +79,7 @@ function validate({choices={},campaignId='CD-I2-DEFAULT',plannedOrders=200,
  }
  return {decisions,campaignId,plannedOrders,policy,supplierDelay,scope,horizonDays,
   option,urgentArrivalDay,purchaseCoveragePercent,scenario:safeScenario,
-  openingStock,extraCapacityDailyCost,pickingUnitCapacityLimit};
+  openingStock,extraCapacityDailyCost,pickingUnitCapacityLimit,reservePercent};
 }
 
 export function createI2GameCampaignAdapter({cache=createSkuSessionCache({maxEntries:10})}={}){
@@ -100,7 +101,7 @@ export function createI2GameCampaignAdapter({cache=createSkuSessionCache({maxEnt
    scenario:x.scenario,policy:x.policy,supplierDelay:x.supplierDelay,
    plannedSampleOrders:x.plannedOrders,
    openingStock:x.openingStock,extraCapacityDailyCost:x.extraCapacityDailyCost,
-   pickingUnitCapacityLimit:x.pickingUnitCapacityLimit
+   pickingUnitCapacityLimit:x.pickingUnitCapacityLimit,reservePercent:x.reservePercent
   });
   const projection=cache.getProjection({
    contract,skuInputs:contract.skuInputs,

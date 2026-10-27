@@ -76,8 +76,15 @@ export function auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSam
   &&(!Number.isSafeInteger(skuInputs.extraCapacityDailyCost)
     ||skuInputs.extraCapacityDailyCost<0||skuInputs.extraCapacityDailyCost>1000000))
   fail('tarifa SKU fuera de rango');
+ if(Object.hasOwn(skuInputs,'reservePercent')&&(
+  !Number.isSafeInteger(skuInputs.reservePercent)
+  ||skuInputs.reservePercent!==openingState.reservePercent
+  ||![0,25].includes(skuInputs.reservePercent)))
+  fail('reserva física no corresponde con la apertura precomprometida');
+ if(!Object.hasOwn(skuInputs,'reservePercent')&&openingState.reservePercent!==0)
+  fail('reserva física sin supuesto de apertura');
  const allowed=['policy','plannedOrders','actualOrders','stock','delayDays',
-  'extraCapacityDailyCost','pickingUnitCapacityLimit',
+  'extraCapacityDailyCost','pickingUnitCapacityLimit','reservePercent',
   ...names,'supplierFill'];
  if(Object.keys(skuInputs).some(key=>!allowed.includes(key)))fail('campo agregado no autorizado en el replay SKU');
  if(!skuInputs.delayDays||typeof skuInputs.delayDays!=='object'
