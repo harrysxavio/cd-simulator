@@ -990,3 +990,50 @@ html,body{height:100%;overflow:hidden}
  .management-diagnosis,.diagnosis-metric{background:Canvas;color:CanvasText;border:1px solid CanvasText}
  .management-diagnosis summary:focus-visible{outline:3px solid Highlight}
 }
+
+
+/* I2-29 · Optionally expanded multi-lever studio. Outer game scroll stays locked. */
+.multi-lever-panel{min-width:0;margin:12px 0;padding:10px;border:1px solid var(--border);
+ border-radius:12px;background:var(--panel)}
+.multi-lever-panel>summary{min-height:44px;align-content:center;cursor:pointer;
+ font-weight:750;font-size:.86rem;line-height:1.45}
+.multi-lever-panel p{font-size:.78rem;line-height:1.48;overflow-wrap:anywhere}
+.multi-lever-controls{display:grid;gap:9px;min-width:0}
+.multi-lever-switch{display:flex;align-items:center;min-height:44px;gap:9px;
+ border:1px solid var(--border);border-radius:9px;padding:8px;background:var(--detail-bg)}
+.multi-lever-switch input{flex:0 0 18px;width:18px;height:18px;accent-color:var(--primary)}
+.multi-lever-switch label{font-size:.8rem;line-height:1.4;flex:1;min-width:0}
+.multi-lever-switch:has(input:disabled){opacity:.65}
+.multi-lever-params{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+ min-width:0}
+.multi-lever-field{min-width:0;display:flex;flex-direction:column;gap:5px}
+.multi-lever-field label{font-size:.72rem;color:var(--muted);line-height:1.3}
+.multi-lever-field select{min-width:0;max-width:100%;width:100%;min-height:44px;
+ padding:5px;border:1px solid var(--border);border-radius:8px;
+ color:var(--text);background:var(--bg);font:inherit;font-size:.79rem}
+.multi-calculate{min-height:44px;padding:10px 12px;border-radius:9px;
+ border:1px solid var(--primary);background:var(--primary);color:#18191c;
+ cursor:pointer;font:inherit;font-weight:750;font-size:.83rem}
+.multi-lever-output{display:grid;gap:10px;min-width:0}
+.multi-lever-output:empty{display:none}
+.multi-lever-output>strong,.multi-compare-conclusion>strong{font-size:.82rem}
+.multi-compare-conclusion{min-width:0;padding:9px;border:1px solid var(--border);
+ border-radius:10px;background:var(--detail-bg);display:grid;gap:6px}
+.multi-compare-conclusion p{margin:0!important}
+.multi-warning{border-left:3px solid var(--primary);padding:4px 7px;
+ background:var(--panel);font-size:.77rem!important}
+.multi-scenario-details{border-top:1px solid var(--border);padding:7px 0}
+.multi-scenario-details summary{min-height:44px;padding:8px 0;
+ cursor:pointer;font-size:.8rem;font-weight:700}
+.multi-compare-rows{min-width:0}
+.multi-compare-row{display:grid;gap:4px;padding:9px 0;border-bottom:1px solid var(--border)}
+.multi-compare-row strong{font-size:.79rem}
+.multi-compare-row p{margin:0!important}
+@media(max-width:340px){.multi-lever-params{grid-template-columns:1fr}}
+@media(forced-colors:active){
+ .multi-lever-panel,.multi-lever-switch,.multi-compare-conclusion,
+ .multi-lever-field select,.multi-calculate{background:Canvas;color:CanvasText;
+  border:1px solid CanvasText}
+ .multi-lever-panel summary:focus-visible,.multi-calculate:focus-visible{
+  outline:3px solid Highlight}
+}
