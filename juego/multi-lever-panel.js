@@ -1,0 +1,136 @@
+import {i2NormalizeMultiRecovery} from '../src/i2-multi-recovery.js';
+import {i2MultiLeverPreview} from '../src/i2-multilever-preview.js';
+import {I2_GOALS} from '../src/i2-management-objectives.js';
+
+/** I2-29: mobile what-if UI only, never a confirmed recovery decision. */
+export function renderI2MultiLeverPanel({
+ state,objectives,draft,opened=false,preview=null,
+ onDraft=()=>{},onOpen=()=>{},onPreview=()=>{},onError=()=>{}
+}={}){
+ const money=new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0});
+ const num=new Intl.NumberFormat('es-CL');
+ const elem=(tag,cls='',text='')=>{
+  const x=document.createElement(tag);
+  if(cls)x.className=cls;
+  x.textContent=text;return x;
+ };
+ const para=(text,cls='note')=>elem('p',cls,text);
+ const panel=elem('details','multi-lever-panel');
+ panel.open=opened;
+ panel.addEventListener('toggle',()=>onOpen(panel.open));
+ panel.append(elem('summary','',
+  'Ensayar combinación de acciones · sin confirmar'),
+  para('Puedes probar varias acciones sobre el mismo stock, plan y demanda. Los resultados NO se suman entre alternativas ni se guardan en la partida.','footnote'));
+ const controls=elem('section','multi-lever-controls');
+ const output=elem('section','multi-lever-output');
+ output.setAttribute('aria-live','polite');
+ const check=(id,label,active,disabled=false)=>{
+  const row=elem('div','multi-lever-switch');
+  const box=elem('input');box.type='checkbox';box.id=id;box.checked=active;box.disabled=disabled;
+  const text=elem('label','',label);text.htmlFor=id;row.append(box,text);
+  controls.append(row);return box;
+ };
+ const choices=(id,label,values,value)=>{
+  const group=elem('div','multi-lever-field');
+  const title=elem('label','',label);title.htmlFor=id;
+  const select=elem('select');select.id=id;
+  for(const v of values){
+   const option=elem('option','',String(v));option.value=String(v);
+   option.selected=v===value;select.append(option);
+  }
+  group.append(title,select);
+  return {group,select};
+ };
+ const buy=check('multiBuy','Compra urgente SKU',draft.urgentPurchase.enabled);
+ const buyFields=elem('div','multi-lever-params');
+ const arrival=choices('multiBuyDay','Llegada de compra · día',[1,2,5,10,13],draft.urgentPurchase.arrivalDay);
+ const coverage=choices('multiCoverage','Cobertura del faltante (%)',[0,25,50,75,100],draft.urgentPurchase.coveragePercent);
+ buyFields.append(arrival.group,coverage.group);controls.append(buyFields);
+ const physicalReserve=state.advanced.reservePercent??0;
+ const reserve=check('multiReserve','Traslado desde RESERVA-CD',draft.reserveTransfer.enabled,physicalReserve===0);
+ const reserveFields=elem('div','multi-lever-params');
+ const release=choices('multiRelease','Traslado de reserva · día',[1,2,5,10,13],draft.reserveTransfer.releaseDay);
+ reserveFields.append(release.group);controls.append(reserveFields);
+ controls.append(para(physicalReserve>0
+  ?'Reserva '+physicalReserve+' % ubicada antes de la sorpresa. Trasladar cambia ubicación, no suma existencias.'
+  :'Reserva no disponible. Para activarla, reinicia y ubica 25 % del stock inicial en Configuración avanzada ANTES de confirmar Comercial.','footnote'));
+ const boost=check('multiBoost','Refuerzo (+80 pedidos por jornada)',draft.capacityBoost.enabled);
+ controls.append(para('Meta servicio '+I2_GOALS[objectives.goal].serviceTargetPercent+
+  ' % · límite de gasto adicional '+money.format(objectives.incrementalBudgetCLP)+
+  '. El límite genera advertencia, no prohíbe explorar.','footnote'));
+ const compare=elem('button','multi-calculate','Calcular impacto conjunto');
+ compare.type='button';compare.id='multiCompare';controls.append(compare);
+ const status=para('Los controles inferiores de la misión aún confirman solo la alternativa clásica. La confirmación conjunta se implementa en I2-30.','footnote');
+ status.id='multiStatus';status.setAttribute('role','status');
+ controls.append(status);
+ function refresh(){
+  buyFields.hidden=!buy.checked;reserveFields.hidden=!reserve.checked;
+ }
+ refresh();
+ function renderResult(model){
+  const selected=model.selected;
+  const conclusion=elem('section','multi-compare-conclusion');
+  conclusion.append(
+   elem('strong','','Balance de la combinación elegida'),
+   para('Servicio '+selected.dispatchPercent.toFixed(1).replace('.',',')+' % · '+
+    num.format(selected.dispatchedOrders)+' pedidos expedidos / '+
+    num.format(selected.actualOrders)+' observados.'),
+   para('Pendientes '+num.format(selected.pendingOrders)+
+    ' · mejora '+(selected.recoveredOrders>0?'+':'')+num.format(selected.recoveredOrders)+' pedidos.'),
+   para('Gasto incremental '+money.format(selected.incrementalExpenseCLP)+
+    ' · presupuesto '+money.format(model.budgetCLP)+
+    (selected.expenseWithinTarget?' · dentro de meta.':' · sobre la meta.')),
+   para('Compra '+money.format(selected.urgentPurchaseValueCLP)+
+    ' + recargo '+money.format(selected.urgentSurchargeCLP)+
+    ' + refuerzo '+money.format(selected.extraCapacityCostCLP)+'.','footnote'),
+   para('Aporte marginal de la última palanca: '+
+    (model.marginal.extraDispatchedOrders>0?'+':'')+
+    num.format(model.marginal.extraDispatchedOrders)+' pedidos y '+
+    money.format(model.marginal.extraExpenseCLP)+' de gasto.','footnote')
+  );
+  for(const w of model.warnings)conclusion.append(para('Atención: '+w,'multi-warning'));
+  const details=elem('details','multi-scenario-details');
+  details.append(elem('summary','','Comparar no intervenir, acciones individuales y conjunto'));
+  for(const x of model.rows){
+   const row=elem('section','multi-compare-row');
+   row.append(elem('strong','',x.label),
+    para(num.format(x.dispatchedOrders)+' expedidos · '+num.format(x.pendingOrders)+' pendientes'),
+    para('Mejora '+(x.recoveredOrders>0?'+':'')+num.format(x.recoveredOrders)+
+     ' pedidos · gasto '+money.format(x.incrementalExpenseCLP),'footnote'));
+   details.append(row);
+  }
+  output.replaceChildren(elem('strong','','Una sola base física y un replay por conjunto'),
+   conclusion,details,para(model.note,'footnote'));
+ }
+ const update=()=>{
+  try{
+   const next=i2NormalizeMultiRecovery({
+    urgentPurchase:{enabled:buy.checked,arrivalDay:Number(arrival.select.value),
+     coveragePercent:Number(coverage.select.value)},
+    reserveTransfer:{enabled:reserve.checked,releaseDay:Number(release.select.value)},
+    capacityBoost:{enabled:boost.checked}
+   });
+   onDraft(next);output.replaceChildren();
+   status.textContent='Borrador actualizado. Calcula de nuevo para ver los impactos. Nada ha sido confirmado.';
+   refresh();
+  }catch(error){onError(error)}
+ };
+ for(const control of [buy,reserve,boost,arrival.select,coverage.select,release.select])
+  control.addEventListener('change',update);
+ compare.addEventListener('click',()=>{
+  try{
+   const model=i2MultiLeverPreview({state,
+    actions:i2NormalizeMultiRecovery({
+     urgentPurchase:{enabled:buy.checked,arrivalDay:Number(arrival.select.value),
+      coveragePercent:Number(coverage.select.value)},
+     reserveTransfer:{enabled:reserve.checked,releaseDay:Number(release.select.value)},
+     capacityBoost:{enabled:boost.checked}
+    }),objectives});
+   onPreview(model);renderResult(model);
+   status.textContent='Comparación completada. Es informativa; no existe confirmación conjunta todavía.';
+  }catch(error){onError(error)}
+ });
+ panel.append(controls,output);
+ if(preview)renderResult(preview);
+ return panel;
+}
