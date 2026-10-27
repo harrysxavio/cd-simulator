@@ -23,6 +23,8 @@ import {i2AreaPhysicalTimeline} from '../src/i2-area-physical-timeline.js';
 import {renderI2AreaPhysicalTimeline} from './area-physical-timeline.js';
 import {i2EconomicManagerReading} from '../src/i2-economic-manager.js';
 import {renderI2EconomicManagerPanel} from './economic-manager-panel.js';
+import {i2NicoEvidenceLearning} from '../src/i2-nico-evidence-learning.js';
+import {renderI2NicoEvidenceLearning} from './nico-learning-panel.js';
 import {i2ConfirmMultiRecovery,i2ClearMultiRecovery,i2ConfirmedMultiOutcome} from '../src/i2-recovery-confirmation.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
@@ -993,7 +995,7 @@ function reviewScene(){
  */
 function multiResultsScene(){
  stage.textContent='Resultado · Acciones combinadas';progress.style.width='100%';
- let result,evaluation,board,trace,economics;
+ let result,evaluation,board,trace,economics,learning;
  try{
   result=i2ConfirmedMultiOutcome(state);
   evaluation=i2EvaluateObjectives(result.scorecard,objectives);
@@ -1003,6 +1005,8 @@ function multiResultsScene(){
   trace=i2AreaPhysicalTimeline({state,baseline:original,scorecard:result.scorecard});
   economics=i2EconomicManagerReading({state,scorecard:result.scorecard,
    selected:result.economicEvidence,original:original.economicEvidence});
+  learning=i2NicoEvidenceLearning({state,scorecard:result.scorecard,
+   board,economics,objectives});
  }catch(e){showError(e);return}
  const score=result.scorecard,row=result.reading,a=result.event.actions;
  const actions=[
@@ -1045,6 +1049,7 @@ function multiResultsScene(){
   renderI2ManagerResultBoard(board),
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
+  renderI2NicoEvidenceLearning(learning),
   section('multi-committed-summary',[
    node('strong',{text:actions.length?'Acciones confirmadas':'Decisión: no intervenir'}),
    ...(actions.length?actions.map(x=>p(x,'note')):[p('No se contrataron acciones adicionales.','note')]),
@@ -1081,7 +1086,7 @@ function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
  if(state.recoveryConfirmation){multiResultsScene();return}
  stage.textContent='Resultado · Aprendizaje';progress.style.width='100%';
- let data,score,evaluation,board,trace,economics;
+ let data,score,evaluation,board,trace,economics,learning;
  try{
   data=resultFor();score=i2SafeScorecard(data);
   evaluation=i2EvaluateObjectives(score,objectives);
@@ -1091,6 +1096,7 @@ function resultsScene(){
   trace=i2AreaPhysicalTimeline({state,baseline:original,scorecard:score});
   economics=i2EconomicManagerReading({state,scorecard:score,
    selected:data.economicEvidence,original:original.economicEvidence});
+  learning=i2NicoEvidenceLearning({state,scorecard:score,board,economics,objectives});
  }catch(e){showError(e);return}
  // Solo tras el reveal: lee el mismo compromiso original por SKU.
  const commercial=data.commercial;
@@ -1333,6 +1339,7 @@ function resultsScene(){
   renderI2ManagerResultBoard(board),
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
+  renderI2NicoEvidenceLearning(learning),
   forecast,
   planning,
   purchasing,
