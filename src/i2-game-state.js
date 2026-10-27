@@ -3,6 +3,7 @@ import {I2_AREAS,I2_RECOVERIES} from './i2-product-contract.js';
 import {I2_MVP_CASE} from './i2-mvp-adapter.js';
 import {I2_DEFAULT_SEED,i2ChallengeForSeed} from './i2-challenge-config.js';
 import {I2_DEFAULT_ADVANCED,i2ValidateAdvanced} from './i2-advanced-settings.js';
+import {i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
 
 /** I2-05: only educational choices and navigation are saved.
  * Never persist a physical SKU ledger, a recovery preview or V1's session. */
@@ -66,6 +67,30 @@ export function normalizeI2GameState(raw){
   if(!I2_AREAS.some(a=>a.id===id)||confirmed.has(id))return null;
   confirmed.add(id);
  }
+ // A committed multi-plan is an additive optional event; historical V1/V2
+ // save shapes remain byte-for-byte unaffected when this property is absent.
+ // Never persist recovered orders, expense figures or physical ledger.
+ let recoveryConfirmation=null;
+ if(Object.hasOwn(raw,'recoveryConfirmation')){
+  const c=raw.recoveryConfirmation;
+  if(!c||typeof c!=='object'||Array.isArray(c)
+   ||Object.keys(c).sort().join(',')!=='actions,baselineKey,observedOrders,plannedOrders,seed,version'
+   ||c.version!==1||typeof c.baselineKey!=='string'
+   ||c.baselineKey.length<10||c.baselineKey.length>2500
+   ||typeof c.seed!=='string'||c.seed!==raw.seed
+   ||c.plannedOrders!==advanced.plannedOrders
+   ||!Number.isSafeInteger(c.observedOrders)||c.observedOrders<=0
+   ||!raw.reveal||!['recover','review','result'].includes(raw.phase)
+   ||confirmed.size!==I2_AREAS.length)return null;
+  let actions;
+  try{actions=i2NormalizeMultiRecovery(c.actions)}catch{return null}
+  if(JSON.stringify(actions)!==JSON.stringify(c.actions))return null;
+  if(actions.reserveTransfer.enabled&&(advanced.reservePercent??0)!==25)return null;
+  recoveryConfirmation={
+   version:1,seed:c.seed,plannedOrders:c.plannedOrders,
+   observedOrders:c.observedOrders,baselineKey:c.baselineKey,actions
+  };
+ }
  // Commit order is exactly the sequence of the eight operational areas.
  // Returning to a past step or intro is allowed, but never changing the plan
  // after the reveal or skipping a planning area.
@@ -83,7 +108,8 @@ export function normalizeI2GameState(raw){
   phase:raw.phase,substep:stepFor(raw.phase),index:raw.index,
   choices,recovery:raw.recovery,arrivalDay:raw.arrivalDay,coverage:raw.coverage,
   advanced,
-  confirmedAreas:[...confirmed],reveal:raw.reveal
+  confirmedAreas:[...confirmed],reveal:raw.reveal,
+  ...(recoveryConfirmation===null?{}:{recoveryConfirmation})
  };
 }
 export function saveI2GameState(storage,state){

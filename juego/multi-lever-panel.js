@@ -2,10 +2,11 @@ import {i2NormalizeMultiRecovery} from '../src/i2-multi-recovery.js';
 import {i2MultiLeverPreview} from '../src/i2-multilever-preview.js';
 import {I2_GOALS} from '../src/i2-management-objectives.js';
 
-/** I2-29: mobile what-if UI only, never a confirmed recovery decision. */
+/** I2-29 preview + I2-30 explicit confirmation after physical comparison. */
 export function renderI2MultiLeverPanel({
  state,objectives,draft,opened=false,preview=null,
- onDraft=()=>{},onOpen=()=>{},onPreview=()=>{},onError=()=>{}
+ onDraft=()=>{},onOpen=()=>{},onPreview=()=>{},onConfirm=()=>{},
+ onCancel=()=>{},onError=()=>{}
 }={}){
  const money=new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0});
  const num=new Intl.NumberFormat('es-CL');
@@ -19,8 +20,15 @@ export function renderI2MultiLeverPanel({
  panel.open=opened;
  panel.addEventListener('toggle',()=>onOpen(panel.open));
  panel.append(elem('summary','',
-  'Ensayar combinación de acciones · sin confirmar'),
-  para('Puedes probar varias acciones sobre el mismo stock, plan y demanda. Los resultados NO se suman entre alternativas ni se guardan en la partida.','footnote'));
+  'Combinar acciones y confirmar un plan'),
+  para('Puedes probar varias acciones sobre el mismo stock, plan y demanda. Antes de guardar una combinación, debes revisar su resultado y confirmarla expresamente.','footnote'));
+ if(state.recoveryConfirmation){
+  const review=elem('section','multi-confirmed-reminder');
+  review.append(para('Hay una combinación ya confirmada. Puedes probar alternativas sin cambiarla.','note'));
+  const cancel=elem('button','multi-cancel-confirmed','Descartar combinación confirmada');
+  cancel.type='button';cancel.id='multiCancelSaved';cancel.addEventListener('click',onCancel);
+  review.append(cancel);panel.append(review);
+ }
  const controls=elem('section','multi-lever-controls');
  const output=elem('section','multi-lever-output');
  output.setAttribute('aria-live','polite');
@@ -60,7 +68,7 @@ export function renderI2MultiLeverPanel({
   '. El límite genera advertencia, no prohíbe explorar.','footnote'));
  const compare=elem('button','multi-calculate','Calcular impacto conjunto');
  compare.type='button';compare.id='multiCompare';controls.append(compare);
- const status=para('Los controles inferiores de la misión aún confirman solo la alternativa clásica. La confirmación conjunta se implementa en I2-30.','footnote');
+ const status=para('Puedes comparar libremente. Para aplicar el conjunto, revisa el resumen y pulsa Confirmar combinación. El botón principal de la misión continúa correspondiendo a las cinco opciones clásicas.','footnote');
  status.id='multiStatus';status.setAttribute('role','status');
  controls.append(status);
  function refresh(){
@@ -99,8 +107,27 @@ export function renderI2MultiLeverPanel({
      ' pedidos · gasto '+money.format(x.incrementalExpenseCLP),'footnote'));
    details.append(row);
   }
+  const decision=elem('details','multi-confirm-decision');
+  decision.append(elem('summary','','Revisar antes de confirmar esta combinación'));
+  const review=elem('section','multi-confirm-summary');
+  review.append(
+   para('Plan: '+model.selectedCount+' palancas activas · '+num.format(selected.dispatchedOrders)+
+    ' expedidos · '+num.format(selected.pendingOrders)+' pendientes.'),
+   para('Gasto extra '+money.format(selected.incrementalExpenseCLP)+
+    ' · umbral '+money.format(model.budgetCLP)+
+    (selected.expenseWithinTarget?' (dentro)':' (sobre el límite, decisión permitida).'),'note'),
+   para('Una confirmación registra estas palancas y su baseline; no cambia compras originales. Puede revisarse desde resultados.','footnote')
+  );
+  const commit=elem('button','multi-confirm-button','Confirmar combinación y ver resultado');
+  commit.type='button';commit.id='multiCommit';
+  commit.addEventListener('click',()=>{try{onConfirm(model.selected.actions)}catch(error){onError(error)}});
+  const cancel=elem('button','multi-review-cancel','Volver a editar sin confirmar');
+  cancel.type='button';cancel.id='multiCancelReview';
+  cancel.addEventListener('click',()=>{decision.open=false;
+   status.textContent='Confirmación cancelada. Puedes seguir comparando; no se cambió la partida.'});
+  review.append(commit,cancel);decision.append(review);
   output.replaceChildren(elem('strong','','Una sola base física y un replay por conjunto'),
-   conclusion,details,para(model.note,'footnote'));
+   conclusion,details,decision,para(model.note,'footnote'));
  }
  const update=()=>{
   try{
@@ -127,7 +154,7 @@ export function renderI2MultiLeverPanel({
      capacityBoost:{enabled:boost.checked}
     }),objectives});
    onPreview(model);renderResult(model);
-   status.textContent='Comparación completada. Es informativa; no existe confirmación conjunta todavía.';
+   status.textContent='Comparación lista. Abre «Revisar antes de confirmar» para aceptar o descartar este plan.';
   }catch(error){onError(error)}
  });
  panel.append(controls,output);
