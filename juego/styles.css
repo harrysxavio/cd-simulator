@@ -1119,3 +1119,17 @@ html,body{height:100%;overflow:hidden}
 @media(max-width:355px){.economic-manager-grid{grid-template-columns:1fr}}
 @media(forced-colors:active){.economic-manager-panel,.economic-manager-card,.economic-manager-compare,.economic-day-detail,.economic-days select{background:Canvas;color:CanvasText;border:1px solid CanvasText}
 .economic-manager-panel summary:focus-visible,.economic-days select:focus-visible{outline:3px solid Highlight}}
+
+/* I2-34 · Nico learning and results-based award; no crowd of badge chips. */
+.nico-learning-result{min-width:0;margin:12px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.nico-learning-result>summary{min-height:44px;padding:8px 0;cursor:pointer;font-size:.87rem;font-weight:780;line-height:1.35}
+.nico-learning-result p{font-size:.78rem;line-height:1.48;overflow-wrap:anywhere}
+.nico-earned-award{margin:10px 0;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--detail-bg)}
+.nico-earned-award strong{display:block;font-size:.84rem;line-height:1.4}
+.nico-earned-award p{margin:6px 0 0!important}
+.nico-learning-subsection{border-top:1px solid var(--border);padding:3px 0;min-width:0}
+.nico-learning-subsection>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:.8rem;font-weight:750;line-height:1.35;padding:6px 0;overflow-wrap:anywhere}
+.nico-learning-subsection p{padding:7px 8px;margin:5px 0!important;border-left:2px solid var(--border);background:var(--detail-bg);border-radius:4px}
+.nico-learning-facts p{font-variant-numeric:tabular-nums}
+@media(forced-colors:active){.nico-learning-result,.nico-earned-award,.nico-learning-subsection p{border:1px solid CanvasText;background:Canvas;color:CanvasText}
+.nico-learning-result summary:focus-visible{outline:3px solid Highlight}}
