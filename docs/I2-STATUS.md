@@ -7,11 +7,19 @@
 
 ## Resumen
 
-- **I2-00–I2-30: 31 de 41 microfases fusionadas a main (~75,6 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **I2-00–I2-31: 32 de 41 microfases fusionadas a main (~78,0 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
 - **MVP alfa vertical integrado en PR #79.** Campaña inicial +40 % ampliada por PR #100 a cinco retos exógenos de demanda ±, ocho decisiones, revelación explícita, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-14 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
 - **Validación humana aún abierta:** [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67): Android físico, TalkBack, comprensión pedagógica con usuario principiante. Ninguna prueba en Chromium emulado reemplaza esta aceptación.
+
+## I2-31 · Resultado de cuatro ejes y Nico gerente (27-10-2026)
+
+- **[PR #123](https://github.com/harrysxavio/cd-simulator/pull/123) fusionada** al commit `5e1a4449bfc7a0743268a947801c47265f059e52`. [Contrato de aceptación](I2-31-RESULTADO-GERENCIAL-NICO.md).
+- Después de los dos KPI principales se abre opcionalmente el tablero de **servicio**, **ritmo medio de expedición** (pedidos/12 jornadas; productividad persona-hora desconocida y sin semáforo falso), **costo extra parcial** y **pendientes día 12** (umbral de cola educativo explícito). Cada eje muestra fuente, fórmula, umbral y explicación.
+- El botón desplegable «La mirada de Nico como gerente» presenta fortalezas, sacrificios, tres preguntas y límites de impacto en el consumidor. No declara éxito global cuando un semáforo es rojo. Las señales de Recepción/Calidad se rotulan SOLO como baseline original sin recuperación. Se utiliza el mismo motor y scorecard para estrategias clásicas y multiacción confirmada.
+- **Pruebas finales aprobadas**: [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40515894641), [I2 enfocada](https://github.com/harrysxavio/cd-simulator/actions/runs/40515894671) y [Chromium integral](https://github.com/harrysxavio/cd-simulator/actions/runs/40515894640). Cinco semillas, modos clásico/multi y E2E Pixel 7, V1 sin alteración.
+- **32/41 (78,0 %); F7 1/5.** Siguiente I2-32, trazabilidad física del detalle de ocho áreas. La comprobación de despliegue HTTP GitHub Pages y validación Android real/TalkBack siguen independientes.
 
 ## I2-30 · Confirmación y replay de combinación (27-10-2026)
 
@@ -59,7 +67,7 @@
 
 [**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
 
-**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 31/41**. F7 e F8 no se certifican por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-31**, resultado gerencial y consejos de Nico, conservando las metas de servicio, costos, capacidad y plazos.
+**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 32/41**. F7 1/5; F8 sigue pendiente, sin certificación humana por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-32**, detalle físico de las ocho áreas, conservando las metas de servicio, costos, capacidad y plazos.
 
 ## Microfases integradas y evidencia
 
@@ -103,7 +111,7 @@
 | F4 · Configuración y tutorial | I2-13–17 | **I2-13–17 integradas; F4 técnicamente completa (5/5)** | Briefing y retomar la partida verificados. Tutor, configuración y tres vistas integradas; Android/TalkBack pendiente en F8 |
 | F5 · Ocho áreas | I2-18–25 | **Completada técnicamente (8/8)** | Comercial, Planificación, Compras, Recepción, Calidad, Inventario, Picking y Transporte integrados. Validación humana Android/TalkBack aún abierta |
 | F6 · Demanda sorpresa y recuperación | I2-26–30 | **I2-26–30 integradas; 5/5 técnicamente** | Demanda revelada, diagnóstico, contrato y comparador móvil de 0/1/varias acciones. Confirmación, persistencia y replay I2-30 integrados; falta QA humana |
-| F7 · Resultados/gamificación | I2-31–35 | **Resultado básico alfa** | KPIs físicos y costos modelados parciales; faltan logros, reto, niveles y comparador más completo |
+| F7 · Resultados/gamificación | I2-31–35 | **I2-31 integrada; 1/5 técnicamente** | Tablero gerencial de cuatro ejes con Nico; pendientes I2-32–35 para trazabilidad detallada, economía y aprendizaje |
 | F8 · Certificación y publicación estable | I2-36–40 | **Pendiente** | Controles, múltiples dispositivos, accesibilidad/TalkBack, evaluación y release estable |
 
 ## I2-14 · Cierre técnico (25-10-2026)
@@ -223,7 +231,7 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-31** (tablero gerencial, indicadores verificables, semáforos y análisis de Nico). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-32** (detalle de ocho áreas con eventos físicos por jornada, BOM y trazabilidad gerencial de Nico). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
 
 ## Cierre técnico I2-04 e I2-05 (24-10-2026)
 
