@@ -16,6 +16,7 @@ import {i2DemandEventSealed,i2DemandEventObserved} from '../src/i2-demand-event.
 import {i2ManagementDiagnosis} from '../src/i2-management-diagnosis.js';
 import {i2EmptyRecoveryActions,i2NormalizeMultiRecovery} from '../src/i2-multi-recovery.js';
 import {i2MultiLeverPreview} from '../src/i2-multilever-preview.js';
+import {renderI2MultiLeverPanel} from './multi-lever-panel.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_NICO_MANAGER_TOUR,i2NicoManagerGuide} from '../src/i2-nico-manager-learning.js';
@@ -297,6 +298,7 @@ function advancedSettings(){
    const plan=root.querySelector('#gamePlanOrders');
    if(plan)plan.textContent='Partimos con '+num.format(next.plannedOrders)+
     ' pedidos previstos en una muestra. La demanda real sigue oculta.';
+   multiDraft=i2EmptyRecoveryActions();multiPreview=null;
    message.textContent='Configuración guardada. La nueva base se aplicará a esta misión.';
   }catch(e){message.textContent='Revisa los valores: '+e.message}
  });
@@ -913,7 +915,13 @@ function recoveryScene(){
   labeledSelect('Cobertura de compra extraordinaria (%)',[0,25,50,75,100],state.coverage,x=>{state.coverage=x;preview=null;saveAndRender()}),
   section('impact-wrap',[
    node('button',{className:'impact-btn',text:'Consultar impacto potencial',attrs:{type:'button'}})
-  ])
+  ]),
+  renderI2MultiLeverPanel({
+   state,objectives,draft:multiDraft,opened:multiOpened,preview:multiPreview,
+   onDraft:next=>{multiDraft=next;multiPreview=null},
+   onOpen:value=>{multiOpened=value},
+   onPreview:model=>{multiPreview=model},onError:showError
+  })
  ]);
  const impact=root.querySelector('.impact-btn');
  impact.addEventListener('click',()=>{
