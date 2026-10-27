@@ -80,7 +80,8 @@ const sum=(rows,key)=>rows.reduce((n,x)=>n+x[key],0);
  * A physical reserve is only usable if the scenario already located stock in
  * RESERVA-CD before demand was revealed (reservePercent is a baseline input).
  */
-export function i2CompareMultiRecovery({state,plans=[],reservePercent=0}={}){
+export function i2CompareMultiRecovery({state,plans=[],
+ reservePercent=state?.advanced?.reservePercent??0}={}){
  const event=i2DemandEventObserved(state);
  if(!Array.isArray(plans)||plans.length<1||plans.length>8
   ||!valid(reservePercent)||reservePercent<0||reservePercent>50)
@@ -97,7 +98,8 @@ export function i2CompareMultiRecovery({state,plans=[],reservePercent=0}={}){
   policy:'balanced',plannedSampleOrders:advanced.plannedOrders,
   openingStock:advanced.openingStock,
   extraCapacityDailyCost:advanced.extraCapacityDailyCost,
-  pickingUnitCapacityLimit:advanced.pickingUnitCapacityLimit
+  pickingUnitCapacityLimit:advanced.pickingUnitCapacityLimit,
+  reservePercent
  });
  if(contract.actualSampleOrders!==event.observedOrders
   ||contract.plannedSampleOrders!==event.plannedOrders)
