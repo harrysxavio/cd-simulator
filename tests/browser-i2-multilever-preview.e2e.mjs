@@ -38,7 +38,8 @@ for(const reservePrelocated of [false,true]){
    assert.equal(await page.locator('#multiReserve').isDisabled(),!reservePrelocated);
    await page.locator('#multiCompare').click();
    assert.match(await page.locator('.multi-compare-conclusion').innerText(),/No|Servicio|Gasto/);
-   assert.equal(await page.locator('.multi-compare-row').count(),0);
+   assert.equal(await page.locator('.multi-compare-row').count(),1,
+    'El detalle incluye una fila de no intervenir aunque esté plegado');
    await page.locator('#multiBuy').check();
    await page.locator('#multiBuyDay').selectOption('13');
    await page.locator('#multiCoverage').selectOption('100');
