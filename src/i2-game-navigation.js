@@ -109,7 +109,7 @@ export function i2FooterLabels(value){
   });
   case 'result':return Object.freeze({
    primary:'Jugar de nuevo ↻',
-   secondary:state.recoveryConfirmation?'← Revisar intervención':'',
+   secondary:state.recoveryConfirmation?'← Revisar intervención':null,
    action:'restart',back:state.recoveryConfirmation?'revise-recovery':null
   });
   default:throw new Error('I2-09: pantalla desconocida');
