@@ -14,6 +14,8 @@ import {I2_GOALS,I2_BUDGET_CHOICES,i2ReadObjectives,i2SaveObjectives,i2EvaluateO
 import {I2_CHALLENGES,i2ChallengeForSeed} from '../src/i2-challenge-config.js';
 import {i2DemandEventSealed,i2DemandEventObserved} from '../src/i2-demand-event.js';
 import {i2ManagementDiagnosis} from '../src/i2-management-diagnosis.js';
+import {i2EmptyRecoveryActions,i2NormalizeMultiRecovery} from '../src/i2-multi-recovery.js';
+import {i2MultiLeverPreview} from '../src/i2-multilever-preview.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_NICO_MANAGER_TOUR,i2NicoManagerGuide} from '../src/i2-nico-manager-learning.js';
@@ -44,6 +46,10 @@ const init=newI2GameState;
 let state;
 try{state=loadI2GameState(window.localStorage)}catch{state=init()}
 let preview=null;
+// I2-29: transient preview only; I2-30 owns confirmation and persistence.
+let multiDraft=i2EmptyRecoveryActions();
+let multiPreview=null;
+let multiOpened=false;
 let areaTab='decision'; // solo navegación visual; nunca persistir en campaña
 let objectives=i2ReadObjectives(window.localStorage);
 let showGuide=false;
@@ -140,6 +146,9 @@ function gameTransition(action){
   state=navigateI2GameState(state,action);
   areaTab='decision';
   preview=null;
+  if(action==='restart'){
+   multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=false;
+  }
   saveAndRender();
  }catch(e){showError(e)}
 }
@@ -234,7 +243,7 @@ function advancedSettings(){
  const locked=state.confirmedAreas.length>0;
  const details=node('details',{className:'advanced-settings'});
  details.append(node('summary',{text:'Configuración avanzada · stock, capacidad y costo'}));
- const draft={...state.advanced};
+ const draft={...state.advanced,reservePercent:state.advanced.reservePercent??0};
  const opts=[
   {key:'plannedOrders',id:'advancedOrders',label:'Pedidos planificados de muestra',
    note:'Cambiar el tamaño de la muestra modifica la planificación y las compras originales.',
@@ -248,6 +257,9 @@ function advancedSettings(){
    note:'Perfil conjunto A/B/C, separado del stock agregado del simulador clásico.',
    values:[{value:'low',label:'Reducido · 75 %'},{value:'standard',label:'Base · 100 %'},
     {value:'high',label:'Alto · 125 %'}]},
+  {key:'reservePercent',id:'advancedReserve',label:'Reserva física preubicada de A/B/C',
+   note:'Antes de la sorpresa separas 25 % del stock inicial en RESERVA-CD. No aumenta inventario y queda inmovilizada hasta trasladarla.',
+   values:[{value:0,label:'Sin reserva · 0 %'},{value:25,label:'Separar 25 % del stock existente'}]},
   {key:'extraCapacityDailyCostCLP',id:'advancedCost',label:'Tarifa diaria de refuerzo',
    note:'Costo CLP simulado por turno de refuerzo activado; no es costo total.',
    values:I2_ADVANCED_FIELDS.extraCapacityDailyCostCLP.map(x=>({value:x,label:money.format(x)}))}
@@ -307,7 +319,8 @@ function advancedSummary(){
  return 'Base: '+num.format(c.plannedOrders)+' pedidos · Picking '+
  (c.pickingLimitSkuPerDay==='base'?'según áreas':c.pickingLimitSkuPerDay+' SKU/día')+
  ' · Stock '+({low:'75 %',standard:'100 %',high:'125 %'}[c.stockProfile])+
- ' · Refuerzo '+money.format(c.extraCapacityDailyCostCLP)+'/turno';
+ ' · Refuerzo '+money.format(c.extraCapacityDailyCostCLP)+'/turno'+
+ ' · Reserva inicial '+(c.reservePercent??0)+' %';
 }
 /** Presentación breve, independiente de revelar resultados y sin forzar consejos. */
 /** Extra pedagógica opcional. Su lectura no toca las decisiones ni el motor. */
@@ -1253,6 +1266,6 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced});preview=null;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=false;saveAndRender()}
 });
 render();
