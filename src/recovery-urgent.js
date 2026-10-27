@@ -26,7 +26,7 @@ export function urgentPurchaseTraceReadModel({
 }={}){
  const baseline=comparison?.baselineSnapshot,physical=comparison?.recovered;
  const horizon=physical?.days;
- if(!['wait','reserve','overtime','emergency','combined'].includes(comparison?.option)
+ if(!['wait','reserve','overtime','emergency','combined','multi'].includes(comparison?.option)
   ||baseline?.scope!=='sku-cohort'||baseline?.integrated!==comparison.integrated
   ||baseline.integrated.actual!==comparison.base
   ||!Object.isFrozen(baseline)||!Object.isFrozen(baseline.integrated.originalPurchaseOrders)
@@ -45,7 +45,8 @@ export function urgentPurchaseTraceReadModel({
   ||!cost(comparison.urgentBase)||!cost(comparison.urgentSurcharge)){
   fail('faltan fuentes de campaña o plazos compatibles');
  }
- const selected=comparison.option==='emergency'||comparison.option==='combined';
+ const selected=comparison.option==='emergency'||comparison.option==='combined'||
+ (comparison.option==='multi'&&comparison.multiActions?.urgentPurchase?.enabled===true);
  const originalBySku=new Map(baseline.integrated.originalPurchaseOrders.rows.map(p=>[p.skuId,p]));
  const demandBySku=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,0]));
  for(const order of baseline.integrated.actual.ordersDetail){
