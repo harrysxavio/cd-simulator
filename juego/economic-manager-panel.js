@@ -60,7 +60,8 @@ export function renderI2EconomicManagerPanel(model){
     ' · faltante proveedor '+money.format(row.shortfallCLP)+'.','footnote'));
   purchases.append(item);
  }
- purchases.append(p(model.concepts.purchase,'footnote'));
+ purchases.append(p(model.concepts.purchase,'footnote'),
+  p('No existe comprobante de pago, factura del proveedor ni salida bancaria acreditada para esas PO.','footnote'));
  panel.append(purchases);
  const byDay=node('details','economic-days');
  byDay.append(node('summary','','Auditoría día por día (0–12)'));
