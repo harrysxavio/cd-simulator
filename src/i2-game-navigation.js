@@ -62,6 +62,12 @@ export function navigateI2GameState(value,action){
     return normalizeI2GameState(next);
    }
    break;
+  case 'revise-recovery':
+   if(next.phase==='result'&&next.reveal){
+    change('recover',7);
+    return normalizeI2GameState(next);
+   }
+   break;
   case 'finish':
    if(next.phase==='recover'&&next.reveal){
     change('result',7);
@@ -102,7 +108,9 @@ export function i2FooterLabels(value){
    action:'return-to-recovery',back:null
   });
   case 'result':return Object.freeze({
-   primary:'Jugar de nuevo ↻',secondary:null,action:'restart',back:null
+   primary:'Jugar de nuevo ↻',
+   secondary:state.recoveryConfirmation?'← Revisar intervención':'',
+   action:'restart',back:state.recoveryConfirmation?'revise-recovery':null
   });
   default:throw new Error('I2-09: pantalla desconocida');
  }
