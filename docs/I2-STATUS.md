@@ -7,7 +7,7 @@
 
 ## Resumen
 
-- **I2-00–I2-29: 30 de 41 microfases con PR fusionado a main (~73,2 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
+- **I2-00–I2-30: 31 de 41 microfases fusionadas a main (~75,6 % de entregas).** El avance por número de microfases no es porcentaje de esfuerzo ni equivale a certificación del producto final.
 - **MVP alfa vertical integrado en PR #79.** Campaña inicial +40 % ampliada por PR #100 a cinco retos exógenos de demanda ±, ocho decisiones, revelación explícita, consulta de cinco recuperaciones, resultado SKU físico y reinicio. Es un corte transversal para probar usabilidad, **no un cierre automático de I2-14 a I2-40**.
 - **Control técnico del MVP:** [PR #79](https://github.com/harrysxavio/cd-simulator/pull/79) con Node, Chromium completo y pruebas enfocadas aprobadas antes del merge, commit `5f0186352022e52f398e25ff6afdf0ee7313ba74`. Comprobación post-merge de publicación, HTTP y Chromium en `main` se registra como tarea de liberación.
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
@@ -51,7 +51,7 @@
 
 [**Plan de mejora gerencial y UX registrado**](I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md). El usuario confirmó que la alfa muestra **poco impacto gerencial** pese a que V1 modela ocho áreas, compras, cronología SKU y costos auditados. Se elevaron los criterios de I2-14–I2-40: costo/servicio/capacidad/espera, semáforos y resultados multieje, contexto de plazos, demanda exógena seedada +/−, Nico presentado y pixel-art profesional, cierres con ×/backdrop y paneles laterales accesibles.
 
-**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 30/41**. No se certifican KPI integrales ni fases I2-30/I2-35 por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-30**, confirmación y persistencia de la intervención multiacción, conservando las metas de servicio, costos, capacidad y plazos.
+**La revisión #96 fue documental** y no completó microfases al momento de fusionarse. La implementación posterior de I2-14 se integró mediante [PR #98](https://github.com/harrysxavio/cd-simulator/pull/98) (metas/costos) y [PR #100](https://github.com/harrysxavio/cd-simulator/pull/100) (cinco retos exógenos). **Avance formal actualizado: 31/41**. F7 e F8 no se certifican por asociación. Se conserva la profundidad de V1 y no se crea un «Costo total» SKU no auditado. La siguiente microfase formal es **I2-31**, resultado gerencial y consejos de Nico, conservando las metas de servicio, costos, capacidad y plazos.
 
 ## Microfases integradas y evidencia
 
@@ -94,7 +94,7 @@
 | F3 · UX móvil y guía | I2-07–12 | **Completada técnicamente (6/6)** | Tokens, viewport, navegación, ayuda modal, mapa y guía opcional integrados; Android físico y TalkBack pendientes de aceptación transversal |
 | F4 · Configuración y tutorial | I2-13–17 | **I2-13–17 integradas; F4 técnicamente completa (5/5)** | Briefing y retomar la partida verificados. Tutor, configuración y tres vistas integradas; Android/TalkBack pendiente en F8 |
 | F5 · Ocho áreas | I2-18–25 | **Completada técnicamente (8/8)** | Comercial, Planificación, Compras, Recepción, Calidad, Inventario, Picking y Transporte integrados. Validación humana Android/TalkBack aún abierta |
-| F6 · Demanda sorpresa y recuperación | I2-26–30 | **I2-26–29 integradas; 4/5 técnicamente** | Demanda revelada, diagnóstico, contrato y comparador móvil de 0/1/varias acciones. Pendiente confirmación, persistencia y replay I2-30 |
+| F6 · Demanda sorpresa y recuperación | I2-26–30 | **I2-26–30 integradas; 5/5 técnicamente** | Demanda revelada, diagnóstico, contrato y comparador móvil de 0/1/varias acciones. Confirmación, persistencia y replay I2-30 integrados; falta QA humana |
 | F7 · Resultados/gamificación | I2-31–35 | **Resultado básico alfa** | KPIs físicos y costos modelados parciales; faltan logros, reto, niveles y comparador más completo |
 | F8 · Certificación y publicación estable | I2-36–40 | **Pendiente** | Controles, múltiples dispositivos, accesibilidad/TalkBack, evaluación y release estable |
 
@@ -215,7 +215,7 @@
 
 ## Regla de avance
 
-Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-30** (confirmación trazada, persistencia/migración, vuelta, cancelación y reintento del conjunto en resultado final). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
+Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de despliegue cuando corresponda. La siguiente microfase formal es **I2-31** (tablero gerencial, indicadores verificables, semáforos y análisis de Nico). F4 está integrada; Android físico, TalkBack y evaluación con novatos permanecen pendientes. F3 sigue integrada técnicamente, pero Android/TalkBack y comprensión de novatos permanecen pendientes. La alfa transversal no cierra otras fases automáticamente.
 
 ## Cierre técnico I2-04 e I2-05 (24-10-2026)
 
