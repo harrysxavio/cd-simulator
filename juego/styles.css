@@ -1077,3 +1077,21 @@ html,body{height:100%;overflow:hidden}
 @media(forced-colors:active){.manager-result-board,.manager-axis{background:Canvas;color:CanvasText;border-color:CanvasText}
 .manager-axis-status{color:CanvasText!important}
 .manager-result-board summary:focus-visible{outline:3px solid Highlight}}
+
+/* I2-32 · Accordion-first physical storyline for eight areas, day/SKU details. */
+.area-physical-trace{min-width:0;margin:12px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.area-physical-trace>summary{min-height:44px;padding:8px 0;font-size:.86rem;font-weight:750;cursor:pointer;line-height:1.4}
+.area-physical-trace p{font-size:.78rem;line-height:1.48;overflow-wrap:anywhere}
+.area-trace-steps{display:grid;gap:5px;min-width:0}
+.area-trace-step{min-width:0;background:var(--detail-bg);border:1px solid var(--border);border-radius:8px;padding:4px 9px}
+.area-trace-step>summary,.area-trace-days>summary,.area-trace-by-sku>summary,.area-trace-bom>summary,.area-trace-examples>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-size:.79rem;font-weight:740;line-height:1.35;padding:7px 0;overflow-wrap:anywhere}
+.area-trace-days,.area-trace-by-sku,.area-trace-bom,.area-trace-examples{border-top:1px solid var(--border);margin-top:9px;padding-top:5px;min-width:0}
+.area-trace-days label{display:block;font-size:.73rem;margin:5px 0;color:var(--muted)}
+.area-trace-days select{display:block;min-height:44px;width:100%;max-width:100%;font:inherit;font-size:.81rem;color:var(--text);background:var(--detail-bg);border:1px solid var(--border);border-radius:8px;padding:6px 9px}
+.area-trace-day-reading{display:grid;gap:7px;border:1px solid var(--border);background:var(--detail-bg);border-radius:10px;padding:9px;margin:9px 0;min-width:0}
+.area-trace-day-reading strong{font-size:.82rem}
+.area-trace-day-reading p{margin:0!important}
+.area-trace-sku-row{border-top:1px solid var(--border);padding:9px 0}
+.area-trace-sku-row strong,.area-trace-examples strong{font-size:.82rem}
+@media(forced-colors:active){.area-physical-trace,.area-trace-step,.area-trace-day-reading,.area-trace-days select{background:Canvas;color:CanvasText;border:1px solid CanvasText}
+.area-physical-trace summary:focus-visible,.area-trace-days select:focus-visible{outline:3px solid Highlight}}
