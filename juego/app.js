@@ -17,6 +17,7 @@ import {i2ManagementDiagnosis} from '../src/i2-management-diagnosis.js';
 import {i2EmptyRecoveryActions,i2NormalizeMultiRecovery} from '../src/i2-multi-recovery.js';
 import {i2MultiLeverPreview} from '../src/i2-multilever-preview.js';
 import {renderI2MultiLeverPanel} from './multi-lever-panel.js';
+import {i2ConfirmMultiRecovery,i2ClearMultiRecovery,i2ConfirmedMultiOutcome} from '../src/i2-recovery-confirmation.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
 import {I2_NICO_MANAGER_TOUR,i2NicoManagerGuide} from '../src/i2-nico-manager-learning.js';
@@ -48,7 +49,7 @@ let state;
 try{state=loadI2GameState(window.localStorage)}catch{state=init()}
 let preview=null;
 // I2-29: transient preview only; I2-30 owns confirmation and persistence.
-let multiDraft=i2EmptyRecoveryActions();
+let multiDraft=state.recoveryConfirmation?.actions??i2EmptyRecoveryActions();
 let multiPreview=null;
 let multiOpened=false;
 let areaTab='decision'; // solo navegación visual; nunca persistir en campaña
@@ -909,7 +910,8 @@ function recoveryScene(){
   section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
   p('Tu acción gerencial','option-heading'),
   section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
-   state.recovery=c.optionId;preview=null;saveAndRender();
+   state=i2ClearMultiRecovery(state);
+   state.recovery=c.optionId;preview=null;multiPreview=null;saveAndRender();
   },{selected:state.recovery===c.optionId}))),
   labeledSelect('Día de llegada o traslado', [1,2,5,10,13],state.arrivalDay,x=>{state.arrivalDay=x;preview=null;saveAndRender()}),
   labeledSelect('Cobertura de compra extraordinaria (%)',[0,25,50,75,100],state.coverage,x=>{state.coverage=x;preview=null;saveAndRender()}),
@@ -920,7 +922,18 @@ function recoveryScene(){
    state,objectives,draft:multiDraft,opened:multiOpened,preview:multiPreview,
    onDraft:next=>{multiDraft=next;multiPreview=null},
    onOpen:value=>{multiOpened=value},
-   onPreview:model=>{multiPreview=model},onError:showError
+   onPreview:model=>{multiPreview=model},
+   onConfirm:actions=>{
+    state=i2ConfirmMultiRecovery(state,actions);
+    multiDraft=state.recoveryConfirmation.actions;
+    multiPreview=null;
+    persist();gameTransition('finish');
+   },
+   onCancel:()=>{
+    state=i2ClearMultiRecovery(state);multiPreview=null;
+    persist();render();
+   },
+   onError:showError
   })
  ]);
  const impact=root.querySelector('.impact-btn');
@@ -939,7 +952,11 @@ function recoveryScene(){
    impact.disabled=true;
   }catch(e){showError(e)}
  });
- updateFooter({beforeAdvance:()=>i2SafeScorecard(resultFor())});
+ updateFooter({beforeAdvance:()=>{
+  i2SafeScorecard(resultFor());
+  // Explicit legacy CTA cannot silently commit an old multi event.
+  if(state.recoveryConfirmation)state=i2ClearMultiRecovery(state);
+ }});
 }
 /** After revealing, the manager can review decisions without revising the sealed plan. */
 function reviewScene(){
@@ -964,8 +981,90 @@ function reviewScene(){
  ]);
  updateFooter();
 }
+/**
+ * Confirmed multi-results: one canonical replay plus the existing scorecard.
+ * Do not render base area diagnostics as effects of recovery.
+ */
+function multiResultsScene(){
+ stage.textContent='Resultado · Acciones combinadas';progress.style.width='100%';
+ let result,evaluation;
+ try{
+  result=i2ConfirmedMultiOutcome(state);
+  evaluation=i2EvaluateObjectives(result.scorecard,objectives);
+ }catch(e){showError(e);return}
+ const score=result.scorecard,row=result.reading,a=result.event.actions;
+ const actions=[
+  a.urgentPurchase.enabled?'Compra urgente: '+a.urgentPurchase.coveragePercent+
+   ' % del faltante, llegada día '+a.urgentPurchase.arrivalDay:null,
+  a.reserveTransfer.enabled?'Traslado RESERVA-CD: día '+a.reserveTransfer.releaseDay:null,
+  a.capacityBoost.enabled?'Refuerzo: +80 cupos/jornada':null
+ ].filter(Boolean);
+ const explain=p(score.recoveredOrders.value>0
+  ?'El conjunto recuperó '+num.format(score.recoveredOrders.value)+
+   ' pedidos respecto del plan original. Compara la mejora con el costo.'
+  :'El conjunto no recuperó pedidos adicionales. Revisa si las compras llegaron a tiempo y si stock y capacidad estaban disponibles.','note');
+ const status=section('management-evaluation',[
+  node('strong',{text:'Evaluación gerencial del conjunto'}),...[
+   ['Servicio de expedición',evaluation.service.status,
+    evaluation.service.actualPercent.toFixed(1).replace('.',',')+
+    ' % · meta '+evaluation.service.targetPercent+' %'],
+   ['Gasto extra modelado',evaluation.expense.status,
+    money.format(evaluation.expense.valueCLP)+' · límite '+money.format(evaluation.expense.budgetCLP)]
+  ].map(([label,kind,value])=>section('management-traffic-row',[
+   node('span',{className:'management-traffic status-'+kind,
+    text:kind==='green'?'Adecuado':kind==='amber'?'Atención':'Crítico'}),
+   node('strong',{text:label}),p(value,'note')
+  ])),
+  p(evaluation.allGreen?'Las dos metas didácticas se cumplieron, sin calcular rentabilidad integral.':
+    'Una buena salida de pedidos no compensa automáticamente el exceso de costos.','footnote')
+ ]);
+ replace([
+  p('CIERRE DÍA 12 · RECUPERACIÓN CONJUNTA','eyebrow'),
+  heading('Las consecuencias de tu combinación.'), 
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(evaluation.allGreen?'result':'analysis')]:[]),
+  p('Demanda observada: '+num.format(score.actualOrders.value)+
+   ' pedidos completos. Combinación confirmada y reproducida del mismo escenario SKU.','lead'),
+  section('metrics-grid',[
+   section('metric-card',[node('span',{text:'Expedidos desde CD'}),
+    node('strong',{text:num.format(score.shippedOrders.value)})]),
+   section('metric-card',[node('span',{text:'Pendientes día 12'}),
+    node('strong',{text:num.format(score.pendingOrders.value)})])
+  ]),
+  section('multi-committed-summary',[
+   node('strong',{text:actions.length?'Acciones confirmadas':'Decisión: no intervenir'}),
+   ...(actions.length?actions.map(x=>p(x,'note')):[p('No se contrataron acciones adicionales.','note')]),
+   p('Plan original: '+num.format(score.baselineShipped.value)+
+    ' expedidos · mejora conjunta '+num.format(score.recoveredOrders.value)+
+    ' pedidos.','note'),
+   p('Compra urgente '+money.format(row.urgentPurchaseValueCLP)+
+    ' · recargo '+money.format(row.urgentSurchargeCLP)+
+    ' · turnos extra '+money.format(row.extraCapacityCostCLP)+'.','footnote'),
+   p('Gasto incremental: '+money.format(score.incrementalExpense.value)+
+    '. Compras originales comprometidas: '+money.format(score.committedOriginalPurchases.value)+
+    '. No son dinero pagado ni costo operacional total.','note'),
+   p('Traslados reserva: '+num.format(row.physicallyMovedReserveSkuUnits)+
+    ' SKU · compras urgentes: '+num.format(row.orderedUrgentSkuUnits)+
+    ' SKU · turnos extra cobrables: '+num.format(row.chargedExtraCapacityShifts)+
+    ' · cupos adicionales ociosos: '+num.format(row.idleExtraSlots)+'.','footnote')
+  ]),
+  status,
+  section('guide-box',[node('strong',{text:'La mirada de Nico'}),explain,
+   p('Una intervención combinada puede costar dinero incluso si no mejora el servicio. Sus resultados se miden juntos, no sumando mejoras individuales.','note'),
+   p('Un pedido expedido salió del CD, pero no sabemos si llegó al consumidor. No se conoce la productividad por persona-hora ni el costo total de operación.','footnote')
+  ]),
+  node('details',{className:'multi-committed-audit'},[
+   node('summary',{text:'Ver trazabilidad de la confirmación'}),
+   p('Misma semilla del reto, apertura SKU, compras originales y horizonte de 12 días.'),
+   p('La comparación usa el escenario original congelado. El resultado se recalcula al abrir, no se guarda un libro físico nuevo.','note'),
+   p('Costo total: desconocido; utilidad y entregas al cliente: no medidas.','footnote')
+  ]),
+  p('Para cambiar la combinación, usa «Revisar intervención». Para otra partida, usa «Jugar de nuevo».','footnote')
+ ]);
+ updateFooter();
+}
 function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
+ if(state.recoveryConfirmation){multiResultsScene();return}
  stage.textContent='Resultado · Aprendizaje';progress.style.width='100%';
  let data,score,evaluation;
  try{data=resultFor();score=i2SafeScorecard(data);evaluation=i2EvaluateObjectives(score,objectives)}catch(e){showError(e);return}
