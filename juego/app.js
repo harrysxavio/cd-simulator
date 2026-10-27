@@ -17,6 +17,8 @@ import {i2ManagementDiagnosis} from '../src/i2-management-diagnosis.js';
 import {i2EmptyRecoveryActions,i2NormalizeMultiRecovery} from '../src/i2-multi-recovery.js';
 import {i2MultiLeverPreview} from '../src/i2-multilever-preview.js';
 import {renderI2MultiLeverPanel} from './multi-lever-panel.js';
+import {i2ManagerResultBoard} from '../src/i2-manager-result-board.js';
+import {renderI2ManagerResultBoard} from './manager-result-panel.js';
 import {i2ConfirmMultiRecovery,i2ClearMultiRecovery,i2ConfirmedMultiOutcome} from '../src/i2-recovery-confirmation.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
  i2NicoTutorial,i2NicoCoachTip} from '../src/i2-nico-tutorial.js';
@@ -987,10 +989,12 @@ function reviewScene(){
  */
 function multiResultsScene(){
  stage.textContent='Resultado · Acciones combinadas';progress.style.width='100%';
- let result,evaluation;
+ let result,evaluation,board;
  try{
   result=i2ConfirmedMultiOutcome(state);
   evaluation=i2EvaluateObjectives(result.scorecard,objectives);
+  board=i2ManagerResultBoard({state,scorecard:result.scorecard,
+   baseline:resultFor('wait'),objectives,mode:'multi'});
  }catch(e){showError(e);return}
  const score=result.scorecard,row=result.reading,a=result.event.actions;
  const actions=[
@@ -1030,6 +1034,7 @@ function multiResultsScene(){
    section('metric-card',[node('span',{text:'Pendientes día 12'}),
     node('strong',{text:num.format(score.pendingOrders.value)})])
   ]),
+  renderI2ManagerResultBoard(board),
   section('multi-committed-summary',[
    node('strong',{text:actions.length?'Acciones confirmadas':'Decisión: no intervenir'}),
    ...(actions.length?actions.map(x=>p(x,'note')):[p('No se contrataron acciones adicionales.','note')]),
@@ -1066,8 +1071,14 @@ function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
  if(state.recoveryConfirmation){multiResultsScene();return}
  stage.textContent='Resultado · Aprendizaje';progress.style.width='100%';
- let data,score,evaluation;
- try{data=resultFor();score=i2SafeScorecard(data);evaluation=i2EvaluateObjectives(score,objectives)}catch(e){showError(e);return}
+ let data,score,evaluation,board;
+ try{
+  data=resultFor();score=i2SafeScorecard(data);
+  evaluation=i2EvaluateObjectives(score,objectives);
+  board=i2ManagerResultBoard({state,scorecard:score,
+   baseline:state.recovery==='wait'?data:resultFor('wait'),
+   objectives,mode:'classic'});
+ }catch(e){showError(e);return}
  // Solo tras el reveal: lee el mismo compromiso original por SKU.
  const commercial=data.commercial;
  const forecast=section('commercial-result',[
@@ -1306,6 +1317,7 @@ function resultsScene(){
    score.recoveredOrders.value>0?'improvement':'analysis')]:[]),
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
+  renderI2ManagerResultBoard(board),
   forecast,
   planning,
   purchasing,
