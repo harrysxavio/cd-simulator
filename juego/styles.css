@@ -1095,3 +1095,27 @@ html,body{height:100%;overflow:hidden}
 .area-trace-sku-row strong,.area-trace-examples strong{font-size:.82rem}
 @media(forced-colors:active){.area-physical-trace,.area-trace-step,.area-trace-day-reading,.area-trace-days select{background:Canvas;color:CanvasText;border:1px solid CanvasText}
 .area-physical-trace summary:focus-visible,.area-trace-days select:focus-visible{outline:3px solid Highlight}}
+
+/* I2-33 · Optional didactic V1 economic audit, four compact cards. */
+.economic-manager-panel{min-width:0;margin:12px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.economic-manager-panel>summary{min-height:44px;cursor:pointer;padding:8px 0;font-weight:750;font-size:.87rem;line-height:1.4}
+.economic-manager-panel p{font-size:.78rem;line-height:1.48;overflow-wrap:anywhere}
+.economic-manager-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:9px 0}
+.economic-manager-card{min-width:0;display:grid;gap:5px;padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--detail-bg)}
+.economic-manager-card span{font-size:.74rem;line-height:1.3}
+.economic-manager-card strong{font-size:1rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.economic-manager-compare{display:grid;gap:7px;border:1px solid var(--border);border-radius:10px;padding:9px;background:var(--detail-bg)}
+.economic-manager-compare>strong{font-size:.82rem}
+.economic-manager-compare p{margin:0!important}
+.economic-purchase-book,.economic-days,.economic-nico-coach{border-top:1px solid var(--border);padding-top:5px;margin-top:10px}
+.economic-purchase-book>summary,.economic-days>summary,.economic-nico-coach>summary{min-height:44px;padding:8px 0;cursor:pointer;font-size:.81rem;font-weight:750;line-height:1.4}
+.economic-purchase-row{border-bottom:1px solid var(--border);padding:7px 0}
+.economic-purchase-row strong{font-size:.79rem}
+.economic-days label{display:block;font-size:.73rem;color:var(--muted);margin:5px 0}
+.economic-days select{width:100%;max-width:100%;min-height:44px;border:1px solid var(--border);border-radius:8px;color:var(--text);background:var(--detail-bg);font:inherit;padding:6px 8px}
+.economic-day-detail{min-width:0;display:grid;gap:6px;background:var(--detail-bg);border:1px solid var(--border);border-radius:9px;padding:9px;margin:9px 0}
+.economic-day-detail p{margin:0!important}
+.economic-day-detail strong{font-size:.8rem}
+@media(max-width:355px){.economic-manager-grid{grid-template-columns:1fr}}
+@media(forced-colors:active){.economic-manager-panel,.economic-manager-card,.economic-manager-compare,.economic-day-detail,.economic-days select{background:Canvas;color:CanvasText;border:1px solid CanvasText}
+.economic-manager-panel summary:focus-visible,.economic-days select:focus-visible{outline:3px solid Highlight}}
