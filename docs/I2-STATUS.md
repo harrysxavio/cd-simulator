@@ -13,6 +13,14 @@
 - **Defecto V1 #73 cerrado:** [PR #74](https://github.com/harrysxavio/cd-simulator/pull/74) integrado, suites main y PR aprobadas. V1 sigue operativa en la ruta raíz.
 - **Validación humana aún abierta:** [issue #67](https://github.com/harrysxavio/cd-simulator/issues/67): Android físico, TalkBack, comprensión pedagógica con usuario principiante. Ninguna prueba en Chromium emulado reemplaza esta aceptación.
 
+## I2-30 · Confirmación y replay de combinación (27-10-2026)
+
+- [PR #122](https://github.com/harrysxavio/cd-simulator/pull/122) fusionada: `25dfa7e`. [Contrato](I2-30-CONFIRMACION-MULTIACCION.md).
+- El gerente puede confirmar/cancelar 0/1/varias palancas. El evento guardado incluye solo acciones, semilla, demanda y clave de baseline; no guarda libro físico ni valores contables. Replay de resultado desde el mismo motor SKU, mismo plan y compras originales.
+- Volver a editar, descartar combinación, continuar con cualquiera de las cinco alternativas clásicas y reiniciar sin conservar la intervención. Resultado: servicio, pendientes, recargo/compra/turnos, reserva y capacidad ociosa; costo total y entrega consumidor desconocidos.
+- CI final verde: [Node](https://github.com/harrysxavio/cd-simulator/actions/runs/40485354314), [I2 focused](https://github.com/harrysxavio/cd-simulator/actions/runs/40485354558), [Chromium integral](https://github.com/harrysxavio/cd-simulator/actions/runs/40485354334).
+- **31/41 (75,6 %). F6 técnicamente 5/5. Próxima I2-31**: resultado principal gerencial y Nico. Android/TalkBack y comprobación HTTP de Pages todavía pendientes.
+
 ## I2-29 · Selector móvil multiacción y meta económica (27-10-2026)
 
 - **PR #121 fusionada a `main`**, squash `fa9a9f900dd5a4f00035f098e125d9018a5138f4`. [Contrato I2-29](I2-29-SELECTOR-MULTIACCION.md).
