@@ -4,6 +4,7 @@
  */
 import {I2_CHALLENGES,i2ChallengeReveal} from './i2-challenge-config.js';
 import {i2MvpPhysicalResult,i2DefaultChoices} from './i2-mvp-adapter.js';
+import {I2_DEFAULT_ADVANCED,I2_ADVANCED_FIELDS} from './i2-advanced-settings.js';
 
 const options=Object.freeze(['wait','overtime','reserve','emergency','combined']);
 const fixed=n=>Number.isSafeInteger(n)&&n>0;
@@ -22,14 +23,15 @@ const row=x=>Object.freeze({
  * Inputs are passed to one existing model; no scoring formula or synthetic ledger.
  */
 export function i2ChallengeReplayMatrix({choices=i2DefaultChoices(),plannedOrders=200,seed}={}){
- if(!fixed(plannedOrders))throw new Error('I2-35: muestra inválida');
+ if(!fixed(plannedOrders)||!I2_ADVANCED_FIELDS.plannedOrders.includes(plannedOrders))
+  throw new Error('I2-35: muestra inválida');
  const selected=I2_CHALLENGES.filter(c=>seed===undefined||c.seed===seed);
  if(!selected.length)throw new Error('I2-35: semilla desconocida');
  return Object.freeze(selected.map(challenge=>{
   const shock=i2ChallengeReveal(challenge.seed,plannedOrders);
   const results=options.map(option=>{
    const result=i2MvpPhysicalResult({choices,seed:challenge.seed,
-    plannedOrders,option});
+    advanced:{...I2_DEFAULT_ADVANCED,plannedOrders},option});
    if(result.actualOrders!==shock.actualOrders ||
       result.shippedOrders+result.pendingOrders!==result.actualOrders ||
       !Number.isSafeInteger(result.incrementalExpenseCLP) ||
