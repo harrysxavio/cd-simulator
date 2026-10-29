@@ -259,3 +259,42 @@ Las metas numéricas son criterios futuros, **no mediciones ya obtenidas**.
 8. Las pruebas físicas y el test de comprensión corresponden a usuarios reales; no simularlos ni marcarlos cerrados mediante IA.
 
 **Estado inicial al escribir el plan:** fases implementadas de I2: **0/41** hasta que se integre y certifique el paquete de auditoría (I2-00). La funcionalidad del modo juego **todavía no se ha construido**. El botón de acceso no debe presentarse hasta que exista ruta utilizable.
+
+
+## D. Rebaselining vinculante 28-10-2026 · microfases ampliadas I2-35–40
+
+**Regla:** este apartado prevalece sobre criterios anteriores cuando añade rigor o descompone su ejecución; los IDs históricos I2-00–40 permanecen. Los padres I2-35–40 solo cierran cuando todas sus hijas y puertas aplicables están verificadas. Las hijas NO incrementan el histórico 35/41. [Auditoría y guion pedagógico](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md). **Esta revisión documental NO implementa ni certifica el juego.**
+
+**Orden de prioridad:** invariantes y cronología → diversidad demostrada → descubrir multiacción/entrada móvil → Nico y aprendizaje → intentos → QA/release. No alterar código de PR #127 sin reconciliar su HEAD y tests.
+
+**Contrato universal por hija:** problema/beneficio en tabla; alcance, archivos, dependencias, prueba/aceptación y estado en tabla; riesgo compartido de no confundir plan con hecho ni costo parcial con P&L. Siguiente acción: implementar el primer criterio aún no comprobado, registrar PR+CI, actualizar STATUS y comprobar publicación si cambia interfaz.
+
+| Microfase · propósito y beneficio | Alcance y archivos/componentes | Dependencia | Aceptación observable y evidencia | Estado |
+|---|---|---|---|---|
+| **I2-35.1 · Matriz física y cronología** — Probar qué cuellos representa de verdad el motor, y separar acciones futuras de experimentos retrospectivos. | src/; tests/i2-*; docs auditoría | Motor canónico, I2-34 | 8 fixtures y tests que identifiquen cuello, efecto temporal y estrategia diferenciada. | En curso: contrato listo; implementación pendiente |
+| **I2-35.2 · Catálogo de arquetipos** — Crear escenarios de compras, inventario, muelle, calidad, picking y transporte con parámetros físicos soportados. | src/i2-challenge-config.js; src/i2-mvp-adapter.js; tests | 35.1 | ≥5 arquetipos operacionalmente distintos; cada uno tiene semilla, fixture, baseline, evento sellado y prueba de estrategia útil. | Pendiente |
+| **I2-35.3 · Semántica de incertidumbre** — Evitar que un simulador perfecto antes de confirmar se presente como predicción. | src/i2-demand-event.js; juego/; tests | 35.1 | Modo laboratorio separado de decisión en vivo; hipótesis/exploración y alerta de contrafactual temporal probadas. | Pendiente |
+| **I2-35.4 · Comparación y replay** — Completar PR #127 sin confundir cinco recuperaciones clásicas con todas las combinaciones. | PR #127; src/i2-challenge-replay-matrix.js; juego/app.js; tests | 35.1–35.3 | Cinco alternativas clásico de mismo seed y plan, costos/cola; multiacción correctamente identificada; Node+E2E+V1 verdes. | Parcial en PR #127, no main |
+| **I2-35.5 · Progresión de misiones** — Diversificar ritmo y mapa de dependencias, sin inventar cambios de motor. | juego/app.js; juego/styles.css; tests/browser | 35.2 | Rutas con diferencias de qué información y decisión aparece, y mapa de áreas mostrando dependencia/estado; revisión 320–430. | Pendiente |
+| **I2-36.1 · Contrato de decisión y botones** — Auditar descubrir multiacción, no intervenir, cancelar y confirmar, estados UI. | juego/app.js; juego/multi-lever-panel.js; tests/browser | 35.4 | Matriz por fase, todos los controles clicables, foco restaurado, distinción explorar/calcular/confirmar. | Pendiente |
+| **I2-36.2 · Entrada rápida móvil** — Reducir fricción de portada sin ocultar configuración. | juego/app.js; juego/styles.css; tests/browser | 36.1 | Una CTA empezar sugerido; acceso independiente a tutorial, objetivos y avanzado; test de retorno/persistencia. | Pendiente |
+| **I2-36.3 · Tutorial progresivo y Nico** — Enseñar por capas, con pasos cortos y repetición controlada. | src/i2-nico-*.js; juego/help-dialog.js; juego/app.js | 36.2 | Siguiente/atrás/saltar/reabrir; capítulo por etapa; 3 capas por concepto, preferencia persistida. | Pendiente |
+| **I2-36.4 · Descubrimiento de multiacción** — Jerarquizar las estrategias de recuperación y su efecto marginal. | juego/multi-lever-panel.js; juego/app.js; tests/browser | 36.1 | Usuario encuentra 0/1/múltiples acciones sin panel escondido; plan editado vs confirmado inequívoco. | Pendiente |
+| **I2-37.1 · Cierre en seis preguntas** — Priorizar resumen y aprendizaje sobre auditoría extensa. | juego/manager-result-panel.js; juego/nico-learning-panel.js | 35.4 | Objetivo, delta, evidencia, sacrificio, consumidor y reintento antes de anexos; auditoría a demanda. | Pendiente |
+| **I2-37.2 · Hipótesis y reintentos** — Aprender probando políticas distintas bajo misma semilla. | src/i2-game-state.js; juego/app.js; tests | 37.1 | Registrar hipótesis voluntaria, cambio y observación; comparativa de intentos reproducible, sin calificar texto automáticamente. | Pendiente |
+| **I2-37.3 · Diseño táctil y adaptativo** — Eliminar scroll competidor, superposiciones y CTA lejanas. | juego/styles.css; tests/browser | 36.4–37.2 | 320/360/390/412/430 px + altura corta, zoom 200%, teclado, reduced-motion y objetivos táctiles. | Pendiente |
+| **I2-38.1 · QA automatizado transversal** — Garantizar funcionamiento de flujos y guardados. | tests/browser; tests/node | 37.3 | Matriz E2E por estado: persistencia, regreso, cancelar, ayuda, mismos resultados, V1 intacto. | Pendiente |
+| **I2-38.2 · QA humano pedagógico y accesible** — Probar comprensión real, no emulación. | issue #67; docs/evidencia | 38.1 | Evidencia Android físico/TalkBack y usuario principiante: seis preguntas del contrato. | Bloqueado por validación humana |
+| **I2-39.1 · Regresión SKU y causalidad** — Validar inventario, BOM, fechas, costos y multiacción. | src/; tests | 38.1 | Invariantes físicos, stock por estado, PO, plazos, costo marginal, no doble conteo; escenarios extremos. | Pendiente |
+| **I2-39.2 · Aceptación de negocio** — No aprobar retos solo porque pasa el código. | docs/; tests; revisión humana | 39.1,38.2 | Cada arquetipo demuestra una decisión diferente útil, metas conocidas y sin premio por azar/clicks. | Pendiente |
+| **I2-40.1 · Publicación verificable** — Asegurar que el artefacto publicado corresponde al SHA aceptado. | GitHub Actions; docs/I2-STATUS.md | 39.2 | CI verde, merge, Pages/HTTP asset+SHA, V1 y /juego/ funcionales, versión visible. | Pendiente |
+| **I2-40.2 · Cierre y continuidad** — Entregar versión estable y trazabilidad. | docs/I2-STATUS.md; README | 40.1 | Guía para jugador, límites conocidos, defectos y checkpoint, evidencia humana y release. | Pendiente |
+
+### Riesgos, restricciones y protocolo de continuación
+- **Riesgo de retrocausalidad:** compra urgente con fecha anterior al reveal solo puede ser contrafactual de laboratorio; definir reloj de decisión y lead time explícitos antes de aceptar acciones en modo operativo.
+- **Riesgo de falsos arquetipos:** no declarar bloqueo en Calidad, muelle o transporte sin evidencia SKU por día y pruebas donde cambia la decisión óptima.
+- **Riesgo de sobrecarga visual:** texto en tres capas y un concepto central; información técnica consultable y visible a petición; no depender exclusivamente de desplegables.
+- **Riesgo de métricas:** unidad, fórmula, período, fuente, denominador y límites visibles al consultar; costo total, productividad persona-hora y entrega final permanecen desconocidos cuando el motor no los mide.
+- **Riesgo humano:** I2-38.2 no aprobable por Chromium emulado ni revisión de IA.
+- **Checkpoint obligatorio en STATUS:** último merge, rama/PR en curso, SHA, pruebas ejecutadas y resultado, Pages+HTTP o no comprobado, bloqueo, archivos tocados, siguiente prueba/acción y criterios faltantes.
+- **Primer paso exacto:** tomar matriz de restricciones en `src/i2-mvp-adapter.js` y contratos de Recepción, Calidad, Picking y Transporte; producir fixtures para ARC-01–08 y distinguir soporte actual vs cambio mínimo antes de modificar PR #127.
