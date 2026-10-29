@@ -24,6 +24,7 @@ import {renderI2AreaPhysicalTimeline} from './area-physical-timeline.js';
 import {i2EconomicManagerReading} from '../src/i2-economic-manager.js';
 import {renderI2EconomicManagerPanel} from './economic-manager-panel.js';
 import {i2NicoEvidenceLearning} from '../src/i2-nico-evidence-learning.js';
+import {i2ChallengeReplayMatrix} from '../src/i2-challenge-replay-matrix.js';
 import {renderI2NicoEvidenceLearning} from './nico-learning-panel.js';
 import {i2ConfirmMultiRecovery,i2ClearMultiRecovery,i2ConfirmedMultiOutcome} from '../src/i2-recovery-confirmation.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
@@ -1050,6 +1051,7 @@ function multiResultsScene(){
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
   renderI2NicoEvidenceLearning(learning),
+  replayTradeoffPanel(),
   section('multi-committed-summary',[
    node('strong',{text:actions.length?'Acciones confirmadas':'Decisión: no intervenir'}),
    ...(actions.length?actions.map(x=>p(x,'note')):[p('No se contrataron acciones adicionales.','note')]),
@@ -1081,6 +1083,32 @@ function multiResultsScene(){
   p('Para cambiar la combinación, usa «Revisar intervención». Para otra partida, usa «Jugar de nuevo».','footnote')
  ]);
  updateFooter();
+}
+/** I2-35 · Optional comparison: same plan and seed, five classic recoveries.
+ * This panel is observational and never alters the saved run or the SKU engine. */
+function replayTradeoffPanel(){
+ const scenario=i2ChallengeReplayMatrix({
+  seed:state.seed,choices:state.choices,
+  plannedOrders:state.advanced.plannedOrders
+ })[0];
+ const labels={wait:'No intervenir',overtime:'Refuerzo',reserve:'Reserva',
+  emergency:'Compra urgente',combined:'Compra + refuerzo'};
+ return node('details',{className:'i2-tradeoff-replay'},[
+  node('summary',{text:'Comparar alternativas del mismo reto · Nico'}),
+  p('Misma demanda observada ('+num.format(scenario.actualOrders)+
+    ' pedidos), mismas ocho decisiones y las mismas compras originales. Solo cambia la recuperación.','note'),
+  ...scenario.recoveries.map(r=>section('management-traffic-row',[
+   node('strong',{text:labels[r.option]}),
+   p('Expedidos '+num.format(r.shippedOrders)+' · pendientes '+
+    num.format(r.pendingOrders)+' · servicio '+r.servicePercent.toFixed(1)+
+    ' % · gasto extra '+money.format(r.incrementalExpenseCLP),'note'),
+   p(r.clpPerRecoveredOrder===null
+    ?'Costo por pedido recuperado: no calculable (no hubo recuperación neta).':
+     'Costo incremental por pedido recuperado: '+money.format(r.clpPerRecoveredOrder)+
+     '. No equivale al costo total.','footnote')
+  ])),
+  p(scenario.boundary,'footnote')
+ ]);
 }
 function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
@@ -1340,6 +1368,7 @@ function resultsScene(){
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
   renderI2NicoEvidenceLearning(learning),
+  replayTradeoffPanel(),
   forecast,
   planning,
   purchasing,
