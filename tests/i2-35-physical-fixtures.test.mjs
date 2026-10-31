@@ -180,3 +180,32 @@ test('I2-35.1: probe receiving, quality and transport queues with supported conf
  assert.equal(attempts,18);
  // Absence of a witness must be recorded, not silently turned into a mission.
 });
+
+/**
+ * An actual Quality retention witness: verify the physical ledger rather than
+ * assuming slow=retained. Diagnostic measures the managerial effect separately.
+ */
+test('I2-35.1: quality-held SKU witness and cost-versus-benefit diagnostic',()=>{
+ const config={seed:'alpha-case-01',options:{stockProfile:'low'},
+  choices:{planning:'buffer',purchasing:'express',receiving:'low',
+   quality:'slow',inventory:'count',picking:'reinforce',transport:'low'}};
+ const slow=run(config);
+ const priority=run({...config,choices:{...config.choices,quality:'priority'}});
+ assert.ok(slow.quality.totals.peakHeldSkuUnits>0,
+  'Quality retention must be a real physical event in this known fixture');
+ assert.equal(slow.actualOrders,priority.actualOrders);
+ assert.equal(slow.shippedOrders+slow.pendingOrders,slow.actualOrders);
+ assert.equal(priority.shippedOrders+priority.pendingOrders,priority.actualOrders);
+ const costly=run(fixtures[7],'overtime'),noAction=run(fixtures[7],'wait');
+ assert.equal(costly.actualOrders,noAction.actualOrders);
+ assert.deepEqual(costly.originalPurchaseOrders,noAction.originalPurchaseOrders);
+ console.log('I2-35.1 QUALITY_AND_ECONOMIC_WITNESS '+JSON.stringify({
+  quality:{slowPeakHeld:slow.quality.totals.peakHeldSkuUnits,
+   priorityPeakHeld:priority.quality.totals.peakHeldSkuUnits,
+   slowShipped:slow.shippedOrders,priorityShipped:priority.shippedOrders},
+  overtime:{baseShipped:noAction.shippedOrders,
+   chosenShipped:costly.shippedOrders,
+   recovered:costly.recoveredOrders,
+   incrementalExpenseCLP:costly.incrementalExpenseCLP}
+ }));
+});
