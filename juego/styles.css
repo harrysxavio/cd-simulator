@@ -1151,3 +1151,24 @@ html,body{height:100%;overflow:hidden}
  line-height:1.5;overflow-wrap:anywhere}
 @media(forced-colors:active){.i2-tradeoff-replay,.i2-replay-option-row{
  border:1px solid CanvasText;background:Canvas;color:CanvasText}}
+
+
+/* I2-35.2 · ARC-06 pilot: short optional entry and post-result reflection.
+ * Maintain legibility at 320px and when browser text is enlarged. */
+.i2-picking-pilot-card,.i2-picking-pilot-debrief{min-width:0;margin:12px 0;padding:12px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.i2-picking-pilot-card>strong{display:block;font-size:.95rem;line-height:1.4}
+.i2-picking-pilot-card p,.i2-picking-pilot-debrief p{font-size:.83rem;
+ line-height:1.5;overflow-wrap:anywhere}
+.i2-picking-pilot-button{display:block;max-width:100%;min-height:44px;
+ padding:10px 14px;margin-top:8px;background:var(--detail-bg);color:var(--text);
+ border:1px solid var(--border);border-radius:10px;font:inherit;font-weight:750;
+ cursor:pointer;white-space:normal;text-align:center}
+.i2-picking-pilot-button:focus-visible,.i2-picking-pilot-debrief summary:focus-visible{
+ outline:3px solid currentColor;outline-offset:3px}
+.i2-picking-pilot-debrief>summary{min-height:44px;padding:8px 0;
+ font-size:.87rem;line-height:1.4;font-weight:750;cursor:pointer}
+.i2-picking-pilot-findings{min-width:0;display:grid;gap:8px}
+.i2-picking-pilot-findings .metric-card strong{font-size:.92rem;overflow-wrap:anywhere}
+@media(forced-colors:active){.i2-picking-pilot-card,.i2-picking-pilot-debrief,
+.i2-picking-pilot-button{background:Canvas;color:CanvasText;border-color:CanvasText}}

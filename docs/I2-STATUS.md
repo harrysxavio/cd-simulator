@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **Checkpoint 31-10-2026 · I2-35.2 piloto ARC-06 (rama):** se incorporó a `feat/i2-35-2-picking-guided-pilot` el primer recorrido de **diagnóstico de Picking** activable desde portada, con restricción física conocida de 10 SKU/jornada, persistencia de esquema actual, ocho decisiones, cierre y reflexión contrafactual a demanda. Archivos: `src/i2-guided-picking-pilot.js`, `juego/app.js`, `juego/styles.css`, pruebas Node/E2E y [contrato](I2-35-2-PILOTO-PICKING-JUGABLE.md). **Código en rama, no integrado ni publicado** hasta CI/merge y validación HTTP. La semilla es la existente `alpha-case-04`; no afirmar nuevo evento exógeno ni resolución del cuello con refuerzos. I2-35.2/F7 siguen **parciales**. Siguiente: CI → corregir → merge → verificar Pages; después diseñar otra misión con cuello distinto y condiciones de éxito profesional.
+
+
 ## Estado vigente · 31-10-2026
 
 **Línea base:** I2-00–I2-34 fusionadas; F0–F6 técnicamente completas, F7 **4/5** (I2-35 padre abierto), F8 **0/5**. El indicador histórico sigue siendo **35/41 IDs originales** (85,4 % por conteo, no esfuerzo).
