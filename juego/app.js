@@ -1512,6 +1512,6 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=false;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
 });
 render();
