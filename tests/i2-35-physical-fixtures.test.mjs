@@ -124,5 +124,17 @@ test('I2-35.1: paired physical observations identify binding vs nominal constrai
   high:{dispatched:uncapped.shippedOrders},
   outputDelta:uncapped.shippedOrders-capped.shippedOrders});
  assert.ok(observed.every(x=>Number.isSafeInteger(x.outputDelta)));
+ // Evidence-based regression: this exact fixture previously showed a physical
+ // Picking cap that reduced expeditions; assert its marginal effect remains real.
+ const pickLimit=observed.find(x=>x.stage==='physical-picking-cap');
+ assert.ok(pickLimit.outputDelta>0,
+  'A 10-SKU/day physical Picking limit must restrict this fixed scenario');
+ // Do not equate nominal capacity changes with an effective bottleneck.
+ const nonbinding=['receiving','quality','picking','transport'];
+ for(const stage of nonbinding){
+  const entry=observed.find(x=>x.stage===stage);
+  assert.equal(entry.outputDelta,0,
+   stage+' is a nominal-only change in this fixed fixture, not another mission');
+ }
  console.log('I2-35.1 PAIRED_PHYSICAL_EVIDENCE '+JSON.stringify(observed));
 });
