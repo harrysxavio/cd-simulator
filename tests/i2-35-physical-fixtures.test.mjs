@@ -37,7 +37,7 @@ test('I2-35.1: eight candidates obey physical orders and preserve deterministic 
   assert.equal(first.recoveredOrders,0,f.id);
   assert.equal(first.horizonDays,12,f.id);
   assert.equal(first.unknownTotalCost,true,f.id);
-  assert.ok(first.originalPurchaseOrders.length>=0,f.id);
+  assert.ok(first.originalPurchaseOrders!==null && typeof first.originalPurchaseOrders==='object',f.id);
  }
 });
 
