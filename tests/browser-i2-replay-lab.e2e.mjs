@@ -45,3 +45,45 @@ test('I2-35: mobile replay lab is optional and never alters management evaluatio
   await browser.close();
  }
 });
+
+/** I2-35: combined recovery result must expose the same optional classic lab. */
+test('I2-35: confirmed multi-action still has a five-option retrospective lab',
+ {timeout:120000},async()=>{
+ const browser=await chromium.launch({
+  headless:true,executablePath:process.env.E2E_CHROMIUM_PATH||undefined
+ });
+ const context=await browser.newContext({...devices['Pixel 7'],
+  viewport:{width:390,height:780}});
+ const page=await context.newPage(),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ try{
+  await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
+  await page.locator('#gameNext').click();
+  for(let i=0;i<8;i++)await page.locator('#gameNext').click();
+  await page.locator('#gameNext').click();
+  await page.locator('.multi-lever-panel summary').first().click();
+  await page.locator('#multiBuy').check();
+  await page.locator('#multiBoost').check();
+  await page.locator('#multiBuyDay').selectOption('13');
+  await page.locator('#multiCompare').click();
+  await page.locator('.multi-confirm-decision summary').click();
+  await page.locator('#multiCommit').click();
+  await page.locator('#gameScene h1').filter({hasText:'combinación'}).waitFor();
+  const panel=page.locator('.i2-tradeoff-replay');
+  assert.equal(await panel.count(),1);
+  assert.equal(await panel.locator('.i2-replay-option-row').count(),0);
+  await panel.locator('summary').click();
+  await panel.locator('.i2-replay-option-row').first().waitFor();
+  assert.equal(await panel.locator('.i2-replay-option-row').count(),5);
+  assert.match(await panel.innerText(),/no compara todas las combinaciones/);
+  const saved=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
+  await panel.locator('summary').click();
+  await panel.locator('summary').click();
+  assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),saved,
+   'Read-only lab cannot change a confirmed multi-action recovery');
+  assert.deepEqual(errors,[]);
+ }finally{
+  await context.close();
+  await browser.close();
+ }
+});
