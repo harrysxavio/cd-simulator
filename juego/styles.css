@@ -1133,3 +1133,21 @@ html,body{height:100%;overflow:hidden}
 .nico-learning-facts p{font-variant-numeric:tabular-nums}
 @media(forced-colors:active){.nico-learning-result,.nico-earned-award,.nico-learning-subsection p{border:1px solid CanvasText;background:Canvas;color:CanvasText}
 .nico-learning-result summary:focus-visible{outline:3px solid Highlight}}
+
+
+/* I2-35 · Optional post-result laboratory; no calculations until opened.
+ * Keep rows readable on narrow devices and with enlarged text. */
+.i2-tradeoff-replay{min-width:0;margin:12px 0;padding:10px;border:1px solid var(--border);
+ border-radius:12px;background:var(--panel)}
+.i2-tradeoff-replay>summary{min-height:44px;padding:8px 0;cursor:pointer;
+ font-size:.88rem;font-weight:750;line-height:1.4}
+.i2-tradeoff-replay summary:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+.i2-replay-options{min-width:0;display:grid;gap:8px}
+.i2-replay-options>p{font-size:.82rem;line-height:1.55;overflow-wrap:anywhere}
+.i2-replay-option-row{min-width:0;padding:10px;background:var(--detail-bg);
+ border:1px solid var(--border);border-radius:10px}
+.i2-replay-option-row strong{display:block;font-size:.87rem;line-height:1.4}
+.i2-replay-option-row p{margin:5px 0 0!important;font-size:.82rem;
+ line-height:1.5;overflow-wrap:anywhere}
+@media(forced-colors:active){.i2-tradeoff-replay,.i2-replay-option-row{
+ border:1px solid CanvasText;background:Canvas;color:CanvasText}}
