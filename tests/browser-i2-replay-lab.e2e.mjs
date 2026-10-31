@@ -29,8 +29,11 @@ test('I2-35: mobile replay lab is optional and never alters management evaluatio
    'Replay cannot pollute objective evaluation selectors');
   const detail=page.locator('.i2-tradeoff-replay');
   assert.equal(await detail.count(),1);
-  assert.equal(await detail.locator('.i2-replay-option-row').count(),5);
+  assert.equal(await detail.locator('.i2-replay-option-row').count(),0,
+   'Five expensive canonical replays must not run before opening the panel');
   await detail.locator('summary').click();
+  await detail.locator('.i2-replay-option-row').first().waitFor();
+  assert.equal(await detail.locator('.i2-replay-option-row').count(),5);
   assert.match(await detail.innerText(),/Laboratorio|alternativas clásicas/);
   assert.match(await detail.innerText(),/no es una predicción/);
   assert.equal(await detail.locator('.i2-replay-option-row').first().isVisible(),true);
