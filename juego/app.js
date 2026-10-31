@@ -27,6 +27,7 @@ import {i2EconomicManagerReading} from '../src/i2-economic-manager.js';
 import {renderI2EconomicManagerPanel} from './economic-manager-panel.js';
 import {i2NicoEvidenceLearning} from '../src/i2-nico-evidence-learning.js';
 import {i2ChallengeReplayMatrix} from '../src/i2-challenge-replay-matrix.js';
+import {i2SixQuestionSummary} from '../src/i2-six-question-summary.js';
 import {I2_PICKING_PILOT,i2IsPickingPilot,i2StartPickingPilot,
  i2LeavePickingPilot,i2PickingPilotReflection} from '../src/i2-guided-picking-pilot.js';
 import {renderI2NicoEvidenceLearning} from './nico-learning-panel.js';
@@ -467,6 +468,23 @@ function pickingPilotDebriefPanel(){
   }
  });
  return panel;
+}
+/**
+ * I2-37.1: concise, visibly prioritized management close.
+ * Its six answers are read-only evidence, never another simulation.
+ */
+function nicoSixQuestionPanel(score,evaluation){
+ const summary=i2SixQuestionSummary(score,evaluation);
+ return section('i2-six-question-summary',[
+  node('strong',{text:summary.title}),
+  p(summary.verdict,'i2-six-verdict'),
+  p(summary.scope,'footnote'),
+  ...summary.rows.map(row=>section('i2-six-answer',[
+   node('strong',{text:row.question}),
+   p(row.answer,'note')
+  ])),
+  p(summary.boundary,'footnote')
+ ]);
 }
 function intro(){
  const brief=i2FirstMissionBriefing(state);
@@ -1138,6 +1156,7 @@ function multiResultsScene(){
    section('metric-card',[node('span',{text:'Pendientes día 12'}),
     node('strong',{text:num.format(score.pendingOrders.value)})])
   ]),
+  nicoSixQuestionPanel(score,evaluation),
   renderI2ManagerResultBoard(board),
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
@@ -1472,6 +1491,7 @@ function resultsScene(){
    score.recoveredOrders.value>0?'improvement':'analysis')]:[]),
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
+  nicoSixQuestionPanel(score,evaluation),
   renderI2ManagerResultBoard(board),
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
