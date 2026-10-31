@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **Seguimiento CI I2-35.1 · 31-10-2026:** PR #129 sigue en revisión. CI inicial: Chromium **verde**, Node **rojo** por supuesto erróneo en prueba `originalPurchaseOrders.length` (no por inconsistencia física demostrada). Prueba ajustada en commit `3e89c0c`, documento de contrato y diagnóstico actualizado; CI del nuevo HEAD en cola a la última revisión. Aún faltan pruebas discriminantes y no se declara cierre ni publicación. [Evidencia](I2-35-1-CAPACIDADES-FISICAS.md).
+
+
 > **CHECKPOINT DE IMPLEMENTACIÓN I2-35.1 · 31-10-2026.** [PR #128](https://github.com/harrysxavio/cd-simulator/pull/128) fusionado a `main` (SHA `440a4c0369f79c92d516994d06be81f96766479e`). **I2-35.1 en curso** en rama `feat/i2-35-1-physical-fixtures`: pruebas de ocho candidatos físicos en `tests/i2-35-physical-fixtures.test.mjs`, inventario de soporte y riesgos en [I2-35-1-CAPACIDADES-FISICAS.md](I2-35-1-CAPACIDADES-FISICAS.md). Los tests aún requieren CI del PR; no prueban ocho cuellos diferenciados. **I2-35 e I2-35.1 siguen sin aceptación formal.** PR #127 draft separado. Próximo paso: comprobar CI, ejecutar casos de cuello vinculante, identificar soporte/cambios mínimos de arquetipos, resolver cronología contrafactual. Sin alteración a `/juego/`, sin verificación Pages/Android/TalkBack.
 
 
