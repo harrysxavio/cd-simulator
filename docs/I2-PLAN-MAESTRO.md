@@ -8,6 +8,26 @@
 
 **Fuente de verdad para ejecuciones futuras:** este plan. El [plan V1 de 43 microfases](EXECUTION-PLAN-43.md) permanece separado; I2 no altera su histórico ni cierra M7-38/M8-42 por asociación. Consultar [auditoría](I2-AUDITORIA-BASE-V11.68.md), [UX/guion](I2-EXPERIENCIA-MOVIL.md), [arquitectura y pruebas](I2-ARQUITECTURA-Y-PRUEBAS.md).
 
+## Continuación técnica · Lab11 (31-10-2026)
+
+**PR #133 integrado:** resumen gerencial final con Nico en seis preguntas; aceptación
+funcional automatizada antes de merge. No cierra por sí solo I2-37.1.
+
+**I2-35.5a/b en desarrollo (rama rebasada sobre #133):**
+- 35.5a: calendario independiente de demanda, parada de Recepción y retención
+  temporal de Calidad modeladas en `eventSimulation`. Pruebas de inventario y FIFO.
+- 35.5b: incidente opt-in en `integratedDemand` (solo ejecución observada),
+  `createRecoveryBaseline`, `recoveryComparison` y comparación I2 multiacción.
+  Las compras comprometidas se congelan antes del incidente y todas las
+  alternativas se comparan con un solo calendario causal.
+- 35.5c: próximo paso, `eventSeed` persistente, revelar en jornada correcta,
+  solo acciones ejecutables desde su decisión; separar laboratorio retrospectivo.
+- 35.5d: aceptación de diversidad operacional con pruebas discriminantes,
+  E2E móvil/humano y actualización de Pages.
+
+Los contratos anteriores continúan vigentes. No recontar hijas en 35/41.
+[Detalle y límites](I2-35-5-EVENTOS-OPERACIONALES-FISICOS.md).
+
 ## A. Contrato de avance
 
 Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico, prueba automatizada, revisión de regresión V1, merge a main, chequeos post-merge y, si afecta publicación, Pages + HTTP servido real. Registrar SHA, links y limitaciones en **docs/I2-STATUS.md** antes de declararla completa.
