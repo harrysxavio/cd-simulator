@@ -43,6 +43,7 @@ test('I2-14: configure score thresholds without modifying the game simulation or
   assert.equal(before.reveal,false);
   await page.locator('#gameNext').click(); // reveal
   assert.match(await page.locator('#gameStage').innerText(),/Recuperación/);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.getByRole('button',{name:/Refuerzo operativo/}).click();
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene h1').innerText(),/consecuencias/);
