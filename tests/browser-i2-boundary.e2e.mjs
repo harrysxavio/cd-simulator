@@ -26,6 +26,7 @@ test('I2-06: mobile game keeps PII off storage and labels modeled cost as partia
   }
   assert.match(await page.locator('#gameScene h1').innerText(),/Algo cambió/);
   await page.locator('#gameNext').click();
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('.impact-btn').click();
   const impact=await page.locator('.impact-result').innerText();
   assert.match(impact,/Gasto incremental modelado:/);
