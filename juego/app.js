@@ -8,6 +8,7 @@ import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {openI2NicoJourney} from './nico-journey-dialog.js';
+import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
 import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
@@ -935,7 +936,9 @@ function recoveryScene(){
  // Único acceso al evento observado, permitido solo tras la transición reveal.
  const reveal=i2DemandEventObserved(state);
  // Construir siempre el mismo plan original sin intervención para diagnosticar.
- const diagnosis=i2ManagementDiagnosis(state,resultFor('wait'));
+ const baseline=resultFor('wait');
+ const diagnosis=i2ManagementDiagnosis(state,baseline);
+ const situation=i2OperationalSituationCards(baseline);
  stage.textContent='Crisis · Recuperación';progress.style.width='92%';
  replace([
   p('DEMANDA SORPRESA · CASO REPRODUCIBLE','eyebrow'),
@@ -954,6 +957,17 @@ function recoveryScene(){
   p(reveal.teaching,'note'),
   p(reveal.context,'note'),
   p(reveal.boundary,'footnote'),
+  section('i2-operational-alerts',[
+   node('strong',{text:'NOVEDADES DEL CD · PLAN ORIGINAL'}),
+   p('El equipo informa señales físicas de la simulación antes de elegir un refuerzo.','note'),
+   ...situation.incidents.map(item=>section('i2-operational-alert',[
+    node('strong',{text:item.title}),
+    p(num.format(item.quantity)+' '+item.unit+' · '+item.meaning,'note'),
+    p('Nico pregunta: '+item.question,'footnote')
+   ])),
+   ...(situation.incidents.length===0?[p('Sin colas observadas en estas etapas del plan original. Revisa stock y capacidad antes de actuar.','note')]:[]),
+   p(situation.note,'footnote')
+  ]),
   managementDiagnosisPanel(diagnosis),
   ...(i2IsPickingPilot(state)?[
    p('Nico: el límite físico de Picking es conocido desde el inicio. Pregúntate si la recuperación que vas a comprar realmente altera ese límite. Puedes elegir no intervenir.','note')
