@@ -730,7 +730,20 @@ function areaScene(){
   p('Fuente: '+model.threshold.source,'footnote'),
   ...model.boundaries.map(line=>p(line,'footnote'))
  ]);
+ const coaching=i2NicoCoachTip(state,guideLevel);
  const decision=section('area-tab-panel',[
+  section('nico-decision-coach',[
+   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(coaching.pose)]:[]),
+   section('nico-decision-words',[
+    node('strong',{text:'Nico te acompaña · '+original.title}),
+    p(coaching.text,'note'),
+    p(coaching.question,'footnote'),
+    helpButton('Ver un ejemplo con Nico',original.title+' · ejemplo de decisión',[
+     coaching.example,'Pregunta para decidir: '+coaching.question,
+     'Es una orientación del plan, no una predicción del evento de demanda.'
+    ])
+   ])
+  ]),
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
   ...(area.id==='transport'?[p('Una ruta adicional solo ayuda si ya hay pedidos completos. Preparado, expedido y entregado son estados distintos.','commercial-brief')]:[]),
