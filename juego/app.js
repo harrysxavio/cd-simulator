@@ -65,6 +65,7 @@ let preview=null;
 let multiDraft=state.recoveryConfirmation?.actions??i2EmptyRecoveryActions();
 let multiPreview=null;
 let multiOpened=true;
+let classicOpened=false; // UX-only preference: preserve edit context on rerender
 let areaTab='decision'; // solo navegación visual; nunca persistir en campaña
 let objectives=i2ReadObjectives(window.localStorage);
 let showGuide=false;
@@ -1016,6 +1017,9 @@ function recoveryScene(){
    ])
   ])
  ]);
+ const classic=root.querySelector('.i2-classic-recovery');
+ classic.open=classicOpened;
+ classic.addEventListener('toggle',()=>{classicOpened=classic.open});
  const impact=root.querySelector('.impact-btn');
  impact.addEventListener('click',()=>{
   try{
