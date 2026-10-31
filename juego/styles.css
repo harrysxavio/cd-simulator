@@ -1172,3 +1172,116 @@ html,body{height:100%;overflow:hidden}
 .i2-picking-pilot-findings .metric-card strong{font-size:.92rem;overflow-wrap:anywhere}
 @media(forced-colors:active){.i2-picking-pilot-card,.i2-picking-pilot-debrief,
 .i2-picking-pilot-button{background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+
+/* I2-36.2–36.4 · Visible mobile teaching and recovery UX.
+ * Dialog runs outside the game scroll; focus/escape are native. */
+.nico-manager-tutorial{
+ display:block;min-height:48px;width:100%;padding:11px 14px;margin:10px 0;
+ border:1px solid var(--primary);border-radius:12px;background:var(--primary);
+ color:#231307;font:inherit;font-size:.94rem;font-weight:800;text-align:center;cursor:pointer
+}
+.nico-journey-dialog{
+ position:fixed;inset:0;margin:auto;box-sizing:border-box;overflow-y:auto;
+ width:min(96vw,560px);max-width:560px;max-height:calc(100dvh - 24px);
+ padding:16px;border:1px solid var(--border);border-radius:20px;
+ background:var(--panel);color:var(--text);box-shadow:0 22px 85px #0009
+}
+.nico-journey-dialog::backdrop{background:#040a14dd}
+.nico-journey-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.nico-journey-progress{color:var(--detail-label);font-size:.85rem;font-weight:800;letter-spacing:.05em}
+.nico-journey-close,.nico-journey-back,.nico-journey-next,.nico-journey-skip{
+ min-height:44px;border:1px solid var(--border);border-radius:10px;
+ background:var(--detail-bg);color:var(--text);padding:9px 12px;
+ cursor:pointer;font:inherit;font-size:.91rem
+}
+.nico-journey-art{width:100%;min-height:148px;display:grid;place-items:center;
+ background:linear-gradient(120deg,#152c46,#26405b);border-radius:14px;margin:9px 0}
+.nico-journey-portrait{height:164px;width:160px;object-fit:contain;image-rendering:pixelated}
+.nico-journey-title{font-size:1.25rem;line-height:1.35;margin:10px 0}
+.nico-journey-body{display:grid;gap:10px}
+.nico-journey-body p{font-size:.97rem;line-height:1.58;margin:0}
+.nico-journey-bubble{background:var(--detail-bg);border:1px solid var(--border);
+ border-radius:14px;padding:13px}
+.nico-journey-example{padding:11px 12px;border-left:3px solid var(--primary);
+ background:var(--detail-bg);border-radius:4px}
+.nico-journey-question{font-weight:650}
+.nico-journey-depth{border:1px solid var(--border);border-radius:10px;padding:8px 11px}
+.nico-journey-depth>summary{min-height:44px;cursor:pointer;align-content:center}
+.nico-journey-level{display:flex;flex-wrap:wrap;justify-content:space-between;
+ align-items:center;gap:7px;margin:16px 0 8px}
+.nico-journey-level label{font-size:.83rem}
+.nico-journey-level select{background:var(--detail-bg);color:var(--text);
+ font:inherit;min-height:44px;max-width:100%;padding:8px;
+ border:1px solid var(--border);border-radius:9px}
+.nico-journey-actions{display:grid;grid-template-columns:1fr 1.3fr;gap:8px;margin-top:12px}
+.nico-journey-next{background:var(--primary);color:#231307;font-weight:800;border-color:var(--primary)}
+.nico-journey-skip{grid-column:1/-1}
+.nico-journey-back:disabled{opacity:.45}
+.i2-recovery-nico-lead{display:flex;align-items:center;gap:10px;padding:11px;
+ margin:8px 0;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.i2-recovery-nico-lead>.nico-scene-portrait{flex:0 0 82px;width:82px;height:100px;object-fit:contain}
+.i2-recovery-mentor-message{flex:1;min-width:0}
+.i2-recovery-mentor-message>strong,.i2-recovery-workbench-title>strong{
+ font-size:.94rem;line-height:1.4}
+.i2-recovery-mentor-message p,.i2-recovery-workbench-title p{
+ font-size:.85rem;line-height:1.48;overflow-wrap:anywhere}
+.i2-recovery-workbench-title{margin:16px 0 4px;padding:10px 0 0}
+.multi-lever-panel[open]{border:2px solid var(--primary);padding:12px;
+ background:var(--panel)}
+.multi-lever-panel>summary{font-size:1rem;font-weight:850;color:var(--detail-label)}
+.multi-lever-panel p,.multi-lever-switch label{font-size:.86rem;line-height:1.5}
+.multi-lever-switch{min-height:54px;padding:11px}
+.multi-lever-switch input{width:22px;height:22px;flex-basis:22px}
+.multi-nico-hint{display:block;min-height:44px;padding:8px 12px;margin:8px 0;
+ background:var(--detail-bg);color:var(--text);border:1px solid var(--border);
+ border-radius:10px;cursor:pointer;font:inherit;font-weight:700}
+.multi-nico-hint-text{background:var(--detail-bg);border-left:3px solid var(--primary);
+ padding:10px;line-height:1.5}
+.i2-classic-recovery{margin:15px 0;border:1px solid var(--border);
+ border-radius:11px;padding:8px 12px}
+.i2-classic-recovery>summary{min-height:44px;padding:8px 0;cursor:pointer;
+ font-size:.85rem;color:var(--muted);font-weight:650}
+.i2-classic-recovery .choice-list{margin-top:9px}
+@media(max-width:355px){
+ .nico-journey-dialog{width:calc(100vw - 12px);max-height:calc(100dvh - 12px);padding:11px}
+ .nico-journey-art{min-height:112px}.nico-journey-portrait{height:120px;width:110px}
+ .nico-journey-title{font-size:1.12rem}
+ .i2-recovery-nico-lead>.nico-scene-portrait{flex-basis:66px;width:66px}
+}
+@media(max-height:620px){.nico-journey-art{min-height:85px}.nico-journey-portrait{height:100px;width:96px}}
+@media(prefers-reduced-motion:reduce){.nico-journey-dialog{scroll-behavior:auto}}
+@media(forced-colors:active){.nico-journey-dialog,.nico-journey-bubble,
+ .nico-manager-tutorial,.i2-recovery-nico-lead,.multi-lever-panel[open]{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* I2-36 · Operational updates from the real 12-day model, not artificial randomness. */
+.i2-operational-alerts{display:grid;gap:8px;margin:12px 0;
+ padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.i2-operational-alerts>strong{font-size:.83rem;letter-spacing:.03em;color:var(--detail-label)}
+.i2-operational-alerts p{font-size:.82rem;line-height:1.5;margin:0!important}
+.i2-operational-alert{display:grid;gap:5px;background:var(--detail-bg);
+ border:1px solid var(--border);border-left:3px solid var(--primary);
+ border-radius:9px;padding:9px}
+.i2-operational-alert>strong{font-size:.86rem}
+@media(forced-colors:active){.i2-operational-alerts,.i2-operational-alert{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* In the recovery scene, the multi-action compare button is the primary path;
+ * keep the legacy single-action footer available without competing visually. */
+#gameNext.recovery-classic-footer{background:var(--detail-bg);color:var(--muted);
+ border:1px solid var(--border);font-weight:650}
+
+/* Nico now mentors in the decision tab, not only behind the hidden Nico tab. */
+.nico-decision-coach{display:flex;align-items:center;gap:10px;margin:9px 0 14px;
+ padding:11px;background:var(--panel);border:1px solid var(--border);
+ border-left:3px solid var(--primary);border-radius:12px}
+.nico-decision-coach>.nico-scene-portrait{flex:0 0 70px;width:70px;height:92px;object-fit:contain}
+.nico-decision-words{flex:1;min-width:0}
+.nico-decision-words strong{font-size:.89rem;line-height:1.4}
+.nico-decision-words p{font-size:.84rem;line-height:1.49;overflow-wrap:anywhere}
+.nico-decision-words .help-trigger{min-height:44px;max-width:100%;white-space:normal}
+@media(max-width:355px){.nico-decision-coach>.nico-scene-portrait{
+ flex-basis:55px;width:55px;height:77px}}
+@media(forced-colors:active){.nico-decision-coach{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}

@@ -37,7 +37,7 @@ test('MVP alpha: eight decisions, explicit reveal, fifth recovery and physical r
   if(i===0)await page.locator('.game-choice').last().click(); // optimistic forecast
   const choices=await page.locator('.game-choice.chosen').count();
   assert.equal(choices,1);
-  assert.equal(await page.locator('.learn-more').count(),2);
+  assert.equal(await page.locator('.learn-more').count(),3);
   assert.equal((await page.locator('#gameScene').innerText()).includes('280 pedidos'),false);
   await continueM(page);
  }
@@ -53,6 +53,7 @@ test('MVP alpha: eight decisions, explicit reveal, fifth recovery and physical r
  const revealed=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),KEY);
  assert.equal(revealed.reveal,true);
  assert.equal(await page.locator('.game-choice').count(),5);
+ await page.locator('.i2-classic-recovery summary').click();
  await page.locator('.game-choice').filter({hasText:'Compra urgente SKU'}).click();
  await page.getByLabel('Día de llegada o traslado').selectOption('13');
  await page.locator('.impact-btn').click();

@@ -13,7 +13,7 @@ test('I2-16: Nico se presenta sin activar consejos y niveles no mutan campaña n
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
   await page.locator('#gameScene h1').filter({hasText:'Hoy tú diriges'}).waitFor();
   const card=page.locator('.nico-welcome');
-  assert.match(await card.innerText(),/¡Hola! Soy Nico, tu compañero de misión/i);
+  assert.match(await card.innerText(),/Soy Nico, tu mentor de CD/i);
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'false',
    'Mostrar el personaje no activa consejos automáticamente');
   const art=page.locator('.nico-avatar img');
@@ -27,13 +27,13 @@ test('I2-16: Nico se presenta sin activar consejos y niveles no mutan campaña n
   assert.equal(await art.evaluate(img=>img.complete&&img.naturalWidth>0),true);
   await page.evaluate(()=>localStorage.setItem('supply-lab-v90','keep-v1'));
   const before=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
-  await page.locator('.nico-lesson summary').click();
+  await page.locator('.nico-manager-tutorial').click();
   assert.equal(await page.locator('#nicoLevel').inputValue(),'novato');
-  assert.equal(await page.locator('#nicoTutorialSteps p').count(),3);
+  assert.match(await page.locator('.nico-journey-progress').innerText(),/1 DE 7/);
   await page.locator('#nicoLevel').selectOption('intermedio');
-  assert.match(await page.locator('#nicoTutorialSteps').innerText(),/pronóstico|Revisa/);
   await page.locator('#nicoLevel').selectOption('avanzado');
-  assert.match(await page.locator('#nicoTutorialSteps').innerText(),/baseline/);
+  assert.equal(await page.locator('.nico-journey-depth').getAttribute('open'),'');
+  await page.locator('.nico-journey-close').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),before);
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-v90')),'keep-v1');
   await page.locator('.mentor-toggle').click();
@@ -47,8 +47,9 @@ test('I2-16: Nico se presenta sin activar consejos y niveles no mutan campaña n
   await page.reload({waitUntil:'networkidle'});
   assert.equal(await page.locator('.mentor-toggle').getAttribute('aria-expanded'),'true');
   await page.locator('#gameBack').click();
-  await page.locator('.nico-lesson summary').click();
+  await page.locator('.nico-manager-tutorial').click();
   assert.equal(await page.locator('#nicoLevel').inputValue(),'avanzado');
+  await page.locator('.nico-journey-skip').click();
   assert.equal(await page.locator('#gameNext').innerText(),'Comenzar misión →');
   for(const [width,height] of [[320,568],[360,640],[390,844],[430,932],[740,360]]){
    await page.setViewportSize({width,height});

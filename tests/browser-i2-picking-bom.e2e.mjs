@@ -16,9 +16,12 @@ test('I2-24: Picking BOM visible, antes no se revela demanda y después hay deta
   await page.evaluate(()=>localStorage.setItem('supply-lab-v90','untouched-v1'));
   const tutorial=page.locator('.nico-manager-tutorial').first();
   assert.equal(await tutorial.count(),1,'Se reutiliza tutorial ya integrado por PR114');
-  await tutorial.locator('summary').first().click();
-  assert.equal(await tutorial.locator('.nico-manager-chapter').count(),7);
-  await tutorial.locator('.nico-skip-tutorial').click();
+  await tutorial.click();
+  assert.match(await page.locator('.nico-journey-progress').innerText(),/1 DE 7/);
+  await page.locator('.nico-journey-skip').click();
+  await page.locator('.nico-journey-dialog').waitFor({state:'detached'});
+  // Closing a separate tutorial returns to the briefing; begin explicitly.
+  await page.locator('#gameNext').click();
   for(let i=0;i<6;i++)await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene h1').innerText(),/Picking/);
   await page.getByRole('tab',{name:'Indicadores'}).click();

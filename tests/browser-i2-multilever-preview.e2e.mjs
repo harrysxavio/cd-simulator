@@ -34,7 +34,7 @@ for(const reservePrelocated of [false,true]){
    const saved=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
    const panel=page.locator('.multi-lever-panel');
    assert.equal(await panel.count(),1);
-   await panel.locator('summary').first().click();
+   if(!(await panel.evaluate(el=>el.open)))await panel.locator('summary').first().click();
    assert.equal(await page.locator('#multiReserve').isDisabled(),!reservePrelocated);
    await page.locator('#multiCompare').click();
    assert.match(await page.locator('.multi-compare-conclusion').innerText(),/No|Servicio|Gasto/);

@@ -14,7 +14,8 @@ test('I2-13: first-time briefing on phone, start in one action, safe exit and re
   await page.locator('#gameScene h1').filter({hasText:'Hoy tú diriges'}).waitFor();
   assert.equal(await page.locator('.intro-fact').count(),3);
   assert.deepEqual((await page.locator('.intro-fact strong').allInnerTexts()),['8','3','12']);
-  assert.equal(await page.locator('.briefing-step').count(),3);
+  assert.equal(await page.locator('.briefing-step').count(),0);
+  assert.equal(await page.locator('.nico-manager-tutorial').count(),1);
   assert.match(await page.locator('#gameScene').innerText(),/centro de distribución \(CD\)/i);
   assert.match(await page.locator('#gameScene').innerText(),/200 pedidos previstos/);
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos|40 %/);
