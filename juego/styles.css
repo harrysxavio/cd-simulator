@@ -1254,3 +1254,15 @@ html,body{height:100%;overflow:hidden}
 @media(forced-colors:active){.nico-journey-dialog,.nico-journey-bubble,
  .nico-manager-tutorial,.i2-recovery-nico-lead,.multi-lever-panel[open]{
  background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* I2-36 · Operational updates from the real 12-day model, not artificial randomness. */
+.i2-operational-alerts{display:grid;gap:8px;margin:12px 0;
+ padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.i2-operational-alerts>strong{font-size:.83rem;letter-spacing:.03em;color:var(--detail-label)}
+.i2-operational-alerts p{font-size:.82rem;line-height:1.5;margin:0!important}
+.i2-operational-alert{display:grid;gap:5px;background:var(--detail-bg);
+ border:1px solid var(--border);border-left:3px solid var(--primary);
+ border-radius:9px;padding:9px}
+.i2-operational-alert>strong{font-size:.86rem}
+@media(forced-colors:active){.i2-operational-alerts,.i2-operational-alert{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
