@@ -262,7 +262,7 @@ function advancedSettings(){
    note:'Cambiar el tamaño de la muestra modifica la planificación y las compras originales.',
    values:I2_ADVANCED_FIELDS.plannedOrders.map(x=>({value:x,label:x+' pedidos'}))},
   {key:'pickingLimitSkuPerDay',id:'advancedPicking',label:'Tope de Picking (SKU por jornada)',
-   note:'Limita físicamente las unidades que se preparan al día; no representa operarios.',
+   note:'Limita físicamente las unidades que se preparan al día; no representa operarios. Cambiar este límite durante el reto guiado lo convierte en un escenario personalizado.',
    values:[{value:'base',label:'Según decisiones del CD'},
     {value:'10',label:'Estrés · 10 SKU / día'},
     {value:'40',label:'Restringido · 40 SKU / día'}]},
@@ -432,8 +432,10 @@ function nicoWelcome(){
 /** An explicitly selectable operational exercise, not just a renamed demand shock. */
 function pickingPilotStartCard(){
  const active=i2IsPickingPilot(state);
+ const locked=state.confirmedAreas.length>0;
  const control=node('button',{className:'i2-picking-pilot-button',attrs:{type:'button'},
   text:active?'Volver al reto inicial':'Activar reto de diagnóstico'});
+ control.disabled=locked;
  control.addEventListener('click',()=>{
   try{
    state=active?i2LeavePickingPilot(state):i2StartPickingPilot(state);
@@ -445,6 +447,7 @@ function pickingPilotStartCard(){
   p(active?'Reto de Picking activo: tope físico conocido de 10 unidades SKU por jornada.':
    'Opcional: dirige un CD cuyo Picking solo puede procesar 10 unidades de producto por jornada. La demanda observada sigue oculta.','note'),
   p('Tu reto: decidir dónde conviene actuar y cuándo aceptar un límite en vez de gastar sin beneficio. Las metas generales son orientativas; puede no ser físicamente posible alcanzarlas.','footnote'),
+  ...(locked?[p('Ya confirmaste una decisión. Para cambiar de reto, reinicia la campaña.','footnote')]:[]),
   control
  ]);
 }
@@ -486,9 +489,9 @@ function pickingPilotDebriefPanel(){
 }
 function intro(){
  const brief=i2FirstMissionBriefing(state);
- stage.textContent='Misión 01 · Tu primer turno';
+ stage.textContent=i2IsPickingPilot(state)?'Reto guiado · Picking':'Misión 01 · Tu primer turno';
  replace([
-  p('MISIÓN 01 · '+brief.role,'eyebrow'),
+  p((i2IsPickingPilot(state)?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
   heading(brief.title),
   p(brief.meaning,'intro-meaning'),
   p(brief.objective,'lead'),
