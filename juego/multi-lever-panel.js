@@ -63,7 +63,7 @@ export function renderI2MultiLeverPanel({
   group.append(title,select);
   return {group,select};
  };
- const buy=check('multiBuy','1 · Comprar productos faltantes (compra urgente)',draft.urgentPurchase.enabled);
+ const buy=check('multiBuy','1 · Compras: adquirir SKU faltantes',draft.urgentPurchase.enabled);
  const buyFields=elem('div','multi-lever-params');
  const arrival=choices('multiBuyDay','Llegada de compra · día',[1,2,5,10,13],draft.urgentPurchase.arrivalDay);
  const coverage=choices('multiCoverage','Cobertura del faltante (%)',[0,25,50,75,100],draft.urgentPurchase.coveragePercent);
@@ -71,14 +71,14 @@ export function renderI2MultiLeverPanel({
   para('Los días son jornadas de esta simulación de 12 días, no fechas del calendario. Día 13 queda fuera del corte. Si pruebas una llegada anterior al momento de decisión, estás haciendo un experimento retrospectivo, no una compra ejecutable en tiempo real.','footnote'));
  controls.append(buyFields);
  const physicalReserve=state.advanced.reservePercent??0;
- const reserve=check('multiReserve','2 · Utilizar reserva física ya separada',draft.reserveTransfer.enabled,physicalReserve===0);
+ const reserve=check('multiReserve','2 · Inventario: liberar reserva ya separada',draft.reserveTransfer.enabled,physicalReserve===0);
  const reserveFields=elem('div','multi-lever-params');
  const release=choices('multiRelease','Traslado de reserva · día',[1,2,5,10,13],draft.reserveTransfer.releaseDay);
  reserveFields.append(release.group);controls.append(reserveFields);
  controls.append(para(physicalReserve>0
   ?'Reserva '+physicalReserve+' % ubicada antes de la sorpresa. Trasladar cambia ubicación, no suma existencias.'
   :'Reserva no disponible. Para activarla, reinicia y ubica 25 % del stock inicial en Configuración avanzada ANTES de confirmar Comercial.','footnote'));
- const boost=check('multiBoost','3 · Reforzar capacidad de preparación (+80 cupos nominales/jornada)',draft.capacityBoost.enabled);
+ const boost=check('multiBoost','3 · Picking: reforzar preparación (+80 cupos nominales/jornada)',draft.capacityBoost.enabled);
  controls.append(para('Este refuerzo cuesta dinero si se activa. No agrega inventario ni elimina cualquier límite físico de SKU; el beneficio debe comprobarse.','footnote'));
  controls.append(para('Meta servicio '+I2_GOALS[objectives.goal].serviceTargetPercent+
   ' % · límite de gasto adicional '+money.format(objectives.incrementalBudgetCLP)+
