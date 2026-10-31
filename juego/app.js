@@ -7,6 +7,7 @@ import {newI2GameState,loadI2GameState,saveI2GameState} from '../src/i2-game-sta
 import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
+import {openI2NicoJourney} from './nico-journey-dialog.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
 import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
@@ -62,7 +63,7 @@ let preview=null;
 // I2-29: transient preview only; I2-30 owns confirmation and persistence.
 let multiDraft=state.recoveryConfirmation?.actions??i2EmptyRecoveryActions();
 let multiPreview=null;
-let multiOpened=false;
+let multiOpened=true;
 let areaTab='decision'; // solo navegación visual; nunca persistir en campaña
 let objectives=i2ReadObjectives(window.localStorage);
 let showGuide=false;
@@ -160,7 +161,7 @@ function gameTransition(action){
   areaTab='decision';
   preview=null;
   if(action==='restart'){
-   multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=false;
+   multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;
   }
   saveAndRender();
  }catch(e){showError(e)}
@@ -338,30 +339,27 @@ function advancedSummary(){
 }
 /** Presentación breve, independiente de revelar resultados y sin forzar consejos. */
 /** Extra pedagógica opcional. Su lectura no toca las decisiones ni el motor. */
+/** A dedicated tutorial window, not seven nested dropdowns on the game screen. */
 function nicoManagerTutorial({duringGame=false}={}){
- const panel=node('details',{className:'nico-manager-tutorial'});
- panel.append(node('summary',{text:duringGame
-  ?'Reabrir tutorial: cómo funciona un CD'
-  :'Conocer mi misión con Nico · tutorial de gerente'}));
- const chapters=section('nico-manager-chapters',
-  I2_NICO_MANAGER_TOUR.map(item=>{
-   const chapter=node('details',{className:'nico-manager-chapter'});
-   chapter.append(node('summary',{text:item.title}),
-    p(item.body),p('Por ejemplo: '+item.example,'note'),
-    p('Como gerente, mira esto: '+item.watch,'mentor-example'),
-    p('¿Y el cliente? '+item.consumer,'footnote'));
-   return chapter;
-  }));
- panel.append(
-  p('Este recorrido es voluntario. Puedes abrir solo los capítulos que te interesen, cerrarlo y seguir jugando.','footnote'),
-  chapters
- );
- if(!duringGame){
-  const skip=node('button',{className:'nico-skip-tutorial',text:'Saltar tutorial y empezar ahora',attrs:{type:'button'}});
-  skip.addEventListener('click',()=>gameTransition('start'));
-  panel.append(skip);
- }
- return panel;
+ const trigger=node('button',{
+  className:'nico-manager-tutorial',
+  text:duringGame?'Reabrir tutorial con Nico':'Conocer el juego con Nico · 7 pasos',
+  attrs:{type:'button','aria-haspopup':'dialog'}
+ });
+ trigger.addEventListener('click',()=>{
+  openI2NicoJourney({
+   source:trigger,portraitSrc:i2NicoPortraitAsset().src,
+   level:guideLevel,
+   onLevel:level=>{
+    try{
+     guideLevel=saveI2NicoLevel(window.localStorage,level);
+     const current=root.querySelector('#gameGuide');
+     if(current)current.replaceWith(guideElement());
+    }catch(error){showError(error)}
+   }
+  });
+ });
+ return trigger;
 }
 function nicoManagerArea(areaId){
  const guide=i2NicoManagerGuide(areaId,guideLevel);
@@ -393,40 +391,20 @@ function nicoManagerArea(areaId){
  return doc;
 }
 function nicoWelcome(){
- const avatar=section('nico-avatar',[
-  node('span',{className:'nico-avatar-fallback',text:'NC',attrs:{'aria-hidden':'true'}}),
-  nicoImage(i2NicoPortraitAsset().src,{width:76,height:92})
- ]);
- const intro=section('nico-intro-text',[
-  node('strong',{text:'¡Hola! Soy Nico, tu compañero de misión'}),
-  p('Vamos a recorrer el CD juntos. Te explicaré lo importante con ejemplos y tú tomarás las decisiones.','nico-intro-line')
- ]);
  const card=section('nico-welcome',[
-  section('nico-welcome-head',[avatar,intro])
+  section('nico-welcome-head',[
+   section('nico-avatar',[
+    node('span',{className:'nico-avatar-fallback',text:'NC',attrs:{'aria-hidden':'true'}}),
+    nicoImage(i2NicoPortraitAsset().src,{width:88,height:100})
+   ]),
+   section('nico-intro-text',[
+    node('strong',{text:'Soy Nico, tu mentor de CD'}),
+    p('Yo te enseño cómo funciona la operación. Tú eliges qué hacer y revisamos juntos lo que sucede.','nico-intro-line')
+   ])
+  ]),
+  nicoManagerTutorial(),
+  p('Puedes comenzar directamente y abrir el tutorial cuando quieras.','footnote')
  ]);
- const detail=node('details',{className:'nico-lesson'});
- detail.append(node('summary',{text:'Elegir nivel y ver tutorial (opcional)'}));
- const group=section('management-field');
- const sel=node('select',{attrs:{id:'nicoLevel'}});
- for(const x of I2_NICO_LEVELS){
-  const option=node('option',{attrs:{value:x.id},text:x.label});
-  option.selected=x.id===guideLevel;
-  sel.append(option);
- }
- const steps=section('nico-tutorial-steps',i2NicoTutorial(guideLevel).map(line=>p(line)));
- steps.id='nicoTutorialSteps';
- sel.addEventListener('change',()=>{
-  try{
-   guideLevel=saveI2NicoLevel(window.localStorage,sel.value);
-   steps.replaceChildren(...i2NicoTutorial(guideLevel).map(line=>p(line)));
-   const current=root.querySelector('#gameGuide');
-   if(current)current.replaceWith(guideElement());
-  }catch(e){showError(e)}
- });
- group.append(node('label',{text:'Experiencia con Nico',attrs:{for:'nicoLevel'}}),sel,
-  p('El nivel modifica las explicaciones, no la dificultad ni el resultado.','footnote'));
- detail.append(group,steps);
- card.append(detail,nicoManagerTutorial());
  return card;
 }
 /** An explicitly selectable operational exercise, not just a renamed demand shock. */
@@ -507,13 +485,7 @@ function intro(){
   ]:[]),
   pickingPilotStartCard(),
   nicoWelcome(),
-  section('briefing-steps',[
-   node('strong',{text:'Tu desafío en 3 pasos'}),
-   ...brief.steps.map((step,index)=>section('briefing-step',[
-    node('span',{className:'briefing-number',text:String(index+1)}),
-    p(step)
-   ]))
-  ]),
+  p('Primero planificarás las ocho áreas. Después verás qué cambió y podrás combinar intervenciones para responder.','note'),
   node('p',{className:'note',text:'Partimos con '+num.format(brief.plannedOrders)+' pedidos previstos en una muestra. La demanda real sigue oculta.',attrs:{id:'gamePlanOrders'}}),
   node('p',{className:'management-target',text:objectivesSummary(),attrs:{id:'managementTarget'}}),
   node('p',{className:'footnote',text:'Reto activo: '+i2ChallengeForSeed(state.seed).level,attrs:{id:'gameChallengeLabel'}}),
@@ -986,16 +958,17 @@ function recoveryScene(){
   ...(i2IsPickingPilot(state)?[
    p('Nico: el límite físico de Picking es conocido desde el inicio. Pregúntate si la recuperación que vas a comprar realmente altera ese límite. Puedes elegir no intervenir.','note')
   ]:[]),
-  section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
-  p('Tu acción gerencial','option-heading'),
-  section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
-   state=i2ClearMultiRecovery(state);
-   state.recovery=c.optionId;preview=null;multiPreview=null;saveAndRender();
-  },{selected:state.recovery===c.optionId}))),
-  labeledSelect('Día de llegada o traslado', [1,2,5,10,13],state.arrivalDay,x=>{state.arrivalDay=x;preview=null;saveAndRender()}),
-  labeledSelect('Cobertura de compra extraordinaria (%)',[0,25,50,75,100],state.coverage,x=>{state.coverage=x;preview=null;saveAndRender()}),
-  section('impact-wrap',[
-   node('button',{className:'impact-btn',text:'Consultar impacto potencial',attrs:{type:'button'}})
+  section('i2-recovery-nico-lead',[
+   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('analysis')]:[]),
+   section('i2-recovery-mentor-message',[
+    node('strong',{text:'Nico · Tú diriges la recuperación'}),
+    p('Puedes activar ninguna, una o varias acciones. Primero revisa dónde está el límite; después compara pedidos recuperados y gasto.','note'),
+    p('No intervenir también es una decisión válida. Pagar refuerzos no garantiza pedidos adicionales.','footnote')
+   ])
+  ]),
+  section('i2-recovery-workbench-title',[
+   node('strong',{text:'1 · Arma tu plan de acciones'}),
+   p('Marca las acciones compatibles, ajusta sus fechas y calcula el resultado conjunto antes de confirmar.','note')
   ]),
   renderI2MultiLeverPanel({
    state,objectives,draft:multiDraft,opened:multiOpened,preview:multiPreview,
@@ -1013,7 +986,21 @@ function recoveryScene(){
     persist();render();
    },
    onError:showError
-  })
+  }),
+  node('details',{className:'i2-classic-recovery'},[
+   node('summary',{text:'O usar una decisión simple (modo clásico)'}),
+   p('Este es el modo anterior de cinco respuestas individuales. Para combinar acciones utiliza el plan de arriba.','footnote'),
+   p('Selecciona una alternativa simple','option-heading'),
+   section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
+    state=i2ClearMultiRecovery(state);
+    state.recovery=c.optionId;preview=null;multiPreview=null;saveAndRender();
+   },{selected:state.recovery===c.optionId}))),
+   labeledSelect('Día de llegada o traslado', [1,2,5,10,13],state.arrivalDay,x=>{state.arrivalDay=x;preview=null;saveAndRender()}),
+   labeledSelect('Cobertura de compra extraordinaria (%)',[0,25,50,75,100],state.coverage,x=>{state.coverage=x;preview=null;saveAndRender()}),
+   section('impact-wrap',[
+    node('button',{className:'impact-btn',text:'Consultar impacto potencial',attrs:{type:'button'}})
+   ])
+  ])
  ]);
  const impact=root.querySelector('.impact-btn');
  impact.addEventListener('click',()=>{
@@ -1036,6 +1023,7 @@ function recoveryScene(){
   // Explicit legacy CTA cannot silently commit an old multi event.
   if(state.recoveryConfirmation)state=i2ClearMultiRecovery(state);
  }});
+ primary.textContent='Confirmar opción simple →';
 }
 /** After revealing, the manager can review decisions without revising the sealed plan. */
 function reviewScene(){
