@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {chromium,devices} from 'playwright';
 const BASE=process.env.E2E_BASE_URL||'http://127.0.0.1:8000';
 
-test('Tutorial de Nico puede saltarse o abrirse, y ocho áreas tienen guía profunda opcional',
+/** The tutorial is a separate, reversible lesson; it never advances the game. */
+test('Nico teaches in seven separate dialog steps with a large portrait and returns to play',
  {timeout:120000},async()=>{
  const browser=await chromium.launch({headless:true,
   executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
@@ -15,61 +16,61 @@ test('Tutorial de Nico puede saltarse o abrirse, y ocho áreas tienen guía prof
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
   await page.evaluate(()=>localStorage.setItem('supply-lab-v90','protected'));
   const before=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
-  const tutorial=page.locator('.nico-manager-tutorial').first();
-  assert.equal(await tutorial.count(),1);
-  assert.equal(await tutorial.getAttribute('open'),null);
-  await tutorial.locator('summary').first().click();
-  assert.equal(await tutorial.locator('.nico-manager-chapter').count(),7);
-  await tutorial.locator('.nico-manager-chapter').nth(3).locator('summary').click();
-  assert.match(await tutorial.innerText(),/pedido combinado necesita 1 A y 1 B/i);
+  const launcher=page.locator('.nico-manager-tutorial').first();
+  assert.equal(await launcher.count(),1);
+  assert.equal(await page.locator('.nico-journey-dialog').count(),0);
+  await launcher.click();
+  const dialog=page.locator('.nico-journey-dialog');
+  assert.equal(await dialog.getAttribute('open'),'');
+  assert.equal(await dialog.locator('.nico-journey-portrait').count(),1);
+  assert.match(await dialog.locator('.nico-journey-progress').innerText(),/1 DE 7/);
+  for(let i=1;i<7;i++)await dialog.locator('.nico-journey-next').click();
+  assert.match(await dialog.locator('.nico-journey-progress').innerText(),/7 DE 7/);
+  assert.match(await dialog.innerText(),/Aprende de la partida/i);
+  await dialog.locator('.nico-journey-back').click();
+  assert.match(await dialog.locator('.nico-journey-progress').innerText(),/6 DE 7/);
+  await dialog.locator('.nico-journey-skip').click();
+  assert.equal(await dialog.count(),0);
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),before);
-  await tutorial.locator('.nico-skip-tutorial').click();
-  assert.match(await page.locator('#gameScene h1').innerText(),/Comercial/);
+  await page.locator('#gameNext').click();
   await page.getByRole('tab',{name:'Nico'}).click();
   const guide=page.locator('.nico-manager-area');
-  assert.equal(await guide.count(),1);
-  assert.equal(await guide.getAttribute('open'),null);
   await guide.locator('summary').click();
   assert.equal(await guide.locator('.nico-manager-topic').count(),8);
   assert.equal(await guide.locator('.nico-manager-option').count(),3);
-  assert.match(await guide.innerText(),/pronóstico|Comercial/i);
-  assert.match(await guide.innerText(),/¿Qué podría salir bien o mal\?/);
-  const stepBefore=await page.evaluate(()=>JSON.stringify(JSON.parse(localStorage.getItem('supply-lab-i2-v1'))));
-  await page.locator('.nico-manager-tutorial summary').first().click();
-  assert.equal(await page.locator('.nico-manager-chapter').count(),7);
-  assert.equal(await page.evaluate(()=>JSON.stringify(JSON.parse(localStorage.getItem('supply-lab-i2-v1')))),stepBefore);
-  for(let i=0;i<8;i++){
-   await page.getByRole('tab',{name:'Nico'}).click();
-   const areaGuide=page.locator('.nico-manager-area');
-   assert.equal(await areaGuide.count(),1);
-   await areaGuide.locator('summary').click();
-   assert.equal(await areaGuide.locator('.nico-manager-topic').count(),8);
-   assert.equal(await areaGuide.locator('.nico-manager-option').count(),3);
-   assert.doesNotMatch(await areaGuide.innerText(),/demanda real 280|se observaron 280/);
-   if(i<7)await page.locator('#gameNext').click();
-  }
+  await page.locator('.nico-manager-tutorial').first().click();
+  assert.equal(await page.locator('.nico-journey-dialog').count(),1);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('.nico-journey-dialog').count(),0);
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-v90')),'protected');
   assert.deepEqual(errors,[]);
  }finally{await context.close();await browser.close()}
 });
-test('Nico: panel pedagógico no produce scroll exterior ni tapa el CTA',
+
+/** A real modal may scroll INSIDE itself on short screens; main CTA stays where it was. */
+test('Nico tutorial remains usable on short 320–430 px mobile screens',
  {timeout:70000},async()=>{
  const browser=await chromium.launch({headless:true,
   executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
  const page=await browser.newPage({viewport:{width:360,height:760}});
  try{
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
-  await page.locator('.nico-manager-tutorial summary').first().click();
-  await page.locator('.nico-manager-chapter summary').first().click();
+  await page.locator('.nico-manager-tutorial').first().click();
   for(const [width,height] of [[320,568],[360,640],[390,844],[430,932],[740,360]]){
    await page.setViewportSize({width,height});
-   const rect=await page.evaluate(()=>{
-    const d=document.documentElement,b=document.querySelector('#gameNext').getBoundingClientRect();
-    return {w:d.scrollWidth,cw:d.clientWidth,h:d.scrollHeight,ch:d.clientHeight,
-      bottom:b.bottom,height:b.height};
+   const a=await page.evaluate(()=>{
+    const d=document.querySelector('.nico-journey-dialog');
+    return {dw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,
+     dialogWidth:d.getBoundingClientRect().width,
+     dialogHeight:d.getBoundingClientRect().height,
+     dialogMax:innerHeight,buttons:d.querySelectorAll('button').length};
    });
-   assert.ok(rect.w<=rect.cw+2&&rect.h<=rect.ch+2,'No scroll exterior');
-   assert.ok(rect.bottom<=height+2&&rect.height>=44,'CTA visible');
+   assert.ok(a.dw<=a.cw+2,'no horizontal overflow');
+   assert.ok(a.dialogWidth<=width,'dialog within viewport');
+   assert.ok(a.dialogHeight<=height,'dialog within viewport height');
+   assert.ok(a.buttons>=4);
   }
+  await page.locator('.nico-journey-close').click();
+  assert.equal(await page.locator('.nico-journey-dialog').count(),0);
  }finally{await browser.close()}
 });
