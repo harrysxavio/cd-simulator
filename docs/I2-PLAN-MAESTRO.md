@@ -8,6 +8,29 @@
 
 **Fuente de verdad para ejecuciones futuras:** este plan. El [plan V1 de 43 microfases](EXECUTION-PLAN-43.md) permanece separado; I2 no altera su histórico ni cierra M7-38/M8-42 por asociación. Consultar [auditoría](I2-AUDITORIA-BASE-V11.68.md), [UX/guion](I2-EXPERIENCIA-MOVIL.md), [arquitectura y pruebas](I2-ARQUITECTURA-Y-PRUEBAS.md).
 
+## Continuación operativa Lab11 · corte 31-10-2026
+
+El PR #132 está integrado (Nico tutorial independiente de siete pasos, recuperación
+multiacción prioritaria, pistas en cada área y alertas basadas en el ledger).
+**35/41 microfases principales continúan formalmente aceptadas:** ese PR no
+aprueba automáticamente F8 ni I2-35.
+
+Para **I2-35.5** se establece secuencia verificable sin IDs adicionales:
+- **35.5a — motor de incidentes:** Recepción detenida y retención temporal en
+  Calidad con calendario `eventSeed` independiente de la demanda, tests
+  causales y conservación. Rama de trabajo, no jugable.
+- **35.5b — integración de baseline:** reutilizar contrato SKU, PO iniciales,
+  ledger y alternativas bajo el MISMO evento; dos fixtures que discriminen
+  políticas y generen consecuencias útiles, sin reinterpretar capacidad.
+- **35.5c — experiencia del jugador:** persistencia sellada predecisión,
+  revelación con reloj causal, Nico explica consecuencias, estrategias
+  gerenciales ejecutables y gasto incremental contra objetivos.
+- **35.5d — QA y liberación:** batería de semillas, V1, Chromium, móviles,
+  accesibilidad humana, Pages/HTTP y evidencia; sólo entonces aceptar I2-35.5.
+
+[Contrato técnico y estado de este corte](I2-35-5-EVENTOS-OPERACIONALES-FISICOS.md).
+No declarar eventos verdaderamente jugables durante 35.5a.
+
 ## A. Contrato de avance
 
 Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico, prueba automatizada, revisión de regresión V1, merge a main, chequeos post-merge y, si afecta publicación, Pages + HTTP servido real. Registrar SHA, links y limitaciones en **docs/I2-STATUS.md** antes de declararla completa.
