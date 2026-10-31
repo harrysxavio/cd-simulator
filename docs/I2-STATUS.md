@@ -6,6 +6,17 @@
 > **Checkpoint 31-10-2026 · I2-35.2 piloto ARC-06 (rama):** se incorporó a `feat/i2-35-2-picking-guided-pilot` el primer recorrido de **diagnóstico de Picking** activable desde portada, con restricción física conocida de 10 SKU/jornada, persistencia de esquema actual, ocho decisiones, cierre y reflexión contrafactual a demanda. Archivos: `src/i2-guided-picking-pilot.js`, `juego/app.js`, `juego/styles.css`, pruebas Node/E2E y [contrato](I2-35-2-PILOTO-PICKING-JUGABLE.md). **Código en rama, no integrado ni publicado** hasta CI/merge y validación HTTP. La semilla es la existente `alpha-case-04`; no afirmar nuevo evento exógeno ni resolución del cuello con refuerzos. I2-35.2/F7 siguen **parciales**. Siguiente: CI → corregir → merge → verificar Pages; después diseñar otra misión con cuello distinto y condiciones de éxito profesional.
 
 
+## Actualización UX visible · 31-10-2026
+
+**[PR #132](https://github.com/harrysxavio/cd-simulator/pull/132) FUSIONADO** con commit `05d5ffa9feabe853c048f274c0775aab01fa8d5b`. **Node, verificación funcional enfocada y Chromium completo: verdes en HEAD `b5b4442` antes del merge.** Cambios de juego: tutorial independiente de Nico en siete pasos con personaje grande, siguiente/atrás/cerrar/saltar y reabrir; Nico orienta cada decisión de área; multiacción abierta y prioritaria por Compras/Inventario/Picking con pistas y fechas explicadas; modo clásico secundario; señales de problemas físicos de la simulación tras revelación. [Contrato y límites](I2-36-UX-JUGABILIDAD-VISIBLE.md).
+
+**Estados:** I2-36.2, 36.3 y 36.4 con **corte de interfaz integrado** pero **aceptación completa pendiente** de revisión pedagógica y humana; I2-35.5 tiene señales operacionales calculadas, **no incidentes exógenos aleatorios**. F7 continúa **4/5**, F8 **0/5** y el histórico **35/41** por ID principal: no recontar subfases.
+
+**Publicación:** tras merge el primer chequeo HTTP recuperó JS/CSS **antiguos** y `nico-journey-dialog.js` HTTP 404; **despliegue nuevo aún no verificado** en ese momento. No declarar que el usuario ve cambios hasta que JS/CSS/módulo estén servidos.
+
+**Próximos pasos exactos:** (1) verificar Pages JS con `openI2NicoJourney`, CSS con `.nico-journey-dialog` y módulo `nico-journey-dialog.js` HTTP 200; (2) implementar dos eventos exógenos con física real y semillas reproducibles independientes de demanda, con reloj causal; (3) más decisiones operacionales por área, metas y costos marginales; (4) QA humano en Android/TalkBack, zoom y usuarios principiantes; (5) consolidar F8 y publicar release.
+
+---
 ## Estado vigente · 31-10-2026
 
 **Línea base:** I2-00–I2-34 fusionadas; F0–F6 técnicamente completas, F7 **4/5** (I2-35 padre abierto), F8 **0/5**. El indicador histórico sigue siendo **35/41 IDs originales** (85,4 % por conteo, no esfuerzo).
