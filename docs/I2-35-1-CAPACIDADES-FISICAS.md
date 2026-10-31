@@ -39,3 +39,21 @@
 - Se guardan en logs CI: expedidos, pendientes, máximo de cola de muelle, stock retenido por Calidad, pedidos nunca preparados, staging, gasto extra parcial y diferencia de expedición. **Un valor cero en diferencia de expedición NO invalida el motor: significa que ese parámetro no resultó vinculante en ese fixture.**
 - Hasta revisar resultados de CI no afirmar cuellos efectivos ni estrategia ganadora. Los pares no son misión jugable y no alteran interfaz ni fuentes canónicas.
 - Próximo paso exacto: extraer `I2-35.1 PAIRED_PHYSICAL_EVIDENCE` desde run Node, clasificar pares vinculantes/no vinculantes, escoger fixtures para I2-35.2; después integrar/merge si se satisfacen puertas y actualizar STATUS.
+
+## Evidencia discriminante confirmada por CI Node · 31-10-2026
+Run Node del commit `831198a`: **success**. Semilla `alpha-case-04`, 300 pedidos observados, configuraciones aisladas manteniendo constantes las demás entradas.
+
+| Par | Expedidos configuración limitada | Expedidos configuración ampliada | Δ pedidos | Interpretación |
+|---|---:|---:|---:|---|
+| Recepción low→extra | 98 | 98 | 0 | No vinculante en este fixture; cola máxima 0 SKU |
+| Calidad slow→priority | 98 | 98 | 0 | No vinculante en este fixture; máximo retenido 0 SKU |
+| Picking low→reinforce | 98 | 98 | 0 | No vinculante con capacidades nominales evaluadas |
+| Transporte low→extra | 98 | 98 | 0 | No vinculante; sin staging observable en este fixture |
+| Compras cheap→reliable | 98 | 99 | +1 | Sensibilidad positiva pequeña; no prueba que proveedor tarde |
+| Límite adicional Picking 10 SKU/día→base | 59 | 98 | +39 | **Restricción física vinculante demostrada en esta comparación** |
+
+Los primeros cinco pares reportan 202 pendientes en la configuración limitada, salvo proveedor confiable (201). Las observaciones `dockQueue=0`, `qualityHeld=0` y `staging=0` son del **baseline original** en estos fixtures, nunca una garantía de ausencia de riesgos generales.
+
+**Decisión de producto:** no publicar como misiones distintas ARC-04/05/07 solo porque existen campos para capacidad de muelle, Calidad o Transporte. Se requieren fixtures que produzcan cola/retenido/staging y un efecto estratégico distinto. ARC-06 cuenta con un contraste cuantificado, pero todavía exige balance, gasto y UX propios de misión. ARC-03 requiere evento exógeno de fecha, no mero proveedor elegido en planificación.
+
+**Próximo trabajo:** generar fixtures dirigidos a cada cuello con conservación de BOM y stock; validar respuesta diferencial y no-intervención, después configurar arquetipos jugables I2-35.2. CI Chromium del mismo HEAD todavía en proceso a la hora de la primera revisión.
