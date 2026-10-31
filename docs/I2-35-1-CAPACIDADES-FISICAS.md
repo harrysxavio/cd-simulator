@@ -57,3 +57,8 @@ Los primeros cinco pares reportan 202 pendientes en la configuración limitada, 
 **Decisión de producto:** no publicar como misiones distintas ARC-04/05/07 solo porque existen campos para capacidad de muelle, Calidad o Transporte. Se requieren fixtures que produzcan cola/retenido/staging y un efecto estratégico distinto. ARC-06 cuenta con un contraste cuantificado, pero todavía exige balance, gasto y UX propios de misión. ARC-03 requiere evento exógeno de fecha, no mero proveedor elegido en planificación.
 
 **Próximo trabajo:** generar fixtures dirigidos a cada cuello con conservación de BOM y stock; validar respuesta diferencial y no-intervención, después configurar arquetipos jugables I2-35.2. CI Chromium del mismo HEAD todavía en proceso a la hora de la primera revisión.
+
+## Búsqueda dirigida de restricciones · 31-10-2026
+Se añadió test con **18 combinaciones permitidas**: 2 semillas de demanda × 3 perfiles de stock × 3 políticas de proveedor, manteniendo fuerte Picking, priorizando planificación y limitando Recepción, Calidad y Transporte. El test registra la máxima cola de muelle, inventario retenido por Calidad y staging, o `null` cuando no encuentra evidencia.
+
+**Precaución:** ausencia de un caso en 18 configuraciones no significa imposibilidad física; requiere ampliar espacio de búsqueda o extender el motor. No declarar I2-35.2 desbloqueada hasta evaluar CI y contrastes estratégicos. Próximo paso: recuperar `TARGETED_QUEUE_EVIDENCE` del job Node y añadir aserciones de casos positivos si existen.
