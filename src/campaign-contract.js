@@ -4,6 +4,7 @@ import {SKU_CATALOG} from './sku.js';
 import {SCOPE_DEFINITIONS} from './measurements.js';
 import {skuOpeningState} from './opening-state.js';
 import {auditSkuDecisionBoundary} from './sku-boundary-audit.js';
+import {normalizeOperationalEvents} from './operational-event-schedule.js';
 
 /**
  * One explicitly documented contract between campaign decisions and the SKU lab.
@@ -18,7 +19,8 @@ import {auditSkuDecisionBoundary} from './sku-boundary-audit.js';
 export function campaignSkuContract({
  decisions={},actions={},scenario={},policy='balanced',
  supplierDelay=false,plannedSampleOrders=200,campaignId='SKU-LAB',
- openingStock=null,extraCapacityDailyCost=null,pickingUnitCapacityLimit=null,reservePercent=0
+ openingStock=null,extraCapacityDailyCost=null,pickingUnitCapacityLimit=null,reservePercent=0,
+ operationalEvents=[]
 }={}){
  if(!['lean','balanced','service'].includes(policy))throw new Error('Política SKU inválida');
  if(!Number.isSafeInteger(plannedSampleOrders)||plannedSampleOrders<1||plannedSampleOrders>100000)throw new Error('Tamaño de muestra SKU inválido');
@@ -55,7 +57,9 @@ export function campaignSkuContract({
   delayDays:supplierDelay?{A:8}:{},...skuAreaCapacity,
   ...(extraCapacityDailyCost===null?{}:{extraCapacityDailyCost}),
   ...(pickingUnitCapacityLimit===null?{}:{pickingUnitCapacityLimit}),
-  ...(reservePercent===0?{}:{reservePercent})
+  ...(reservePercent===0?{}:{reservePercent}),
+  // External calendar is only opt-in; default SKU input contract stays intact.
+  ...(operationalEvents.length?{operationalEvents:normalizeOperationalEvents(operationalEvents,12)}:{})
  };
  // Prove each managerial proxy is separated from physical quantities and costs.
  const boundaryAudit=auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSampleOrders,

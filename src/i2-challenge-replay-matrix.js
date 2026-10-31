@@ -23,7 +23,7 @@ const row=x=>Object.freeze({
  * Inputs are passed to one existing model; no scoring formula or synthetic ledger.
  */
 export function i2ChallengeReplayMatrix({choices=i2DefaultChoices(),plannedOrders,advanced=I2_DEFAULT_ADVANCED,seed,
- urgentArrivalDay=2,purchaseCoveragePercent=100}={}){
+ urgentArrivalDay=2,purchaseCoveragePercent=100,operationalEvents=[]}={}){
  // Preserve every setting of the current session (inventory, picking, reserve and cost).
  // plannedOrders remains an explicit compatibility override for existing callers.
  if(plannedOrders!==undefined&&(!fixed(plannedOrders)||!I2_ADVANCED_FIELDS.plannedOrders.includes(plannedOrders)))
@@ -35,7 +35,7 @@ export function i2ChallengeReplayMatrix({choices=i2DefaultChoices(),plannedOrder
   const shock=i2ChallengeReveal(challenge.seed,settings.plannedOrders);
   const results=options.map(option=>{
    const result=i2MvpPhysicalResult({choices,seed:challenge.seed,
-    advanced:settings,option,urgentArrivalDay,purchaseCoveragePercent});
+    advanced:settings,option,urgentArrivalDay,purchaseCoveragePercent,operationalEvents});
    if(result.actualOrders!==shock.actualOrders ||
       result.shippedOrders+result.pendingOrders!==result.actualOrders ||
       !Number.isSafeInteger(result.incrementalExpenseCLP) ||

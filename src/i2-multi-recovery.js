@@ -7,6 +7,7 @@ import {i2DemandEventObserved} from './i2-demand-event.js';
 import {campaignSkuContract} from './campaign-contract.js';
 import {createRecoveryBaseline} from './recovery-baseline.js';
 import {recoveryComparison} from './recovery.js';
+import {i2OperationalEventsForSeed} from './operational-event-schedule.js';
 
 const fail=message=>{throw new Error('I2-28: '+message)};
 const valid=n=>Number.isSafeInteger(n);
@@ -106,7 +107,8 @@ export function i2CompareMultiRecovery({state,plans=[],
   fail('evento revelado no concilia con la campaña SKU');
  // Opt-in only after demand reveal; state/eventSeed persistence is a later phase.
  // All multi-action options reuse a single immutable operational calendar.
- const inputs={...contract.skuInputs,reservePercent,days:12,operationalEvents};
+ const calendar=state.eventSeed?i2OperationalEventsForSeed(state.eventSeed):operationalEvents;
+ const inputs={...contract.skuInputs,reservePercent,days:12,operationalEvents:calendar};
  const baseline=createRecoveryBaseline(inputs);
  const noAction=recoveryComparison({
   ...inputs,option:'wait',baselineSnapshot:baseline,

@@ -9,6 +9,7 @@
  * receipt, dispatch, stock opening or customer delivery in this boundary.
  */
 import {SKU_CATALOG} from './sku.js';
+import {normalizeOperationalEvents} from './operational-event-schedule.js';
 
 const freezeDeep=value=>{
  if(value&&typeof value==='object'&&!Object.isFrozen(value)){
@@ -83,7 +84,14 @@ export function auditSkuDecisionBoundary({area,skuInputs,openingState,plannedSam
   fail('reserva física no corresponde con la apertura precomprometida');
  if(!Object.hasOwn(skuInputs,'reservePercent')&&openingState.reservePercent!==0)
   fail('reserva física sin supuesto de apertura');
- const allowed=['policy','plannedOrders','actualOrders','stock','delayDays',
+ if(Object.hasOwn(skuInputs,'operationalEvents')){
+  // External day/area incidents are not aggregate demand, new purchases or
+  // balance adjustments; only the strict physical calendar is admissible.
+  const scheduled=normalizeOperationalEvents(skuInputs.operationalEvents,12);
+  if(!scheduled.length||JSON.stringify(scheduled)!==JSON.stringify(skuInputs.operationalEvents))
+   fail('calendario operacional no canónico');
+ }
+ const allowed=['operationalEvents','policy','plannedOrders','actualOrders','stock','delayDays',
   'extraCapacityDailyCost','pickingUnitCapacityLimit','reservePercent',
   ...names,'supplierFill'];
  if(Object.keys(skuInputs).some(key=>!allowed.includes(key)))fail('campo agregado no autorizado en el replay SKU');

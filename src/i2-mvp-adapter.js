@@ -42,7 +42,7 @@ export function i2CanonicalChoices(choices){
  */
 export function i2MvpPhysicalResult({
  choices=i2DefaultChoices(),option='wait',urgentArrivalDay=2,purchaseCoveragePercent=100,
- seed=I2_DEFAULT_SEED,advanced=I2_DEFAULT_ADVANCED
+ seed=I2_DEFAULT_SEED,advanced=I2_DEFAULT_ADVANCED,operationalEvents=[]
 }={}){
  if(!I2_RECOVERIES.some(r=>r.optionId===option))
   throw new Error('Misión CD: recuperación inválida');
@@ -62,7 +62,7 @@ export function i2MvpPhysicalResult({
   openingStock:options.openingStock,
   extraCapacityDailyCost:options.extraCapacityDailyCost,
   pickingUnitCapacityLimit:options.pickingUnitCapacityLimit,
-  reservePercent:options.reservePercent,
+  reservePercent:options.reservePercent,operationalEvents,
   scenario:{
    ...DEFAULT_SCENARIO,
    demand:1000,
