@@ -1,27 +1,29 @@
 # Implementación 2 · Estado verificable de Misión CD
 
-> **I2-35.2 · catálogo físico en preparación (31-10-2026):** PR #129 fusionado a main (`03218a7`) con Node+Chromium verdes, pero I2-35.1 conserva limitaciones cronológicas y de variedad. Rama `feat/i2-35-2-evidence-archetypes`: tres sondas canónicas reproducibles en `src/i2-operational-archetype-probes.js`, pruebas Node y [contrato](I2-35-2-ARQUETIPOS-PROBADOS.md). **Todas `playable:false`: no representan nuevas misiones disponibles.** Pendiente CI y PR; próxima acción confirmar valores, diseñar primera experiencia ARC-06 jugable sin causalidad retrospectiva. PR #127 laboratorio en validación separado. Pages sin cambios certificados.
+## Estado vigente · 31-10-2026
 
+**Línea base:** I2-00–I2-34 fusionadas; F0–F6 técnicamente completas, F7 **4/5** (I2-35 padre abierto), F8 **0/5**. El indicador histórico sigue siendo **35/41 IDs originales** (85,4 % por conteo, no esfuerzo).
 
-> **I2-35.1 · 31-10-2026, búsqueda dirigida:** Node del corte anterior `e506f18` aprobado, Chromium en ejecución al consultar. Se añadieron 18 configuraciones canónicas para encontrar testimonios de cola de Recepción, retenciones de Calidad y staging de Transporte; log `TARGETED_QUEUE_EVIDENCE`, test aún no validado por CI del HEAD. Archivos: `tests/i2-35-physical-fixtures.test.mjs` y [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). Próximo paso: leer log, fijar escenarios reproducibles y verificar cambios de estrategia; I2-35.1 no cerrada, PR #129 draft, publicación sin cambios.
+**Tres integraciones de este corte:** [PR #129](https://github.com/harrysxavio/cd-simulator/pull/129) (matriz/sondas, commit `03218a7`), [PR #130](https://github.com/harrysxavio/cd-simulator/pull/130) (tres arquetipos físicos NO jugables, `8c5b364`), [PR #127](https://github.com/harrysxavio/cd-simulator/pull/127) (laboratorio de cinco recuperaciones clásicas al cierre, `f1f9dcb`). Node, Chromium y controles de verificación requeridos resultaron aprobados en esos PR antes de los merges. Se corrigió un selector E2E y un patrón textual de prueba; no se reinterpretaron fallos como aprobaciones.
 
+**Detalle del padre I2-35:**
+- **35.1 – auditoría física:** evidencia integrable de Picking, retención Calidad y gasto sin mejora. Aún faltan muelle y staging vinculantes, y cronología operativa vs contrafactual. **Parcial**.
+- **35.2 – arquetipos diferenciados:** catálogo reproducible ARC-05/06/08 y tests en main, todos `playable:false`. **Parcial**, faltan misiones realmente jugables.
+- **35.3 – incertidumbre y experimentación:** el comparador de cierre está rotulado «Laboratorio» y no se revela antes del resultado; todavía requiere separar todas las acciones retrospectivas de las ejecutables. **Parcial**.
+- **35.4 – comparación retrospectiva:** matriz canónica de cinco alternativas clásicas en cierre de juego, respeta stock, límites, reserva, gasto, plazo y cobertura; render diferido; pruebas Node y E2E clásico/multi. **Integrado técnicamente en main**, publicación sujeta a comprobación Pages.
+- **35.5 – ritmo y diversidad jugable:** **pendiente**.
 
-> **I2-35.1 · resultados discriminantes (31-10-2026):** CI Node de `831198a` aprobada, lectura de logs: con misma semilla +50% (300 pedidos) Recepción, Calidad, Picking nominal y Transporte cambiaron **0 expedidos** (98→98); proveedor económico→confiable **+1** (98→99); límite físico de Picking de 10 SKU/día vs normal **+39** (59→98). No declarar esos cuatro cambios nominales como retos separados. Pruebas de regresión para el contraste añadido en `tests/i2-35-physical-fixtures.test.mjs`; CI del HEAD posterior por comprobar. [Matriz con cifras y límites](I2-35-1-CAPACIDADES-FISICAS.md). Siguiente: fixtures con congestión/retención/staging demostrados, no solo diferencias de parámetros. PR #129 sigue abierto; I2-35.1 sin cierre, Pages sin cambio.
+**Publicación:** URL https://harrysxavio.github.io/cd-simulator/juego/ y `juego/app.js` respondían HTTP **200** en comprobación remota posterior al merge, pero el JS público todavía **NO contenía** la firma del laboratorio de I2-35. Se mantiene el estado **«publicación nueva no verificada»** hasta observar ese recurso actualizado. No afirmar SHA servido solo por tener HTTP 200.
 
+**Bloqueo humano:** Android físico, TalkBack y prueba con usuario principiante siguen pendientes [#67](https://github.com/harrysxavio/cd-simulator/issues/67).
 
-> **I2-35.1 · actualización de pruebas comparativas (31-10-2026):** después del fallo inicial de forma de manifiesto, una ejecución Node del HEAD corregido resultó **verde**; el cambio posterior añadió prueba de pares físicos con la misma demanda en `tests/i2-35-physical-fixtures.test.mjs`, documentación de métricas y protocolo en [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). **La nueva ejecución CI del HEAD aún no está verificada.** PR #129 draft, sin merge, sin nueva versión pública. Próximo paso: extraer los resultados `PAIRED_PHYSICAL_EVIDENCE`, clasificar escenarios vinculantes y ampliar pruebas discriminantes; mantener PR #127 separado. I2-35.1 no cerrada.
+**Próxima acción ejecutable:** (1) volver a comprobar que `/juego/app.js` publicado contenga el identificador `i2ChallengeReplayMatrix` y verificar el despliegue de `f1f9dcb`; (2) construir primera misión jugable ARC-06 respetando información pre-reveal y estrategias reales; (3) buscar fixtures de muelle y staging vinculantes; (4) QA móvil de 320–430 px y educación con usuarios. [Plan maestro](I2-PLAN-MAESTRO.md) · [auditoría](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md) · [arquetipos](I2-35-2-ARQUETIPOS-PROBADOS.md).
 
+**Histórico:** se conserva al final bajo [Archivo de checkpoints previos](#archivo-de-checkpoints-previos). Los estados de PR anteriores allí son fotografías históricas y no deben leerse como vigentes.
 
-> **Seguimiento CI I2-35.1 · 31-10-2026:** PR #129 sigue en revisión. CI inicial: Chromium **verde**, Node **rojo** por supuesto erróneo en prueba `originalPurchaseOrders.length` (no por inconsistencia física demostrada). Prueba ajustada en commit `3e89c0c`, documento de contrato y diagnóstico actualizado; CI del nuevo HEAD en cola a la última revisión. Aún faltan pruebas discriminantes y no se declara cierre ni publicación. [Evidencia](I2-35-1-CAPACIDADES-FISICAS.md).
+---
 
-
-> **CHECKPOINT DE IMPLEMENTACIÓN I2-35.1 · 31-10-2026.** [PR #128](https://github.com/harrysxavio/cd-simulator/pull/128) fusionado a `main` (SHA `440a4c0369f79c92d516994d06be81f96766479e`). **I2-35.1 en curso** en rama `feat/i2-35-1-physical-fixtures`: pruebas de ocho candidatos físicos en `tests/i2-35-physical-fixtures.test.mjs`, inventario de soporte y riesgos en [I2-35-1-CAPACIDADES-FISICAS.md](I2-35-1-CAPACIDADES-FISICAS.md). Los tests aún requieren CI del PR; no prueban ocho cuellos diferenciados. **I2-35 e I2-35.1 siguen sin aceptación formal.** PR #127 draft separado. Próximo paso: comprobar CI, ejecutar casos de cuello vinculante, identificar soporte/cambios mínimos de arquetipos, resolver cronología contrafactual. Sin alteración a `/juego/`, sin verificación Pages/Android/TalkBack.
-
-
-> **CHECKPOINT DE PLANIFICACIÓN · 28-10-2026 (actualizar al fusionar PR documental).** Corte técnico verificado: I2-00–I2-34 en `main` (35/41 IDs históricos). I2-35 aún **no cerrada**; [PR #127](https://github.com/harrysxavio/cd-simulator/pull/127) draft abierto en rama independiente, con módulo de comparación de cinco recuperaciones y panel de resultados, **no fusionado ni publicado**. La actualización del plan se propone en rama `docs/i2-product-rebaseline-2026-10-28`, ver [auditoría](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md) y [desglose vinculante](I2-PLAN-MAESTRO.md#d-rebaselining-vinculante-28-10-2026--microfases-ampliadas-i2-3540). **Este bloque no declara CI nueva aprobada ni publicación validada.** Próximo paso exacto: **I2-35.1**, fixtures físicos por cuello, cronología causal y test de estrategias diferentes; posteriormente reconciliar PR #127. Android/TalkBack/usuarios #67 pendientes. Evidencia de HTTP+commit Pages no comprobada en esta sesión.
-
-
-**Corte:** 27 de octubre de 2026 (Chile) · **Base V1:** v11.68 r177.  
+**Corte histórico de referencia:** 27 de octubre de 2026 (Chile) · **Base V1:** v11.68 r177.  
 **Plan técnico:** [41 microfases I2-00–I2-40](I2-PLAN-MAESTRO.md) · [Roadmap ejecutivo de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md).  
 **Enlace de la alfa:** https://harrysxavio.github.io/cd-simulator/juego/  
 **Documentación del primer corte vertical:** [I2-MVP-ALFA.md](I2-MVP-ALFA.md).
@@ -318,3 +320,26 @@ Cada microfase futura debe contar con contrato, tests, PR, merge y evidencia de 
 - [Despliegue main PR #79](https://github.com/harrysxavio/cd-simulator/actions/runs/40055970843)
 - [Verificación pública main PR #79](https://github.com/harrysxavio/cd-simulator/actions/runs/40055970726)
 - [Chromium main PR #79](https://github.com/harrysxavio/cd-simulator/actions/runs/40055970697)
+
+
+## Archivo de checkpoints previos
+
+> **I2-35.2 · catálogo físico en preparación (31-10-2026):** PR #129 fusionado a main (`03218a7`) con Node+Chromium verdes, pero I2-35.1 conserva limitaciones cronológicas y de variedad. Rama `feat/i2-35-2-evidence-archetypes`: tres sondas canónicas reproducibles en `src/i2-operational-archetype-probes.js`, pruebas Node y [contrato](I2-35-2-ARQUETIPOS-PROBADOS.md). **Todas `playable:false`: no representan nuevas misiones disponibles.** Pendiente CI y PR; próxima acción confirmar valores, diseñar primera experiencia ARC-06 jugable sin causalidad retrospectiva. PR #127 laboratorio en validación separado. Pages sin cambios certificados.
+
+
+> **I2-35.1 · 31-10-2026, búsqueda dirigida:** Node del corte anterior `e506f18` aprobado, Chromium en ejecución al consultar. Se añadieron 18 configuraciones canónicas para encontrar testimonios de cola de Recepción, retenciones de Calidad y staging de Transporte; log `TARGETED_QUEUE_EVIDENCE`, test aún no validado por CI del HEAD. Archivos: `tests/i2-35-physical-fixtures.test.mjs` y [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). Próximo paso: leer log, fijar escenarios reproducibles y verificar cambios de estrategia; I2-35.1 no cerrada, PR #129 draft, publicación sin cambios.
+
+
+> **I2-35.1 · resultados discriminantes (31-10-2026):** CI Node de `831198a` aprobada, lectura de logs: con misma semilla +50% (300 pedidos) Recepción, Calidad, Picking nominal y Transporte cambiaron **0 expedidos** (98→98); proveedor económico→confiable **+1** (98→99); límite físico de Picking de 10 SKU/día vs normal **+39** (59→98). No declarar esos cuatro cambios nominales como retos separados. Pruebas de regresión para el contraste añadido en `tests/i2-35-physical-fixtures.test.mjs`; CI del HEAD posterior por comprobar. [Matriz con cifras y límites](I2-35-1-CAPACIDADES-FISICAS.md). Siguiente: fixtures con congestión/retención/staging demostrados, no solo diferencias de parámetros. PR #129 sigue abierto; I2-35.1 sin cierre, Pages sin cambio.
+
+
+> **I2-35.1 · actualización de pruebas comparativas (31-10-2026):** después del fallo inicial de forma de manifiesto, una ejecución Node del HEAD corregido resultó **verde**; el cambio posterior añadió prueba de pares físicos con la misma demanda en `tests/i2-35-physical-fixtures.test.mjs`, documentación de métricas y protocolo en [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). **La nueva ejecución CI del HEAD aún no está verificada.** PR #129 draft, sin merge, sin nueva versión pública. Próximo paso: extraer los resultados `PAIRED_PHYSICAL_EVIDENCE`, clasificar escenarios vinculantes y ampliar pruebas discriminantes; mantener PR #127 separado. I2-35.1 no cerrada.
+
+
+> **Seguimiento CI I2-35.1 · 31-10-2026:** PR #129 sigue en revisión. CI inicial: Chromium **verde**, Node **rojo** por supuesto erróneo en prueba `originalPurchaseOrders.length` (no por inconsistencia física demostrada). Prueba ajustada en commit `3e89c0c`, documento de contrato y diagnóstico actualizado; CI del nuevo HEAD en cola a la última revisión. Aún faltan pruebas discriminantes y no se declara cierre ni publicación. [Evidencia](I2-35-1-CAPACIDADES-FISICAS.md).
+
+
+> **CHECKPOINT DE IMPLEMENTACIÓN I2-35.1 · 31-10-2026.** [PR #128](https://github.com/harrysxavio/cd-simulator/pull/128) fusionado a `main` (SHA `440a4c0369f79c92d516994d06be81f96766479e`). **I2-35.1 en curso** en rama `feat/i2-35-1-physical-fixtures`: pruebas de ocho candidatos físicos en `tests/i2-35-physical-fixtures.test.mjs`, inventario de soporte y riesgos en [I2-35-1-CAPACIDADES-FISICAS.md](I2-35-1-CAPACIDADES-FISICAS.md). Los tests aún requieren CI del PR; no prueban ocho cuellos diferenciados. **I2-35 e I2-35.1 siguen sin aceptación formal.** PR #127 draft separado. Próximo paso: comprobar CI, ejecutar casos de cuello vinculante, identificar soporte/cambios mínimos de arquetipos, resolver cronología contrafactual. Sin alteración a `/juego/`, sin verificación Pages/Android/TalkBack.
+
+
+> **CHECKPOINT DE PLANIFICACIÓN · 28-10-2026 (actualizar al fusionar PR documental).** Corte técnico verificado: I2-00–I2-34 en `main` (35/41 IDs históricos). I2-35 aún **no cerrada**; [PR #127](https://github.com/harrysxavio/cd-simulator/pull/127) draft abierto en rama independiente, con módulo de comparación de cinco recuperaciones y panel de resultados, **no fusionado ni publicado**. La actualización del plan se propone en rama `docs/i2-product-rebaseline-2026-10-28`, ver [auditoría](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md) y [desglose vinculante](I2-PLAN-MAESTRO.md#d-rebaselining-vinculante-28-10-2026--microfases-ampliadas-i2-3540). **Este bloque no declara CI nueva aprobada ni publicación validada.** Próximo paso exacto: **I2-35.1**, fixtures físicos por cuello, cronología causal y test de estrategias diferentes; posteriormente reconciliar PR #127. Android/TalkBack/usuarios #67 pendientes. Evidencia de HTTP+commit Pages no comprobada en esta sesión.
