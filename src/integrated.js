@@ -6,7 +6,7 @@ import {freezeCommercialPlanning} from './commercial-planning.js';
 /** Compare identical operational policy under planned and actual order volumes.
  * Procurement is frozen at plan: the surprise must not trigger retroactive buys.
  */
-export function integratedDemand({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},days=12,dailyCapacity=200,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,separateTransport=false,plannedForecastPercent=100,planningCoveragePercent=100,stock={},reserveStock={}}={}){
+export function integratedDemand({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},days=12,dailyCapacity=200,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,separateTransport=false,plannedForecastPercent=100,planningCoveragePercent=100,stock={},reserveStock={},operationalEvents=[]}={}){
  if(!Number.isInteger(plannedOrders)||plannedOrders<1||plannedOrders>100000||!Number.isInteger(actualOrders)||actualOrders<1||actualOrders>100000)throw new Error('Demanda de pedidos inválida');
  if(!Number.isFinite(plannedForecastPercent)||plannedForecastPercent<1||plannedForecastPercent>200)throw new Error('Pronóstico comercial SKU inválido');
  if(!Number.isFinite(planningCoveragePercent)||planningCoveragePercent<0||planningCoveragePercent>150)throw new Error('Cobertura planificada SKU inválida');
@@ -26,7 +26,9 @@ export function integratedDemand({policy='service',plannedOrders=200,actualOrder
  // The managerial planning decision is frozen BEFORE the demand reveal.
  // Only sku-level planning quantities, never aggregate-shift units, enter this contract.
  const planningCommitment=freezeCommercialPlanning({plannedOrders,forecastOrders,plannedForecastPercent,planningCoveragePercent,planningPolicy:plan,originalPurchaseOrders});
- const surprise=eventSimulation({policy,orders:actualOrders,days,dailyCapacity,stock,delayDays,supplierFill,qualityReleasePercent,inventoryAccuracyPercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,reserveStock,fixedPurchases:purchase,separateTransport});
+ // External disruption is not part of the original purchasing decision.
+ // Only the observed physical replay uses it; procurement remains frozen.
+ const surprise=eventSimulation({policy,orders:actualOrders,days,dailyCapacity,stock,delayDays,supplierFill,qualityReleasePercent,inventoryAccuracyPercent,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,reserveStock,fixedPurchases:purchase,separateTransport,operationalEvents});
  assertFrozenOriginalPurchases(originalPurchaseOrders,surprise);
  const comparison={planned:baseline,actual:surprise,plannedOrders,actualOrders,policy,purchase,originalPurchaseOrders,planningCommitment,committedPurchaseValue,forecastOrders,plannedForecastPercent,planningCoveragePercent,
   impact:{orders:actualOrders-plannedOrders,onTime:surprise.onTime-baseline.onTime,completed:surprise.completed-baseline.completed,pending:surprise.pending-baseline.pending,late:surprise.late-baseline.late}};
