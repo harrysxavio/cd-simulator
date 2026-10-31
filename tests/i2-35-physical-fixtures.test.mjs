@@ -138,3 +138,45 @@ test('I2-35.1: paired physical observations identify binding vs nominal constrai
  }
  console.log('I2-35.1 PAIRED_PHYSICAL_EVIDENCE '+JSON.stringify(observed));
 });
+
+/**
+ * The chosen high-demand seed alone has no muelle/quality/staging queue.
+ * Search only approved physical options, without altering the canonical engine,
+ * and expose reproducible witnesses (or evidence that no witness was found).
+ * This is discovery, not a proof of impossibility.
+ */
+test('I2-35.1: probe receiving, quality and transport queues with supported configurations',()=>{
+ const seeds=['alpha-case-01','alpha-case-04'];
+ const stockProfiles=['low','standard','high'];
+ const purchasePolicies=['cheap','reliable','express'];
+ const observations={dock:null,quality:null,staging:null};
+ let attempts=0;
+ for(const seed of seeds){
+  for(const stockProfile of stockProfiles){
+   for(const purchasing of purchasePolicies){
+    // Keep other departments strong to make targeted restrictions observable.
+    const fixture={seed,options:{stockProfile},choices:{
+     planning:'buffer',purchasing,receiving:'low',
+     quality:'slow',inventory:'count',picking:'reinforce',transport:'low'
+    }};
+    const result=run(fixture);
+    attempts++;
+    const metrics={
+     seed,stockProfile,purchasing,
+     shipped:result.shippedOrders,
+     dock:result.receiving.totals.peakDockQueueSkuUnits,
+     held:result.quality.totals.peakHeldSkuUnits,
+     staging:result.transport.totals.peakStagingOrders
+    };
+    for(const [target,key] of [['dock','dock'],['quality','held'],['staging','staging']]){
+     if(metrics[key]>0&&(!observations[target]||metrics[key]>observations[target][key]))
+      observations[target]=metrics;
+    }
+    assert.equal(result.shippedOrders+result.pendingOrders,result.actualOrders);
+   }
+  }
+ }
+ console.log('I2-35.1 TARGETED_QUEUE_EVIDENCE '+JSON.stringify({attempts,observations}));
+ assert.equal(attempts,18);
+ // Absence of a witness must be recorded, not silently turned into a mission.
+});
