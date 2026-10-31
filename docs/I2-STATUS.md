@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **I2-35.1 · resultados discriminantes (31-10-2026):** CI Node de `831198a` aprobada, lectura de logs: con misma semilla +50% (300 pedidos) Recepción, Calidad, Picking nominal y Transporte cambiaron **0 expedidos** (98→98); proveedor económico→confiable **+1** (98→99); límite físico de Picking de 10 SKU/día vs normal **+39** (59→98). No declarar esos cuatro cambios nominales como retos separados. Pruebas de regresión para el contraste añadido en `tests/i2-35-physical-fixtures.test.mjs`; CI del HEAD posterior por comprobar. [Matriz con cifras y límites](I2-35-1-CAPACIDADES-FISICAS.md). Siguiente: fixtures con congestión/retención/staging demostrados, no solo diferencias de parámetros. PR #129 sigue abierto; I2-35.1 sin cierre, Pages sin cambio.
+
+
 > **I2-35.1 · actualización de pruebas comparativas (31-10-2026):** después del fallo inicial de forma de manifiesto, una ejecución Node del HEAD corregido resultó **verde**; el cambio posterior añadió prueba de pares físicos con la misma demanda en `tests/i2-35-physical-fixtures.test.mjs`, documentación de métricas y protocolo en [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). **La nueva ejecución CI del HEAD aún no está verificada.** PR #129 draft, sin merge, sin nueva versión pública. Próximo paso: extraer los resultados `PAIRED_PHYSICAL_EVIDENCE`, clasificar escenarios vinculantes y ampliar pruebas discriminantes; mantener PR #127 separado. I2-35.1 no cerrada.
 
 
