@@ -1086,29 +1086,44 @@ function multiResultsScene(){
 }
 /** I2-35 · Optional comparison: same plan and seed, five classic recoveries.
  * This panel is observational and never alters the saved run or the SKU engine. */
+/** Build only the summary initially: five canonical replays run ONLY on user demand.
+ * That prevents redundant work on low-end phones and keeps result scene reactive. */
 function replayTradeoffPanel(){
- const scenario=i2ChallengeReplayMatrix({
-  seed:state.seed,choices:state.choices,
-  advanced:state.advanced
- })[0];
- const labels={wait:'No intervenir',overtime:'Refuerzo',reserve:'Reserva',
-  emergency:'Compra urgente',combined:'Compra + refuerzo'};
- return node('details',{className:'i2-tradeoff-replay'},[
-  node('summary',{text:'Laboratorio: comparar cinco alternativas clásicas · Nico'}),
-  p('Misma demanda observada ('+num.format(scenario.actualOrders)+
-    ' pedidos), mismas ocho decisiones y las mismas compras originales. Solo cambia la recuperación. Esta comparación muestra el resultado conocido del escenario; no es una predicción disponible antes de decidir ni compara todas las combinaciones posibles.','note'),
-  ...scenario.recoveries.map(r=>section('i2-replay-option-row',[
-   node('strong',{text:labels[r.option]}),
-   p('Expedidos '+num.format(r.shippedOrders)+' · pendientes '+
-    num.format(r.pendingOrders)+' · servicio '+r.servicePercent.toFixed(1)+
-    ' % · gasto extra '+money.format(r.incrementalExpenseCLP),'note'),
-   p(r.clpPerRecoveredOrder===null
-    ?'Costo por pedido recuperado: no calculable (no hubo recuperación neta).':
-     'Costo incremental por pedido recuperado: '+money.format(r.clpPerRecoveredOrder)+
-     '. No equivale al costo total.','footnote')
-  ])),
-  p(scenario.boundary,'footnote')
+ const panel=node('details',{className:'i2-tradeoff-replay'},[
+  node('summary',{text:'Laboratorio: comparar cinco alternativas clásicas · Nico'})
  ]);
+ let loaded=false;
+ panel.addEventListener('toggle',()=>{
+  if(!panel.open||loaded)return;
+  loaded=true;
+  try{
+   const scenario=i2ChallengeReplayMatrix({
+    seed:state.seed,choices:state.choices,advanced:state.advanced
+   })[0];
+   const labels={wait:'No intervenir',overtime:'Refuerzo',reserve:'Reserva',
+    emergency:'Compra urgente',combined:'Compra + refuerzo'};
+   panel.append(section('i2-replay-options',[
+    p('Misma demanda observada ('+num.format(scenario.actualOrders)+
+     ' pedidos), mismas ocho decisiones y las mismas compras originales. Solo cambia la recuperación. Esta comparación muestra el resultado conocido del escenario; no es una predicción disponible antes de decidir ni compara todas las combinaciones posibles.','note'),
+    ...scenario.recoveries.map(r=>section('i2-replay-option-row',[
+     node('strong',{text:labels[r.option]}),
+     p('Expedidos '+num.format(r.shippedOrders)+' · pendientes '+
+      num.format(r.pendingOrders)+' · servicio '+r.servicePercent.toFixed(1)+
+      ' % · gasto extra '+money.format(r.incrementalExpenseCLP),'note'),
+     p(r.clpPerRecoveredOrder===null
+      ?'Costo por pedido recuperado: no calculable (no hubo recuperación neta).':
+       'Costo incremental por pedido recuperado: '+money.format(r.clpPerRecoveredOrder)+
+       '. No equivale al costo total.','footnote')
+    ])),
+    p(scenario.boundary,'footnote')
+   ]));
+  }catch(error){
+   // Fail visibly on calculation errors; never fabricate a zero cost or score.
+   console.error('I2-35 laboratorio:',error);
+   panel.append(p('No se pudo calcular una comparación fiable para esta partida.','note'));
+  }
+ });
+ return panel;
 }
 function resultsScene(){
  if(!state.reveal){state.phase='reveal';render();return}
