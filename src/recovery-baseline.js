@@ -2,6 +2,7 @@ import {integratedDemand} from './integrated.js';
 import {skuOpeningState} from './opening-state.js';
 import {SKU_CATALOG} from './sku.js';
 import {assertFrozenOriginalPurchases} from './original-purchase.js';
+import {normalizeOperationalEvents} from './operational-event-schedule.js';
 
 /**
  * M5-20 · One pre-intervention physical baseline for ALL recovery alternatives.
@@ -34,10 +35,11 @@ export function recoveryBaselineSeed({
  receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,
  qualityReleasePercent=100,inventoryAccuracyPercent=100,separateTransport=false,
  plannedForecastPercent=100,planningCoveragePercent=100,
- stock=null,reservePercent=0
+ stock=null,reservePercent=0,operationalEvents=[]
 }={}){
  if(typeof separateTransport!=='boolean')fail('modalidad Picking/Transporte inválida');
  const openingState=skuOpeningState({stock,reservePercent});
+ const eventSchedule=normalizeOperationalEvents(operationalEvents,days);
  // Canonical field order: equality means the *same assumptions*, independent
  // of JS object key insertion order and unrelated recovery-only settings.
  const seed={
@@ -46,7 +48,9 @@ export function recoveryBaselineSeed({
   dailyCapacity,days,receivingUnitCapacity,pickingUnitCapacity,
   transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,separateTransport,
   plannedForecastPercent,planningCoveragePercent,
-  stock:openingState.openingBySku,reservePercent:openingState.reservePercent
+  stock:openingState.openingBySku,reservePercent:openingState.reservePercent,
+  // Keep old V1 signatures byte-for-byte stable in the no-event case.
+  ...(eventSchedule.length?{operationalEvents:eventSchedule}:{})
  };
  return {seed,openingState};
 }
@@ -65,6 +69,8 @@ export function createRecoveryBaseline(options={}){
   ||integrated.planned.separateTransport!==seed.separateTransport
   ||integrated.actual.ledger.length!==seed.days+1
   ||integrated.planned.ledger.length!==seed.days+1
+  ||JSON.stringify(integrated.actual.operationalEvents)!==JSON.stringify(seed.operationalEvents??[])
+  ||integrated.planned.operationalEvents.length!==0
   ||integrated.actual.deliveries.length!==SKU_CATALOG.length
   ||integrated.planned.deliveries.length!==SKU_CATALOG.length){
   fail('el calendario y la demanda base no son compatibles');
@@ -112,6 +118,8 @@ export function assertRecoveryBaseline(snapshot,options={}){
   ||snapshot.integrated.planned.orders!==snapshot.plannedOrders
   ||snapshot.integrated.actual.days!==snapshot.days
   ||snapshot.integrated.planned.days!==snapshot.days
+  ||JSON.stringify(snapshot.integrated.actual.operationalEvents)!==JSON.stringify(snapshot.seed.operationalEvents??[])
+  ||snapshot.integrated.planned.operationalEvents.length!==0
   ||snapshot.integrated.actual.separateTransport!==snapshot.seed.separateTransport
   ||snapshot.integrated.planned.separateTransport!==snapshot.seed.separateTransport
   ||snapshot.integrated.originalPurchaseOrders?.commitmentStage!=='before-demand-reveal'

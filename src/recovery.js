@@ -19,7 +19,7 @@ export const RECOVERY_OPTIONS={
  * Reserve reallocation is a dated internal movement of catalog opening stock,
  * not new stock or a supplier receipt. No movement is modeled without stock.
  */
-export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,option='wait',unitRevenue=SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder,emergencySurchargeRate=SKU_COST_DEFAULTS.recovery.urgentSurchargeRate,extraCapacityDailyCost=SKU_COST_DEFAULTS.recovery.addedCapacityCLPPerDay,latePenaltyPerOrderDay=SKU_COST_DEFAULTS.recovery.backlogPenaltyCLPPerOrderDay,holdingRatePerDay=SKU_COST_DEFAULTS.recovery.holdingFractionPerCLPDay,urgentArrivalDay=1,purchaseCoveragePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,stock=null,reservePercent=0,separateTransport=false,baselineSnapshot=null,multiActions=null}={}){
+export function recoveryComparison({policy='service',plannedOrders=200,actualOrders=260,delayDays={},supplierFill={},dailyCapacity=200,days=12,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,option='wait',unitRevenue=SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder,emergencySurchargeRate=SKU_COST_DEFAULTS.recovery.urgentSurchargeRate,extraCapacityDailyCost=SKU_COST_DEFAULTS.recovery.addedCapacityCLPPerDay,latePenaltyPerOrderDay=SKU_COST_DEFAULTS.recovery.backlogPenaltyCLPPerOrderDay,holdingRatePerDay=SKU_COST_DEFAULTS.recovery.holdingFractionPerCLPDay,urgentArrivalDay=1,purchaseCoveragePercent=100,plannedForecastPercent=100,planningCoveragePercent=100,stock=null,reservePercent=0,separateTransport=false,baselineSnapshot=null,multiActions=null,operationalEvents=[]}={}){
  if(typeof separateTransport!=='boolean')throw new Error('Modo staging inválido');
  // Modo interno I2: no modificar el catálogo público de las 5 recuperaciones V1.
  const choice=option==='multi'?{label:'Intervenciones conjuntas auditadas',extraCapacity:0,urgent:false}:RECOVERY_OPTIONS[option];
@@ -62,7 +62,7 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  const baselineInputs={policy,plannedOrders,actualOrders,delayDays,supplierFill,
   dailyCapacity,days,qualityReleasePercent,inventoryAccuracyPercent,
   receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,
-  plannedForecastPercent,planningCoveragePercent,stock,reservePercent,separateTransport};
+  plannedForecastPercent,planningCoveragePercent,stock,reservePercent,separateTransport,operationalEvents};
  const baseline=baselineSnapshot===null?createRecoveryBaseline(baselineInputs)
   :assertRecoveryBaseline(baselineSnapshot,baselineInputs);
  const openingState=baseline.openingState;
@@ -92,7 +92,9 @@ export function recoveryComparison({policy='service',plannedOrders=200,actualOrd
  // Waiting makes NO intervention: reuse the exact event book of the
  // frozen actual-demand baseline, including the same Picking/Transport mode.
  const isNoAction=option==='wait'||(option==='multi'&&!effective.urgent&&!effective.releaseReserve&&!effective.extraCapacity);
- const recovered=isNoAction?base.actual:eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,stock:openingStock,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent,reserveStock,reserveReleaseDay:effective.releaseReserve?effectiveReserveDay:null,separateTransport});
+ const recovered=isNoAction?base.actual:eventSimulation({policy,orders:actualOrders,days,dailyCapacity:capacity,stock:openingStock,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,supplierFill,delayDays,fixedPurchases:base.purchase,extraDeliveries:urgent,reserveStock,reserveReleaseDay:effective.releaseReserve?effectiveReserveDay:null,separateTransport,
+  // Same observed incident calendar as the reference: no magic recovery.
+  operationalEvents:baseline.seed.operationalEvents??[]});
  // A recovery option may create a SEPARATE urgent PO, but cannot rewrite
  // an original supplier commitment (including its expected arrival day).
  assertFrozenOriginalPurchases(base.originalPurchaseOrders,recovered);
