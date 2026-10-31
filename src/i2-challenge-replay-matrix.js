@@ -4,7 +4,7 @@
  */
 import {I2_CHALLENGES,i2ChallengeReveal} from './i2-challenge-config.js';
 import {i2MvpPhysicalResult,i2DefaultChoices} from './i2-mvp-adapter.js';
-import {I2_DEFAULT_ADVANCED,I2_ADVANCED_FIELDS} from './i2-advanced-settings.js';
+import {I2_DEFAULT_ADVANCED,I2_ADVANCED_FIELDS,i2ValidateAdvanced} from './i2-advanced-settings.js';
 
 const options=Object.freeze(['wait','overtime','reserve','emergency','combined']);
 const fixed=n=>Number.isSafeInteger(n)&&n>0;
@@ -22,16 +22,19 @@ const row=x=>Object.freeze({
  * Compare the SAME seed, planned cohort and eight committed area decisions.
  * Inputs are passed to one existing model; no scoring formula or synthetic ledger.
  */
-export function i2ChallengeReplayMatrix({choices=i2DefaultChoices(),plannedOrders=200,seed}={}){
- if(!fixed(plannedOrders)||!I2_ADVANCED_FIELDS.plannedOrders.includes(plannedOrders))
+export function i2ChallengeReplayMatrix({choices=i2DefaultChoices(),plannedOrders,advanced=I2_DEFAULT_ADVANCED,seed}={}){
+ // Preserve every setting of the current session (inventory, picking, reserve and cost).
+ // plannedOrders remains an explicit compatibility override for existing callers.
+ if(plannedOrders!==undefined&&(!fixed(plannedOrders)||!I2_ADVANCED_FIELDS.plannedOrders.includes(plannedOrders)))
   throw new Error('I2-35: muestra inválida');
+ const settings=i2ValidateAdvanced(plannedOrders===undefined?advanced:{...advanced,plannedOrders});
  const selected=I2_CHALLENGES.filter(c=>seed===undefined||c.seed===seed);
  if(!selected.length)throw new Error('I2-35: semilla desconocida');
  return Object.freeze(selected.map(challenge=>{
-  const shock=i2ChallengeReveal(challenge.seed,plannedOrders);
+  const shock=i2ChallengeReveal(challenge.seed,settings.plannedOrders);
   const results=options.map(option=>{
    const result=i2MvpPhysicalResult({choices,seed:challenge.seed,
-    advanced:{...I2_DEFAULT_ADVANCED,plannedOrders},option});
+    advanced:settings,option});
    if(result.actualOrders!==shock.actualOrders ||
       result.shippedOrders+result.pendingOrders!==result.actualOrders ||
       !Number.isSafeInteger(result.incrementalExpenseCLP) ||
@@ -49,7 +52,7 @@ export function i2ChallengeReplayMatrix({choices=i2DefaultChoices(),plannedOrder
   }
   return Object.freeze({
    seed:challenge.seed,level:challenge.level,label:challenge.label,
-   plannedOrders,actualOrders:shock.actualOrders,shockPercent:shock.shockPercent,
+   plannedOrders:settings.plannedOrders,actualOrders:shock.actualOrders,shockPercent:shock.shockPercent,
    recoveries:Object.freeze(results.map(({baselineKey,originalPurchaseOrders,...r})=>Object.freeze(r))),
    boundary:'Solo expedición del CD, cola y gasto incremental del modelo. Sin costo total, productividad por persona-hora ni entrega al consumidor.'
   });
