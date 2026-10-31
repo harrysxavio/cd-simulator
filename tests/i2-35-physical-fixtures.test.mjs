@@ -191,14 +191,22 @@ test('I2-35.1: quality-held SKU witness and cost-versus-benefit diagnostic',()=>
    quality:'slow',inventory:'count',picking:'reinforce',transport:'low'}};
  const slow=run(config);
  const priority=run({...config,choices:{...config.choices,quality:'priority'}});
- assert.ok(slow.quality.totals.peakHeldSkuUnits>0,
-  'Quality retention must be a real physical event in this known fixture');
+ assert.equal(slow.quality.totals.peakHeldSkuUnits,12,
+  'Quality must hold exactly 12 SKU units in the reproducible fixture');
+ assert.equal(priority.quality.totals.peakHeldSkuUnits,0,
+  'Priority releases all queued units in the same physical fixture');
+ assert.equal(priority.shippedOrders,slow.shippedOrders,
+  'Earlier release alone does not overcome another binding constraint');
  assert.equal(slow.actualOrders,priority.actualOrders);
  assert.equal(slow.shippedOrders+slow.pendingOrders,slow.actualOrders);
  assert.equal(priority.shippedOrders+priority.pendingOrders,priority.actualOrders);
  const costly=run(fixtures[7],'overtime'),noAction=run(fixtures[7],'wait');
  assert.equal(costly.actualOrders,noAction.actualOrders);
  assert.deepEqual(costly.originalPurchaseOrders,noAction.originalPurchaseOrders);
+ assert.equal(costly.recoveredOrders,0,
+  'Overtime must not falsely recover orders when blocked elsewhere');
+ assert.equal(costly.incrementalExpenseCLP,300000,
+  'Expensive nonbinding recovery must show its positive known expense');
  console.log('I2-35.1 QUALITY_AND_ECONOMIC_WITNESS '+JSON.stringify({
   quality:{slowPeakHeld:slow.quality.totals.peakHeldSkuUnits,
    priorityPeakHeld:priority.quality.totals.peakHeldSkuUnits,
