@@ -28,6 +28,21 @@ funcional automatizada antes de merge. No cierra por sí solo I2-37.1.
 Los contratos anteriores continúan vigentes. No recontar hijas en 35/41.
 [Detalle y límites](I2-35-5-EVENTOS-OPERACIONALES-FISICOS.md).
 
+## Extensión I2-35.5c · sorpresa operacional visible (piloto)
+
+En la rama `feat/i2-35-5c-operational-drill-entry`, opt-in con semilla
+de incidente independiente y persistida predecisión, efectos físicos
+reproducidos por el mismo motor, informe de Nico solo después de revelar
+y recuperaciones clásicas/multi calculadas con el calendario original.
+Se conserva la partida V1/I2 anterior sin interrupciones.
+
+**Limitación pendiente:** el motor se ejecuta por las 12 jornadas de una
+vez y la recuperación sigue siendo retrospectiva. Es indispensable
+modelar decisiones efectivas desde la jornada de observación y no
+presentar este piloto como cumplimiento del ciclo de gestión diario.
+[Contrato y pruebas](I2-35-5-C-MISION-INCIDENTES.md). La fase madre
+no avanza hasta completar las hijas/QA.
+
 ## A. Contrato de avance
 
 Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico, prueba automatizada, revisión de regresión V1, merge a main, chequeos post-merge y, si afecta publicación, Pages + HTTP servido real. Registrar SHA, links y limitaciones en **docs/I2-STATUS.md** antes de declararla completa.
