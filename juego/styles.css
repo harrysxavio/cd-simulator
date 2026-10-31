@@ -1266,3 +1266,8 @@ html,body{height:100%;overflow:hidden}
 .i2-operational-alert>strong{font-size:.86rem}
 @media(forced-colors:active){.i2-operational-alerts,.i2-operational-alert{
  background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* In the recovery scene, the multi-action compare button is the primary path;
+ * keep the legacy single-action footer available without competing visually. */
+#gameNext.recovery-classic-footer{background:var(--detail-bg);color:var(--muted);
+ border:1px solid var(--border);font-weight:650}
