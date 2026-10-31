@@ -1271,3 +1271,17 @@ html,body{height:100%;overflow:hidden}
  * keep the legacy single-action footer available without competing visually. */
 #gameNext.recovery-classic-footer{background:var(--detail-bg);color:var(--muted);
  border:1px solid var(--border);font-weight:650}
+
+/* Nico now mentors in the decision tab, not only behind the hidden Nico tab. */
+.nico-decision-coach{display:flex;align-items:center;gap:10px;margin:9px 0 14px;
+ padding:11px;background:var(--panel);border:1px solid var(--border);
+ border-left:3px solid var(--primary);border-radius:12px}
+.nico-decision-coach>.nico-scene-portrait{flex:0 0 70px;width:70px;height:92px;object-fit:contain}
+.nico-decision-words{flex:1;min-width:0}
+.nico-decision-words strong{font-size:.89rem;line-height:1.4}
+.nico-decision-words p{font-size:.84rem;line-height:1.49;overflow-wrap:anywhere}
+.nico-decision-words .help-trigger{min-height:44px;max-width:100%;white-space:normal}
+@media(max-width:355px){.nico-decision-coach>.nico-scene-portrait{
+ flex-basis:55px;width:55px;height:77px}}
+@media(forced-colors:active){.nico-decision-coach{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
