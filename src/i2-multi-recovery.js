@@ -81,7 +81,7 @@ const sum=(rows,key)=>rows.reduce((n,x)=>n+x[key],0);
  * RESERVA-CD before demand was revealed (reservePercent is a baseline input).
  */
 export function i2CompareMultiRecovery({state,plans=[],
- reservePercent=state?.advanced?.reservePercent??0}={}){
+ reservePercent=state?.advanced?.reservePercent??0,operationalEvents=[]}={}){
  const event=i2DemandEventObserved(state);
  if(!Array.isArray(plans)||plans.length<1||plans.length>8
   ||!valid(reservePercent)||reservePercent<0||reservePercent>50)
@@ -104,7 +104,9 @@ export function i2CompareMultiRecovery({state,plans=[],
  if(contract.actualSampleOrders!==event.observedOrders
   ||contract.plannedSampleOrders!==event.plannedOrders)
   fail('evento revelado no concilia con la campaña SKU');
- const inputs={...contract.skuInputs,reservePercent,days:12};
+ // Opt-in only after demand reveal; state/eventSeed persistence is a later phase.
+ // All multi-action options reuse a single immutable operational calendar.
+ const inputs={...contract.skuInputs,reservePercent,days:12,operationalEvents};
  const baseline=createRecoveryBaseline(inputs);
  const noAction=recoveryComparison({
   ...inputs,option:'wait',baselineSnapshot:baseline,
