@@ -14,7 +14,7 @@ test('I2-10: optional contextual dialog traps focus, Escape restores trigger and
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
   await page.locator('#gameNext').click();
   const previous=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
-  assert.equal(await page.locator('.help-trigger').count(),2);
+  assert.equal(await page.locator('.help-trigger').count(),3);
   const source=page.locator('.help-trigger').first();
   await source.click();
   const modal=page.locator('dialog.i2-help-dialog');
