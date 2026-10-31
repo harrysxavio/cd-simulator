@@ -53,3 +53,13 @@ test('I2-35: replay respects full session physical settings, not demo defaults',
  assert.throws(()=>i2ChallengeReplayMatrix({advanced:{...advanced,stockProfile:'unsupported'}}),
   /inválida/);
 });
+
+test('I2-35: urgent delivery on day 13 never rescues orders before day-12 cutoff',()=>{
+ const [m]=i2ChallengeReplayMatrix({seed:'alpha-case-04',urgentArrivalDay:13,
+  purchaseCoveragePercent:100,advanced:{...I2_DEFAULT_ADVANCED,stockProfile:'low'}});
+ const baseline=m.recoveries.find(r=>r.option==='wait');
+ const urgent=m.recoveries.find(r=>r.option==='emergency');
+ assert.equal(urgent.shippedOrders,baseline.shippedOrders);
+ assert.equal(urgent.recoveredOrders,0);
+ assert.equal(urgent.clpPerRecoveredOrder,null);
+});
