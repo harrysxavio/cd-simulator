@@ -20,6 +20,8 @@ test('I2-24: Picking BOM visible, antes no se revela demanda y después hay deta
   assert.match(await page.locator('.nico-journey-progress').innerText(),/1 DE 7/);
   await page.locator('.nico-journey-skip').click();
   await page.locator('.nico-journey-dialog').waitFor({state:'detached'});
+  // Closing a separate tutorial returns to the briefing; begin explicitly.
+  await page.locator('#gameNext').click();
   for(let i=0;i<6;i++)await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene h1').innerText(),/Picking/);
   await page.getByRole('tab',{name:'Indicadores'}).click();
