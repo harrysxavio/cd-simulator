@@ -30,7 +30,7 @@ test('Nico teaches in seven separate dialog steps with a large portrait and retu
   await dialog.locator('.nico-journey-back').click();
   assert.match(await dialog.locator('.nico-journey-progress').innerText(),/6 DE 7/);
   await dialog.locator('.nico-journey-skip').click();
-  assert.equal(await dialog.count(),0);
+  await dialog.waitFor({state:'detached'});
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),before);
   await page.locator('#gameNext').click();
   await page.getByRole('tab',{name:'Nico'}).click();
@@ -41,7 +41,7 @@ test('Nico teaches in seven separate dialog steps with a large portrait and retu
   await page.locator('.nico-manager-tutorial').first().click();
   assert.equal(await page.locator('.nico-journey-dialog').count(),1);
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('.nico-journey-dialog').count(),0);
+  await page.locator('.nico-journey-dialog').waitFor({state:'detached'});
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-v90')),'protected');
   assert.deepEqual(errors,[]);
  }finally{await context.close();await browser.close()}
@@ -71,6 +71,6 @@ test('Nico tutorial remains usable on short 320–430 px mobile screens',
    assert.ok(a.buttons>=4);
   }
   await page.locator('.nico-journey-close').click();
-  assert.equal(await page.locator('.nico-journey-dialog').count(),0);
+  await page.locator('.nico-journey-dialog').waitFor({state:'detached'});
  }finally{await browser.close()}
 });
