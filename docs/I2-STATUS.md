@@ -18,7 +18,7 @@
 
 **Publicación comprobada (31-10-2026):** la URL https://harrysxavio.github.io/cd-simulator/juego/ respondió HTTP **200**. Posteriormente `juego/app.js` público respondió HTTP **200** y contenía `i2ChallengeReplayMatrix` y `Laboratorio: comparar cinco alternativas clásicas`; `juego/styles.css` público respondió HTTP **200** y contenía `.i2-replay-option-row` y `.i2-tradeoff-replay`. Se verificó el despliegue del **nuevo código y CSS**, no equivalencia binaria con un SHA embebido ni QA Android físico. El workflow de verificación de Pages del commit `1dad0b4` también fue verde; sus controles generales no sustituyen esta comprobación específica del panel.
 
-**Nuevo código PR #131:** integrado en main (`a53aa5e`). El piloto de Picking se agregó a `juego/app.js` y `styles.css`; **verificación HTTP de esos nuevos assets pendiente de efectuar o registrar** tras merge. No confundir las verificaciones del laboratorio anterior con la del nuevo piloto.
+**Nuevo piloto ARC-06 · publicación comprobada (31-10-2026):** PR #131 integrado en main (`a53aa5e`), Node/verificación enfocada/Chromium aprobados. URL pública `/juego/` respondió HTTP **200**, `juego/app.js` respondió HTTP **200** con firma `i2StartPickingPilot` y `juego/styles.css` HTTP **200** con estilo `.i2-picking-pilot-card`, comprobados también **sin parámetros** después del despliegue. Esto verifica que los recursos del reto están publicados, **no** valida uso humano Android/TalkBack ni cierra I2-35.2.
 
 **Bloqueo humano:** Android físico, TalkBack y prueba con usuario principiante siguen pendientes [#67](https://github.com/harrysxavio/cd-simulator/issues/67).
 
