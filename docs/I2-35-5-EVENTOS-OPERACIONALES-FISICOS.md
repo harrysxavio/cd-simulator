@@ -58,3 +58,25 @@ legítimo, no un fallo que deba compensarse alterando el motor.
 
 No confundir "evento generado" con "evento jugable y bien explicado":
 la aceptación de I2-35.5 sigue abierta hasta 35.5d.
+
+## Continuación I2-35.5b sobre el nuevo main
+
+El corte complementa el evento físico con un **baseline y recuperación coherentes**:
+`integratedDemand` crea compras y plan sin evento, pero el replay observado
+utiliza el mismo calendario programado; `createRecoveryBaseline` congela la
+semilla física incorporando el evento **solo cuando existe**, para preservar
+exactamente las claves V1 cuando la lista está vacía. `recoveryComparison`
+recibe el calendario idéntico para wait/overtime/emergency/combined/multi.
+`i2CompareMultiRecovery` permite inyectarlo únicamente tras revelar demanda,
+sin alterar las pantallas del juego ni añadir un campo a partidas antiguas.
+
+Pruebas: `tests/i2-operational-event-recovery.test.mjs` verifica el mismo
+manifiesto original, referencia compartida, incidente aplicable, ausencia de
+costos inventados, bloqueo de baseline incongruente y recuperación conjunta.
+
+**Limitaciones obligatorias:** I2-35.5b no es aún un nuevo reto jugable,
+ni decisión tomada cronológicamente en medio de una jornada. No comunicar
+que el usuario puede intervenir en tiempo real hasta que 35.5c implemente
+revelación progresiva, persistencia de `eventSeed` y reglas de momento
+de decisión. El horario de perturbación del catálogo es determinista y
+debe demostrar materialidad en fixtures físicos antes de aceptarse un reto.
