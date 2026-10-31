@@ -1,6 +1,6 @@
 # I2-35.1 · Matriz inicial de capacidades y cronología · checkpoint
 
-**Estado: en curso, pruebas por confirmar.** No certificar diversidad de ocho retos todavía. Fuente vinculante: [plan maestro](I2-PLAN-MAESTRO.md) y [auditoría](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md).
+**Estado: en curso, CI anterior mostró un fallo de aserción de forma del manifiesto de compras; corregido en commit `3e89c0c`, nueva CI por verificar.** No certificar diversidad de ocho retos todavía. Fuente vinculante: [plan maestro](I2-PLAN-MAESTRO.md) y [auditoría](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md).
 
 ## Evidencias del motor y límites
 | Arquetipo | Parámetro actualmente soportado | Qué todavía NO está demostrado |
@@ -28,3 +28,8 @@
 - **Próxima acción**: revisar CI de rama, corregir fallos, agregar tests discriminantes por área y evidencia de cronología; después cerrar 35.1 o registrar limitaciones con pruebas bloqueadas.
 - PR #127 permanece draft separado: no rebasar ni modificar sin reconciliar después de 35.1.
 - Pages, Android, TalkBack y evaluación humana: no verificados en este trabajo.
+
+## Registro de defecto de prueba · 31-10-2026
+- Run Node inicial PR #129: cuatro de cinco pruebas nuevas aprobaron, la primera falló porque trató `originalPurchaseOrders` como arreglo (`.length`) aunque su contrato puede ser un objeto.
+- Se cambió la aserción para validar presencia de estructura sin suponer su forma; no se tocó el motor ni el contenido de compras. Se conserva en otros tests la comparación estructural exacta entre replay y alternativa.
+- CI del nuevo HEAD pendiente. Próximo paso técnico **después de verde**: medir `receiving.totals.peakDockQueueSkuUnits`, `quality.totals.peakHeldSkuUnits`, `picking.totals.neverPreparedOrders`, `transport.totals.preparedAwaitingDispatchOrders` y su sensibilidad a acciones, conservando misma demanda/semilla.
