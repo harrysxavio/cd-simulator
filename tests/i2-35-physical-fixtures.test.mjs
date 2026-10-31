@@ -1,0 +1,219 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {i2MvpPhysicalResult,i2DefaultChoices} from '../src/i2-mvp-adapter.js';
+import {I2_DEFAULT_ADVANCED} from '../src/i2-advanced-settings.js';
+
+/**
+ * I2-35.1: exploratory physical fixtures, NOT certification of eight distinct missions.
+ * All runs use the canonical SKU engine and compare one change at a time.
+ * A monotonicity check is insufficient to claim the altered stage was binding:
+ * such a claim needs witnessed positive changes and physical ledger attribution.
+ */
+const base=i2DefaultChoices();
+const advanced=(extra={})=>({...I2_DEFAULT_ADVANCED,...extra});
+const fixtures=[
+ {id:'ARC-01',title:'Demanda baja y compras comprometidas',seed:'alpha-case-05',choices:{},options:{}},
+ {id:'ARC-02',title:'Demanda alta con stock bajo',seed:'alpha-case-04',choices:{},options:{stockProfile:'low'}},
+ {id:'ARC-03',title:'Proveedor con menor cumplimiento',seed:'alpha-case-04',choices:{purchasing:'cheap'},options:{}},
+ {id:'ARC-04',title:'Recepción con capacidad reducida',seed:'alpha-case-04',choices:{receiving:'low'},options:{}},
+ {id:'ARC-05',title:'Liberación lenta de Calidad',seed:'alpha-case-04',choices:{quality:'slow'},options:{}},
+ {id:'ARC-06',title:'Picking limitado por SKU',seed:'alpha-case-04',choices:{},options:{pickingLimitSkuPerDay:'10'}},
+ {id:'ARC-07',title:'Transporte con capacidad reducida',seed:'alpha-case-04',choices:{transport:'low'},options:{}},
+ {id:'ARC-08',title:'Refuerzo caro aguas abajo de otra restricción',seed:'alpha-case-04',choices:{quality:'slow'},options:{extraCapacityDailyCostCLP:100000}}
+];
+
+function run(fixture,option='wait'){
+ return i2MvpPhysicalResult({
+  seed:fixture.seed,choices:{...base,...fixture.choices},advanced:advanced(fixture.options),option
+ });
+}
+test('I2-35.1: eight candidates obey physical orders and preserve deterministic replay',()=>{
+ assert.equal(fixtures.length,8);
+ for(const f of fixtures){
+  const first=run(f),again=run(f);
+  assert.deepEqual(first,again,f.id+' deterministic');
+  assert.equal(first.shippedOrders+first.pendingOrders,first.actualOrders,f.id);
+  assert.equal(first.baselineShipped+first.baselinePending,first.actualOrders,f.id);
+  assert.equal(first.recoveredOrders,0,f.id);
+  assert.equal(first.horizonDays,12,f.id);
+  assert.equal(first.unknownTotalCost,true,f.id);
+  assert.ok(first.originalPurchaseOrders!==null && typeof first.originalPurchaseOrders==='object',f.id);
+ }
+});
+
+test('I2-35.1: all candidate changes preserve the externally fixed demand',()=>{
+ const reference=run(fixtures[2]);
+ for(const f of fixtures.slice(2)){
+  const result=run(f);
+  assert.equal(result.actualOrders,reference.actualOrders,f.id);
+  assert.equal(result.plannedOrders,reference.plannedOrders,f.id);
+ }
+ assert.ok(run(fixtures[0]).actualOrders<run(fixtures[1]).actualOrders);
+});
+
+test('I2-35.1: nonbinding interventions cannot create goods or change event seed',()=>{
+ for(const f of fixtures){
+  const before=run(f),expensive=run(f,'overtime');
+  assert.equal(expensive.actualOrders,before.actualOrders,f.id);
+  assert.deepEqual(expensive.originalPurchaseOrders,before.originalPurchaseOrders,f.id);
+  assert.equal(expensive.baselineKey,before.baselineKey,f.id);
+  assert.equal(expensive.shippedOrders+expensive.pendingOrders,expensive.actualOrders,f.id);
+  // Positive gains cannot be assumed: report actual deltas in future arquetype matrix.
+ }
+});
+
+test('I2-35.1: restrictive picking limit is passed into physical results',()=>{
+ const f=fixtures.find(x=>x.id==='ARC-06');
+ const bounded=run(f);
+ const unbounded=run({...f,options:{}});
+ assert.equal(bounded.actualOrders,unbounded.actualOrders);
+ assert.equal(bounded.plannedOrders,unbounded.plannedOrders);
+ assert.ok(bounded.shippedOrders<=unbounded.shippedOrders,
+  'Removing a physical picking cap must not reduce order output');
+});
+
+test('I2-35.1: late purchase cannot improve day-12 result',()=>{
+ const f=fixtures[1];
+ const wait=run(f,'wait');
+ const late=i2MvpPhysicalResult({
+  seed:f.seed,choices:{...base,...f.choices},
+  advanced:advanced(f.options),option:'emergency',urgentArrivalDay:13
+ });
+ assert.equal(late.recoveredOrders,0);
+ assert.equal(late.shippedOrders,wait.shippedOrders);
+});
+
+/**
+ * Diagnostic evidence (not an acceptance claim): expose physical observations
+ * for paired runs holding all non-target parameters constant. CI output enables
+ * evidence-based selection of genuinely binding archetypes for I2-35.2.
+ */
+test('I2-35.1: paired physical observations identify binding vs nominal constraints',()=>{
+ const pairs=[
+  {id:'receiving',area:'receiving',low:'low',high:'extra'},
+  {id:'quality',area:'quality',low:'slow',high:'priority'},
+  {id:'picking',area:'picking',low:'low',high:'reinforce'},
+  {id:'transport',area:'transport',low:'low',high:'extra'},
+  {id:'supplier',area:'purchasing',low:'cheap',high:'reliable'}
+ ];
+ const observed=[];
+ for(const pair of pairs){
+  const fixed={seed:'alpha-case-04',choices:{},options:{}};
+  const low=run({...fixed,choices:{[pair.area]:pair.low}});
+  const high=run({...fixed,choices:{[pair.area]:pair.high}});
+  const numbers=result=>({
+   dispatched:result.shippedOrders,
+   pending:result.pendingOrders,
+   dockQueue:result.receiving.totals.peakDockQueueSkuUnits,
+   qualityHeld:result.quality.totals.peakHeldSkuUnits,
+   neverPrepared:result.picking.totals.neverPreparedOrders,
+   staging:result.transport.totals.peakStagingOrders,
+   expense:result.incrementalExpenseCLP
+  });
+  assert.equal(low.actualOrders,high.actualOrders,pair.id);
+  assert.equal(low.plannedOrders,high.plannedOrders,pair.id);
+  assert.equal(low.shippedOrders+low.pendingOrders,low.actualOrders,pair.id);
+  assert.equal(high.shippedOrders+high.pendingOrders,high.actualOrders,pair.id);
+  // Do not assign causation solely from the label: log what actually changes.
+  observed.push({stage:pair.id,low:numbers(low),high:numbers(high),
+   outputDelta:high.shippedOrders-low.shippedOrders});
+ }
+ const capped=run({seed:'alpha-case-04',choices:{},options:{pickingLimitSkuPerDay:'10'}});
+ const uncapped=run({seed:'alpha-case-04',choices:{},options:{}});
+ observed.push({stage:'physical-picking-cap',low:{dispatched:capped.shippedOrders},
+  high:{dispatched:uncapped.shippedOrders},
+  outputDelta:uncapped.shippedOrders-capped.shippedOrders});
+ assert.ok(observed.every(x=>Number.isSafeInteger(x.outputDelta)));
+ // Evidence-based regression: this exact fixture previously showed a physical
+ // Picking cap that reduced expeditions; assert its marginal effect remains real.
+ const pickLimit=observed.find(x=>x.stage==='physical-picking-cap');
+ assert.ok(pickLimit.outputDelta>0,
+  'A 10-SKU/day physical Picking limit must restrict this fixed scenario');
+ // Do not equate nominal capacity changes with an effective bottleneck.
+ const nonbinding=['receiving','quality','picking','transport'];
+ for(const stage of nonbinding){
+  const entry=observed.find(x=>x.stage===stage);
+  assert.equal(entry.outputDelta,0,
+   stage+' is a nominal-only change in this fixed fixture, not another mission');
+ }
+ console.log('I2-35.1 PAIRED_PHYSICAL_EVIDENCE '+JSON.stringify(observed));
+});
+
+/**
+ * The chosen high-demand seed alone has no muelle/quality/staging queue.
+ * Search only approved physical options, without altering the canonical engine,
+ * and expose reproducible witnesses (or evidence that no witness was found).
+ * This is discovery, not a proof of impossibility.
+ */
+test('I2-35.1: probe receiving, quality and transport queues with supported configurations',()=>{
+ const seeds=['alpha-case-01','alpha-case-04'];
+ const stockProfiles=['low','standard','high'];
+ const purchasePolicies=['cheap','reliable','express'];
+ const observations={dock:null,quality:null,staging:null};
+ let attempts=0;
+ for(const seed of seeds){
+  for(const stockProfile of stockProfiles){
+   for(const purchasing of purchasePolicies){
+    // Keep other departments strong to make targeted restrictions observable.
+    const fixture={seed,options:{stockProfile},choices:{
+     planning:'buffer',purchasing,receiving:'low',
+     quality:'slow',inventory:'count',picking:'reinforce',transport:'low'
+    }};
+    const result=run(fixture);
+    attempts++;
+    const metrics={
+     seed,stockProfile,purchasing,
+     shipped:result.shippedOrders,
+     dock:result.receiving.totals.peakDockQueueSkuUnits,
+     held:result.quality.totals.peakHeldSkuUnits,
+     staging:result.transport.totals.peakStagingOrders
+    };
+    for(const [target,key] of [['dock','dock'],['quality','held'],['staging','staging']]){
+     if(metrics[key]>0&&(!observations[target]||metrics[key]>observations[target][key]))
+      observations[target]=metrics;
+    }
+    assert.equal(result.shippedOrders+result.pendingOrders,result.actualOrders);
+   }
+  }
+ }
+ console.log('I2-35.1 TARGETED_QUEUE_EVIDENCE '+JSON.stringify({attempts,observations}));
+ assert.equal(attempts,18);
+ // Absence of a witness must be recorded, not silently turned into a mission.
+});
+
+/**
+ * An actual Quality retention witness: verify the physical ledger rather than
+ * assuming slow=retained. Diagnostic measures the managerial effect separately.
+ */
+test('I2-35.1: quality-held SKU witness and cost-versus-benefit diagnostic',()=>{
+ const config={seed:'alpha-case-01',options:{stockProfile:'low'},
+  choices:{planning:'buffer',purchasing:'express',receiving:'low',
+   quality:'slow',inventory:'count',picking:'reinforce',transport:'low'}};
+ const slow=run(config);
+ const priority=run({...config,choices:{...config.choices,quality:'priority'}});
+ assert.equal(slow.quality.totals.peakHeldSkuUnits,12,
+  'Quality must hold exactly 12 SKU units in the reproducible fixture');
+ assert.equal(priority.quality.totals.peakHeldSkuUnits,0,
+  'Priority releases all queued units in the same physical fixture');
+ assert.equal(priority.shippedOrders,slow.shippedOrders,
+  'Earlier release alone does not overcome another binding constraint');
+ assert.equal(slow.actualOrders,priority.actualOrders);
+ assert.equal(slow.shippedOrders+slow.pendingOrders,slow.actualOrders);
+ assert.equal(priority.shippedOrders+priority.pendingOrders,priority.actualOrders);
+ const costly=run(fixtures[7],'overtime'),noAction=run(fixtures[7],'wait');
+ assert.equal(costly.actualOrders,noAction.actualOrders);
+ assert.deepEqual(costly.originalPurchaseOrders,noAction.originalPurchaseOrders);
+ assert.equal(costly.recoveredOrders,0,
+  'Overtime must not falsely recover orders when blocked elsewhere');
+ assert.equal(costly.incrementalExpenseCLP,300000,
+  'Expensive nonbinding recovery must show its positive known expense');
+ console.log('I2-35.1 QUALITY_AND_ECONOMIC_WITNESS '+JSON.stringify({
+  quality:{slowPeakHeld:slow.quality.totals.peakHeldSkuUnits,
+   priorityPeakHeld:priority.quality.totals.peakHeldSkuUnits,
+   slowShipped:slow.shippedOrders,priorityShipped:priority.shippedOrders},
+  overtime:{baseShipped:noAction.shippedOrders,
+   chosenShipped:costly.shippedOrders,
+   recovered:costly.recoveredOrders,
+   incrementalExpenseCLP:costly.incrementalExpenseCLP}
+ }));
+});
