@@ -25,6 +25,8 @@ import {i2EconomicManagerReading} from '../src/i2-economic-manager.js';
 import {renderI2EconomicManagerPanel} from './economic-manager-panel.js';
 import {i2NicoEvidenceLearning} from '../src/i2-nico-evidence-learning.js';
 import {i2ChallengeReplayMatrix} from '../src/i2-challenge-replay-matrix.js';
+import {I2_PICKING_PILOT,i2IsPickingPilot,i2StartPickingPilot,
+ i2LeavePickingPilot,i2PickingPilotReflection} from '../src/i2-guided-picking-pilot.js';
 import {renderI2NicoEvidenceLearning} from './nico-learning-panel.js';
 import {i2ConfirmMultiRecovery,i2ClearMultiRecovery,i2ConfirmedMultiOutcome} from '../src/i2-recovery-confirmation.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
@@ -427,6 +429,61 @@ function nicoWelcome(){
  card.append(detail,nicoManagerTutorial());
  return card;
 }
+/** An explicitly selectable operational exercise, not just a renamed demand shock. */
+function pickingPilotStartCard(){
+ const active=i2IsPickingPilot(state);
+ const control=node('button',{className:'i2-picking-pilot-button',attrs:{type:'button'},
+  text:active?'Volver al reto inicial':'Activar reto de diagnóstico'});
+ control.addEventListener('click',()=>{
+  try{
+   state=active?i2LeavePickingPilot(state):i2StartPickingPilot(state);
+   persist();render();
+  }catch(error){showError(error)}
+ });
+ return section('i2-picking-pilot-card',[
+  node('strong',{text:I2_PICKING_PILOT.title}),
+  p(active?'Reto de Picking activo: tope físico conocido de 10 unidades SKU por jornada.':
+   'Opcional: dirige un CD cuyo Picking solo puede procesar 10 unidades de producto por jornada. La demanda observada sigue oculta.','note'),
+  p('Tu reto: decidir dónde conviene actuar y cuándo aceptar un límite en vez de gastar sin beneficio. Las metas generales son orientativas; puede no ser físicamente posible alcanzarlas.','footnote'),
+  control
+ ]);
+}
+
+/** Optional retrospective explanation; only computes after the user requests it. */
+function pickingPilotDebriefPanel(){
+ if(!i2IsPickingPilot(state))return null;
+ const panel=node('details',{className:'i2-picking-pilot-debrief'},[
+  node('summary',{text:'Nico: ¿cuánto limitó Picking esta misión?'})
+ ]);
+ let loaded=false;
+ panel.addEventListener('toggle',()=>{
+  if(!panel.open||loaded)return;
+  loaded=true;
+  try{
+   const evidence=i2PickingPilotReflection(state);
+   panel.append(section('i2-picking-pilot-findings',[
+    p(evidence.knownCondition,'note'),
+    section('metrics-grid',[
+     section('metric-card',[
+      node('span',{text:'Con límite de Picking'}),
+      node('strong',{text:num.format(evidence.restrictedDispatched)+' pedidos expedidos'})
+     ]),
+     section('metric-card',[
+      node('span',{text:'Sin ese límite físico'}),
+      node('strong',{text:num.format(evidence.unrestrictedDispatched)+' pedidos expedidos'})
+     ])
+    ]),
+    p(evidence.finding,'note'),
+    p('Pregunta gerencial: '+evidence.question,'note'),
+    p(evidence.boundary,'footnote')
+   ]));
+  }catch(error){
+   console.error('I2-35.2 reflexión Picking:',error);
+   panel.append(p('No fue posible verificar la comparación física.','note'));
+  }
+ });
+ return panel;
+}
 function intro(){
  const brief=i2FirstMissionBriefing(state);
  stage.textContent='Misión 01 · Tu primer turno';
@@ -445,6 +502,7 @@ function intro(){
    p('PARTIDA EN CURSO','intro-resume-title'),
    p(brief.resumeLabel+'. Puedes continuar sin perder lo que ya decidiste.','intro-resume')
   ]:[]),
+  pickingPilotStartCard(),
   nicoWelcome(),
   section('briefing-steps',[
    node('strong',{text:'Tu desafío en 3 pasos'}),
@@ -699,6 +757,12 @@ function areaScene(){
   choiceList(area),
   ...(area.id==='transport'?[p('Una ruta adicional solo ayuda si ya hay pedidos completos. Preparado, expedido y entregado son estados distintos.','commercial-brief')]:[]),
   ...(area.id==='picking'?[p('Picking necesita todos los SKU del pedido completo; reforzar operarios no repara faltantes ni asegura salida del CD.','commercial-brief')]:[]),
+  ...(area.id==='picking'&&i2IsPickingPilot(state)?[
+   section('i2-picking-pilot-card',[
+    node('strong',{text:'Condición conocida del reto'}),
+    p('El tope físico es 10 unidades SKU por jornada; no es un límite de pedidos ni productividad por persona-hora. Reforzar la dotación nominal puede no superar este tope.','note')
+   ])
+  ]:[]),
   ...(area.id==='inventory'?[p('Una caja puede existir físicamente y aun así no estar localizada o lista para Picking. Conciliar mejora lo que podemos prometer, no inventa unidades.','commercial-brief')]:[]),
   ...(area.id==='quality'?[p('Calidad revisa los productos que ya entraron al CD. Una unidad retenida está esperando revisión: no significa que esté dañada o perdida.','commercial-brief')]:[]),
   ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
@@ -916,6 +980,9 @@ function recoveryScene(){
   p(reveal.context,'note'),
   p(reveal.boundary,'footnote'),
   managementDiagnosisPanel(diagnosis),
+  ...(i2IsPickingPilot(state)?[
+   p('Nico: el límite físico de Picking es conocido desde el inicio. Pregúntate si la recuperación que vas a comprar realmente altera ese límite. Puedes elegir no intervenir.','note')
+  ]:[]),
   section('guide-box',[node('strong',{text:'Tu guía'}),p('Elige una intervención. Puedes consultar el impacto estimado antes de confirmar. Algunas decisiones cuestan dinero y aun así podrían no recuperar pedidos.')]),
   p('Tu acción gerencial','option-heading'),
   section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
@@ -1051,6 +1118,7 @@ function multiResultsScene(){
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
   renderI2NicoEvidenceLearning(learning),
+  ...(i2IsPickingPilot(state)?[pickingPilotDebriefPanel()]:[]),
   replayTradeoffPanel(),
   section('multi-committed-summary',[
    node('strong',{text:actions.length?'Acciones confirmadas':'Decisión: no intervenir'}),
@@ -1384,6 +1452,7 @@ function resultsScene(){
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
   renderI2NicoEvidenceLearning(learning),
+  ...(i2IsPickingPilot(state)?[pickingPilotDebriefPanel()]:[]),
   replayTradeoffPanel(),
   forecast,
   planning,
