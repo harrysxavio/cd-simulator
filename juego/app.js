@@ -9,6 +9,8 @@ import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {openI2NicoJourney} from './nico-journey-dialog.js';
 import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
+import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
+ i2OperationalEventsForSeed} from '../src/operational-event-schedule.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
 import {i2GuideHint,readI2GuidePreference,saveI2GuidePreference} from '../src/i2-game-guide.js';
 import {i2FirstMissionBriefing} from '../src/i2-first-mission-briefing.js';
@@ -412,14 +414,50 @@ function nicoWelcome(){
  return card;
 }
 /** An explicitly selectable operational exercise, not just a renamed demand shock. */
+/**
+ * I2-35.5c (piloto): la semilla de incidente se selecciona una sola vez
+ * antes del primer compromiso. El tipo y el día permanecen ocultos.
+ * No simula una intervención durante la jornada: eso requiere el siguiente corte.
+ */
+function operationalIncidentCard(){
+ const active=!!state.eventSeed,locked=state.confirmedAreas.length>0;
+ const btn=node('button',{className:'i2-operational-drill-button',
+  attrs:{type:'button',id:'gameOperationalDrill'},
+  text:active?'Desactivar sorpresa operacional':'Activar misión con incidente sorpresa'});
+ btn.disabled=locked;
+ btn.addEventListener('click',()=>{
+  if(locked)return;
+  try{
+   if(active){delete state.eventSeed}
+   else{
+    // Random assignment is independent of demand seed, choices or score.
+    // Persist immediately so reloading never redraws a different incident.
+    const sample=new Uint32Array(1);
+    window.crypto.getRandomValues(sample);
+    state.eventSeed=I2_OPERATIONAL_EVENT_SEEDS[sample[0]%I2_OPERATIONAL_EVENT_SEEDS.length];
+    if(i2IsPickingPilot(state))state=i2LeavePickingPilot(state);
+   }
+   persist();render();
+  }catch(e){showError(e)}
+ });
+ return section('i2-operational-drill-card',[
+  node('strong',{text:'Reto opcional · Incidente operacional desconocido'}),
+  p(active?'Incidente sellado y fijado para esta partida. Tipo y jornada se descubrirán al revelar.':
+   'Además de la demanda, la operación puede sufrir una interrupción física de muelle o Calidad. Se escogerá un caso reproducible de forma independiente.','note'),
+  p('En este piloto las consecuencias se muestran al cierre y las recuperaciones se estudian como laboratorio retrospectivo; todavía no puedes ejecutar intervenciones durante una jornada.','footnote'),
+  ...(locked?[p('La misión está confirmada y ya no puedes cambiar su incidente.','footnote')]:[]),
+  btn
+ ]);
+}
 function pickingPilotStartCard(){
  const active=i2IsPickingPilot(state);
  const locked=state.confirmedAreas.length>0;
  const control=node('button',{className:'i2-picking-pilot-button',attrs:{type:'button'},
   text:active?'Volver al reto inicial':'Activar reto de diagnóstico'});
- control.disabled=locked;
+ control.disabled=locked||!!state.eventSeed;
  control.addEventListener('click',()=>{
   try{
+   if(state.eventSeed)return;
    state=active?i2LeavePickingPilot(state):i2StartPickingPilot(state);
    persist();render();
   }catch(error){showError(error)}
@@ -505,6 +543,7 @@ function intro(){
    p(brief.resumeLabel+'. Puedes continuar sin perder lo que ya decidiste.','intro-resume')
   ]:[]),
   pickingPilotStartCard(),
+  operationalIncidentCard(),
   nicoWelcome(),
   p('Primero planificarás las ocho áreas. Después verás qué cambió y podrás combinar intervenciones para responder.','note'),
   node('p',{className:'note',text:'Partimos con '+num.format(brief.plannedOrders)+' pedidos previstos en una muestra. La demanda real sigue oculta.',attrs:{id:'gamePlanOrders'}}),
@@ -889,6 +928,7 @@ function revealScene(){
    node('strong',{text:'Mensaje del equipo'}),
    p('Gerencia, llegó el momento de comparar la planificación con lo que realmente ocurrió. Las órdenes de compra iniciales no pueden reescribirse retroactivamente.')
   ]),
+  ...(state.eventSeed?[p(i2OperationalEventSealed(state.eventSeed).description,'note')]:[]),
   p('La sorpresa se revela solo cuando tú lo decides.','note')
  ]);
  updateFooter();
@@ -897,7 +937,8 @@ function resultFor(option){
  return i2MvpPhysicalResult({
   choices:state.choices,option:option??state.recovery,
   urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage,
-  seed:state.seed,advanced:state.advanced
+  seed:state.seed,advanced:state.advanced,
+  operationalEvents:state.eventSeed?i2OperationalEventsForSeed(state.eventSeed):[]
  });
 }
 function labeledSelect(label,values,current,onChange){
@@ -964,6 +1005,39 @@ function managementDiagnosisPanel(model){
  );
  return panel;
 }
+/** Post-reveal comparison only: do not disclose the surprise in planning. */
+function operationalIncidentOutcomePanel(){
+ if(!state.eventSeed||!state.reveal)return null;
+ const events=i2OperationalEventsForSeed(state.eventSeed);
+ const observed=resultFor('wait');
+ const without=i2MvpPhysicalResult({
+  choices:state.choices,option:'wait',
+  urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage,
+  seed:state.seed,advanced:state.advanced,operationalEvents:[]
+ });
+ if(JSON.stringify(observed.originalPurchaseOrders)!==
+    JSON.stringify(without.originalPurchaseOrders)||
+   observed.actualOrders!==without.actualOrders)
+  throw Error('I2-35.5c: el incidente alteró demanda o compras comprometidas');
+ const delta=observed.shippedOrders-without.shippedOrders;
+ const stageName={'receiving-stop':'Recepción · muelle detenido',
+  'quality-stop':'Calidad · liberación detenida'};
+ return section('i2-incident-outcome',[
+  node('strong',{text:'¡Novedad operacional! · Eventos del periodo'}),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
+  p('Nico: estas interrupciones sucedieron durante la operación aunque el plan ya estaba comprometido. En cada una se conservan los SKU; pueden quedar esperando.','note'),
+  ...events.map(event=>section('i2-incident-event',[
+   node('strong',{text:'Día '+event.startDay+' · '+stageName[event.kind]}),
+   p('Duración: '+event.durationDays+' jornada(s). La etapa no procesó unidades mientras estuvo detenida.','note')
+  ])),
+  p('Plan sin estos incidentes: '+num.format(without.shippedOrders)+
+   ' pedidos expedidos. Con incidentes: '+num.format(observed.shippedOrders)+
+   '. Diferencia: '+(delta>0?'+':'')+num.format(delta)+' pedidos.','note'),
+  p(delta===0?'El total de pedidos no cambió. Puede existir holgura o un cuello diferente: no inventes un perjuicio que el motor no calculó.':
+   'La diferencia corresponde a este contrafactual con la misma demanda, decisiones y compras iniciales. No presupone costos no medidos.','footnote'),
+  p('IMPORTANTE: las acciones de recuperación actuales son comparaciones retrospectivas sobre las 12 jornadas; no representan una orden enviada por el gerente en un día pasado.','footnote')
+ ]);
+}
 function recoveryScene(){
  if(!state.reveal){state.phase='reveal';render();return}
  // Único acceso al evento observado, permitido solo tras la transición reveal.
@@ -990,6 +1064,7 @@ function recoveryScene(){
   p(reveal.teaching,'note'),
   p(reveal.context,'note'),
   p(reveal.boundary,'footnote'),
+  ...(state.eventSeed?[operationalIncidentOutcomePanel()]:[]),
   section('i2-operational-alerts',[
    node('strong',{text:'NOVEDADES DEL CD · PLAN ORIGINAL'}),
    p('El equipo informa señales físicas de la simulación antes de elegir un refuerzo.','note'),
@@ -1210,7 +1285,8 @@ function replayTradeoffPanel(){
   try{
    const scenario=i2ChallengeReplayMatrix({
     seed:state.seed,choices:state.choices,advanced:state.advanced,
-    urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage
+    urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage,
+    operationalEvents:state.eventSeed?i2OperationalEventsForSeed(state.eventSeed):[]
    })[0];
    const labels={wait:'No intervenir',overtime:'Refuerzo',reserve:'Reserva',
     emergency:'Compra urgente',combined:'Compra + refuerzo'};
@@ -1565,6 +1641,6 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced,eventSeed:state.eventSeed??null});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
 });
 render();
