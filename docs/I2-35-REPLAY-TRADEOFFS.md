@@ -27,3 +27,6 @@ Siguiente: I2-36 matriz de interacciones E2E y focos/touch.
 - Optimización móvil: el panel solo construye y calcula las cinco alternativas cuando se abre; antes de abrirlo hay una sola línea de resumen y cero cálculos duplicados.
 - Añadida regresión Node de configuración avanzada y E2E móvil con ausencia de fugas pre-reveal, cinco filas después de desplegar, evaluación gerencial inalterada y persistencia al recargar.
 - **Pendiente**: comprobar CI de HEAD, revisar fallos si los hay, integrar en main, verificar publicación GitHub Pages y mostrar SHA. Estas correcciones todavía NO cierran I2-35, que requiere diversidad de cuellos físicos real.
+
+## Precisión temporal adicional (31-10-2026)
+El laboratorio respeta el plazo de compra urgente y la cobertura `state.arrivalDay/state.coverage` en las cinco alternativas clásicas. Llegada en **día 13** implica **0 pedidos recuperados por compra urgente** antes del cierre de día 12; se añadió test de regresión de este límite. En resultados multiacción el panel sigue siendo comparación ilustrativa de cinco opciones clásicas, no reconstrucción exacta de la combinación confirmada. Se prohíbe atribuir causalidad perfecta o simular decisiones retrospectivas como ejecutables.
