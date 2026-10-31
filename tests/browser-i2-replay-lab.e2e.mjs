@@ -75,7 +75,7 @@ test('I2-35: confirmed multi-action still has a five-option retrospective lab',
   await panel.locator('summary').click();
   await panel.locator('.i2-replay-option-row').first().waitFor();
   assert.equal(await panel.locator('.i2-replay-option-row').count(),5);
-  assert.match(await panel.innerText(),/no compara todas las combinaciones/);
+  assert.match(await panel.innerText(),/ni compara todas las combinaciones/);
   const saved=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
   await panel.locator('summary').click();
   await panel.locator('summary').click();
