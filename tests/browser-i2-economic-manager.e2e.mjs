@@ -23,7 +23,7 @@ for(const mode of ['classic','multi']){
    await toRecover(page);
    if(mode==='classic')await page.locator('#gameNext').click();
    else{
-    await page.locator('.multi-lever-panel > summary').click();
+    if(!(await page.locator('.multi-lever-panel').evaluate(el=>el.open)))await page.locator('.multi-lever-panel > summary').click();
     await page.locator('#multiBuy').check();
     await page.locator('#multiBoost').check();
     await page.locator('#multiCompare').click();
