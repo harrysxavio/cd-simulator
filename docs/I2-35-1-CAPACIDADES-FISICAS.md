@@ -33,3 +33,9 @@
 - Run Node inicial PR #129: cuatro de cinco pruebas nuevas aprobaron, la primera falló porque trató `originalPurchaseOrders` como arreglo (`.length`) aunque su contrato puede ser un objeto.
 - Se cambió la aserción para validar presencia de estructura sin suponer su forma; no se tocó el motor ni el contenido de compras. Se conserva en otros tests la comparación estructural exacta entre replay y alternativa.
 - CI del nuevo HEAD pendiente. Próximo paso técnico **después de verde**: medir `receiving.totals.peakDockQueueSkuUnits`, `quality.totals.peakHeldSkuUnits`, `picking.totals.neverPreparedOrders`, `transport.totals.preparedAwaitingDispatchOrders` y su sensibilidad a acciones, conservando misma demanda/semilla.
+
+## Pares discriminantes · ampliación del 31-10-2026
+- El test `paired physical observations` calcula **sobre la misma semilla** dos alternativas por área (Recepción bajo/reforzado, Calidad lenta/prioritaria, Picking bajo/reforzado, Transporte bajo/reforzado, proveedor económico/confiable) y el límite físico Picking 10 vs base.
+- Se guardan en logs CI: expedidos, pendientes, máximo de cola de muelle, stock retenido por Calidad, pedidos nunca preparados, staging, gasto extra parcial y diferencia de expedición. **Un valor cero en diferencia de expedición NO invalida el motor: significa que ese parámetro no resultó vinculante en ese fixture.**
+- Hasta revisar resultados de CI no afirmar cuellos efectivos ni estrategia ganadora. Los pares no son misión jugable y no alteran interfaz ni fuentes canónicas.
+- Próximo paso exacto: extraer `I2-35.1 PAIRED_PHYSICAL_EVIDENCE` desde run Node, clasificar pares vinculantes/no vinculantes, escoger fixtures para I2-35.2; después integrar/merge si se satisfacen puertas y actualizar STATUS.
