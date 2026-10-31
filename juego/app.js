@@ -1098,7 +1098,8 @@ function replayTradeoffPanel(){
   loaded=true;
   try{
    const scenario=i2ChallengeReplayMatrix({
-    seed:state.seed,choices:state.choices,advanced:state.advanced
+    seed:state.seed,choices:state.choices,advanced:state.advanced,
+    urgentArrivalDay:state.arrivalDay,purchaseCoveragePercent:state.coverage
    })[0];
    const labels={wait:'No intervenir',overtime:'Refuerzo',reserve:'Reserva',
     emergency:'Compra urgente',combined:'Compra + refuerzo'};
