@@ -29,7 +29,7 @@ for(const physicalReserve of [false,true]){
  try{
   await reveal(page,physicalReserve);
   const before=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),KEY);
-  await page.locator('.multi-lever-panel summary').first().click();
+  if(!(await page.locator('.multi-lever-panel').evaluate(el=>el.open)))await page.locator('.multi-lever-panel summary').first().click();
   await page.locator('#multiBuy').check();
   await page.locator('#multiBoost').check();
   if(physicalReserve)await page.locator('#multiReserve').check();
@@ -59,7 +59,7 @@ for(const physicalReserve of [false,true]){
    'result must be recomputed from preserved event');
   await page.locator('#gameBack').click();
   assert.match(await page.locator('#gameStage').innerText(),/Recuperación/);
-  await page.locator('.multi-lever-panel summary').first().click();
+  if(!(await page.locator('.multi-lever-panel').evaluate(el=>el.open)))await page.locator('.multi-lever-panel summary').first().click();
   assert.equal(await page.locator('#multiBuy').isChecked(),true);
   assert.equal(await page.locator('#multiBoost').isChecked(),true);
   assert.equal(await page.locator('#multiReserve').isChecked(),physicalReserve);
@@ -92,11 +92,12 @@ test('I2-30: volver a la selección clásica no conserva evento multi',
  const page=await context.newPage();
  try{
   await reveal(page);
-  await page.locator('.multi-lever-panel summary').first().click();
+  if(!(await page.locator('.multi-lever-panel').evaluate(el=>el.open)))await page.locator('.multi-lever-panel summary').first().click();
   await page.locator('#multiCompare').click();
   await page.locator('.multi-confirm-decision summary').click();
   await page.locator('#multiCommit').click();
   await page.locator('#gameBack').click();
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('.game-choice').filter({hasText:'Compra urgente SKU'}).click();
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene h1').innerText(),/consecuencias/);
