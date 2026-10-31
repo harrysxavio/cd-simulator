@@ -100,6 +100,7 @@ function button(label,handler,{selected=false,description=''}={}){
  return b;
 }
 function setActions({next='Continuar',onNext=null,back='',onBack=null}={}){
+ primary.classList.remove('recovery-classic-footer');
  primary.textContent=next;primary.disabled=!onNext;primary.hidden=!onNext;
  primary.onclick=onNext;
  secondary.textContent=back;secondary.hidden=!onBack;secondary.onclick=onBack;
@@ -1042,6 +1043,7 @@ function recoveryScene(){
   if(state.recoveryConfirmation)state=i2ClearMultiRecovery(state);
  }});
  primary.textContent='Confirmar opción simple →';
+ primary.classList.add('recovery-classic-footer');
 }
 /** After revealing, the manager can review decisions without revising the sealed plan. */
 function reviewScene(){
