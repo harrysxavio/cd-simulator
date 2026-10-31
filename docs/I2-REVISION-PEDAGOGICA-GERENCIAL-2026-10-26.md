@@ -1,5 +1,8 @@
 # I2 · Corrección pedagógica y gerencial vinculante · 26-10-2026
 
+> **Adenda pedagógica vinculante 28-10-2026:** [auditoría de producto y guía de tres capas](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md), ejecutada mediante I2-36.3 e I2-37.1/37.2 del [plan maestro](I2-PLAN-MAESTRO.md). Cada intervención de Nico se estructura en (A) comprensión cotidiana inmediata, (B) ejemplo concreto del pedido/cola/SKU con dato de partida solo si ya observable y (C) ficha profesional opcional con definición, fórmula, unidad, período, fuente y límites. Una idea principal por aparición; siglas explicadas una vez; diferenciar hechos, interpretación, hipótesis y ejemplo. Tutorial secuencial saltable y reabrible, preferencia para reducir interrupciones, sin cambiar dificultad física por nivel de texto. Los textos deben guiar *qué mirar, por qué y qué sacrifica una decisión*, no dar solución universal. **Planificado, no certificado en UX móvil ni con usuarios.**
+
+
 **Alcance:** mejora del plan vigente de 41 microfases, sin duplicar fases ni declarar requisitos futuros como terminados. Este documento complementa I2-REVISION-GESTION-GAMIFICADA-2026-10-24.md y es vinculante para I2-24–40.
 
 ## Auditoría de las nuevas observaciones

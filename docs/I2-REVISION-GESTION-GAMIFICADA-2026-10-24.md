@@ -1,5 +1,8 @@
 # Implementación 2 · Revisión de profundidad gerencial y UX didáctica (24-10-2026)
 
+> **Revisión del 28-10-2026:** el objetivo de gamificación se redefine como ciclo **situación → información disponible → hipótesis → decisión → efecto del motor → reflexión → reintento**. Cinco shocks de demanda no prueban variedad de cuellos. Antes de prometer ocho arquetipos validar soporte físico ARC-01–08 y estrategias útiles diferentes; no alterar el escenario exógeno por desempeño ni presentar comparaciones perfectas como predicción en vivo. La experiencia en teléfono debe priorizar decisiones y mostrar detalle técnico a demanda; PR #127 agrega comparación en rama, aún no en main. Ver [auditoría](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md) y [microfases](I2-PLAN-MAESTRO.md). **Este texto constituye criterio de aceptación, no aprobación de implementación.**
+
+
 **Decisión vigente y vinculante:** este documento complementa [I2-PLAN-MAESTRO.md](I2-PLAN-MAESTRO.md), [I2-EXPERIENCIA-MOVIL.md](I2-EXPERIENCIA-MOVIL.md) y [I2-STATUS.md](I2-STATUS.md). Se mantienen los **41 IDs I2-00 a I2-40**; 14 estaban integradas al revisar esta solicitud. **Plan aprobado ≠ funciones implementadas.** Cada regla añadida aquí se satisface solo mediante pruebas y PR posteriores. Si una regla requiere dividir una microfase, usar PR sucesivos / subtareas sin atribuir prematuramente su finalización.
 
 ## 1. Auditoría de la brecha real

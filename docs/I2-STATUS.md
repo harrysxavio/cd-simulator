@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **CHECKPOINT DE PLANIFICACIÓN · 28-10-2026 (actualizar al fusionar PR documental).** Corte técnico verificado: I2-00–I2-34 en `main` (35/41 IDs históricos). I2-35 aún **no cerrada**; [PR #127](https://github.com/harrysxavio/cd-simulator/pull/127) draft abierto en rama independiente, con módulo de comparación de cinco recuperaciones y panel de resultados, **no fusionado ni publicado**. La actualización del plan se propone en rama `docs/i2-product-rebaseline-2026-10-28`, ver [auditoría](I2-AUDITORIA-PRODUCTO-REBASELINE-2026-10-28.md) y [desglose vinculante](I2-PLAN-MAESTRO.md#d-rebaselining-vinculante-28-10-2026--microfases-ampliadas-i2-3540). **Este bloque no declara CI nueva aprobada ni publicación validada.** Próximo paso exacto: **I2-35.1**, fixtures físicos por cuello, cronología causal y test de estrategias diferentes; posteriormente reconciliar PR #127. Android/TalkBack/usuarios #67 pendientes. Evidencia de HTTP+commit Pages no comprobada en esta sesión.
+
+
 **Corte:** 27 de octubre de 2026 (Chile) · **Base V1:** v11.68 r177.  
 **Plan técnico:** [41 microfases I2-00–I2-40](I2-PLAN-MAESTRO.md) · [Roadmap ejecutivo de 9 fases](I2-ROADMAP-EJECUCION-2026-10-23.md).  
 **Enlace de la alfa:** https://harrysxavio.github.io/cd-simulator/juego/  
