@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **I2-35.1 · actualización de pruebas comparativas (31-10-2026):** después del fallo inicial de forma de manifiesto, una ejecución Node del HEAD corregido resultó **verde**; el cambio posterior añadió prueba de pares físicos con la misma demanda en `tests/i2-35-physical-fixtures.test.mjs`, documentación de métricas y protocolo en [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). **La nueva ejecución CI del HEAD aún no está verificada.** PR #129 draft, sin merge, sin nueva versión pública. Próximo paso: extraer los resultados `PAIRED_PHYSICAL_EVIDENCE`, clasificar escenarios vinculantes y ampliar pruebas discriminantes; mantener PR #127 separado. I2-35.1 no cerrada.
+
+
 > **Seguimiento CI I2-35.1 · 31-10-2026:** PR #129 sigue en revisión. CI inicial: Chromium **verde**, Node **rojo** por supuesto erróneo en prueba `originalPurchaseOrders.length` (no por inconsistencia física demostrada). Prueba ajustada en commit `3e89c0c`, documento de contrato y diagnóstico actualizado; CI del nuevo HEAD en cola a la última revisión. Aún faltan pruebas discriminantes y no se declara cierre ni publicación. [Evidencia](I2-35-1-CAPACIDADES-FISICAS.md).
 
 
