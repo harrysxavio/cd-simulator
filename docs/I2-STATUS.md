@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **I2-35.2 · catálogo físico en preparación (31-10-2026):** PR #129 fusionado a main (`03218a7`) con Node+Chromium verdes, pero I2-35.1 conserva limitaciones cronológicas y de variedad. Rama `feat/i2-35-2-evidence-archetypes`: tres sondas canónicas reproducibles en `src/i2-operational-archetype-probes.js`, pruebas Node y [contrato](I2-35-2-ARQUETIPOS-PROBADOS.md). **Todas `playable:false`: no representan nuevas misiones disponibles.** Pendiente CI y PR; próxima acción confirmar valores, diseñar primera experiencia ARC-06 jugable sin causalidad retrospectiva. PR #127 laboratorio en validación separado. Pages sin cambios certificados.
+
+
 > **I2-35.1 · 31-10-2026, búsqueda dirigida:** Node del corte anterior `e506f18` aprobado, Chromium en ejecución al consultar. Se añadieron 18 configuraciones canónicas para encontrar testimonios de cola de Recepción, retenciones de Calidad y staging de Transporte; log `TARGETED_QUEUE_EVIDENCE`, test aún no validado por CI del HEAD. Archivos: `tests/i2-35-physical-fixtures.test.mjs` y [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). Próximo paso: leer log, fijar escenarios reproducibles y verificar cambios de estrategia; I2-35.1 no cerrada, PR #129 draft, publicación sin cambios.
 
 
