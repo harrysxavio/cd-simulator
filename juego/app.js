@@ -1089,15 +1089,15 @@ function multiResultsScene(){
 function replayTradeoffPanel(){
  const scenario=i2ChallengeReplayMatrix({
   seed:state.seed,choices:state.choices,
-  plannedOrders:state.advanced.plannedOrders
+  advanced:state.advanced
  })[0];
  const labels={wait:'No intervenir',overtime:'Refuerzo',reserve:'Reserva',
   emergency:'Compra urgente',combined:'Compra + refuerzo'};
  return node('details',{className:'i2-tradeoff-replay'},[
-  node('summary',{text:'Comparar alternativas del mismo reto · Nico'}),
+  node('summary',{text:'Laboratorio: comparar cinco alternativas clásicas · Nico'}),
   p('Misma demanda observada ('+num.format(scenario.actualOrders)+
-    ' pedidos), mismas ocho decisiones y las mismas compras originales. Solo cambia la recuperación.','note'),
-  ...scenario.recoveries.map(r=>section('management-traffic-row',[
+    ' pedidos), mismas ocho decisiones y las mismas compras originales. Solo cambia la recuperación. Esta comparación muestra el resultado conocido del escenario; no es una predicción disponible antes de decidir ni compara todas las combinaciones posibles.','note'),
+  ...scenario.recoveries.map(r=>section('i2-replay-option-row',[
    node('strong',{text:labels[r.option]}),
    p('Expedidos '+num.format(r.shippedOrders)+' · pendientes '+
     num.format(r.pendingOrders)+' · servicio '+r.servicePercent.toFixed(1)+
