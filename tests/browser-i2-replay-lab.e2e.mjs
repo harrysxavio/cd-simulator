@@ -22,6 +22,7 @@ test('I2-35: mobile replay lab is optional and never alters management evaluatio
   assert.equal(await page.locator('.i2-tradeoff-replay').count(),0);
   await page.locator('#gameNext').click(); // reveal → recovery
   assert.equal(await page.locator('.i2-tradeoff-replay').count(),0);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.getByRole('button',{name:/Refuerzo operativo/}).click();
   await page.locator('#gameNext').click(); // commit recovery → result
   await page.locator('#gameScene h1').filter({hasText:'consecuencias'}).waitFor();
@@ -61,7 +62,7 @@ test('I2-35: confirmed multi-action still has a five-option retrospective lab',
   await page.locator('#gameNext').click();
   for(let i=0;i<8;i++)await page.locator('#gameNext').click();
   await page.locator('#gameNext').click();
-  await page.locator('.multi-lever-panel summary').first().click();
+  if(!(await page.locator('.multi-lever-panel').evaluate(el=>el.open)))await page.locator('.multi-lever-panel summary').first().click();
   await page.locator('#multiBuy').check();
   await page.locator('#multiBoost').check();
   await page.locator('#multiBuyDay').selectOption('13');
