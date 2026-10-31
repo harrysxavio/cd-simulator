@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **I2-35.1 · 31-10-2026, búsqueda dirigida:** Node del corte anterior `e506f18` aprobado, Chromium en ejecución al consultar. Se añadieron 18 configuraciones canónicas para encontrar testimonios de cola de Recepción, retenciones de Calidad y staging de Transporte; log `TARGETED_QUEUE_EVIDENCE`, test aún no validado por CI del HEAD. Archivos: `tests/i2-35-physical-fixtures.test.mjs` y [matriz física](I2-35-1-CAPACIDADES-FISICAS.md). Próximo paso: leer log, fijar escenarios reproducibles y verificar cambios de estrategia; I2-35.1 no cerrada, PR #129 draft, publicación sin cambios.
+
+
 > **I2-35.1 · resultados discriminantes (31-10-2026):** CI Node de `831198a` aprobada, lectura de logs: con misma semilla +50% (300 pedidos) Recepción, Calidad, Picking nominal y Transporte cambiaron **0 expedidos** (98→98); proveedor económico→confiable **+1** (98→99); límite físico de Picking de 10 SKU/día vs normal **+39** (59→98). No declarar esos cuatro cambios nominales como retos separados. Pruebas de regresión para el contraste añadido en `tests/i2-35-physical-fixtures.test.mjs`; CI del HEAD posterior por comprobar. [Matriz con cifras y límites](I2-35-1-CAPACIDADES-FISICAS.md). Siguiente: fixtures con congestión/retención/staging demostrados, no solo diferencias de parámetros. PR #129 sigue abierto; I2-35.1 sin cierre, Pages sin cambio.
 
 
