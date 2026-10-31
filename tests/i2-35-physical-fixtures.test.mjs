@@ -82,3 +82,47 @@ test('I2-35.1: late purchase cannot improve day-12 result',()=>{
  assert.equal(late.recoveredOrders,0);
  assert.equal(late.shippedOrders,wait.shippedOrders);
 });
+
+/**
+ * Diagnostic evidence (not an acceptance claim): expose physical observations
+ * for paired runs holding all non-target parameters constant. CI output enables
+ * evidence-based selection of genuinely binding archetypes for I2-35.2.
+ */
+test('I2-35.1: paired physical observations identify binding vs nominal constraints',()=>{
+ const pairs=[
+  {id:'receiving',area:'receiving',low:'low',high:'extra'},
+  {id:'quality',area:'quality',low:'slow',high:'priority'},
+  {id:'picking',area:'picking',low:'low',high:'reinforce'},
+  {id:'transport',area:'transport',low:'low',high:'extra'},
+  {id:'supplier',area:'purchasing',low:'cheap',high:'reliable'}
+ ];
+ const observed=[];
+ for(const pair of pairs){
+  const fixed={seed:'alpha-case-04',choices:{},options:{}};
+  const low=run({...fixed,choices:{[pair.area]:pair.low}});
+  const high=run({...fixed,choices:{[pair.area]:pair.high}});
+  const numbers=result=>({
+   dispatched:result.shippedOrders,
+   pending:result.pendingOrders,
+   dockQueue:result.receiving.totals.peakDockQueueSkuUnits,
+   qualityHeld:result.quality.totals.peakHeldSkuUnits,
+   neverPrepared:result.picking.totals.neverPreparedOrders,
+   staging:result.transport.totals.peakStagingOrders,
+   expense:result.incrementalExpenseCLP
+  });
+  assert.equal(low.actualOrders,high.actualOrders,pair.id);
+  assert.equal(low.plannedOrders,high.plannedOrders,pair.id);
+  assert.equal(low.shippedOrders+low.pendingOrders,low.actualOrders,pair.id);
+  assert.equal(high.shippedOrders+high.pendingOrders,high.actualOrders,pair.id);
+  // Do not assign causation solely from the label: log what actually changes.
+  observed.push({stage:pair.id,low:numbers(low),high:numbers(high),
+   outputDelta:high.shippedOrders-low.shippedOrders});
+ }
+ const capped=run({seed:'alpha-case-04',choices:{},options:{pickingLimitSkuPerDay:'10'}});
+ const uncapped=run({seed:'alpha-case-04',choices:{},options:{}});
+ observed.push({stage:'physical-picking-cap',low:{dispatched:capped.shippedOrders},
+  high:{dispatched:uncapped.shippedOrders},
+  outputDelta:uncapped.shippedOrders-capped.shippedOrders});
+ assert.ok(observed.every(x=>Number.isSafeInteger(x.outputDelta)));
+ console.log('I2-35.1 PAIRED_PHYSICAL_EVIDENCE '+JSON.stringify(observed));
+});
