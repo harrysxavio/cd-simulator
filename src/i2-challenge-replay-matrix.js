@@ -54,7 +54,7 @@ export function i2ChallengeReplayMatrix({choices=i2DefaultChoices(),plannedOrder
    seed:challenge.seed,level:challenge.level,label:challenge.label,
    plannedOrders:settings.plannedOrders,actualOrders:shock.actualOrders,shockPercent:shock.shockPercent,
    recoveries:Object.freeze(results.map(({baselineKey,originalPurchaseOrders,...r})=>Object.freeze(r))),
-   boundary:'Solo expedición del CD, cola y gasto incremental del modelo. Sin costo total, productividad por persona-hora ni entrega al consumidor.'
+   boundary:'Compara solo pedidos expedidos, pendientes y gasto incremental conocido; no compara colas por intervención. Sin costo total, productividad por persona-hora ni entrega al consumidor.'
   });
  }));
 }
