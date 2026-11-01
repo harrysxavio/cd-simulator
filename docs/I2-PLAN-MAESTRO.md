@@ -1,5 +1,9 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+
+> **Lab11 · 01-11-2026 · I2-35.5c3b PUBLICADA:** [PR #140](https://github.com/harrysxavio/cd-simulator/pull/140) merge `c046963`, Node/focused/Chromium verdes, Pages y HTTP público del módulo y estilos verificados. Jornada 3 observable entre decisión día 2 y segundo incidente día 4, con redecisión; días 5–12 observados uno por uno antes del cierre. Cada lectura se calcula con motor físico canónico y órdenes ya confirmadas, sin spoilers ni duplicar inventario. **35/41 principales completadas; pendientes I2-35, 36, 37, 38, 39 y 40 (F7 4/5; F8 0/5)**. Próximos entregables: I2-35.5c3c (palancas fechadas y costeadas de Recepción/Calidad), I2-35.2/35.5d (≥5 arquetipos realmente diferentes con casos de aceptación), I2-36/37 (UX y aprendizaje/historial de intentos), I2-38/39 (QA humana móvil, inventario y causalidad, evaluación gerente), I2-40 (release estable). [Especificación y límites](I2-35-5-C3B-DIARIO-JORNADAS.md), [estado vigente](I2-STATUS.md). No equiparar 85,4 % de IDs con esfuerzo pendiente.
+
+
 > **I2-35.5c3b · Diario diario del CD (1 noviembre 2026, candidato):** se implementa una vista jornada por jornada utilizando el replay SKU ya calculado, pero exponiendo exclusivamente métricas del día observado. Se introduce `incidentViewDay` opcional y transición validada de un día; día 3 -> segundo incidente día 4 -> días 5–12 -> cierre. Casos de un solo incidente preservados. [Contrato](I2-35-5-C3B-DIARIO-JORNADAS.md). **No se completa I2-35 por esto**: c3c necesita capacidad/costos efectivos de Recepción y Calidad, ≥5 misiones causalmente distintas, QA/UX móvil. I2-35..I2-40 siguen pendientes de aceptación (35/41 por IDs, no tiempo de ejecución).
 
 
