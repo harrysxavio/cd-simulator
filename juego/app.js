@@ -12,6 +12,7 @@ import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards
 import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
 import {i2DailyOperationsSnapshot} from '../src/i2-daily-operations.js';
+import {I2_QUALITY_BRIDGE} from '../src/i2-quality-bridge.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
  i2OperationalEventsForSeed} from '../src/operational-event-schedule.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
@@ -1079,11 +1080,19 @@ function incidentDailyScene(){
     ['Pedidos pendientes',model.pendingOrders+' pedidos'],
     ['En cola de Recepción',model.waitingDockSkuUnits+' SKU'],
     ['Retenidos en Calidad',model.waitingQualitySkuUnits+' SKU'],
-    ['Recibidos hoy',model.receivedSkuUnits+' SKU']
+    ['Recibidos hoy',model.receivedSkuUnits+' SKU'],
+    ...(state.operationalResponse?[['Liberados por línea alternativa',
+     model.qualityBridgeReleasedSkuUnits+' SKU']]:[])
    ].map(([label,value])=>section('metric-card',[
     node('span',{text:label}),node('strong',{text:String(value)})
    ]))
   ]),
+  ...(model.qualityBridgeCostCLP?[section('i2-quality-bridge-reading',[
+   node('strong',{text:'Línea alternativa de Calidad · jornada contratada'}),
+   p('Liberados: '+num.format(model.qualityBridgeReleasedSkuUnits)+
+    ' SKU · costo: '+money.format(model.qualityBridgeCostCLP)+'.','note'),
+   p('La línea principal continúa detenida; es una hipótesis didáctica, no un precio real.','footnote')
+  ])]:[]),
   ...(model.activeIncidents.length?[
    section('i2-daily-incidents',[
     node('strong',{text:'Incidentes activos de hoy'}),
@@ -1118,6 +1127,12 @@ function incidentSecondResponseScene(){
  const options=[
   ['hold','Mantener decisiones · sin nuevo gasto',
    'No emites órdenes adicionales. La operación sigue con lo ya comprometido.'],
+  ['quality-bridge','Activar línea alternativa de Calidad · día '+
+   I2_QUALITY_BRIDGE.day,
+   'Hasta '+I2_QUALITY_BRIDGE.capacitySkuUnits+
+   ' SKU liberados por una línea certificada adicional durante el cierre de Calidad. Cuesta '+
+   money.format(I2_QUALITY_BRIDGE.shiftCostCLP)+
+   ' por jornada contratada, aunque haya cupos ociosos. No elimina el incidente.'],
   ...(checkpoint.canBuyUrgent?[['urgent-next',
    'Nueva compra urgente · llegada día '+checkpoint.nextDay,
    'Compra unidades faltantes y paga el recargo didáctico. No elimina el bloqueo de Calidad ni salta Recepción.']]:[]),
@@ -1151,7 +1166,7 @@ function incidentSecondResponseScene(){
   section('i2-recovery-mentor-message',[
    node('strong',{text:'Nico · Una decisión nueva, sin borrar la anterior'}),
    p('¿Se están acumulando unidades porque falta mercadería o porque una etapa está parada? Más compras no necesariamente aumentan los pedidos expedidos.','note'),
-   p('Tus nuevas órdenes se ejecutarán como mínimo el día '+checkpoint.nextDay+'. El cierre día 12 aún está oculto.','footnote')
+   p('Tus nuevas órdenes empiezan como mínimo el día '+checkpoint.nextDay+'. El cierre día 12 aún está oculto. La línea alternativa tiene capacidad y costo limitados.','footnote')
   ]),
   section('i2-incident-choices',[
    node('strong',{text:'¿Qué decides a partir de este segundo incidente?'}),
@@ -1425,7 +1440,10 @@ function multiResultsScene(){
   a.urgentPurchase.enabled?'Compra urgente: '+a.urgentPurchase.coveragePercent+
    ' % del faltante, llegada día '+a.urgentPurchase.arrivalDay:null,
   a.reserveTransfer.enabled?'Traslado RESERVA-CD: día '+a.reserveTransfer.releaseDay:null,
-  a.capacityBoost.enabled?'Refuerzo: +80 cupos/jornada':null
+  a.capacityBoost.enabled?'Refuerzo: +80 cupos/jornada':null,
+  state.operationalResponse?'Línea alternativa de Calidad día '+
+   state.operationalResponse.day+': hasta '+state.operationalResponse.capacitySkuUnits+
+   ' SKU, '+money.format(state.operationalResponse.shiftCostCLP):null
  ].filter(Boolean);
  const explain=p(score.recoveredOrders.value>0
   ?'El conjunto recuperó '+num.format(score.recoveredOrders.value)+
@@ -1468,6 +1486,7 @@ function multiResultsScene(){
      'note'),
     p('Segunda respuesta: '+({
      hold:'mantener sin nueva intervención',
+     'quality-bridge':'línea alternativa de Calidad, con capacidad y costo limitados',
      'urgent-next':'compra urgente adicional',
      'reserve-next':'movilizar reserva aún disponible',
      'urgent-and-reserve':'compra urgente y reserva disponible'
@@ -1490,7 +1509,14 @@ function multiResultsScene(){
     ' pedidos.','note'),
    p('Compra urgente '+money.format(row.urgentPurchaseValueCLP)+
     ' · recargo '+money.format(row.urgentSurchargeCLP)+
-    ' · turnos extra '+money.format(row.extraCapacityCostCLP)+'.','footnote'),
+    ' · turnos extra '+money.format(row.extraCapacityCostCLP)+
+    ' · línea alternativa de Calidad '+money.format(row.qualityBridgeCostCLP)+'.','footnote'),
+   ...(state.operationalResponse?[
+    p('La línea alternativa liberó '+num.format(row.qualityBridgeReleasedSkuUnits)+
+     ' SKU (máximo contratado: '+state.operationalResponse.capacitySkuUnits+
+     ') en el día '+state.operationalResponse.day+
+     '. Se cobra el turno aunque quede capacidad ociosa.','note')
+   ]:[]),
    p('Gasto incremental: '+money.format(score.incrementalExpense.value)+
     '. Compras originales comprometidas: '+money.format(score.committedOriginalPurchases.value)+
     '. No son dinero pagado ni costo operacional total.','note'),
