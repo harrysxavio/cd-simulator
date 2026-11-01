@@ -9,7 +9,8 @@ import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {openI2NicoJourney} from './nico-journey-dialog.js';
 import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
-import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse} from '../src/i2-incident-response.js';
+import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
+ i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
  i2OperationalEventsForSeed} from '../src/operational-event-schedule.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
@@ -1044,7 +1045,87 @@ function operationalIncidentOutcomePanel(){
  * Confirmar una respuesta ejecuta UNA simulación física desde el mismo
  * escenario, con efecto futuro fechado; no hay preview de resultado final.
  */
+/**
+ * I2-35.5c3a · Segundo punto causal: el snapshot incluye la primera orden
+ * ya ejecutada, pero NUNCA incluye incidentes posteriores ni el cierre final.
+ */
+function incidentSecondResponseScene(){
+ let checkpoint;
+ try{checkpoint=i2IncidentDecisionCheckpoint(state,{index:1})}
+ catch(e){showError(e);return}
+ stage.textContent='Jornada '+checkpoint.decisionDay+' · Segundo incidente';
+ progress.style.width='94%';
+ const old=state.recoveryConfirmation.actions;
+ const oldOrder=[
+  old.urgentPurchase.enabled?'Compra urgente comprometida para día '+old.urgentPurchase.arrivalDay:null,
+  old.reserveTransfer.enabled?'Reserva movilizada para día '+old.reserveTransfer.releaseDay:null
+ ].filter(Boolean);
+ const options=[
+  ['hold','Mantener decisiones · sin nuevo gasto',
+   'No emites órdenes adicionales. La operación sigue con lo ya comprometido.'],
+  ...(checkpoint.canBuyUrgent?[['urgent-next',
+   'Nueva compra urgente · llegada día '+checkpoint.nextDay,
+   'Compra unidades faltantes y paga el recargo didáctico. No elimina el bloqueo de Calidad ni salta Recepción.']]:[]),
+  ...(checkpoint.reserveAvailable?[['reserve-next',
+   'Mover reserva disponible · día '+checkpoint.nextDay,
+   'Traslada stock existente que estaba separado antes de la misión.']]:[]),
+  ...(checkpoint.canBuyUrgent&&checkpoint.reserveAvailable?[['urgent-and-reserve',
+   'Compra urgente + reserva · día '+checkpoint.nextDay,
+   'Combina recursos aún no comprometidos, sin duplicar stock físico.']]:[])
+ ];
+ replace([
+  p('LA OPERACIÓN CONTINÚA · SEGUNDO INCIDENTE OBSERVADO','eyebrow'),
+  heading('Día '+checkpoint.decisionDay+' · Nuevo problema en el CD'),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
+  p(checkpoint.description,'lead'),
+  p('La primera decisión sigue vigente y ya afectó las jornadas anteriores. No puedes retirarla ni cambiar su fecha.','note'),
+  section('i2-incident-first-commitment',[
+   node('strong',{text:'Primera orden que permanece comprometida'}),
+   ...(oldOrder.length?oldOrder.map(x=>p(x,'note')):[p('Primera decisión: no intervenir.','note')])
+  ]),
+  section('metrics-grid i2-incident-checkpoint',[
+   ...[
+    ['En cola de muelle',checkpoint.waitingDockSkuUnits+' SKU'],
+    ['Retenidos en Calidad',checkpoint.waitingQualitySkuUnits+' SKU'],
+    ['Pedidos expedidos hasta hoy',checkpoint.shippedOrdersToDate],
+    ['Pedidos todavía pendientes',checkpoint.pendingOrdersAtDay]
+   ].map(([label,value])=>section('metric-card',[
+    node('span',{text:label}),node('strong',{text:String(value)})
+   ]))
+  ]),
+  section('i2-recovery-mentor-message',[
+   node('strong',{text:'Nico · Una decisión nueva, sin borrar la anterior'}),
+   p('¿Se están acumulando unidades porque falta mercadería o porque una etapa está parada? Más compras no necesariamente aumentan los pedidos expedidos.','note'),
+   p('Tus nuevas órdenes se ejecutarán como mínimo el día '+checkpoint.nextDay+'. El cierre día 12 aún está oculto.','footnote')
+  ]),
+  section('i2-incident-choices',[
+   node('strong',{text:'¿Qué decides a partir de este segundo incidente?'}),
+   ...options.map(([kind,label,description])=>section('i2-incident-choice',[
+    button(label,()=>{
+     try{
+      state=i2ConfirmNextIncidentResponse(state,kind);
+      multiDraft=state.recoveryConfirmation.actions;
+      persist();gameTransition('finish');
+     }catch(e){showError(e)}
+    }),
+    p(description,'footnote')
+   ]))
+  ]),
+  p('Si no hay compras o reservas disponibles, la opción responsable es no contratar recursos ficticios. Aún no existe una palanca de refuerzo de Recepción/Calidad con inicio y costo diarios.','footnote'),
+  p(checkpoint.boundary,'footnote')
+ ]);
+ setActions({
+  next:'',onNext:null,back:'',onBack:null
+ });
+}
 function incidentResponseScene(){
+ if(state.incidentStep===1)return incidentSecondResponseScene();
+ if(state.incidentStep===2){
+  replace([heading('Operación cerrada'),
+   p('Ambas decisiones gerenciales están confirmadas y no pueden modificarse retroactivamente.','note')]);
+  setActions({next:'Volver a resultados →',onNext:()=>gameTransition('finish')});
+  return;
+ }
  if(!state.reveal){state.phase='reveal';render();return}
  let checkpoint;
  try{checkpoint=i2IncidentDecisionCheckpoint(state)}catch(e){showError(e);return}
@@ -1100,7 +1181,14 @@ function incidentResponseScene(){
       try{
        state=i2ConfirmIncidentResponse(state,kind);
        multiDraft=state.recoveryConfirmation.actions;
-       persist();gameTransition('finish');
+       // Solo las misiones con dos incidentes pasan al siguiente día
+       // observable; las de un incidente conservan su cierre anterior.
+       if(i2OperationalEventsForSeed(state.eventSeed).length>1){
+        state={...state,incidentStep:1};
+        persist();render();
+       }else{
+        persist();gameTransition('finish');
+       }
       }catch(e){showError(e)}
      });
      return section('i2-incident-choice',[
@@ -1313,6 +1401,22 @@ function multiResultsScene(){
     node('strong',{text:num.format(score.pendingOrders.value)})])
   ]),
   nicoSixQuestionPanel(score,evaluation),
+  ...(state.incidentStep===2?[
+   section('i2-two-decision-summary',[
+    node('strong',{text:'Tus dos decisiones, en orden de jornada'}),
+    p('Primera respuesta: '+(
+     state.incidentFirstActions.urgentPurchase.enabled?'compra urgente, ':'' )+
+     (state.incidentFirstActions.reserveTransfer.enabled?'traslado de reserva.':'sin traslado de reserva.'),
+     'note'),
+    p('Segunda respuesta: '+({
+     hold:'mantener sin nueva intervención',
+     'urgent-next':'compra urgente adicional',
+     'reserve-next':'movilizar reserva aún disponible',
+     'urgent-and-reserve':'compra urgente y reserva disponible'
+    }[state.incidentSecondDecision])+'.','note'),
+    p('La segunda decisión no puede cambiar los registros de las jornadas anteriores. El impacto final incluye ambos incidentes y ambos comandos físicos.','footnote')
+   ])
+  ]:[]),
   ...(state.eventSeed?[operationalIncidentOutcomePanel()]:[]),
   renderI2ManagerResultBoard(board),
   renderI2AreaPhysicalTimeline(trace),
@@ -1348,9 +1452,12 @@ function multiResultsScene(){
    p('La comparación usa el escenario original congelado. El resultado se recalcula al abrir, no se guarda un libro físico nuevo.','note'),
    p('Costo total: desconocido; utilidad y entregas al cliente: no medidas.','footnote')
   ]),
-  p('Para cambiar la combinación, usa «Revisar intervención». Para otra partida, usa «Jugar de nuevo».','footnote')
+  p(state.eventSeed?'En misiones con incidentes las órdenes confirmadas no se reescriben desde el cierre. Reinicia la misión para ensayar otra estrategia bajo las mismas condiciones.':
+    'Para cambiar la combinación, usa «Revisar intervención». Para otra partida, usa «Jugar de nuevo».','footnote')
  ]);
- updateFooter();
+ if(state.eventSeed){
+  setActions({next:'Jugar de nuevo ↻',onNext:()=>gameTransition('restart')});
+ }else updateFooter();
 }
 /** I2-35 · Optional comparison: same plan and seed, five classic recoveries.
  * This panel is observational and never alters the saved run or the SKU engine. */
