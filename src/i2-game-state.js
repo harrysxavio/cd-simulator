@@ -22,6 +22,9 @@ export function newI2GameState({seed=SEED,advanced=I2_DEFAULT_ADVANCED,
  // No se acepta una semilla libre ni un resultado dictado por el jugador.
  i2ChallengeForSeed(seed);
  const config=i2ValidateAdvanced(advanced);
+ if(guidedScenario!==null&&(seed!=='alpha-case-01'||
+   config.stockProfile!=='low'||config.pickingLimitSkuPerDay!=='base'))
+  throw new Error('I2-35.2: configuración guiada incompatible');
  if(eventSeed!==null&&!I2_OPERATIONAL_EVENT_SEEDS.includes(eventSeed))
   throw new Error('I2-35.5c: evento de misión desconocido');
  if(guidedScenario!==null&&
@@ -78,6 +81,9 @@ export function normalizeI2GameState(raw){
  // los valores anteriores siguen produciendo la misma simulación.
  let advanced;
  try{advanced=i2ValidateAdvanced(raw.advanced??I2_DEFAULT_ADVANCED)}catch{return null}
+ // El marcador guiado no puede ocultar otro perfil o una semilla distinta.
+ if(guidedScenario&&(advanced.stockProfile!=='low'||
+    advanced.pickingLimitSkuPerDay!=='base'||raw.seed!=='alpha-case-01'))return null;
  const choices={};
  for(const area of I2_AREAS){
   const optionId=raw.choices[area.id];
