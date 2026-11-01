@@ -148,10 +148,14 @@ export function i2ConfirmNextIncidentResponse(raw,kind){
  const pending={...state};
  delete pending.recoveryConfirmation;
  delete pending.incidentStep;
+ // Reconfirming the purchases requires a temporarily uncommitted action;
+ // the original day-3 dock shift is restored verbatim after the second command.
+ delete pending.receivingResponse;
  const updated=i2ConfirmMultiRecovery(pending,actions);
  const final=normalizeI2GameState({
   ...updated,incidentStep:2,incidentFirstActions:first,
   incidentSecondDecision:kind,
+  ...(state.receivingResponse?{receivingResponse:state.receivingResponse}:{}),
   ...(kind==='quality-bridge'?{operationalResponse:I2_QUALITY_BRIDGE}:{})
  });
  if(!final)invalid('segunda orden no cumple contrato de persistencia');
