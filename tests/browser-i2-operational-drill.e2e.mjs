@@ -32,6 +32,12 @@ test('I2-35.5c/c2: optional surprise persists, observed before choice, results o
   assert.equal(await page.locator('.i2-incident-checkpoint').count(),1);
   assert.equal(await page.locator('.i2-incident-outcome').count(),0);
   await page.getByRole('button',{name:'No intervenir',exact:true}).click();
+  // La semilla combinada requiere segunda decisión antes del cierre.
+  if(before.eventSeed==='ops-combined-01'){
+   await page.getByRole('heading',{name:/Día 4 · Nuevo problema/}).waitFor();
+   assert.equal(await page.locator('.i2-incident-outcome').count(),0);
+   await page.getByRole('button',{name:/Mantener decisiones · sin nuevo gasto/}).click();
+  }
   const panel=page.locator('.i2-incident-outcome');
   assert.equal(await panel.count(),1);
   assert.match(await panel.innerText(),/Novedad operacional/);
