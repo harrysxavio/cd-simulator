@@ -40,6 +40,11 @@ for(const response of ['No intervenir','Compra urgente']){
     await page.getByRole('button',{name:/Compra urgente · llega día 3/}).click();
    }
    // Segunda observación, ya impactada por la primera orden.
+   await page.getByRole('heading',{name:/Jornada 3 de 12/}).waitFor();
+   assert.equal(await page.locator('.i2-incident-outcome').count(),0);
+   await page.reload({waitUntil:'networkidle'});
+   assert.equal((await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY)).incidentViewDay,3);
+   await page.locator('#gameNext').click();
    await page.getByRole('heading',{name:/Día 4 · Nuevo problema/}).waitFor();
    const second=await page.locator('#gameScene').innerText();
    assert.match(second,/Calidad suspendió liberaciones/);
@@ -52,6 +57,12 @@ for(const response of ['No intervenir','Compra urgente']){
     assert.equal(await page.getByRole('button',{name:/Nueva compra urgente/}).count(),0);
    }
    await page.getByRole('button',{name:/Mantener decisiones · sin nuevo gasto/}).click();
+   for(let day=5;day<=12;day++){
+    await page.getByRole('heading',{name:'Jornada '+day+' de 12'}).waitFor();
+    assert.equal((await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY)).incidentViewDay,day);
+    assert.equal(await page.locator('.i2-incident-outcome').count(),0);
+    await page.locator('#gameNext').click();
+   }
    await page.locator('.i2-six-question-summary').waitFor();
    const persisted=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
    assert.equal(persisted.phase,'result');
