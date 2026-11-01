@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab11 · I2-35.5c3d publicado (01-11-2026):** [PR #144](https://github.com/harrysxavio/cd-simulator/pull/144), `f9434186c`, integrado tras **Node, focused I2 y Chromium verdes** (se reparó antes un error de sintaxis detectado por Chromium); **Pages y verificación HTTP verde**. El gerente ya puede responder al incidente físico de Recepción (muelle detenido día 2) con turno FIFO de **80 SKU adicionales el día 3 a $55.000 CLP didácticos**; el turno se cobra completo y solo mejora el flujo cuando existen SKU esperando y otros cuellos lo permiten. Se verificó conservación de días 0–2, PO original, costo por fecha, concatenación con intervención de Calidad día 5 y persistencia. [Contrato y pruebas](I2-35-5-C3D-RECEPCION-TURNO.md). **I2-35 no cerrada** hasta misiones causalmente distintas y aceptación de negocio; **35/41** padres completados, seis restantes I2-35–I2-40. Siguen pendientes I2-36 experiencia móvil y pedagogía, I2-37 reflexión/historial, I2-38 QA Android/TalkBack, I2-39 conciliación extrema y I2-40 release final.
+
+
 > **I2-35 · I2-35.5c3d candidato (01-11-2026):** se crea alternativa fechada y costeada de Recepción para responder al muelle detenido del día 2: refuerzo FIFO de **80 SKU adicionales el día 3 por $55.000 CLP** didácticos, con uso real y costo en diario y resultados. Misma orden original; no habilita físicamente el día cerrado ni anticipa demanda o entregas; auditorías económicas y pruebas incluidas. [Contrato](I2-35-5-C3D-RECEPCION-TURNO.md). **No declarar integración ni cerrar I2-35** hasta CI, PR merge, Pages HTTP y después diversidad de misiones. Fases oficiales **35/41**, seis pendientes I2-35–I2-40.
 
 
