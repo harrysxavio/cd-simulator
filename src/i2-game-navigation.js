@@ -1,5 +1,6 @@
 import {I2_AREAS} from './i2-product-contract.js';
 import {newI2GameState,normalizeI2GameState} from './i2-game-state.js';
+import {i2OperationalEventsForSeed} from './operational-event-schedule.js';
 
 /**
  * I2-09 · One state transition per footer action, with no physical replay.
@@ -68,12 +69,36 @@ export function navigateI2GameState(value,action){
     return normalizeI2GameState(next);
    }
    break;
+  case 'advance-incident-day':
+   if(next.phase==='recover'&&Number.isSafeInteger(next.incidentViewDay)
+     &&next.recoveryConfirmation&&next.eventSeed){
+    const events=i2OperationalEventsForSeed(next.eventSeed);
+    const following=next.incidentViewDay+1;
+    if(next.incidentStep===1&&events.length===2
+     &&following===events[1].startDay){
+     // Reveal the next incident, but not its result or any future day.
+     delete next.incidentViewDay;
+     return normalizeI2GameState(next);
+    }
+    if(following<=12){
+     next.incidentViewDay=following;
+     return normalizeI2GameState(next);
+    }
+   }
+   break;
   case 'finish':
    // No saltarse la segunda decisión mediante botones antiguos o una llamada
    // directa al contrato de navegación: el segundo incidente debe resolverse.
    if(next.phase==='recover'&&next.incidentStep===1)
     throw new Error('I2-09: segunda decisión gerencial pendiente');
+   if(next.phase==='recover'&&next.incidentViewDay!==undefined
+     &&next.incidentViewDay!==12)
+    throw new Error('I2-09: jornadas sin observar antes del cierre');
+   if(next.phase==='recover'&&next.eventSeed&&!next.recoveryConfirmation)
+    throw new Error('I2-09: no hay orden operacional confirmada');
    if(next.phase==='recover'&&next.reveal){
+    // Jornada 12 ya observada, por lo que no queda marcador diario activo.
+    delete next.incidentViewDay;
     change('result',7);
     return normalizeI2GameState(next);
    }

@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **I2-35.5c3b · Diario diario del CD (1 noviembre 2026, candidato):** se implementa una vista jornada por jornada utilizando el replay SKU ya calculado, pero exponiendo exclusivamente métricas del día observado. Se introduce `incidentViewDay` opcional y transición validada de un día; día 3 -> segundo incidente día 4 -> días 5–12 -> cierre. Casos de un solo incidente preservados. [Contrato](I2-35-5-C3B-DIARIO-JORNADAS.md). **No se completa I2-35 por esto**: c3c necesita capacidad/costos efectivos de Recepción y Calidad, ≥5 misiones causalmente distintas, QA/UX móvil. I2-35..I2-40 siguen pendientes de aceptación (35/41 por IDs, no tiempo de ejecución).
+
+
 
 > **Corte vigente Lab11 · I2-35.5c3a (31-10-2026):** [PR #138](https://github.com/harrysxavio/cd-simulator/pull/138) fusionado `ca4ae29` y GitHub Pages validado con comprobación HTTP específica. La misión combinada permite respuesta día 2 y nueva decisión día 4, basada en resultados físicos de la primera orden y sin conocer el cierre ni reescribir días previos. Segunda acción limitada a recursos todavía no utilizados y solo efectiva desde el día 5. CI Node/focused/Chromium verdes. **F7 permanece 4/5 (I2-35 abierto); F8 0/5. Total 35/41 microfases históricas.** Próxima c3b: visualizar transcurso de jornadas y construir palancas de Recepción/Calidad con inicio, duración y costos auditados, no solo compras/reserva. Próximas c3c/35.5d: cinco misiones discriminantes con estrategias diferentes y pruebas de principiante, Android físico/TalkBack y aceptación gerencial. [Estado vigente](I2-STATUS.md) · [Contrato c3a](I2-35-5-C3A-SEGUNDO-INCIDENTE.md).
 
