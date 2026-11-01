@@ -60,6 +60,10 @@ async function verify(attempt){
   ||!gameJs.includes('function operationalIncidentCard')
   ||!gameCss.includes('.i2-incident-choice')
   ||!incidentModuleJs.includes('i2IncidentDecisionCheckpoint')
+  ||!gameJs.includes('function incidentSecondResponseScene')
+  ||!incidentModuleJs.includes('i2ConfirmNextIncidentResponse')
+  ||!stateJs.includes('incidentFirstActions')
+  ||!gameCss.includes('.i2-two-decision-summary')
   ||!stateJs.includes('eventSeed'))
   throw new Error('Published operational incident decision is missing or stale');
  if(!gameHtml.includes('id="gameChapter"')||!gameHtml.includes('id="gameMapOpen"')
