@@ -519,7 +519,7 @@ function pickingPilotStartCard(){
 function qualityGuidedStartCard(){
  const active=i2IsQualityGuided(state);
  const locked=state.confirmedAreas.length>0;
- const control=node('button',{className:'i2-picking-pilot-button',
+ const control=node('button',{className:'i2-quality-guided-button',
   attrs:{type:'button',id:'gameQualityGuided'},
   text:active?'Volver a la misión inicial':'Activar reto de Calidad'});
  control.disabled=locked||!!state.eventSeed||i2IsPickingPilot(state);
@@ -530,7 +530,7 @@ function qualityGuidedStartCard(){
    persist();render();
   }catch(error){showError(error)}
  });
- return section('i2-picking-pilot-card i2-quality-guided-card',[
+ return section('i2-quality-guided-card',[
   node('strong',{text:I2_QUALITY_GUIDED.title}),
   p(active?'Reto activo: comenzaste con stock reducido de los tres SKU.':
    'Opcional: comienza con 75 % del inventario normal y decide cómo gestionar Calidad sin conocer todavía la demanda real.','note'),
@@ -542,11 +542,11 @@ function qualityGuidedStartCard(){
 
 /** Explicación bajo demanda y sin modificar estado, compras o resultado. */
 function qualityGuidedDebriefPanel(){
- const panel=section('i2-picking-pilot-card i2-quality-guided-debrief',[
+ const panel=section('i2-quality-guided-debrief',[
   node('strong',{text:'Nico · ¿Liberar más inventario mejora el servicio?'}),
   p('Compara dos políticas de Calidad sobre tu plan original. No altera lo que decidiste.','note')
  ]);
- const control=node('button',{className:'i2-picking-pilot-button',
+ const control=node('button',{className:'i2-quality-guided-button',
   attrs:{type:'button',id:'gameQualityAnalyze','aria-expanded':'false'},
   text:'Ver comparación de Calidad'});
  control.addEventListener('click',()=>{
