@@ -69,6 +69,10 @@ export function navigateI2GameState(value,action){
    }
    break;
   case 'finish':
+   // No saltarse la segunda decisión mediante botones antiguos o una llamada
+   // directa al contrato de navegación: el segundo incidente debe resolverse.
+   if(next.phase==='recover'&&next.incidentStep===1)
+    throw new Error('I2-09: segunda decisión gerencial pendiente');
    if(next.phase==='recover'&&next.reveal){
     change('result',7);
     return normalizeI2GameState(next);
