@@ -6,7 +6,7 @@ import {I2_NICO_LEVELS} from '../src/i2-nico-tutorial.js';
  * Never reads actual demand, the exogenous seed, physical replay or results.
  * This is not a second game; it is a temporary modal layer that restores focus.
  */
-export function openI2NicoJourney({source,portraitSrc='./nico.svg',level='novato',
+export function openI2NicoJourney({source,portraitSrc='./nico.svg',portraitForStep=null,level='novato',
  onLevel=()=>{},onStart=null}={}){
  if(!(source instanceof HTMLElement))throw new Error('I2-36: launcher required');
  const dialog=document.createElement('dialog');
@@ -31,9 +31,15 @@ export function openI2NicoJourney({source,portraitSrc='./nico.svg',level='novato
  for(const btn of [back,next,skip])btn.type='button';
  const picture=build('img','nico-journey-portrait');
  picture.src=portraitSrc;picture.alt='Nico, tu mentor de operaciones';
+ picture.dataset.fallbackSrc='./nico.svg';
  picture.width=160;picture.height=176;picture.decoding='async';
  picture.addEventListener('error',()=>{
-  if(picture.getAttribute('src')!=='./nico.svg')picture.src='./nico.svg';
+  // Missing expansion art falls back to the verified original pose first.
+  const fallback=picture.dataset.fallbackSrc||'./nico.svg';
+  if(picture.getAttribute('src')!==fallback){
+   picture.dataset.fallbackSrc='./nico.svg';
+   picture.setAttribute('src',fallback);
+  }
  });
  const avatar=build('div','nico-journey-art');avatar.append(picture);
  const title=build('h2','nico-journey-title');title.id='nico-journey-title';
@@ -64,6 +70,15 @@ export function openI2NicoJourney({source,portraitSrc='./nico.svg',level='novato
  });
  function draw(){
   const part=I2_NICO_MANAGER_TOUR[index];
+  // The seven tutorial steps get distinct context-appropriate Nico reactions.
+  // Selection is editorial only: no run state or future demand is consulted.
+  if(typeof portraitForStep==='function'){
+   const art=portraitForStep(part);
+   if(art?.src&&picture.getAttribute('src')!==art.src){
+    picture.dataset.fallbackSrc=art.fallbackSrc||'./nico.svg';
+    picture.setAttribute('src',art.src);
+   }
+  }
   progress.textContent='PASO '+(index+1)+' DE '+I2_NICO_MANAGER_TOUR.length;
   title.textContent=part.title.replace(/^\d+\.\s*/,'');
   content.replaceChildren();
