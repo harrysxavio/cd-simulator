@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **CORTE PUBLICADO · 01-11-2026, Lab11:** PR #142 (Calidad física con línea alternativa día 5, hasta 80 SKU y $70.000 CLP didácticos), PR #139 (integración contextual de **24 PNG originales de Nico** en tutorial de 7 pasos, ocho áreas, eventos y resultados) y PR #143 (complemento de Nico para diario día 3, segundo incidente día 4, turno de Calidad día 5 y jornada 6) **fusionados y publicados**. PRs con Node/focused/Chromium verdes; **Pages y verificador HTTP verdes**, y el verificador actualizado coteja **SHA-256 de los 24 PNG públicos** con su manifiesto local. [Mapa de arte por estado y pruebas](I2-NICO-DIARIO-CALIDAD-2026-11-01.md), [contrato físico Calidad](I2-35-5-C3C-CALIDAD-ALTERNATIVA.md), [estado vigente](I2-STATUS.md). **Sin cerrar artificialmente I2-35 ni I2-36:** siguen abiertas seis fases padre I2-35..I2-40 (35/41 cerradas, F7 4/5, F8 0/5). Próximo trabajo prioritario: palanca propia para recepción con fecha, capacidad y costo auditable, al menos cinco misiones distintas, aprendizaje y UAT manual Android/TalkBack, aceptación gerencial y release estable.
+
+
 > **I2-36 · Integración de Nico (01-11-2026):** 24 PNG del paquete `expansion-2026-10-31` versionados en el repo y PR #139 fusionado con CI verde; tutor de 7 pasos, ocho áreas, shocks, incidentes y evaluación contextual. El complemento de Lab11 introduce estados nuevos de diario físico y línea de Calidad (días 3/4/5/6) con 4 ilustraciones elegidas tras observación, y refuerza gate de Pages para **los 24 hashes SHA-256 por HTTP**. [Documento técnico](I2-NICO-DIARIO-CALIDAD-2026-11-01.md). **I2-36 NO cerrada**: falta UX/QA humano Android/TalkBack. Quedan I2-35–I2-40, **35/41**.
 
 
