@@ -43,6 +43,17 @@ test('Nico: 24 tarjetas están catalogadas sin activar URLs ausentes',()=>{
  assert.throws(()=>i2NicoMomentAsset('invented-secret-reveal'),/Nico/);
 });
 
+test('Nico: guía contextual de ocho áreas, sin depender del replay físico',()=>{
+ const areas=['commercial','planning','purchasing','receiving','quality',
+  'inventory','picking','transport'];
+ const images=areas.map(area=>i2NicoMomentAsset('mentor-'+area));
+ assert.equal(images.length,8);
+ for(const image of images){
+  assert.ok(existsSync(ROOT+'juego/'+image.fallbackSrc.slice(2)));
+  assert.doesNotMatch(image.desiredSrc,/15_revelacion_demanda|16_evento_inesperado/);
+ }
+});
+
 test('Nico: los siete pasos del tutorial poseen gesto distinto y seguro',()=>{
  assert.equal(I2_NICO_MANAGER_TOUR.length,7);
  const srcs=I2_NICO_MANAGER_TOUR.map(step=>{
