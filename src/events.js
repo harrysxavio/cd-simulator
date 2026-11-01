@@ -179,7 +179,7 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   const completed=queue.filter(o=>o.fulfilledDay!==null).length;
   const backlog=n-completed;
   ledger.push({day,activeOperationalEvents,receivingStopped,qualityStopped,
-   ...(bridge?{qualityBridgeReleasedSkuUnits:alternativeCapacity
+   ...(bridge&&day===bridge.day?{qualityBridgeReleasedSkuUnits:alternativeCapacity
     ?Object.values(released).reduce((n,x)=>n+x,0):0,
     qualityBridgeCostCLP:day===bridge.day?bridge.shiftCostCLP:0,
     qualityBridgeCapacitySkuUnits:alternativeCapacity}:{}),
