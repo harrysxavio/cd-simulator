@@ -1,5 +1,9 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+
+> **I2-36 · auditoría visual publicada (01-11-2026):** [PR #141](https://github.com/harrysxavio/cd-simulator/pull/141) integrado `81fd6a6`; Node/focused/Chromium verdes, Pages/HTTP específicos del CSS confirmados. Se corrigieron paneles blancos, bordes de tema claro y énfasis azul en vistas nuevas de incidentes, calendario diario, confirmación y resultados. Se reutilizan los tokens propios de Misión CD y se verifican contraste WCAG, CSS computado 360/412 px, foco y modo forzado. [Detalle](I2-36-AUDITORIA-TEMA-OSCURO.md). **No cierra I2-36**: faltan UX/QA humano y Android físico. Quedan I2-35 a I2-40 (35/41). Próximo avance prioritario: palancas de capacidad propias de Recepción y Calidad con fechas y costos verificables y al menos cinco misiones física/gerencialmente distintas.
+
+
 > **Corrección visual I2-36 · 01-11-2026 (rama candidata):** tema de la experiencia móvil debe ser exclusivamente **azul oscuro + naranja de Misión CD**, con colores semánticos de KPI conservados. La auditoría detectó en incidentes, diario, confirmación y cierre fondos blancos provenientes de variables CSS inexistentes, y un borde azul no temático; se implementa corrección con tokens existentes, pruebas WCAG de contraste, computed styles Pixel 7 360/412 y verificación Pages. [Informe técnico](I2-36-AUDITORIA-TEMA-OSCURO.md). **I2-36 permanece abierto** hasta UX/accesibilidad y aceptación humana; I2-35..40 siguen pendientes de cierre formal, total 35/41.
 
 
