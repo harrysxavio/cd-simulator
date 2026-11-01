@@ -1,6 +1,6 @@
 # Nico · ampliación visual de 24 poses (31-10-2026)
 
-**Estado:** 24 PNG generados, recortados y empaquetados para revisión. **Binarios de esta ampliación aún no subidos a GitHub ni integrados en /juego/.** No declarar despliegue, QA móvil ni avance de microfase por producir arte.
+**Estado (01-11-2026): 24 PNG ya copiados por el usuario a `main`; integración contextual activada en PR #139, pendiente de CI, merge y verificación de GitHub Pages.** No declarar despliegue, QA móvil ni avance de microfase por producir arte.
 
 ## Contraste con el repositorio
 
@@ -50,6 +50,6 @@ El modo `--publish` crea commit y hace push a la rama activa, **sin modificar ju
 - `juego/app.js`: Nico también presenta gestos distintos en las ocho áreas y reacciona antes y después de revelar demanda, ante interrupciones y sus decisiones, en recuperación, y en el cierre según evaluación. Las decisiones e indicadores siguen naciendo del motor canónico.
 - Pruebas nuevas: `tests/i2-nico-expansion.test.mjs` y `tests/browser-i2-nico-expansion.e2e.mjs` (24 rutas y 7 pasos visuales, sin spoilers ni 404). Deben estar verdes en CI antes de declarar cierre técnico.
 
-**Lo que NO se ha hecho:** los 24 PNG de la expansión no están publicados en el repositorio, la bandera permanece apagada, no hay evidencia de QA Android/TalkBack humana ni despliegue Pages de las nuevas poses.
+**Lo que NO se ha hecho:** los 24 PNG sí se encuentran en el árbol de main. Se activó `I2_NICO_EXPANSION_READY=true` en la rama del PR #139 para validación automatizada. Falta todavía comprobar que 24 SHA-256, Chromium y despliegue Pages aprueben; Android/TalkBack manual sigue pendiente.
 
-**Próximo paso de publicación:** después de fusionar este PR, ejecutar `python tools/import-nico-expansion.py RUTA_ZIP --publish` sobre la rama activa. El importador verifica los 24 SHA-256, copia los PNG y el manifiesto y activa `I2_NICO_EXPANSION_READY=true` en un único commit. Luego verificar que GitHub Pages sirva las 24 rutas HTTP 200 y completar E2E móvil/TalkBack. El importador no modifica el motor físico, las semillas ni el estado de campaña.
+**Próximo paso de publicación:** los PNG y el manifiesto ya están en main, por lo que NO es necesario volver a importar el ZIP. Ejecutar CI de este PR con los hashes SHA-256 y los recorridos de Chromium; fusionar solo con puertas verdes, comprobar HTTP 200 en GitHub Pages y completar QA manual Android/TalkBack. No alterar motor físico, semillas ni estado.
