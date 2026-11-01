@@ -1056,7 +1056,15 @@ function incidentDailyScene(){
  try{model=i2DailyOperationsSnapshot(state)}catch(e){showError(e);return}
  const closing=model.day===model.horizonDays;
  stage.textContent='Diario del CD · Jornada '+model.day;
- progress.style.width=(70+Math.floor(30*model.day/model.horizonDays))+'%';
+ // The journey bar must not move backwards when transitioning between
+ // the two incident checkpoints and their day-by-day observations.
+ const first=i2OperationalEventsForSeed(state.eventSeed)[0].startDay;
+ const base=state.incidentStep===1?93:state.incidentStep===2?94:92;
+ const start=state.incidentStep===2
+  ?i2OperationalEventsForSeed(state.eventSeed)[1].startDay+1:first+1;
+ const progressValue=state.incidentStep===1?base:
+  base+Math.floor((99-base)*(model.day-start)/Math.max(1,model.horizonDays-start));
+ progress.style.width=Math.min(99,Math.max(base,progressValue))+'%';
  replace([
   p('OPERACIÓN EN MARCHA · DIARIO GERENCIAL','eyebrow'),
   heading('Jornada '+model.day+' de '+model.horizonDays),
