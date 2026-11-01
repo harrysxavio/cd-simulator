@@ -52,7 +52,7 @@ export function skuPartialContributionReadModel({
   ||!Array.isArray(operationalCost.daily)||operationalCost.daily.length!==horizon+1
   ||!nonnegative(comparison.unitRevenue)
   ||!nonnegative(comparison.urgentBase)||!nonnegative(comparison.urgentSurcharge)
-  ||!nonnegative(comparison.extraLabor)||!nonnegative(comparison.incrementalExpense)
+  ||!nonnegative(comparison.extraLabor)||!nonnegative(comparison.qualityBridgeCostCLP??0)||!nonnegative(comparison.incrementalExpense)
   ||!nonnegative(comparison.penaltyRecovered)||!nonnegative(comparison.holdingRecovered)
   ||!qty(comparison.base?.completed)||!qty(replay.completed)
   // Comparisons can LOSE dispatches (e.g. independent staging with limited transport).
@@ -92,7 +92,12 @@ export function skuPartialContributionReadModel({
   }
   const potentialDispatchValueCLP=money(shippedOrders*unitRevenue,'expediciones');
   const dispatchedMaterialCostCLP=inv.totals.shippedTodayCLP;
-  const incrementalOperatingCostCLP=ops.costCLP;
+  // Same dated physical journal as the shipments, not a second invented cost.
+  const qualityShiftCostCLP=record.qualityBridgeCostCLP??0;
+  if(!nonnegative(qualityShiftCostCLP)
+   ||qualityShiftCostCLP>(comparison.qualityBridgeCostCLP??0))
+   invalid('turno de Calidad no concilia con la jornada física');
+  const incrementalOperatingCostCLP=ops.costCLP+qualityShiftCostCLP;
   const partialContributionCLP=money(
    potentialDispatchValueCLP-dispatchedMaterialCostCLP-incrementalOperatingCostCLP,
    'contribución del día'
@@ -131,15 +136,20 @@ export function skuPartialContributionReadModel({
   ||!close(partialContributionCLP,last.cumulativePartialContributionCLP)
   ||!close(dispatchedMaterialCostCLP,inv.shippedToDateCLP)
   ||!close(dispatchedMaterialCostCLP,po.shippedMaterialAtStandardCostCLP)
-  ||!close(incrementalOperatingCostCLP,ops.totalCostCLP)
-  ||!close(incrementalOperatingCostCLP,comparison.extraLabor)
+  ||!close(incrementalOperatingCostCLP,
+   ops.totalCostCLP+(comparison.qualityBridgeCostCLP??0))
+  ||!close(incrementalOperatingCostCLP,
+   comparison.extraLabor+(comparison.qualityBridgeCostCLP??0))
+  ||!close(replay.ledger.reduce((n,d)=>n+(d.qualityBridgeCostCLP??0),0),
+   comparison.qualityBridgeCostCLP??0)
   ||!close(po.warehouseReceivedCLP,inv.receivedToDateCLP)
   ||!close(inv.openingCLP+inv.receivedToDateCLP,
    inv.shippedToDateCLP+inv.closingPhysicalCLP)
   ||!close(po.urgentCommitmentCLP,comparison.urgentBase)
   ||!close(purchaseCost.proxy.urgentSurchargeCLP,comparison.urgentSurcharge)
   ||!close(comparison.incrementalExpense,
-   comparison.urgentBase+comparison.urgentSurcharge+comparison.extraLabor)
+   comparison.urgentBase+comparison.urgentSurcharge+comparison.extraLabor+
+    (comparison.qualityBridgeCostCLP??0))
   ||!close(comparison.incrementalRevenue,
    (replay.completed-comparison.base.completed)*unitRevenue)){
   invalid('identidades entre pedidos, existencias y resultados inconsistentes');
@@ -171,6 +181,7 @@ export function skuPartialContributionReadModel({
  return freezeDeep({
   passed:true,scope:'sku-cohort',currency:'CLP',horizonDays:horizon,
   revenueRateCLPPerCompleteShippedOrder:unitRevenue,
+  qualityBridgeCostCLP:comparison.qualityBridgeCostCLP??0,
   revenueRateSource:unitRevenue===SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder
    ?'SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder'
    :'recoveryComparison.unitRevenue (custom scenario assumption)',
@@ -185,6 +196,6 @@ export function skuPartialContributionReadModel({
    chronologicalReconciliation:true},
   missingCosts:['baseline-warehouse-labor','receiving','quality-inspections',
    'picking-base','transport-freight','taxes','depreciation','returns'],
-  note:'Contribución parcial didáctica = valor estimado de pedidos completos EXPEDIDOS desde el CD − costo estándar de SKU expedidos − refuerzo aplicado. No se afirma entrega, venta facturada o cobrada. Compra original/urgente y stock aún existente NO se restan otra vez. Recargos comprometidos, penalidades y tenencia son supuestos separados. Faltan costos base, fletes, impuestos y otras cuentas; NO es utilidad, EBITDA, margen contable ni caja.'
+  note:'Contribución parcial didáctica = valor estimado de pedidos completos EXPEDIDOS desde el CD − costo estándar de SKU expedidos − refuerzos de Picking y Calidad contratados. No se afirma entrega, venta facturada o cobrada. Compra original/urgente y stock aún existente NO se restan otra vez. Recargos comprometidos, penalidades y tenencia son supuestos separados. Faltan costos base, fletes, impuestos y otras cuentas; NO es utilidad, EBITDA, margen contable ni caja.'
  });
 }
