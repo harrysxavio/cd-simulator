@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newI2GameState,normalizeI2GameState} from '../src/i2-game-state.js';
 import {I2_AREAS} from '../src/i2-product-contract.js';
+import {navigateI2GameState} from '../src/i2-game-navigation.js';
 import {I2_QUALITY_GUIDED,i2IsQualityGuided,i2StartQualityGuided,
  i2LeaveQualityGuided,i2QualityGuidedReflection}
  from '../src/i2-quality-guided-mission.js';
@@ -17,6 +18,9 @@ test('I2-35.2: Calidad activa un perfil físico reversible y persistente',()=>{
  assert.equal(i2IsQualityGuided(active),true);
  assert.deepEqual(normalizeI2GameState(JSON.parse(JSON.stringify(active))),active);
  assert.deepEqual(i2LeaveQualityGuided(active),before);
+ const after={...active,phase:'result',index:7,reveal:true,
+  confirmedAreas:I2_AREAS.map(a=>a.id)};
+ assert.equal(navigateI2GameState(after,'restart').guidedScenario,'quality-low-stock');
  assert.deepEqual(before,newI2GameState());
  assert.equal(I2_QUALITY_GUIDED.id,'ARC-05-GUIDED');
  assert.throws(()=>i2QualityGuidedReflection(active),/después del resultado/);
@@ -29,6 +33,8 @@ test('I2-35.2: no permite cambiar misión con decisiones confirmadas ni falsific
  assert.throws(()=>i2StartQualityGuided(committed),/antes de confirmar/);
  assert.throws(()=>i2LeaveQualityGuided(committed),/confirmado/);
  assert.equal(normalizeI2GameState({...active,guidedScenario:'falso'}),null);
+ assert.equal(normalizeI2GameState({...active,
+  advanced:{...active.advanced,stockProfile:'standard'}}),null);
  assert.equal(normalizeI2GameState({...active,guidedScenario:'quality-low-stock',
   eventSeed:'incident-receiving-stop'}),null);
  assert.equal(normalizeI2GameState({...active,extraPrivateData:'prohibido'}).extraPrivateData,undefined);
