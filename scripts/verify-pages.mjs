@@ -74,7 +74,7 @@ async function verify(attempt){
   ||!eventsJs.includes('receivingShiftUsedSkuUnits')
   ||!recoveryJs.includes('receivingShiftCostCLP')
   ||!multiJs.includes('receivingShiftUsedSkuUnits')
-  ||!gameJs.includes("['dock-shift','Contratar turno extra de Recepción")
+  ||!gameJs.includes("'dock-shift','Contratar turno extra de Recepción")
   ||!gameJs.includes('Turno extraordinario de Recepción'))
   throw Error('Published Receiving day-3 physical shift is absent');
  // Preserve the previous Quality publication assertion.
