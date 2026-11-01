@@ -1307,3 +1307,25 @@ html,body{height:100%;overflow:hidden}
  .i2-six-question-summary,.i2-six-answer{background:Canvas;
   color:CanvasText;border-color:CanvasText}
 }
+
+
+/* I2-35.5c · Sorpresa física opcional. Encaje móvil sin scroll horizontal.
+   Los eventos no se muestran antes de revelar la operación. */
+.i2-operational-drill-card,.i2-incident-outcome{
+  display:grid;gap:.55rem;min-width:0;border:1px solid var(--line,#d1d5db);
+  border-radius:1rem;padding:1rem;background:var(--surface,#fff);
+}
+.i2-operational-drill-button{min-height:44px;white-space:normal;text-align:center}
+.i2-incident-outcome{border-inline-start:4px solid #b45309}
+.i2-incident-outcome .nico-portrait,.i2-incident-outcome img{
+  max-width:min(7rem,35%);height:auto;object-fit:contain;
+}
+.i2-incident-event{
+  display:grid;gap:.3rem;min-width:0;padding:.65rem .75rem;
+  border-radius:.65rem;background:var(--muted-surface,#f8fafc);
+  border:1px solid var(--line,#e2e8f0)
+}
+.i2-operational-drill-card p,.i2-incident-outcome p{margin:.2rem 0;overflow-wrap:anywhere}
+@media(max-width:360px){
+ .i2-operational-drill-card,.i2-incident-outcome{padding:.75rem}
+}

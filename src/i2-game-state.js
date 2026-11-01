@@ -4,6 +4,7 @@ import {I2_MVP_CASE} from './i2-mvp-adapter.js';
 import {I2_DEFAULT_SEED,i2ChallengeForSeed} from './i2-challenge-config.js';
 import {I2_DEFAULT_ADVANCED,i2ValidateAdvanced} from './i2-advanced-settings.js';
 import {i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
+import {I2_OPERATIONAL_EVENT_SEEDS} from './operational-event-schedule.js';
 
 /** I2-05: only educational choices and navigation are saved.
  * Never persist a physical SKU ledger, a recovery preview or V1's session. */
@@ -14,16 +15,20 @@ const PHASES=Object.freeze(['intro','area','reveal','recover','review','result']
 const ARRIVALS=Object.freeze([1,2,5,10,13]);
 const COVERAGES=Object.freeze([0,25,50,75,100]);
 
-export function newI2GameState({seed=SEED,advanced=I2_DEFAULT_ADVANCED}={}){
+export function newI2GameState({seed=SEED,advanced=I2_DEFAULT_ADVANCED,eventSeed=null}={}){
  // No se acepta una semilla libre ni un resultado dictado por el jugador.
  i2ChallengeForSeed(seed);
  const config=i2ValidateAdvanced(advanced);
+ if(eventSeed!==null&&!I2_OPERATIONAL_EVENT_SEEDS.includes(eventSeed))
+  throw new Error('I2-35.5c: evento de misión desconocido');
  return {
   schema:I2_GAME_SCHEMA,campaignId:I2_MVP_CASE.campaignId,seed,
   phase:'intro',substep:'briefing',index:0,
   choices:Object.fromEntries(I2_AREAS.map(a=>[a.id,DEFAULTS[a.id]])),
   recovery:'wait',arrivalDay:2,coverage:100,advanced:config,
-  confirmedAreas:[],reveal:false
+  confirmedAreas:[],reveal:false,
+  // Absent for legacy games: opt-in and never a silent migration to an incident.
+  ...(eventSeed===null?{}:{eventSeed})
  };
 }
 function stepFor(phase){
@@ -47,6 +52,11 @@ export function normalizeI2GameState(raw){
   ||!Array.isArray(raw.confirmedAreas)){
   return null;
  }
+ // An optional, independently committed operational scenario; never derive it
+ // from demand seed, score, budget or a player's area choices.
+ if(Object.hasOwn(raw,'eventSeed')&&
+   !I2_OPERATIONAL_EVENT_SEEDS.includes(raw.eventSeed))return null;
+ const eventSeed=raw.eventSeed??null;
  const isV2=raw.schema===I2_GAME_SCHEMA;
  if(isV2){
   if(raw.campaignId!==I2_MVP_CASE.campaignId)return null;
@@ -109,6 +119,7 @@ export function normalizeI2GameState(raw){
   choices,recovery:raw.recovery,arrivalDay:raw.arrivalDay,coverage:raw.coverage,
   advanced,
   confirmedAreas:[...confirmed],reveal:raw.reveal,
+  ...(eventSeed===null?{}:{eventSeed}),
   ...(recoveryConfirmation===null?{}:{recoveryConfirmation})
  };
 }

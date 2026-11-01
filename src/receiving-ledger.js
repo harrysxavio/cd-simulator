@@ -5,6 +5,7 @@
  * the very same receipt records consumed by Quality and stock conservation.
  * No second event simulation, forecast or inventory calculation is allowed.
  */
+import {normalizeOperationalEvents} from './operational-event-schedule.js';
 const sum=(a,f)=>a.reduce((n,x)=>n+f(x),0);
 const nonneg=n=>Number.isSafeInteger(n)&&n>=0;
 const freeze=value=>{
@@ -39,8 +40,12 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
  let previousQueue=0,peakWaiting=0,peakWaitingDay=0,skuWaitDays=0,oldestWaitingDays=0,receivedTotal=0;
  const daily=[];
  const cap=replay.receivingUnitCapacity;
+ const calendar=normalizeOperationalEvents(replay.operationalEvents??[],replay.days);
  for(let day=0;day<=replay.days;day++){
   const eventDay=replay.ledger[day];
+  const closed=calendar.some(e=>e.kind==='receiving-stop'
+   &&day>=e.startDay&&day<e.startDay+e.durationDays);
+  if(eventDay?.receivingStopped!==closed)fail('parada de Recepción no coincide con el calendario externo');
   if(eventDay?.day!==day||!Array.isArray(eventDay.dockArrivals)
    ||!Array.isArray(eventDay.receiptEvents)||!Array.isArray(eventDay.receivingQueue)
    ||eventDay.receivingCapacitySkuUnits!==cap)fail('Día de Recepción inconsistente');
@@ -68,7 +73,8 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
    if(r.skuId!==p.skuId||r.day<p.modeledArrivalDay)fail('Ingreso anterior a la llegada prevista');
    actualByPo.set(p.id,actualByPo.get(p.id)+r.qty);
   }
-  let remainingCapacity=cap===null?Infinity:cap;
+  // Muelle detenido: FIFO permanece, pero la capacidad efectiva es cero.
+  let remainingCapacity=closed?0:(cap===null?Infinity:cap);
   for(const p of orderedByArrival){
    if(p.modeledArrivalDay>day)break;
    // FIFO by modeled arrival day and stable PO insertion order.
@@ -80,7 +86,7 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
    remainingCapacity-=expected;
   }
   const receivedToday=sum(actual,r=>r.qty);
-  if(eventDay.receivingUsedSkuUnits!==receivedToday||receivedToday>(cap??Infinity)
+  if(eventDay.receivingUsedSkuUnits!==receivedToday||receivedToday>(closed?0:(cap??Infinity))
    ||sum(Object.values(eventDay.received),x=>x)!==receivedToday){
    fail('Capacidad de Recepción superada');
   }
@@ -106,7 +112,9 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
   const oldest=endQueue.length?Math.max(...endQueue.map(p=>p.waitingDays)):0;
   oldestWaitingDays=Math.max(oldestWaitingDays,oldest);
   daily.push({
-   day,capacitySkuUnits:cap,arrivedSkuUnits:incoming,
+   day,capacitySkuUnits:cap,
+   ...(closed?{effectiveCapacitySkuUnits:0,interruption:'receiving-stop'}:{}),
+   arrivedSkuUnits:incoming,
    receivedSkuUnits:receivedToday,receivedLots:actual.length,
    waitingSkuUnits:waiting,oldestWaitingDays:oldest,
    queue:endQueue

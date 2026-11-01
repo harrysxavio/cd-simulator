@@ -1,4 +1,5 @@
 import {SKU_CATALOG} from './sku.js';
+import {normalizeOperationalEvents} from './operational-event-schedule.js';
 
 const total=(items,fn)=>items.reduce((sum,item)=>sum+fn(item),0);
 const nonnegative=value=>Number.isSafeInteger(value)&&value>=0;
@@ -42,8 +43,13 @@ export function qualityLotReadModel({replay,receipts,qualityReleases,qualityLots
  const currentLots=new Map(),orderedLots=[],releasedIds=new Set();
  let cumulativeReceived=0,cumulativeReleased=0,heldSkuDays=0,peakHeld=0,peakDay=0;
  const daily=[];
+ const calendar=normalizeOperationalEvents(replay.operationalEvents??[],replay.days);
  for(let day=0;day<=replay.days;day++){
   const physics=replay.ledger[day];
+  const stopped=calendar.some(e=>e.kind==='quality-stop'
+   &&day>=e.startDay&&day<e.startDay+e.durationDays);
+  if(physics?.qualityStopped!==stopped)
+   fail('parada de Calidad no coincide con el calendario externo');
   if(physics?.day!==day||!Array.isArray(physics.receiptEvents)
    ||!Array.isArray(physics.releaseEvents)){
    fail('falta el día físico de Calidad');
@@ -65,7 +71,8 @@ export function qualityLotReadModel({replay,receipts,qualityReleases,qualityLots
   const arrivals=total(newReceipts,r=>r.qty);
   cumulativeReceived+=arrivals;
   const beforeRelease=total(orderedLots,l=>l.heldSkuUnits);
-  let budget=Math.ceil(beforeRelease*replay.qualityReleasePercent/100);
+  // Una detención validada impide liberar lotes solo en días afectados.
+  let budget=stopped?0:Math.ceil(beforeRelease*replay.qualityReleasePercent/100);
   const expected=new Map();
   for(const lot of orderedLots){
    if(budget<=0)break;
@@ -112,7 +119,8 @@ export function qualityLotReadModel({replay,receipts,qualityReleases,qualityLots
   if(waiting>peakHeld){peakHeld=waiting;peakDay=day}
   const oldestWaitingDays=orderedLots.filter(l=>l.heldSkuUnits>0)
    .reduce((max,l)=>Math.max(max,day-l.receivedDay),0);
-  daily.push({day,receivedSkuUnits:arrivals,releasedSkuUnits:releasedToday,
+  daily.push({day,...(stopped?{interruption:'quality-stop',effectiveReleasePercent:0}:{}),
+   receivedSkuUnits:arrivals,releasedSkuUnits:releasedToday,
    heldSkuUnits:waiting,heldBySku,oldestWaitingDays,
    receiptLots:newReceipts.length,releaseEvents:releases.length});
  }
