@@ -1188,6 +1188,8 @@ function incidentSecondResponseScene(){
  replace([
   p('LA OPERACIÓN CONTINÚA · SEGUNDO INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Nuevo problema en el CD'),
+  // Calidad ya fue observada en la jornada; nunca anunciarla antes.
+  renderI2CdScene('quality',{variant:'compact'}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-quality-decision')]:[]),
   p(checkpoint.description,'lead'),
   p('La primera decisión sigue vigente y ya afectó las jornadas anteriores. No puedes retirarla ni cambiar su fecha.','note'),
