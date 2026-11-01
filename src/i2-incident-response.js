@@ -3,6 +3,7 @@ import {i2OperationalEventsForSeed} from './operational-event-schedule.js';
 import {i2CompareMultiRecovery,i2EmptyRecoveryActions,i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
 import {i2ConfirmMultiRecovery} from './i2-recovery-confirmation.js';
 import {I2_QUALITY_BRIDGE} from './i2-quality-bridge.js';
+import {I2_RECEIVING_SHIFT} from './i2-receiving-shift.js';
 
 const invalid=reason=>{throw new Error('I2-35.5c2: '+reason)};
 const freeze=value=>{
@@ -12,7 +13,7 @@ const freeze=value=>{
  }
  return value;
 };
-const OPTIONS=Object.freeze(['wait','urgent-fast','urgent-conservative','reserve-next','buy-and-reserve']);
+const OPTIONS=Object.freeze(['wait','urgent-fast','urgent-conservative','reserve-next','buy-and-reserve','dock-shift']);
 
 /**
  * Primer checkpoint gerencial realmente posterior a una interrupción.
@@ -100,7 +101,15 @@ export function i2ConfirmIncidentResponse(raw,kind){
  const state=normalizeI2GameState(raw);
  if(!state||state.phase!=='recover'||!state.eventSeed)
   invalid('no hay misión operacional activa');
- return i2ConfirmMultiRecovery(state,i2IncidentResponseActions(state,kind));
+ const confirmed=i2ConfirmMultiRecovery(state,i2IncidentResponseActions(state,kind));
+ // The extra Receiving shift is committed after the observed day-2 closure.
+ if(kind!=='dock-shift')return confirmed;
+ const check=i2IncidentDecisionCheckpoint(state);
+ if(check.incidentKind!=='receiving-stop'||check.decisionDay!==2)
+  invalid('refuerzo de Recepción no corresponde al incidente observado');
+ const final=normalizeI2GameState({...confirmed,receivingResponse:I2_RECEIVING_SHIFT});
+ if(!final)invalid('refuerzo de muelle no cumple persistencia');
+ return freeze(final);
 }
 
 /**
