@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Corrección visual I2-36 · 01-11-2026 (rama candidata):** tema de la experiencia móvil debe ser exclusivamente **azul oscuro + naranja de Misión CD**, con colores semánticos de KPI conservados. La auditoría detectó en incidentes, diario, confirmación y cierre fondos blancos provenientes de variables CSS inexistentes, y un borde azul no temático; se implementa corrección con tokens existentes, pruebas WCAG de contraste, computed styles Pixel 7 360/412 y verificación Pages. [Informe técnico](I2-36-AUDITORIA-TEMA-OSCURO.md). **I2-36 permanece abierto** hasta UX/accesibilidad y aceptación humana; I2-35..40 siguen pendientes de cierre formal, total 35/41.
+
+
 
 > **Lab11 · 01-11-2026 · I2-35.5c3b PUBLICADA:** [PR #140](https://github.com/harrysxavio/cd-simulator/pull/140) merge `c046963`, Node/focused/Chromium verdes, Pages y HTTP público del módulo y estilos verificados. Jornada 3 observable entre decisión día 2 y segundo incidente día 4, con redecisión; días 5–12 observados uno por uno antes del cierre. Cada lectura se calcula con motor físico canónico y órdenes ya confirmadas, sin spoilers ni duplicar inventario. **35/41 principales completadas; pendientes I2-35, 36, 37, 38, 39 y 40 (F7 4/5; F8 0/5)**. Próximos entregables: I2-35.5c3c (palancas fechadas y costeadas de Recepción/Calidad), I2-35.2/35.5d (≥5 arquetipos realmente diferentes con casos de aceptación), I2-36/37 (UX y aprendizaje/historial de intentos), I2-38/39 (QA humana móvil, inventario y causalidad, evaluación gerente), I2-40 (release estable). [Especificación y límites](I2-35-5-C3B-DIARIO-JORNADAS.md), [estado vigente](I2-STATUS.md). No equiparar 85,4 % de IDs con esfuerzo pendiente.
 

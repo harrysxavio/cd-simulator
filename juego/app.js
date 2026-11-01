@@ -447,7 +447,7 @@ function operationalIncidentCard(){
   node('strong',{text:'Reto opcional · Incidente operacional desconocido'}),
   p(active?'Incidente sellado y fijado para esta partida. Tipo y jornada se descubrirán al revelar.':
    'Además de la demanda, la operación puede sufrir una interrupción física de muelle o Calidad. Se escogerá un caso reproducible de forma independiente.','note'),
-  p('En esta misión reaccionarás al primer incidente cuando aparezca: podrás no actuar, comprar de urgencia para una fecha posterior o movilizar una reserva ya existente. Los siguientes incidentes y el resultado final permanecen ocultos hasta el cierre.','footnote'),
+  p('En esta misión reaccionarás al primer incidente cuando aparezca: podrás no actuar, comprar de urgencia para una fecha posterior o movilizar una reserva ya existente. Los siguientes incidentes aparecen cuando llega su jornada; el resultado final permanece oculto hasta el día 12.','footnote'),
   ...(locked?[p('La misión está confirmada y ya no puedes cambiar su incidente.','footnote')]:[]),
   btn
  ]);
