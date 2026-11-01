@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **I2-36 · Integración de Nico (01-11-2026):** 24 PNG del paquete `expansion-2026-10-31` versionados en el repo y PR #139 fusionado con CI verde; tutor de 7 pasos, ocho áreas, shocks, incidentes y evaluación contextual. El complemento de Lab11 introduce estados nuevos de diario físico y línea de Calidad (días 3/4/5/6) con 4 ilustraciones elegidas tras observación, y refuerza gate de Pages para **los 24 hashes SHA-256 por HTTP**. [Documento técnico](I2-NICO-DIARIO-CALIDAD-2026-11-01.md). **I2-36 NO cerrada**: falta UX/QA humano Android/TalkBack. Quedan I2-35–I2-40, **35/41**.
+
+
 > **I2-35.5c3c · apoyo alternativo fechado en Calidad (candidato 01-11-2026):** se añade intervención gerencial específica con límite **80 SKU** y costo **$70.000** por turno del **día 5**, activable tras observar segundo incidente día 4. La línea principal de Calidad sigue detenida: la capacidad alternativa FIFO sí afecta inventario/pedidos del motor y se cobra completa aunque quede ociosa. Compras y respuesta del primer incidente permanecen inmutables. Se persiste solamente el comando validado, y el diario día 5 y cierre exhiben gasto/unidades. [Contrato y pruebas](I2-35-5-C3C-CALIDAD-ALTERNATIVA.md). **I2-35 sigue abierta**: falta recurso propio de muelle, cinco escenarios pedagógicamente distintos, UX de gerencia/QA, validación humana; **35/41** padres completados, seis restantes I2-35–I2-40. No declarar publicación hasta CI/PR/Pages HTTP.
 
 
