@@ -52,6 +52,7 @@ import {i2InventoryAccuracyPreview} from '../src/i2-inventory-physical.js';
 import {i2WhySkuAndDays,i2PickingCapacityPreview} from '../src/i2-picking-bom.js';
 import {i2TransportCapacityPreview} from '../src/i2-transport-dispatch.js';
 import {I2_NICO_ASSETS_READY,i2NicoPoseAsset,i2NicoPortraitAsset} from '../src/i2-nico-art.js';
+import {i2NicoMomentAsset} from '../src/i2-nico-expansion.js';
 const root=document.querySelector('#gameScene');
 const primary=document.querySelector('#gameNext');
 const secondary=document.querySelector('#gameBack');
@@ -113,12 +114,21 @@ function setActions({next='Continuar',onNext=null,back='',onBack=null}={}){
  secondary.textContent=back;secondary.hidden=!onBack;secondary.onclick=onBack;
 }
 /** Only verified, user-supplied Nico art; recover gracefully from missing CDN files. */
-function nicoImage(src,{className='',width=112,height=112}={}){
+function nicoImage(src,{className='',width=112,height=112,fallbackSrc='./nico.svg'}={}){
  const img=node('img',{className,attrs:{
   src,width:String(width),height:String(height),alt:'',loading:'lazy',decoding:'async'
  }});
+ // Missing expansion art falls back to an existing PNG, then SVG.
+ // No unpublished URLs are requested while the expansion flag is disabled.
+ let fallback=fallbackSrc;
  img.addEventListener('error',()=>{
-  if(img.getAttribute('src')!=='./nico.svg')img.setAttribute('src','./nico.svg');
+  const current=img.getAttribute('src');
+  if(current===fallback)fallback='./nico.svg';
+  if(current!==fallback){
+   const target=fallback;
+   fallback='./nico.svg';
+   img.setAttribute('src',target);
+  }
  });
  return img;
 }
@@ -127,6 +137,21 @@ function nicoScenePortrait(kind){
  if(!I2_NICO_ASSETS_READY)return null;
  const art=i2NicoPoseAsset(kind);
  return nicoImage(art.src,{className:'nico-scene-portrait'});
+}
+/** Contextual game moment; images are gated until all 24 files are uploaded. */
+function nicoMomentPortrait(moment){
+ if(!I2_NICO_ASSETS_READY)return null;
+ const art=i2NicoMomentAsset(moment);
+ return nicoImage(art.src,{className:'nico-scene-portrait',fallbackSrc:art.fallbackSrc});
+}
+/** Match visible Nico reactions to auditable goals, not button clicks. */
+function nicoResultMoment(evaluation,recoveredOrders){
+ const critical=[evaluation.service?.status,evaluation.expense?.status,
+  evaluation.time?.status].includes('red');
+ if(critical)return 'results-risk';
+ if(evaluation.allGreen)return 'results-success';
+ if(recoveredOrders>0)return 'results-improvement';
+ return 'results-partial';
 }
 function guideElement(){
  const advice=i2NicoCoachTip(state,guideLevel);
@@ -359,6 +384,7 @@ function nicoManagerTutorial({duringGame=false}={}){
  trigger.addEventListener('click',()=>{
   openI2NicoJourney({
    source:trigger,portraitSrc:i2NicoPortraitAsset().src,
+   portraitForStep:part=>i2NicoMomentAsset('tour-'+part.id),
    level:guideLevel,
    onLevel:level=>{
     try{
@@ -794,7 +820,7 @@ function areaScene(){
  const coaching=i2NicoCoachTip(state,guideLevel);
  const decision=section('area-tab-panel',[
   section('nico-decision-coach',[
-   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(coaching.pose)]:[]),
+   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('mentor-'+original.id)]:[]),
    section('nico-decision-words',[
     node('strong',{text:'Nico te acompaña · '+original.title}),
     p(coaching.text,'note'),
@@ -920,7 +946,7 @@ function revealScene(){
  replace([
   p('EL PLAN QUEDÓ CERRADO','eyebrow'),
   heading('Algo cambió mientras el CD se preparaba.'),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('pre-reveal')]:[]),
   p('Tus decisiones comerciales, compras y capacidades ya están definidas. La demanda observada podría ser diferente del pronóstico.','lead'),
   section('guide-box i2-sealed-demand',[
    node('strong',{text:sealed.headline}),
@@ -1028,7 +1054,7 @@ function operationalIncidentOutcomePanel(){
   'quality-stop':'Calidad · liberación detenida'};
  return section('i2-incident-outcome',[
   node('strong',{text:'¡Novedad operacional! · Eventos del periodo'}),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-observed')]:[]),
   p('Nico: estas interrupciones sucedieron durante la operación aunque el plan ya estaba comprometido. En cada una se conservan los SKU; pueden quedar esperando.','note'),
   ...events.map(event=>section('i2-incident-event',[
    node('strong',{text:'Día '+event.startDay+' · '+stageName[event.kind]}),
@@ -1220,7 +1246,7 @@ function incidentResponseScene(){
  replace([
   p('OPERACIÓN EN MARCHA · PRIMER INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Necesitamos tu decisión'),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-decision')]:[]),
   p(checkpoint.description,'lead'),
   section('metrics-grid i2-incident-checkpoint',[
    ...[
@@ -1292,7 +1318,7 @@ function recoveryScene(){
  replace([
   p('DEMANDA SORPRESA · CASO REPRODUCIBLE','eyebrow'),
   heading(reveal.heading),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('reveal')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('observed-demand')]:[]),
   p('Se planificó una muestra de '+num.format(reveal.plannedOrders)+' pedidos, pero se observaron '+num.format(reveal.observedOrders)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
   section('metrics-grid i2-observed-demand',[
    section('metric-card',[
@@ -1323,7 +1349,7 @@ function recoveryScene(){
    p('Nico: el límite físico de Picking es conocido desde el inicio. Pregúntate si la recuperación que vas a comprar realmente altera ese límite. Puedes elegir no intervenir.','note')
   ]:[]),
   section('i2-recovery-nico-lead',[
-   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('analysis')]:[]),
+   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('recovery-options')]:[]),
    section('i2-recovery-mentor-message',[
     node('strong',{text:'Nico · Tú diriges la recuperación'}),
     p('Puedes activar ninguna, una o varias acciones. Primero revisa dónde está el límite; después compara pedidos recuperados y gasto.','note'),
@@ -1467,7 +1493,7 @@ function multiResultsScene(){
  replace([
   p('CIERRE DÍA 12 · RECUPERACIÓN CONJUNTA','eyebrow'),
   heading('Las consecuencias de tu combinación.'), 
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(evaluation.allGreen?'result':'analysis')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait(nicoResultMoment(evaluation,score.recoveredOrders.value))]:[]),
   p('Demanda observada: '+num.format(score.actualOrders.value)+
    ' pedidos completos. Combinación confirmada y reproducida del mismo escenario SKU.','lead'),
   section('metrics-grid',[
@@ -1836,8 +1862,7 @@ function resultsScene(){
  replace([
   p('CIERRE DE CAMPAÑA · DÍA 12','eyebrow'),
   heading('Estas fueron las consecuencias de tus decisiones.'),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(evaluation.allGreen?'result':
-   score.recoveredOrders.value>0?'improvement':'analysis')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait(nicoResultMoment(evaluation,score.recoveredOrders.value))]:[]),
   p('Demanda real: '+num.format(score.actualOrders.value)+' pedidos completos. Resultados procedentes del mismo motor físico SKU de V1.','lead'),
   overview,
   nicoSixQuestionPanel(score,evaluation),

@@ -15,6 +15,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DESTINATION = ROOT / "juego/assets/nico/expansion-2026-10-31"
 PREFIX = "juego/assets/nico/expansion-2026-10-31/"
+REGISTRY = ROOT / "src/i2-nico-expansion.js"
+DISABLED = "export const I2_NICO_EXPANSION_READY=false;"
+ENABLED = "export const I2_NICO_EXPANSION_READY=true;"
 
 
 def run_git(*arguments):
@@ -26,6 +29,16 @@ def import_assets(archive_path: Path, publish: bool = False) -> int:
     """Valida todos los PNG antes de escribir cualquier archivo en el proyecto."""
     if not archive_path.is_file():
         raise FileNotFoundError(f"No se encontró el ZIP: {archive_path}")
+
+    # Activar la expansión exige tener previamente la integración de catálogo.
+    # El preflight ocurre ANTES de escribir assets, para evitar cargas a medias.
+    registry_content = None
+    if publish:
+        if not REGISTRY.is_file():
+            raise RuntimeError("Integra primero el PR de Nico: falta src/i2-nico-expansion.js")
+        registry_content = REGISTRY.read_text(encoding="utf-8")
+        if DISABLED not in registry_content and ENABLED not in registry_content:
+            raise RuntimeError("No se encontró la bandera controlada de expansión")
 
     staged = []
     with zipfile.ZipFile(archive_path) as archive:
@@ -68,10 +81,13 @@ def import_assets(archive_path: Path, publish: bool = False) -> int:
     print(f"Nico: {len(staged)} imágenes verificadas e importadas en {DESTINATION}")
 
     if publish:
-        # Solo añade esta expansión, sin incorporar modificaciones ajenas del usuario.
-        run_git("add", "--", str(DESTINATION.relative_to(ROOT)))
-        run_git("commit", "-m", "assets: expandir Nico con 24 reacciones para Mision CD",
-                "--", str(DESTINATION.relative_to(ROOT)))
+        # La bandera solo se activa después de comprobar todos los SHA-256.
+        REGISTRY.write_text(registry_content.replace(DISABLED, ENABLED), encoding="utf-8")
+        # Solo incluye expansión y registro, sin cambios ajenos del usuario.
+        paths = [str(DESTINATION.relative_to(ROOT)), str(REGISTRY.relative_to(ROOT))]
+        run_git("add", "--", *paths)
+        run_git("commit", "-m", "assets: verificar y activar 24 reacciones de Nico",
+                "--", *paths)
         run_git("push", "origin", "HEAD")
         print("Publicación Git completada; comprobar la rama y la revisión en GitHub.")
     return len(staged)
@@ -81,6 +97,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Importador de 24 tarjetas de Nico")
     parser.add_argument("archive", type=Path, help="Ruta al ZIP descargado desde ChatGPT")
     parser.add_argument("--publish", action="store_true",
-                        help="Crear commit limitado a los assets y ejecutar git push")
+                        help="Verificar, activar catálogo, commitear PNG y publicar la rama actual")
     args = parser.parse_args()
     import_assets(args.archive, args.publish)
