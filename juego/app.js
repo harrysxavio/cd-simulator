@@ -346,7 +346,8 @@ function advancedSettings(){
    const next=i2ValidateAdvanced(draft);
    state.advanced=next;
    // Un perfil personalizado deja de ser el preset conocido.
-   if(i2IsQualityGuided(state)&&next.stockProfile!=='low')
+   if(i2IsQualityGuided(state)&&
+      (next.stockProfile!=='low'||next.pickingLimitSkuPerDay!=='base'))
     delete state.guidedScenario;
    persist();
    const label=root.querySelector('#advancedSummary');
