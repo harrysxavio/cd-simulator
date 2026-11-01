@@ -11,6 +11,7 @@ import {openI2NicoJourney} from './nico-journey-dialog.js';
 import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
 import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
+import {i2DailyOperationsSnapshot} from '../src/i2-daily-operations.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
  i2OperationalEventsForSeed} from '../src/operational-event-schedule.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
@@ -1049,6 +1050,52 @@ function operationalIncidentOutcomePanel(){
  * I2-35.5c3a · Segundo punto causal: el snapshot incluye la primera orden
  * ya ejecutada, pero NUNCA incluye incidentes posteriores ni el cierre final.
  */
+/** Reloj de operaciones: sólo las observaciones del día actual, sin spoilers. */
+function incidentDailyScene(){
+ let model;
+ try{model=i2DailyOperationsSnapshot(state)}catch(e){showError(e);return}
+ const closing=model.day===model.horizonDays;
+ stage.textContent='Diario del CD · Jornada '+model.day;
+ progress.style.width=(70+Math.floor(30*model.day/model.horizonDays))+'%';
+ replace([
+  p('OPERACIÓN EN MARCHA · DIARIO GERENCIAL','eyebrow'),
+  heading('Jornada '+model.day+' de '+model.horizonDays),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(model.activeIncidents.length?'alert':'analysis')]:[]),
+  p(model.activeIncidents.length
+   ?'Nico: hoy hay una etapa detenida. Observa los pendientes; los SKU retenidos no son mercancía perdida.'
+   :'Nico: hoy procesamos el plan y las órdenes ya confirmadas. Mira los despachos y las colas que quedan.','lead'),
+  section('metrics-grid i2-daily-metrics',[
+   ...[
+    ['Expedidos hoy',model.newlyShippedOrders+' pedidos'],
+    ['Expedidos acumulados',model.shippedOrdersToDate+' pedidos'],
+    ['Pedidos pendientes',model.pendingOrders+' pedidos'],
+    ['En cola de Recepción',model.waitingDockSkuUnits+' SKU'],
+    ['Retenidos en Calidad',model.waitingQualitySkuUnits+' SKU'],
+    ['Recibidos hoy',model.receivedSkuUnits+' SKU']
+   ].map(([label,value])=>section('metric-card',[
+    node('span',{text:label}),node('strong',{text:String(value)})
+   ]))
+  ]),
+  ...(model.activeIncidents.length?[
+   section('i2-daily-incidents',[
+    node('strong',{text:'Incidentes activos de hoy'}),
+    ...model.activeIncidents.map(x=>p(x.description,'note'))
+   ])
+  ]:[]),
+  section('i2-recovery-mentor-message',[
+   node('strong',{text:'Nico · La mirada del gerente'}),
+   p('¿Qué cola crece y cuál se libera? Una espera no significa automáticamente que debas contratar más recursos.','note'),
+   p(closing?'Terminó el horizonte de doce jornadas. Ahora puedes analizar el resultado completo.':
+    'Aún no conoces las jornadas siguientes ni el resultado final. Avanza para observar el próximo día.','footnote')
+  ]),
+  p(model.note,'footnote')
+ ]);
+ setActions({
+  next:closing?'Ver cierre de la campaña →':'Avanzar a jornada '+(model.day+1)+' →',
+  onNext:()=>gameTransition(closing?'finish':'advance-incident-day'),
+  back:'',onBack:null
+ });
+}
 function incidentSecondResponseScene(){
  let checkpoint;
  try{checkpoint=i2IncidentDecisionCheckpoint(state,{index:1})}
@@ -1105,7 +1152,9 @@ function incidentSecondResponseScene(){
      try{
       state=i2ConfirmNextIncidentResponse(state,kind);
       multiDraft=state.recoveryConfirmation.actions;
-      persist();gameTransition('finish');
+      const second=i2OperationalEventsForSeed(state.eventSeed)[1];
+      state={...state,incidentViewDay:second.startDay+1};
+      persist();render();
      }catch(e){showError(e)}
     }),
     p(description,'footnote')
@@ -1119,6 +1168,7 @@ function incidentSecondResponseScene(){
  });
 }
 function incidentResponseScene(){
+ if(state.incidentViewDay!==undefined)return incidentDailyScene();
  if(state.incidentStep===1)return incidentSecondResponseScene();
  if(state.incidentStep===2){
   replace([heading('Operación cerrada'),
@@ -1185,10 +1235,10 @@ function incidentResponseScene(){
        // observable; las de un incidente conservan su cierre anterior.
        if(i2OperationalEventsForSeed(state.eventSeed).length>1){
         state={...state,incidentStep:1};
-        persist();render();
-       }else{
-        persist();gameTransition('finish');
        }
+       // After confirming, only tomorrow becomes observable.
+       state={...state,incidentViewDay:checkpoint.decisionDay+1};
+       persist();render();
       }catch(e){showError(e)}
      });
      return section('i2-incident-choice',[
