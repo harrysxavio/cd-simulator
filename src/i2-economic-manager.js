@@ -40,7 +40,7 @@ export function i2EconomicEvidence({campaign,comparison,baselineKey}={}){
   ||t.deployedReinforcementCLP!==op.totals.totalCostCLP+
     (comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0)
   ||t.deployedReinforcementCLP!==comparison.extraLabor+
-    (comparison.qualityBridgeCostCLP??0)
+    (comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0)
   ||t.partialContributionCLP!==t.potentialDispatchValueCLP-
     t.dispatchedMaterialsCLP-t.deployedReinforcementCLP
   ||t.receivedIntoInventoryCLP!==q.warehouseReceivedCLP
@@ -53,7 +53,7 @@ export function i2EconomicEvidence({campaign,comparison,baselineKey}={}){
   ||q.originalCommitmentCLP!==comparison.committedPurchaseValue
   ||comparison.incrementalExpense!==comparison.urgentBase+
     comparison.urgentSurcharge+comparison.extraLabor+
-    (comparison.qualityBridgeCostCLP??0))
+    (comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0))
   fail('no concilia valor, consumo, balance SKU o CLP del motor original');
  const purchaseRows=po.byPurchaseOrder.map(row=>{
   if(!['original','urgent'].includes(row.source)||!['A','B','C'].includes(row.skuId)
