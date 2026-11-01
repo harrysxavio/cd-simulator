@@ -56,6 +56,16 @@ async function verify(attempt){
   ||!gameHtml.includes('id="gameScene"')||!gameHtml.includes('src="./app.js"'))
   throw new Error('Published game route is stale or malformed');
  if(!gameCss.includes('--primary:#f97316'))throw new Error('Published game stylesheet is missing');
+ // I2-36: the incident/day components must use the same dark-orange palette
+ // as the rest of Misión CD, not white fallbacks from a light CSS template.
+ const operationsCss=gameCss.slice(gameCss.indexOf('/* I2-35.5c · Sorpresa'));
+ if(!operationsCss.includes('.i2-daily-incidents')
+  ||!operationsCss.includes('background:var(--panel);color:var(--text)')
+  ||!operationsCss.includes('.i2-operational-drill-button')
+  ||!operationsCss.includes('border-inline-start:4px solid var(--primary)')
+  ||/var\\(--(?:surface|line|muted-surface)\\b/.test(operationsCss)
+  ||/#2563eb\\b/i.test(operationsCss))
+  throw new Error('Published game incident panels are missing the dark-orange theme fix');
  // I2-35.5c2: enforce that the visible incident decision is live, not merely
  // merged on GitHub. An older cached game cannot pass the current release.
  if(!gameJs.includes('function incidentResponseScene')
