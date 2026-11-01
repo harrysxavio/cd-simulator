@@ -63,6 +63,21 @@ async function verify(attempt){
   ||!gameJs.includes('i2-quality-bridge-reading')
   ||!gameCss.includes('.i2-quality-bridge-reading'))
   throw new Error('Published Quality alternate line or its dated economics is missing');
+ // I2-35.5c3d: verify the day-3 Receiving shift is actually deployed,
+ // rather than a PR that merged without serving the new physical module.
+ const [dockJs,receivingJs]=await Promise.all([
+  req('src/i2-receiving-shift.js',attempt),
+  req('src/receiving-ledger.js',attempt)
+ ]);
+ if(!dockJs.includes('I2_RECEIVING_SHIFT')
+  ||!receivingJs.includes('receivingShiftUsedSkuUnits')
+  ||!eventsJs.includes('receivingShiftUsedSkuUnits')
+  ||!recoveryJs.includes('receivingShiftCostCLP')
+  ||!multiJs.includes('receivingShiftUsedSkuUnits')
+  ||!gameJs.includes("['dock-shift','Contratar turno extra de Recepción")
+  ||!gameJs.includes('Turno extraordinario de Recepción'))
+  throw Error('Published Receiving day-3 physical shift is absent');
+ // Preserve the previous Quality publication assertion.
  // Nico visual expansion is an art library of 24 individually cropped PNGs,
  // not an on-demand external image service. Verify that Pages publishes EACH
  // unmodified file, so rendered cards never silently fall back to older art.
