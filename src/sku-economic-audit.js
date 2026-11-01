@@ -159,7 +159,10 @@ export function skuEconomicAuditReadModel({
   const receiptsCLP=sum(arrivals,'amountCLP');
   const materialsCLP=sum(departures,'materialCLP');
   const valueCLP=money(departures.length*comparison.unitRevenue,'valor de expedición');
-  const resourceCLP=money(op.costCLP,'refuerzo');
+  // Picking reinforcement remains owned by its legacy M4-17 ledger.
+  // The alternate Quality line is owned by the physical day-5 journal.
+  const bridgeCostCLP=money(r.qualityBridgeCostCLP??0,'línea alternativa Calidad');
+  const resourceCLP=money(op.costCLP+bridgeCostCLP,'refuerzo');
   const shiftActive=operationalCost.extraCapacityOrdersPerDay>0&&(op.pickedOrders>0||op.shippedOrders>0);
   if(op.activated!==shiftActive
    ||!units(op.chargeableShiftCount)
@@ -167,7 +170,7 @@ export function skuEconomicAuditReadModel({
    ||!units(op.assignedExtraSlots)||!units(op.utilizedExtraSlots)||!units(op.idleExtraSlots)
    ||op.assignedExtraSlots!==op.utilizedExtraSlots+op.idleExtraSlots
    ||op.assignedExtraSlots!==(shiftActive?operationalCost.extraCapacityOrdersPerDay:0)
-   ||!same(resourceCLP,op.chargeableShiftCount*operationalCost.rateCLPPerActivatedShift)){
+   ||!same(op.costCLP,op.chargeableShiftCount*operationalCost.rateCLPPerActivatedShift)){
    fail('recurso operacional cargado sin jornada aplicable');
   }
   for(const id of price.keys()){
@@ -224,7 +227,10 @@ export function skuEconomicAuditReadModel({
  requireSame(cumulativeReceipts,inventory.receivedToDateCLP,'inventario recibido');
  requireSame(cumulativeMaterial,purchase.shippedMaterialAtStandardCostCLP,'material en compras');
  requireSame(cumulativeMaterial,inventory.shippedToDateCLP,'material en stock');
- requireSame(cumulativeResources,labour.totalCostCLP,'jornadas aplicadas');
+ requireSame(cumulativeResources,labour.totalCostCLP+(comparison.qualityBridgeCostCLP??0),
+  'jornadas aplicadas (Picking y Calidad)');
+ requireSame(replay.ledger.reduce((n,d)=>n+(d.qualityBridgeCostCLP??0),0),
+  comparison.qualityBridgeCostCLP??0,'gasto físico de línea alternativa Calidad');
  requireSame(cumulativeValue,result.potentialDispatchValueCLP,'valor potencial cierre');
  requireSame(cumulativeMaterial,result.dispatchedMaterialCostCLP,'costo material cierre');
  requireSame(cumulativeResources,result.incrementalOperatingCostCLP,'costo de refuerzo cierre');
@@ -236,7 +242,8 @@ export function skuEconomicAuditReadModel({
  requireSame(purchaseCost.proxy.urgentPrincipalCLP,purchase.urgentCommitmentCLP,'compromiso extraordinario');
  requireSame(purchaseCost.proxy.urgentSurchargeCLP,comparison.urgentSurcharge,'recargo de compra');
  requireSame(comparison.incrementalExpense,
-  comparison.urgentBase+comparison.urgentSurcharge+comparison.extraLabor,'proxy de desembolso');
+  comparison.urgentBase+comparison.urgentSurcharge+comparison.extraLabor+
+  (comparison.qualityBridgeCostCLP??0),'proxy de desembolso');
  requireSame(comparison.netCashDelta,comparison.incrementalRevenue-comparison.incrementalExpense,'proxy de caja');
  requireSame(comparison.economicProxyDelta,comparison.netCashDelta+
   comparison.penaltySaved-comparison.holdingDelta,'proxy económico');
@@ -269,7 +276,8 @@ export function skuEconomicAuditReadModel({
   {id:'shipped-material',role:'standard-cost-expense',signedFactor:-1,amountCLP:cumulativeMaterial,
    source:'campaign.shipments.lines x SKU catalog',meaning:'Costo estándar del material expedido; incluye stock inicial'},
   {id:'deployed-reinforcement',role:'illustrative-operating-expense',signedFactor:-1,amountCLP:cumulativeResources,
-   source:'comparison.operationalCost.daily activated shifts',meaning:'Jornadas extra activadas, no nómina pagada'}
+   source:'operationalCost.daily + recovered.ledger.qualityBridgeCostCLP',
+   meaning:'Jornadas de Picking y línea alternativa Calidad activadas; no nómina pagada'}
  ];
  const excluded=[
   {id:'original-purchase',amountCLP:purchase.originalCommitmentCLP,reason:'compromiso, no consumo nuevo'},
