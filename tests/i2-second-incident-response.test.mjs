@@ -36,6 +36,9 @@ test('I2-35.5c3a: segundo incidente se observa sin ver nada posterior',()=>{
  assert.equal(c.pendingOrdersAtDay,actual.backlog);
  assert.doesNotMatch(JSON.stringify(c),/day12|completedAtEnd|finalShipped/);
  assert.deepEqual(c, i2IncidentDecisionCheckpoint(state,{index:1}));
+ // No se acepta saltar directamente desde el segundo incidente al cierre.
+ assert.throws(()=>navigateI2GameState(state,'finish'),/segunda decisión/);
+ assert.equal(normalizeI2GameState({...state,phase:'result'}),null);
  assert.ok(Object.isFrozen(c));
  assert.throws(()=>i2IncidentDecisionCheckpoint(atFirst(),{index:1}),/I2-35.5c2/);
 });
