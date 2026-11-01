@@ -69,8 +69,8 @@ test('I2-35.5c3c: second Quality shift never changes day 0–4, old POs or exter
   assert.ok(actual[5].qualityBridgeReleasedSkuUnits>=0);
   assert.ok(actual[5].qualityBridgeReleasedSkuUnits<=I2_QUALITY_BRIDGE.capacitySkuUnits);
   assert.equal(actual[5].qualityBridgeCapacitySkuUnits,I2_QUALITY_BRIDGE.capacitySkuUnits);
-  assert.equal(actual[4].qualityBridgeCostCLP,0);
-  assert.equal(actual[6].qualityBridgeCostCLP,0);
+  assert.equal(actual[4].qualityBridgeCostCLP,undefined);
+  assert.equal(actual[6].qualityBridgeCostCLP,undefined);
   assert.equal(recovered.baselineKey,before.baselineKey);
   assert.deepEqual(recovered.results[0].comparison.originalPurchaseOrders,
    before.results[0].comparison.originalPurchaseOrders);
