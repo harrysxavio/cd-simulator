@@ -1222,7 +1222,7 @@ function incidentSecondResponseScene(){
     p(description,'footnote')
    ]))
   ]),
-  p('Si no hay compras o reservas disponibles, evita contratar recursos innecesarios: la línea alternativa de Calidad tiene capacidad limitada y un costo fijo por turno.','footnote')
+  p('Si no hay compras o reservas disponibles, evita contratar recursos innecesarios: la línea alternativa de Calidad tiene capacidad limitada y un costo fijo por turno.','footnote'),
   p(checkpoint.boundary,'footnote')
  ]);
  setActions({
