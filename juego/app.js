@@ -817,7 +817,7 @@ function areaScene(){
  const coaching=i2NicoCoachTip(state,guideLevel);
  const decision=section('area-tab-panel',[
   section('nico-decision-coach',[
-   ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(coaching.pose)]:[]),
+   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('mentor-'+original.id)]:[]),
    section('nico-decision-words',[
     node('strong',{text:'Nico te acompaña · '+original.title}),
     p(coaching.text,'note'),
