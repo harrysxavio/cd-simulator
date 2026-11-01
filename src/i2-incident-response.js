@@ -28,7 +28,8 @@ export function i2IncidentDecisionCheckpoint(raw,{index=0}={}){
  if(!first||first.startDay>=12||!Number.isInteger(index)||![0,1].includes(index))
   invalid('incidente fuera de la cronología');
  if(index===1&&(state.incidentStep!==1||!state.recoveryConfirmation
-   ||calendar.length<2))invalid('segundo incidente sin primera orden congelada');
+   ||calendar.length<2||state.incidentViewDay!==undefined))
+  invalid('segundo incidente todavía no observable');
  // La segunda observación se obtiene de la operación con la primera orden
  // ya ejecutada, NO de un futuro contrafactual ni del escenario sin acción.
  const firstActions=index===1?state.recoveryConfirmation.actions:i2EmptyRecoveryActions();
