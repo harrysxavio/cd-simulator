@@ -5,6 +5,7 @@ import {I2_DEFAULT_SEED,i2ChallengeForSeed} from './i2-challenge-config.js';
 import {I2_DEFAULT_ADVANCED,i2ValidateAdvanced} from './i2-advanced-settings.js';
 import {i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventsForSeed} from './operational-event-schedule.js';
+import {i2ValidateQualityBridge} from './i2-quality-bridge.js';
 
 /** I2-05: only educational choices and navigation are saved.
  * Never persist a physical SKU ledger, a recovery preview or V1's session. */
@@ -104,6 +105,7 @@ export function normalizeI2GameState(raw){
  // A second dated response is additive to the frozen first command.
  // It cannot activate earlier-day actions or rewrite the first PO manifest.
  let incidentStep=null,incidentFirstActions=null,incidentSecondDecision=null;
+ let operationalResponse=null;
  if(Object.hasOwn(raw,'incidentStep')){
   if(![1,2].includes(raw.incidentStep)||!Number.isSafeInteger(raw.incidentStep)
    ||!recoveryConfirmation||!raw.eventSeed
@@ -112,7 +114,7 @@ export function normalizeI2GameState(raw){
   // No admitir un cierre forzado después de observar el segundo incidente.
   if(incidentStep===1&&raw.phase==='result')return null;
   if(incidentStep===2){
-   const allowed=['hold','urgent-next','reserve-next','urgent-and-reserve'];
+   const allowed=['hold','urgent-next','reserve-next','urgent-and-reserve','quality-bridge'];
    if(!allowed.includes(raw.incidentSecondDecision)||!raw.incidentFirstActions)
     return null;
    try{
@@ -121,6 +123,13 @@ export function normalizeI2GameState(raw){
      return null;
    }catch{return null}
    incidentSecondDecision=raw.incidentSecondDecision;
+   if(incidentSecondDecision==='quality-bridge'){
+    try{
+     operationalResponse=i2ValidateQualityBridge(
+      raw.operationalResponse,i2OperationalEventsForSeed(raw.eventSeed));
+    }catch{return null}
+    if(!operationalResponse)return null;
+   }else if(Object.hasOwn(raw,'operationalResponse'))return null;
    const first=incidentFirstActions,last=recoveryConfirmation.actions;
    const secondDay=i2OperationalEventsForSeed(raw.eventSeed)[1].startDay;
    const buy=['urgent-next','urgent-and-reserve'].includes(incidentSecondDecision);
@@ -141,9 +150,11 @@ export function normalizeI2GameState(raw){
     ||(!reserve&&first.reserveTransfer.enabled!==last.reserveTransfer.enabled))
     return null;
   }else if(Object.hasOwn(raw,'incidentFirstActions')
-     ||Object.hasOwn(raw,'incidentSecondDecision'))return null;
+     ||Object.hasOwn(raw,'incidentSecondDecision')
+     ||Object.hasOwn(raw,'operationalResponse'))return null;
  }else if(Object.hasOwn(raw,'incidentFirstActions')
-   ||Object.hasOwn(raw,'incidentSecondDecision'))return null;
+   ||Object.hasOwn(raw,'incidentSecondDecision')
+   ||Object.hasOwn(raw,'operationalResponse'))return null;
  // Daily journal is OPTIONAL for legacy saves. Its bounds are tied to the
  // already committed response and to the earliest unobserved incident.
  let incidentViewDay=null;
@@ -183,6 +194,7 @@ export function normalizeI2GameState(raw){
   ...(recoveryConfirmation===null?{}:{recoveryConfirmation}),
   ...(incidentStep===null?{}:{incidentStep}),
   ...(incidentViewDay===null?{}:{incidentViewDay}),
+  ...(operationalResponse===null?{}:{operationalResponse}),
   ...(incidentFirstActions===null?{}:{
    incidentFirstActions,incidentSecondDecision
   })
