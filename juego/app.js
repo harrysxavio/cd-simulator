@@ -9,6 +9,7 @@ import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {openI2NicoJourney} from './nico-journey-dialog.js';
 import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
+import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse} from '../src/i2-incident-response.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
  i2OperationalEventsForSeed} from '../src/operational-event-schedule.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
@@ -444,7 +445,7 @@ function operationalIncidentCard(){
   node('strong',{text:'Reto opcional · Incidente operacional desconocido'}),
   p(active?'Incidente sellado y fijado para esta partida. Tipo y jornada se descubrirán al revelar.':
    'Además de la demanda, la operación puede sufrir una interrupción física de muelle o Calidad. Se escogerá un caso reproducible de forma independiente.','note'),
-  p('En este piloto las consecuencias se muestran al cierre y las recuperaciones se estudian como laboratorio retrospectivo; todavía no puedes ejecutar intervenciones durante una jornada.','footnote'),
+  p('En esta misión reaccionarás al primer incidente cuando aparezca: podrás no actuar, comprar de urgencia para una fecha posterior o movilizar una reserva ya existente. Los siguientes incidentes y el resultado final permanecen ocultos hasta el cierre.','footnote'),
   ...(locked?[p('La misión está confirmada y ya no puedes cambiar su incidente.','footnote')]:[]),
   btn
  ]);
@@ -1035,8 +1036,88 @@ function operationalIncidentOutcomePanel(){
    '. Diferencia: '+(delta>0?'+':'')+num.format(delta)+' pedidos.','note'),
   p(delta===0?'El total de pedidos no cambió. Puede existir holgura o un cuello diferente: no inventes un perjuicio que el motor no calculó.':
    'La diferencia corresponde a este contrafactual con la misma demanda, decisiones y compras iniciales. No presupone costos no medidos.','footnote'),
-  p('IMPORTANTE: las acciones de recuperación actuales son comparaciones retrospectivas sobre las 12 jornadas; no representan una orden enviada por el gerente en un día pasado.','footnote')
+  p('En el modo de incidente se confirma una intervención después de la primera alerta: las nuevas compras y traslados empiezan como mínimo la jornada siguiente. El laboratorio clásico separado sigue siendo una comparación retrospectiva.','footnote')
  ]);
+}
+/**
+ * I2-35.5c2: solo hechos de la jornada del primer incidente son visibles.
+ * Confirmar una respuesta ejecuta UNA simulación física desde el mismo
+ * escenario, con efecto futuro fechado; no hay preview de resultado final.
+ */
+function incidentResponseScene(){
+ if(!state.reveal){state.phase='reveal';render();return}
+ let checkpoint;
+ try{checkpoint=i2IncidentDecisionCheckpoint(state)}catch(e){showError(e);return}
+ const confirmed=Boolean(state.recoveryConfirmation);
+ stage.textContent='Jornada '+checkpoint.decisionDay+' · Incidente';
+ progress.style.width='92%';
+ const actions=[
+  ['wait','No intervenir','Observar la operación y no contratar recursos adicionales.'],
+  ['urgent-fast','Compra urgente · llega día '+checkpoint.nextDay,
+   'Compras SKU faltantes con recargo; no se salta Recepción ni Calidad.'],
+  ['urgent-conservative','Compra urgente · llega día '+checkpoint.conservativeDay,
+   'Compra tardía con igual recargo; puede quedar fuera del plazo útil.'],
+  ...(checkpoint.reserveAvailable?[['reserve-next',
+   'Trasladar reserva · día '+checkpoint.nextDay,
+   'Mover al área de preparación stock que ya estaba dentro del CD.'],
+   ['buy-and-reserve','Compra urgente + reserva · desde día '+checkpoint.nextDay,
+   'Combinar compra y traslado sin duplicar SKU ni el compromiso original.']]:[])
+ ];
+ replace([
+  p('OPERACIÓN EN MARCHA · PRIMER INCIDENTE OBSERVADO','eyebrow'),
+  heading('Día '+checkpoint.decisionDay+' · Necesitamos tu decisión'),
+  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
+  p(checkpoint.description,'lead'),
+  section('metrics-grid i2-incident-checkpoint',[
+   ...[
+    ['En cola de muelle',checkpoint.waitingDockSkuUnits+' SKU'],
+    ['Retenidos en Calidad',checkpoint.waitingQualitySkuUnits+' SKU'],
+    ['Pedidos expedidos hasta hoy',checkpoint.shippedOrdersToDate],
+    ['Pedidos aún pendientes',checkpoint.pendingOrdersAtDay]
+   ].map(([label,value])=>section('metric-card',[
+    node('span',{text:label}),node('strong',{text:String(value)})
+   ]))
+  ]),
+  section('i2-recovery-mentor-message',[
+   node('strong',{text:'Nico · Decide con lo que sabes hoy'}),
+   p('Una interrupción no significa automáticamente que debas comprar más. Primero mira dónde se acumulan las unidades; después considera si una acción llegará a tiempo.','note'),
+   p('No conoces el resultado del día 12 ni los eventos que podrían ocurrir después. No cambiarás compras ni decisiones ya ejecutadas.','footnote')
+  ]),
+  ...(confirmed?[
+   section('i2-incident-confirmed',[
+    node('strong',{text:'Respuesta guardada'}),
+    p('Tu decisión ya fue confirmada. Puedes continuar al cierre o descartarla para elegir otra estrategia bajo las mismas condiciones.','note'),
+    button('Cambiar mi decisión',()=>{
+     try{state=i2ClearMultiRecovery(state);multiPreview=null;saveAndRender()}
+     catch(e){showError(e)}
+    })
+   ])
+  ]:[
+   section('i2-incident-choices',[
+    node('strong',{text:'¿Qué orden emites para las próximas jornadas?'}),
+    ...actions.map(([kind,label,description])=>{
+     const control=button(label,()=>{
+      try{
+       state=i2ConfirmIncidentResponse(state,kind);
+       multiDraft=state.recoveryConfirmation.actions;
+       persist();gameTransition('finish');
+      }catch(e){showError(e)}
+     });
+     return section('i2-incident-choice',[
+      control,p(description,'footnote')
+     ]);
+    })
+   ])
+  ]),
+  p('Las compras adicionales se modelan con tarifa didáctica y fecha; el traslado de reserva no inventa inventario. Todavía no se pueden contratar refuerzos de dotación desde una jornada, porque esa capacidad no está modelada con un inicio temporal.','footnote'),
+  p(checkpoint.boundary,'footnote')
+ ]);
+ setActions({
+  next:confirmed?'Ver consecuencias →':'',
+  onNext:confirmed?()=>gameTransition('finish'):null,
+  back:'← Revisar plan',
+  onBack:()=>gameTransition('back')
+ });
 }
 function recoveryScene(){
  if(!state.reveal){state.phase='reveal';render();return}
@@ -1232,6 +1313,7 @@ function multiResultsScene(){
     node('strong',{text:num.format(score.pendingOrders.value)})])
   ]),
   nicoSixQuestionPanel(score,evaluation),
+  ...(state.eventSeed?[operationalIncidentOutcomePanel()]:[]),
   renderI2ManagerResultBoard(board),
   renderI2AreaPhysicalTimeline(trace),
   renderI2EconomicManagerPanel(economics),
@@ -1628,7 +1710,9 @@ function render(){
  if(state.phase==='intro')intro();
  else if(state.phase==='area')areaScene();
  else if(state.phase==='reveal')revealScene();
- else if(state.phase==='recover')recoveryScene();
+ else if(state.phase==='recover'){
+  if(state.eventSeed)incidentResponseScene();else recoveryScene();
+ }
  else if(state.phase==='review')reviewScene();
  else if(state.phase==='result')resultsScene();
  paintProgress();
