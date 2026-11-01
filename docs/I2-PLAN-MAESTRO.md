@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **I2-35 · I2-35.5c3d candidato (01-11-2026):** se crea alternativa fechada y costeada de Recepción para responder al muelle detenido del día 2: refuerzo FIFO de **80 SKU adicionales el día 3 por $55.000 CLP** didácticos, con uso real y costo en diario y resultados. Misma orden original; no habilita físicamente el día cerrado ni anticipa demanda o entregas; auditorías económicas y pruebas incluidas. [Contrato](I2-35-5-C3D-RECEPCION-TURNO.md). **No declarar integración ni cerrar I2-35** hasta CI, PR merge, Pages HTTP y después diversidad de misiones. Fases oficiales **35/41**, seis pendientes I2-35–I2-40.
+
+
 > **CORTE PUBLICADO · 01-11-2026, Lab11:** PR #142 (Calidad física con línea alternativa día 5, hasta 80 SKU y $70.000 CLP didácticos), PR #139 (integración contextual de **24 PNG originales de Nico** en tutorial de 7 pasos, ocho áreas, eventos y resultados) y PR #143 (complemento de Nico para diario día 3, segundo incidente día 4, turno de Calidad día 5 y jornada 6) **fusionados y publicados**. PRs con Node/focused/Chromium verdes; **Pages y verificador HTTP verdes**, y el verificador actualizado coteja **SHA-256 de los 24 PNG públicos** con su manifiesto local. [Mapa de arte por estado y pruebas](I2-NICO-DIARIO-CALIDAD-2026-11-01.md), [contrato físico Calidad](I2-35-5-C3C-CALIDAD-ALTERNATIVA.md), [estado vigente](I2-STATUS.md). **Sin cerrar artificialmente I2-35 ni I2-36:** siguen abiertas seis fases padre I2-35..I2-40 (35/41 cerradas, F7 4/5, F8 0/5). Próximo trabajo prioritario: palanca propia para recepción con fecha, capacidad y costo auditable, al menos cinco misiones distintas, aprendizaje y UAT manual Android/TalkBack, aceptación gerencial y release estable.
 
 
