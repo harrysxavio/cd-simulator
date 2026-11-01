@@ -8,6 +8,7 @@ import {campaignSkuContract} from './campaign-contract.js';
 import {createRecoveryBaseline} from './recovery-baseline.js';
 import {recoveryComparison} from './recovery.js';
 import {i2OperationalEventsForSeed} from './operational-event-schedule.js';
+import {i2ValidateQualityBridge} from './i2-quality-bridge.js';
 
 const fail=message=>{throw new Error('I2-28: '+message)};
 const valid=n=>Number.isSafeInteger(n);
@@ -108,6 +109,8 @@ export function i2CompareMultiRecovery({state,plans=[],
  // Opt-in only after demand reveal; state/eventSeed persistence is a later phase.
  // All multi-action options reuse a single immutable operational calendar.
  const calendar=state.eventSeed?i2OperationalEventsForSeed(state.eventSeed):operationalEvents;
+ const bridge=state.operationalResponse===undefined?null:
+  i2ValidateQualityBridge(state.operationalResponse,calendar);
  const inputs={...contract.skuInputs,reservePercent,days:12,operationalEvents:calendar};
  const baseline=createRecoveryBaseline(inputs);
  const noAction=recoveryComparison({
@@ -124,16 +127,18 @@ export function i2CompareMultiRecovery({state,plans=[],
   seen.add(key);
   if(actions.reserveTransfer.enabled&&baseline.openingState.totals.reserveSkuUnits===0)
    fail('no hay reserva física inicial; no se pueden inventar unidades');
-  const comparison=emptyActions(actions)?noAction:recoveryComparison({
+  const comparison=emptyActions(actions)&&!bridge?noAction:recoveryComparison({
    ...inputs,option:'multi',multiActions:physicalActions(actions),
    baselineSnapshot:baseline,
    urgentArrivalDay:actions.urgentPurchase.arrivalDay,
-   purchaseCoveragePercent:actions.urgentPurchase.coveragePercent
+   purchaseCoveragePercent:actions.urgentPurchase.coveragePercent,
+   qualityBridge:bridge
   });
   const urgentSkuUnits=sum(comparison.urgent,'qty');
   const reserveMovedSkuUnits=comparison.recovered.ledger.reduce((total,day)=>
    total+sum(day.reserveEvents,'qty'),0);
-  const totalCost=comparison.urgentBase+comparison.urgentSurcharge+comparison.extraLabor;
+  const totalCost=comparison.urgentBase+comparison.urgentSurcharge+
+   comparison.extraLabor+comparison.qualityBridgeCostCLP;
   if(comparison.base!==noAction.base
    ||comparison.baselineKey!==noAction.baselineKey
    ||comparison.baselineSnapshot!==baseline
@@ -150,7 +155,7 @@ export function i2CompareMultiRecovery({state,plans=[],
   const reading={
    actions,scope:'sku-cohort',horizonDays:12,
    baselineKey:baseline.scenarioKey,
-   noIntervention:emptyActions(actions),
+   noIntervention:emptyActions(actions)&&!bridge,
    actualOrders:event.observedOrders,
    baselineDispatchedOrders:noAction.base.completed,
    dispatchedOrders:comparison.recovered.completed,
@@ -163,12 +168,15 @@ export function i2CompareMultiRecovery({state,plans=[],
    urgentPurchaseValueCLP:comparison.urgentBase,
    urgentSurchargeCLP:comparison.urgentSurcharge,
    extraCapacityCostCLP:comparison.extraLabor,
+   qualityBridgeCostCLP:comparison.qualityBridgeCostCLP,
+   qualityBridgeReleasedSkuUnits:bridge?
+    comparison.recovered.ledger.reduce((sum,d)=>sum+(d.qualityBridgeReleasedSkuUnits??0),0):0,
    incrementalExpenseCLP:totalCost,
    economicProxyDeltaCLP:comparison.economicProxyDelta,
    originalPurchaseCommitmentCLP:comparison.committedPurchaseValue,
    totalOperatingCostCLP:null,customerDeliveredOrders:null,
    urgentOrders:comparison.urgent.map(u=>({id:u.id,qty:u.qty,day:u.day})),
-   provenance:'recoveryComparison (motor SKU único), one frozen createRecoveryBaseline and originalPurchaseOrders',
+   provenance:'recoveryComparison + capped dated Quality alternate line (motor SKU único), one frozen createRecoveryBaseline and originalPurchaseOrders',
    boundary:'Son resultados conjuntos, no sumas de recuperaciones aisladas; salida del CD no equivale a entrega al cliente. Compra es un nuevo compromiso modelado, no pago acreditado; CLP parcial, costo total desconocido.'
   };
   results.push({reading:freeze(reading),comparison});
