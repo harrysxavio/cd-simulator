@@ -52,7 +52,8 @@ export function skuPartialContributionReadModel({
   ||!Array.isArray(operationalCost.daily)||operationalCost.daily.length!==horizon+1
   ||!nonnegative(comparison.unitRevenue)
   ||!nonnegative(comparison.urgentBase)||!nonnegative(comparison.urgentSurcharge)
-  ||!nonnegative(comparison.extraLabor)||!nonnegative(comparison.qualityBridgeCostCLP??0)||!nonnegative(comparison.incrementalExpense)
+  ||!nonnegative(comparison.extraLabor)||!nonnegative(comparison.qualityBridgeCostCLP??0)
+  ||!nonnegative(comparison.receivingShiftCostCLP??0)||!nonnegative(comparison.incrementalExpense)
   ||!nonnegative(comparison.penaltyRecovered)||!nonnegative(comparison.holdingRecovered)
   ||!qty(comparison.base?.completed)||!qty(replay.completed)
   // Comparisons can LOSE dispatches (e.g. independent staging with limited transport).
@@ -97,7 +98,10 @@ export function skuPartialContributionReadModel({
   if(!nonnegative(qualityShiftCostCLP)
    ||qualityShiftCostCLP>(comparison.qualityBridgeCostCLP??0))
    invalid('turno de Calidad no concilia con la jornada física');
-  const incrementalOperatingCostCLP=ops.costCLP+qualityShiftCostCLP;
+  const receivingCostCLP=record.receivingShiftCostCLP??0;
+  if(!nonnegative(receivingCostCLP)||receivingCostCLP>(comparison.receivingShiftCostCLP??0))
+   invalid('turno de Recepción no concilia con la jornada física');
+  const incrementalOperatingCostCLP=ops.costCLP+qualityShiftCostCLP+receivingCostCLP;
   const partialContributionCLP=money(
    potentialDispatchValueCLP-dispatchedMaterialCostCLP-incrementalOperatingCostCLP,
    'contribución del día'
@@ -137,11 +141,13 @@ export function skuPartialContributionReadModel({
   ||!close(dispatchedMaterialCostCLP,inv.shippedToDateCLP)
   ||!close(dispatchedMaterialCostCLP,po.shippedMaterialAtStandardCostCLP)
   ||!close(incrementalOperatingCostCLP,
-   ops.totalCostCLP+(comparison.qualityBridgeCostCLP??0))
+   ops.totalCostCLP+(comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0))
   ||!close(incrementalOperatingCostCLP,
-   comparison.extraLabor+(comparison.qualityBridgeCostCLP??0))
+   comparison.extraLabor+(comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0))
   ||!close(replay.ledger.reduce((n,d)=>n+(d.qualityBridgeCostCLP??0),0),
    comparison.qualityBridgeCostCLP??0)
+  ||!close(replay.ledger.reduce((n,d)=>n+(d.receivingShiftCostCLP??0),0),
+   comparison.receivingShiftCostCLP??0)
   ||!close(po.warehouseReceivedCLP,inv.receivedToDateCLP)
   ||!close(inv.openingCLP+inv.receivedToDateCLP,
    inv.shippedToDateCLP+inv.closingPhysicalCLP)
@@ -149,7 +155,7 @@ export function skuPartialContributionReadModel({
   ||!close(purchaseCost.proxy.urgentSurchargeCLP,comparison.urgentSurcharge)
   ||!close(comparison.incrementalExpense,
    comparison.urgentBase+comparison.urgentSurcharge+comparison.extraLabor+
-    (comparison.qualityBridgeCostCLP??0))
+    (comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0))
   ||!close(comparison.incrementalRevenue,
    (replay.completed-comparison.base.completed)*unitRevenue)){
   invalid('identidades entre pedidos, existencias y resultados inconsistentes');
@@ -182,6 +188,7 @@ export function skuPartialContributionReadModel({
   passed:true,scope:'sku-cohort',currency:'CLP',horizonDays:horizon,
   revenueRateCLPPerCompleteShippedOrder:unitRevenue,
   qualityBridgeCostCLP:comparison.qualityBridgeCostCLP??0,
+  receivingShiftCostCLP:comparison.receivingShiftCostCLP??0,
   revenueRateSource:unitRevenue===SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder
    ?'SKU_COST_DEFAULTS.recovery.revenueCLPPerShippedOrder'
    :'recoveryComparison.unitRevenue (custom scenario assumption)',
