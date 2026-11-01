@@ -10,11 +10,15 @@ test('Nico: tutorial rota gestos sin revelar la demanda ni pedir PNG aún no pub
   executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
  const context=await browser.newContext({...devices['Pixel 7'],
   viewport:{width:360,height:760}});
- const page=await context.newPage(),errors=[],requestedExpansion=[];
+ const page=await context.newPage(),errors=[],requestedExpansion=[],brokenExpansion=[];
  page.on('pageerror',error=>errors.push(error.message));
  page.on('request',request=>{
   if(request.url().includes('/expansion-2026-10-31/'))
    requestedExpansion.push(request.url());
+ });
+ page.on('response',response=>{
+  if(response.url().includes('/expansion-2026-10-31/')&&response.status()!==200)
+   brokenExpansion.push(response.status()+' '+response.url());
  });
  try{
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
@@ -29,6 +33,7 @@ test('Nico: tutorial rota gestos sin revelar la demanda ni pedir PNG aún no pub
    const portrait=page.locator('.nico-journey-portrait');
    const src=await portrait.getAttribute('src');
    sources.push(src);
+   if(published)assert.match(src,/^\.\/assets\/nico\/expansion-2026-10-31\//);
    await portrait.evaluate(img=>img.decode());
    assert.ok(await portrait.evaluate(img=>img.naturalWidth>0),
     'El retrato de Nico debe cargar en el paso '+(step+1));
@@ -43,6 +48,7 @@ test('Nico: tutorial rota gestos sin revelar la demanda ni pedir PNG aún no pub
   if(published)assert.ok(requestedExpansion.length>=5,
    'Si los PNG están verificados, el tutorial debe servirlos');
   else assert.deepEqual(requestedExpansion,[],'Nunca pedir PNG no publicados');
+  assert.deepEqual(brokenExpansion,[],'Todos los retratos nuevos deben servir HTTP 200');
   await page.locator('.nico-journey-next').click();
   // HTMLDialogElement.close() dispatches its close event asynchronously.
   // Wait for the UI to detach instead of asserting within the same tick.
