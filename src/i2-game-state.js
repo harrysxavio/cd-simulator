@@ -59,6 +59,11 @@ export function normalizeI2GameState(raw){
  if(Object.hasOwn(raw,'eventSeed')&&
    !I2_OPERATIONAL_EVENT_SEEDS.includes(raw.eventSeed))return null;
  const eventSeed=raw.eventSeed??null;
+ // Only a known optional guided mission may be persisted. It never coexists
+ // with the independent operational incident, and old saves remain unchanged.
+ if(Object.hasOwn(raw,'guidedScenario')&&
+    (raw.guidedScenario!=='quality-low-stock'||eventSeed!==null))return null;
+ const guidedScenario=raw.guidedScenario??null;
  const isV2=raw.schema===I2_GAME_SCHEMA;
  if(isV2){
   if(raw.campaignId!==I2_MVP_CASE.campaignId)return null;
@@ -201,6 +206,7 @@ export function normalizeI2GameState(raw){
   advanced,
   confirmedAreas:[...confirmed],reveal:raw.reveal,
   ...(eventSeed===null?{}:{eventSeed}),
+  ...(guidedScenario===null?{}:{guidedScenario}),
   ...(recoveryConfirmation===null?{}:{recoveryConfirmation}),
   ...(incidentStep===null?{}:{incidentStep}),
   ...(incidentViewDay===null?{}:{incidentViewDay}),
