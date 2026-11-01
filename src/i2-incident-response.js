@@ -2,6 +2,7 @@ import {normalizeI2GameState} from './i2-game-state.js';
 import {i2OperationalEventsForSeed} from './operational-event-schedule.js';
 import {i2CompareMultiRecovery,i2EmptyRecoveryActions,i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
 import {i2ConfirmMultiRecovery} from './i2-recovery-confirmation.js';
+import {I2_QUALITY_BRIDGE} from './i2-quality-bridge.js';
 
 const invalid=reason=>{throw new Error('I2-35.5c2: '+reason)};
 const freeze=value=>{
@@ -113,7 +114,7 @@ export function i2ConfirmNextIncidentResponse(raw,kind){
  if(!state||state.phase!=='recover'||state.incidentStep!==1
   ||!state.recoveryConfirmation||state.incidentFirstActions)
   invalid('segundo incidente no habilitado');
- if(!['hold','urgent-next','reserve-next','urgent-and-reserve'].includes(kind))
+ if(!['hold','urgent-next','reserve-next','urgent-and-reserve','quality-bridge'].includes(kind))
   invalid('segunda respuesta desconocida');
  const check=i2IncidentDecisionCheckpoint(state,{index:1});
  const first=state.recoveryConfirmation.actions;
@@ -141,7 +142,8 @@ export function i2ConfirmNextIncidentResponse(raw,kind){
  const updated=i2ConfirmMultiRecovery(pending,actions);
  const final=normalizeI2GameState({
   ...updated,incidentStep:2,incidentFirstActions:first,
-  incidentSecondDecision:kind
+  incidentSecondDecision:kind,
+  ...(kind==='quality-bridge'?{operationalResponse:I2_QUALITY_BRIDGE}:{})
  });
  if(!final)invalid('segunda orden no cumple contrato de persistencia');
  return freeze(final);

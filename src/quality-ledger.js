@@ -1,5 +1,6 @@
 import {SKU_CATALOG} from './sku.js';
 import {normalizeOperationalEvents} from './operational-event-schedule.js';
+import {i2ValidateQualityBridge} from './i2-quality-bridge.js';
 
 const total=(items,fn)=>items.reduce((sum,item)=>sum+fn(item),0);
 const nonnegative=value=>Number.isSafeInteger(value)&&value>=0;
@@ -44,6 +45,7 @@ export function qualityLotReadModel({replay,receipts,qualityReleases,qualityLots
  let cumulativeReceived=0,cumulativeReleased=0,heldSkuDays=0,peakHeld=0,peakDay=0;
  const daily=[];
  const calendar=normalizeOperationalEvents(replay.operationalEvents??[],replay.days);
+ const bridge=i2ValidateQualityBridge(replay.qualityBridge??null,calendar);
  for(let day=0;day<=replay.days;day++){
   const physics=replay.ledger[day];
   const stopped=calendar.some(e=>e.kind==='quality-stop'
@@ -72,7 +74,12 @@ export function qualityLotReadModel({replay,receipts,qualityReleases,qualityLots
   cumulativeReceived+=arrivals;
   const beforeRelease=total(orderedLots,l=>l.heldSkuUnits);
   // Una detención validada impide liberar lotes solo en días afectados.
-  let budget=stopped?0:Math.ceil(beforeRelease*replay.qualityReleasePercent/100);
+  // The main Quality line remains stopped. An explicitly commissioned
+  // alternate certified line may perform a bounded FIFO release on day 5.
+  const bridgeActive=Boolean(bridge&&day===bridge.day&&stopped);
+  let budget=stopped
+   ?(bridgeActive?Math.min(beforeRelease,bridge.capacitySkuUnits):0)
+   :Math.ceil(beforeRelease*replay.qualityReleasePercent/100);
   const expected=new Map();
   for(const lot of orderedLots){
    if(budget<=0)break;
@@ -105,6 +112,12 @@ export function qualityLotReadModel({replay,receipts,qualityReleases,qualityLots
    fail('faltan liberaciones programadas para los lotes');
   }
   const releasedToday=total(releases,r=>r.qty);
+  if(bridgeActive&&(physics.qualityBridgeReleasedSkuUnits!==releasedToday
+   ||physics.qualityBridgeCostCLP!==bridge.shiftCostCLP
+   ||releasedToday>bridge.capacitySkuUnits)
+   ||!bridgeActive&&(physics.qualityBridgeReleasedSkuUnits!==undefined
+    ||physics.qualityBridgeCostCLP!==undefined))
+   fail('línea alternativa de Calidad no concilia SKU y CLP del turno');
   cumulativeReleased+=releasedToday;
   const waiting=total(orderedLots,l=>l.heldSkuUnits);
   const heldBySku=Object.fromEntries(ids.map(id=>[id,total(orderedLots.filter(l=>l.skuId===id),l=>l.heldSkuUnits)]));
@@ -120,6 +133,8 @@ export function qualityLotReadModel({replay,receipts,qualityReleases,qualityLots
   const oldestWaitingDays=orderedLots.filter(l=>l.heldSkuUnits>0)
    .reduce((max,l)=>Math.max(max,day-l.receivedDay),0);
   daily.push({day,...(stopped?{interruption:'quality-stop',effectiveReleasePercent:0}:{}),
+   ...(bridgeActive?{alternateQualityReleasedSkuUnits:releasedToday,
+    alternateQualityShiftCostCLP:bridge.shiftCostCLP}:{}),
    receivedSkuUnits:arrivals,releasedSkuUnits:releasedToday,
    heldSkuUnits:waiting,heldBySku,oldestWaitingDays,
    receiptLots:newReceipts.length,releaseEvents:releases.length});

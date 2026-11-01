@@ -45,6 +45,23 @@ async function verify(attempt){
  ]);
  const dailyJs=await req('src/i2-daily-operations.js',attempt);
  if(!dailyJs.includes('function i2DailyOperationsSnapshot'))throw new Error('Published daily operational read model absent');
+ // I2-35.5c3c: don't accept green Pages unless the real dated Quality
+ // intervention and its physical cost engine are actually served.
+ const [bridgeJs,eventsJs,recoveryJs,multiJs]=await Promise.all([
+  req('src/i2-quality-bridge.js',attempt),
+  req('src/events.js',attempt),
+  req('src/recovery.js',attempt),
+  req('src/i2-multi-recovery.js',attempt)
+ ]);
+ if(!bridgeJs.includes('I2_QUALITY_BRIDGE')
+  ||!eventsJs.includes('qualityBridgeReleasedSkuUnits')
+  ||!recoveryJs.includes('qualityBridgeCostCLP')
+  ||!multiJs.includes('qualityBridgeReleasedSkuUnits')
+  ||!dailyJs.includes('qualityBridgeCostCLP')
+  ||!gameJs.includes("['quality-bridge','Activar línea alternativa de Calidad")
+  ||!gameJs.includes('i2-quality-bridge-reading')
+  ||!gameCss.includes('.i2-quality-bridge-reading'))
+  throw new Error('Published Quality alternate line or its dated economics is missing');
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
  if(manifest.version!==release.version||manifest.assetRevision!==release.assetRevision)throw new Error('Published release manifest differs from repository HEAD');

@@ -1397,3 +1397,17 @@ html,body{height:100%;overflow:hidden}
   border-inline-start-color:Highlight
  }
 }
+
+/* I2-35.5c3c · A contracted Quality recovery shift is operational evidence.
+   The same navy/orange tokens used throughout Misión CD apply here. */
+.i2-quality-bridge-reading{
+ display:grid;gap:.4rem;margin:10px 0;padding:12px;min-width:0;
+ background:var(--panel);color:var(--text);
+ border:1px solid var(--border);border-inline-start:4px solid var(--primary);
+ border-radius:12px;
+}
+.i2-quality-bridge-reading>p{margin:0;overflow-wrap:anywhere}
+@media(forced-colors:active){
+ .i2-quality-bridge-reading{background:Canvas;color:CanvasText;border-color:CanvasText}
+ .i2-quality-bridge-reading{border-inline-start-color:Highlight}
+}
