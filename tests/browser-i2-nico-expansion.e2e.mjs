@@ -18,6 +18,10 @@ test('Nico: tutorial rota gestos sin revelar la demanda ni pedir PNG aún no pub
  });
  try{
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
+  const published=await page.evaluate(async()=>{
+   const module=await import('/src/i2-nico-expansion.js');
+   return module.I2_NICO_EXPANSION_READY;
+  });
   const original=await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1'));
   await page.locator('.nico-manager-tutorial').click();
   const sources=[];
@@ -36,7 +40,9 @@ test('Nico: tutorial rota gestos sin revelar la demanda ni pedir PNG aún no pub
   }
   assert.ok(new Set(sources).size>=5,
    'El personaje debe cambiar de expresión según los siete pasos');
-  assert.deepEqual(requestedExpansion,[],'Nunca pedir PNG no publicados');
+  if(published)assert.ok(requestedExpansion.length>=5,
+   'Si los PNG están verificados, el tutorial debe servirlos');
+  else assert.deepEqual(requestedExpansion,[],'Nunca pedir PNG no publicados');
   await page.locator('.nico-journey-next').click();
   assert.equal(await page.locator('.nico-journey-dialog').count(),0);
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),
