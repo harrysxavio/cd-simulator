@@ -1,4 +1,5 @@
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 const release=JSON.parse(readFileSync(new URL('../release.json',import.meta.url),'utf8'));
 const base=process.env.PAGES_URL||'https://harrysxavio.github.io/cd-simulator/';
 const max=Number(process.env.VERIFY_ATTEMPTS||36),delay=Number(process.env.VERIFY_INTERVAL_MS||10000);
@@ -62,6 +63,40 @@ async function verify(attempt){
   ||!gameJs.includes('i2-quality-bridge-reading')
   ||!gameCss.includes('.i2-quality-bridge-reading'))
   throw new Error('Published Quality alternate line or its dated economics is missing');
+ // Nico visual expansion is an art library of 24 individually cropped PNGs,
+ // not an on-demand external image service. Verify that Pages publishes EACH
+ // unmodified file, so rendered cards never silently fall back to older art.
+ const imageBase='juego/assets/nico/expansion-2026-10-31/';
+ const imageManifest=JSON.parse(readFileSync(
+  new URL('../juego/assets/nico/expansion-2026-10-31/manifest.json',import.meta.url),'utf8'));
+ if(imageManifest.assets?.length!==24||new Set(imageManifest.assets.map(a=>a.path)).size!==24)
+  throw Error('Unexpected Nico expansion manifest');
+ const remoteImageManifest=JSON.parse(await req(imageBase+'manifest.json',attempt));
+ if(JSON.stringify(remoteImageManifest)!==JSON.stringify(imageManifest))
+  throw Error('Published Nico manifest differs from local verified manifest');
+ const expandedNico=await req('src/i2-nico-expansion.js',attempt);
+ if(!expandedNico.includes('I2_NICO_EXPANSION_READY=true')
+  ||!expandedNico.includes('daily-quality-bridge')
+  ||!gameJs.includes('nicoMomentPortrait')
+  ||!gameJs.includes("model.qualityBridgeCostCLP?'daily-quality-bridge'"))
+  throw Error('Published game does not use the contextual Nico expansion');
+ for(let i=0;i<imageManifest.assets.length;i+=4){
+  await Promise.all(imageManifest.assets.slice(i,i+4).map(async image=>{
+   if(!/^(escenas|gestion|resultados|gestos)\/[0-9]{2}_[a-z_]+\.png$/.test(image.path))
+    throw Error('Unexpected Nico image path '+image.path);
+   const url=new URL(imageBase+image.path,base);
+   url.searchParams.set('nico_sha_check',release.assetRevision+'-'+attempt);
+   const resp=await fetch(url,{cache:'no-store',
+    signal:AbortSignal.timeout(18000),headers:{'Cache-Control':'no-cache'}});
+   if(!resp.ok)throw Error('Nico image missing '+image.path+' HTTP '+resp.status);
+   const bytes=Buffer.from(await resp.arrayBuffer());
+   if(bytes.length<2000||bytes.length>300000||
+    !bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))||
+    createHash('sha256').update(bytes).digest('hex')!==image.sha256)
+    throw Error('Nico published PNG differs from original SHA-256 '+image.path);
+   console.log('Nico image verified:',image.path,bytes.length,'bytes');
+  }));
+ }
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
  if(manifest.version!==release.version||manifest.assetRevision!==release.assetRevision)throw new Error('Published release manifest differs from repository HEAD');
