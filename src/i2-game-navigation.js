@@ -94,7 +94,11 @@ export function navigateI2GameState(value,action){
    if(next.phase==='recover'&&next.incidentViewDay!==undefined
      &&next.incidentViewDay!==12)
     throw new Error('I2-09: jornadas sin observar antes del cierre');
+   if(next.phase==='recover'&&next.eventSeed&&!next.recoveryConfirmation)
+    throw new Error('I2-09: no hay orden operacional confirmada');
    if(next.phase==='recover'&&next.reveal){
+    // Jornada 12 ya observada, por lo que no queda marcador diario activo.
+    delete next.incidentViewDay;
     change('result',7);
     return normalizeI2GameState(next);
    }
