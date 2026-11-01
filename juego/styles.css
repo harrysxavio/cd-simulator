@@ -1345,3 +1345,16 @@ html,body{height:100%;overflow:hidden}
  .i2-incident-checkpoint{grid-template-columns:minmax(0,1fr)}
  .i2-incident-choice{padding:.55rem}
 }
+
+
+/* I2-35.5c3a: segunda decisión causal diferenciada y resumen de órdenes. */
+.i2-incident-first-commitment,.i2-two-decision-summary{
+  display:grid;gap:.45rem;min-width:0;padding:.85rem;
+  background:var(--surface,#fff);
+  border:1px solid var(--line,#e2e8f0);
+  border-radius:.85rem;
+}
+.i2-incident-first-commitment>p,.i2-two-decision-summary>p{
+  margin:0;overflow-wrap:anywhere;
+}
+.i2-two-decision-summary{border-inline-start:4px solid #2563eb}
