@@ -144,6 +144,23 @@ export function normalizeI2GameState(raw){
      ||Object.hasOwn(raw,'incidentSecondDecision'))return null;
  }else if(Object.hasOwn(raw,'incidentFirstActions')
    ||Object.hasOwn(raw,'incidentSecondDecision'))return null;
+ // Daily journal is OPTIONAL for legacy saves. Its bounds are tied to the
+ // already committed response and to the earliest unobserved incident.
+ let incidentViewDay=null;
+ if(Object.hasOwn(raw,'incidentViewDay')){
+  const n=raw.incidentViewDay;
+  if(!Number.isSafeInteger(n)||!recoveryConfirmation||!eventSeed
+   ||raw.phase!=='recover')return null;
+  const events=i2OperationalEventsForSeed(eventSeed);
+  const firstDay=events[0].startDay;
+  if(incidentStep===1){
+   if(events.length!==2||n<=firstDay||n>=events[1].startDay)
+    return null;
+  }else if(incidentStep===2){
+   if(events.length!==2||n<=events[1].startDay||n>12)return null;
+  }else if(events.length!==1||n<=firstDay||n>12)return null;
+  incidentViewDay=n;
+ }
  // Commit order is exactly the sequence of the eight operational areas.
  // Returning to a past step or intro is allowed, but never changing the plan
  // after the reveal or skipping a planning area.
@@ -165,6 +182,7 @@ export function normalizeI2GameState(raw){
   ...(eventSeed===null?{}:{eventSeed}),
   ...(recoveryConfirmation===null?{}:{recoveryConfirmation}),
   ...(incidentStep===null?{}:{incidentStep}),
+  ...(incidentViewDay===null?{}:{incidentViewDay}),
   ...(incidentFirstActions===null?{}:{
    incidentFirstActions,incidentSecondDecision
   })
