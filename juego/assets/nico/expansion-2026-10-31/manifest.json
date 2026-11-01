@@ -1,0 +1,254 @@
+{
+  "name": "Misión CD — Nico expansiones visuales",
+  "version": "1.0",
+  "created": "2026-10-31",
+  "count": 24,
+  "source": "new generated character art, curated crops, 2026-10-31",
+  "limitations": [
+    "PNG are individually cropped illustrated cards, not silhouette-cut transparent sprites; transparent outside card bounds only",
+    "no art should reveal demand information before reveal",
+    "game integration should map images to actual state and keep text accessible"
+  ],
+  "assets": [
+    {
+      "id": "13_pista_contextual",
+      "title": "Pista contextual",
+      "path": "escenas/13_pista_contextual.png",
+      "sha256": "f2f6f000b18b3bfe4a7f0c116b75b9768d35c23d8d2c5e667a6093007e8c8169",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "escenas"
+    },
+    {
+      "id": "14_presentar_informacion",
+      "title": "Presentar datos",
+      "path": "escenas/14_presentar_informacion.png",
+      "sha256": "417d0efd6ff7ba7be3d77ad2dfe7c679c7cc33e7911327f687c10b7d41b29449",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "escenas"
+    },
+    {
+      "id": "15_revelacion_demanda",
+      "title": "Revelación demanda",
+      "path": "escenas/15_revelacion_demanda.png",
+      "sha256": "457c48ece8dedcd2f24f6c9c7ab04d2c93d5cf27b3777f4592565808a6a41bc5",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "escenas"
+    },
+    {
+      "id": "16_evento_inesperado",
+      "title": "Evento inesperado",
+      "path": "escenas/16_evento_inesperado.png",
+      "sha256": "8f68950f04817f2e07a5125bcedb6b15649cf21e84c882992524a9d73ee8b64b",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "escenas"
+    },
+    {
+      "id": "17_explicar_impacto",
+      "title": "Explicar impacto",
+      "path": "escenas/17_explicar_impacto.png",
+      "sha256": "b46d593a4f8010ffc0ca5838730fb6a2c091616cbeb73cf4265da7f07579ad5b",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "escenas"
+    },
+    {
+      "id": "18_siguiente_desafio",
+      "title": "Siguiente desafío",
+      "path": "escenas/18_siguiente_desafio.png",
+      "sha256": "0cd2ac28a9c0c0b665042bb2d76a9b1e99516127ba632cda4f1edbba9f2a2491",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "escenas"
+    },
+    {
+      "id": "19_planificacion",
+      "title": "Planificación",
+      "path": "gestion/19_planificacion.png",
+      "sha256": "888f35332952920665695eb2d7c9a12139dd92931dd2fb78416c3aae235d3382",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestion"
+    },
+    {
+      "id": "20_asignar_recursos",
+      "title": "Asignar recursos",
+      "path": "gestion/20_asignar_recursos.png",
+      "sha256": "0903877d7f8f00165d5cd29c9d15342513c1127d6a36748519e814b373c718f4",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestion"
+    },
+    {
+      "id": "21_optimizar",
+      "title": "Optimización",
+      "path": "gestion/21_optimizar.png",
+      "sha256": "aec84a70adced57d92682f7f86b7fc7208a8db2e58d299c38632fdf3469982fa",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestion"
+    },
+    {
+      "id": "22_control_costos",
+      "title": "Control de costos",
+      "path": "gestion/22_control_costos.png",
+      "sha256": "fd38c5ec343360fef133bab861bca94f3e485535facd94a06599a73011bc072a",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestion"
+    },
+    {
+      "id": "23_productividad",
+      "title": "Productividad",
+      "path": "gestion/23_productividad.png",
+      "sha256": "046e7472014c591fdafbc895afdfcc742e72a4381ed44d4c1f6a8975b3965a1b",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestion"
+    },
+    {
+      "id": "24_equilibrar_decisiones",
+      "title": "Equilibrar decisiones",
+      "path": "gestion/24_equilibrar_decisiones.png",
+      "sha256": "78decb5671b8ba5030160723ec5cdcde7fc43208c5c48aec2e6e6b86db81fa8c",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestion"
+    },
+    {
+      "id": "25_exito",
+      "title": "Éxito",
+      "path": "resultados/25_exito.png",
+      "sha256": "4b822c2411c30caac4bf85f3b15fd83f500142577688e6ed7119c6926ad30939",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "resultados"
+    },
+    {
+      "id": "26_resultado_parcial",
+      "title": "Resultado parcial",
+      "path": "resultados/26_resultado_parcial.png",
+      "sha256": "5247741dcfdf0a38dd45c3830f4ad9ee744dd2df2ca68dcaa63fac1b2645cf19",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "resultados"
+    },
+    {
+      "id": "27_atencion",
+      "title": "Atención",
+      "path": "resultados/27_atencion.png",
+      "sha256": "ecefe05f809a62af90724b16cd92894b64c8132b98c9bd0e92d39d1be088746c",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "resultados"
+    },
+    {
+      "id": "28_mejorar",
+      "title": "Oportunidad de mejora",
+      "path": "resultados/28_mejorar.png",
+      "sha256": "0e92c228ee3145d9a5477fa2ab073931223922228a73b804aee5b3100b8dbd69",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "resultados"
+    },
+    {
+      "id": "29_idea",
+      "title": "Idea",
+      "path": "gestos/29_idea.png",
+      "sha256": "9e373649a78d8ba3bc8e90d103cbbce3988e1fb34e6e91e5c1d7d035938b1849",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    },
+    {
+      "id": "30_riesgo",
+      "title": "Riesgo",
+      "path": "gestos/30_riesgo.png",
+      "sha256": "6d000ebfbaf1a3405edf9983e417f736f3ec24528af3f96bbfeef805fef7ee77",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    },
+    {
+      "id": "31_revision_datos",
+      "title": "Revisando datos",
+      "path": "gestos/31_revision_datos.png",
+      "sha256": "e46319ec1b43d5f060cc8c6c763f3e988fe64dcd2b8752cdc4cf247fb8b14e62",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    },
+    {
+      "id": "32_preocupacion",
+      "title": "Preocupación",
+      "path": "gestos/32_preocupacion.png",
+      "sha256": "d3ab40ed8967c0194449c3a5ba021d521ea5b4673b195b6d06c5364eb86960af",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    },
+    {
+      "id": "33_crisis",
+      "title": "Crisis",
+      "path": "gestos/33_crisis.png",
+      "sha256": "55df786d44296f6ea3bb30499154a82dcc9b58edaf87af242b7f6db55a832dbe",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    },
+    {
+      "id": "34_sorpresa",
+      "title": "Sorpresa",
+      "path": "gestos/34_sorpresa.png",
+      "sha256": "0fc8df7787d47d40a3f72ba922133e1cdd9e962d6556717e5a5fecb1ad183a3f",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    },
+    {
+      "id": "35_motivacion",
+      "title": "Motivación",
+      "path": "gestos/35_motivacion.png",
+      "sha256": "14e9aa5cb18144a56b1ebe481a0aa55834744982c41da768f4920044391ad0e4",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    },
+    {
+      "id": "36_cierre_reflexivo",
+      "title": "Cierre reflexivo",
+      "path": "gestos/36_cierre_reflexivo.png",
+      "sha256": "06a44119c57a6034b31ae60163f3b8a136c6e678380f1c04a72a5fc7485f221c",
+      "width": 320,
+      "height": 320,
+      "transparent_character_background": false,
+      "role": "gestos"
+    }
+  ]
+}
