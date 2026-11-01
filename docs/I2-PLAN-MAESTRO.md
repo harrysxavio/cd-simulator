@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **I2-35.5c3c · apoyo alternativo fechado en Calidad (candidato 01-11-2026):** se añade intervención gerencial específica con límite **80 SKU** y costo **$70.000** por turno del **día 5**, activable tras observar segundo incidente día 4. La línea principal de Calidad sigue detenida: la capacidad alternativa FIFO sí afecta inventario/pedidos del motor y se cobra completa aunque quede ociosa. Compras y respuesta del primer incidente permanecen inmutables. Se persiste solamente el comando validado, y el diario día 5 y cierre exhiben gasto/unidades. [Contrato y pruebas](I2-35-5-C3C-CALIDAD-ALTERNATIVA.md). **I2-35 sigue abierta**: falta recurso propio de muelle, cinco escenarios pedagógicamente distintos, UX de gerencia/QA, validación humana; **35/41** padres completados, seis restantes I2-35–I2-40. No declarar publicación hasta CI/PR/Pages HTTP.
+
+
 
 > **I2-36 · auditoría visual publicada (01-11-2026):** [PR #141](https://github.com/harrysxavio/cd-simulator/pull/141) integrado `81fd6a6`; Node/focused/Chromium verdes, Pages/HTTP específicos del CSS confirmados. Se corrigieron paneles blancos, bordes de tema claro y énfasis azul en vistas nuevas de incidentes, calendario diario, confirmación y resultados. Se reutilizan los tokens propios de Misión CD y se verifican contraste WCAG, CSS computado 360/412 px, foco y modo forzado. [Detalle](I2-36-AUDITORIA-TEMA-OSCURO.md). **No cierra I2-36**: faltan UX/QA humano y Android físico. Quedan I2-35 a I2-40 (35/41). Próximo avance prioritario: palancas de capacidad propias de Recepción y Calidad con fechas y costos verificables y al menos cinco misiones física/gerencialmente distintas.
 
