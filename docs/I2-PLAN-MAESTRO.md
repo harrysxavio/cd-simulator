@@ -70,6 +70,22 @@ QA móvil humano, conciliación y publicación estable.
 Ninguna hija incrementa 35/41 ni cierra F7 hasta terminar la
 experiencia/aceptación del padre I2-35.
 
+## Lab11 · I2-35.5c3a: segundo incidente con segunda decisión (candidato)
+
+El caso combinado tiene **dos puntos separados de intervención**:
+Recepción (día 2), Calidad (día 4). El escenario físico intermedio
+del día 4 considera la primera orden ya comprometida. La segunda decisión
+no puede reescribir el pasado ni emitir dos veces la misma compra global
+o trasladar dos veces la reserva. Se guardan comandos mínimos en estado
+I2 y se conserva el motor SKU canónico y la V1.
+
+**Estado:** trabajo en rama hasta aprobar CI/PR/Pages.
+[Contrato + criterios de aceptación](I2-35-5-C3A-SEGUNDO-INCIDENTE.md).
+**I2-35.5c3b pendiente:** observar jornadas entre eventos y activar
+acciones reales en Recepción/Calidad con vigencia y tarifas; no simular
+reducciones de backlog inventadas. **I2-35.5d / F8:** variedad
+discriminante de retos, pruebas, QA Android/TalkBack y lanzamiento.
+
 ## A. Contrato de avance
 
 Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico, prueba automatizada, revisión de regresión V1, merge a main, chequeos post-merge y, si afecta publicación, Pages + HTTP servido real. Registrar SHA, links y limitaciones en **docs/I2-STATUS.md** antes de declararla completa.
