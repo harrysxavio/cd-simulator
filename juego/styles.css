@@ -1329,3 +1329,19 @@ html,body{height:100%;overflow:hidden}
 @media(max-width:360px){
  .i2-operational-drill-card,.i2-incident-outcome{padding:.75rem}
 }
+
+
+/* I2-35.5c2 · Decisión gerencial con fecha, sin revelar el resultado futuro.
+   Botones accesibles, dimensión móvil estable y selección por acción explícita. */
+.i2-incident-checkpoint{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.i2-incident-choices{display:grid;gap:.65rem;min-width:0}
+.i2-incident-choices>strong{font-size:1rem}
+.i2-incident-choice{display:grid;gap:.25rem;padding:.7rem;border:1px solid var(--line,#e2e8f0);border-radius:.85rem;min-width:0}
+.i2-incident-choice button{min-height:48px;width:100%;white-space:normal;overflow-wrap:anywhere;text-align:left}
+.i2-incident-choice p{margin:0;overflow-wrap:anywhere}
+.i2-incident-confirmed{display:grid;gap:.6rem;border:1px solid var(--line,#e2e8f0);padding:.8rem;border-radius:.85rem}
+.i2-incident-confirmed button{min-height:44px}
+@media(max-width:359px){
+ .i2-incident-checkpoint{grid-template-columns:minmax(0,1fr)}
+ .i2-incident-choice{padding:.55rem}
+}
