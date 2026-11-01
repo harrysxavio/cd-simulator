@@ -38,7 +38,7 @@ export function i2EconomicEvidence({campaign,comparison,baselineKey}={}){
   ||t.potentialDispatchValueCLP!==e.totals.potentialDispatchValueCLP
   ||t.dispatchedMaterialsCLP!==e.totals.dispatchedMaterialCostCLP
   ||t.deployedReinforcementCLP!==op.totals.totalCostCLP+
-    (comparison.qualityBridgeCostCLP??0)
+    (comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0)
   ||t.deployedReinforcementCLP!==comparison.extraLabor+
     (comparison.qualityBridgeCostCLP??0)
   ||t.partialContributionCLP!==t.potentialDispatchValueCLP-
@@ -99,6 +99,7 @@ export function i2EconomicEvidence({campaign,comparison,baselineKey}={}){
   shippedMaterialStandardCostCLP:t.dispatchedMaterialsCLP,
   activatedExtraShiftsCLP:t.deployedReinforcementCLP,
   modeledQualityBridgeShiftCLP:comparison.qualityBridgeCostCLP??0,
+  modeledReceivingShiftCLP:comparison.receivingShiftCostCLP??0,
   partialContributionCLP:t.partialContributionCLP,
   openingStockValueCLP:iv.openingCLP,receivedStockValueCLP:t.receivedIntoInventoryCLP,
   closingStockValueCLP:t.closingPhysicalStockCLP,
