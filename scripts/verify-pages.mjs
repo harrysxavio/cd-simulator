@@ -43,6 +43,8 @@ async function verify(attempt){
   req('juego/nico.svg',attempt),
   req('src/i2-incident-response.js',attempt)
  ]);
+ const dailyJs=await req('src/i2-daily-operations.js',attempt);
+ if(!dailyJs.includes('function i2DailyOperationsSnapshot'))throw new Error('Published daily operational read model absent');
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
  if(manifest.version!==release.version||manifest.assetRevision!==release.assetRevision)throw new Error('Published release manifest differs from repository HEAD');
@@ -62,6 +64,10 @@ async function verify(attempt){
   ||!incidentModuleJs.includes('i2IncidentDecisionCheckpoint')
   ||!gameJs.includes('function incidentSecondResponseScene')
   ||!incidentModuleJs.includes('i2ConfirmNextIncidentResponse')
+  ||!gameJs.includes('function incidentDailyScene')
+  ||!gameJs.includes('i2DailyOperationsSnapshot')
+  ||!gameCss.includes('.i2-daily-metrics')
+  ||!stateJs.includes('incidentViewDay')
   ||!stateJs.includes('incidentFirstActions')
   ||!gameCss.includes('.i2-two-decision-summary')
   ||!stateJs.includes('eventSeed'))
