@@ -5,7 +5,7 @@ const BASE=process.env.E2E_BASE_URL||'http://127.0.0.1:8000';
 const KEY='supply-lab-i2-v1';
 
 /** Verifica modo opt-in, secreto antes del reveal y su efecto físico visible. */
-test('I2-35.5c: optional surprise persists and is revealed only after planning',
+test('I2-35.5c/c2: optional surprise persists, observed before choice, results only after',
  {timeout:120000},async()=>{
  const browser=await chromium.launch({headless:true,
   executablePath:process.env.E2E_CHROMIUM_PATH||undefined});
@@ -28,13 +28,16 @@ test('I2-35.5c: optional surprise persists and is revealed only after planning',
   for(let i=0;i<8;i++)await page.locator('#gameNext').click();
   assert.equal(await page.locator('.i2-incident-outcome').count(),0);
   await page.locator('#gameNext').click();
+  // El primer incidente es observable al decidir, pero el cierre aún no.
+  assert.equal(await page.locator('.i2-incident-checkpoint').count(),1);
+  assert.equal(await page.locator('.i2-incident-outcome').count(),0);
+  await page.getByRole('button',{name:'No intervenir',exact:true}).click();
   const panel=page.locator('.i2-incident-outcome');
   assert.equal(await panel.count(),1);
   assert.match(await panel.innerText(),/Novedad operacional/);
   assert.match(await panel.innerText(),/Día [24] · (Recepción|Calidad)/);
   assert.match(await panel.innerText(),/Plan sin estos incidentes/);
-  assert.match(await panel.innerText(),/laboratorio retrospectivo|comparaciones retrospectivas/i);
-  await page.locator('#gameNext').click();
+  assert.match(await panel.innerText(),/comparación retrospectiva|laboratorio clásico separado/i);
   assert.equal(await page.locator('.i2-six-answer').count(),6);
   await page.reload({waitUntil:'networkidle'});
   const after=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);

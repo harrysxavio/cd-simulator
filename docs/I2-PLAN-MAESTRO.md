@@ -43,6 +43,29 @@ presentar este piloto como cumplimiento del ciclo de gestión diario.
 [Contrato y pruebas](I2-35-5-C-MISION-INCIDENTES.md). La fase madre
 no avanza hasta completar las hijas/QA.
 
+## Lab11 · I2-35.5c2 (31-10-2026)
+
+El PR #136 (piloto de evento independiente con primera evidencia visible)
+se fusionó en `main` tras Node, Chromium y focused I2 verdes.
+
+**35.5c2 · Primer punto operativo: desarrollo en rama:** el jugador
+observa el primer incidente de muelle o Calidad sin conocer incidentes
+posteriores ni resultado final. Puede confirmar una respuesta
+operacional fechada desde el día siguiente (sin intervenir, comprar
+urgente a 1 o 3 días, mover reserva existente y combinar), o no gastar.
+Usa `i2CompareMultiRecovery`, el motor SKU y una sola semilla física
+para todas las estrategias, no hay segundo motor. [Contrato y criterios
+de aceptación](I2-35-5-C2-RESPUESTA-OPERATIVA.md).
+
+**35.5c3 (siguiente):** reloj jornada-a-jornada, múltiples observaciones
+y decisiones posteriores; bloqueo de intervenciones retroactivas para
+refuerzos de capacidad con inicio fechado y costos verificables.
+**35.5d:** misiones físicamente diferentes, pruebas discriminantes,
+QA móvil humano, conciliación y publicación estable.
+
+Ninguna hija incrementa 35/41 ni cierra F7 hasta terminar la
+experiencia/aceptación del padre I2-35.
+
 ## A. Contrato de avance
 
 Cada microfase se desarrolla en **rama + PR pequeños** con criterio específico, prueba automatizada, revisión de regresión V1, merge a main, chequeos post-merge y, si afecta publicación, Pages + HTTP servido real. Registrar SHA, links y limitaciones en **docs/I2-STATUS.md** antes de declararla completa.

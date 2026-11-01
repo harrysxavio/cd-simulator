@@ -24,7 +24,7 @@ async function verify(attempt){
  if(!html.includes('id="gameEntry" href="./juego/"'))errors.push('HTML missing real game route link');
  if(!html.includes('Jugar Misión CD'))errors.push('HTML missing playable alpha entry label');
  if(errors.length)throw new Error(errors.join('; '));
- const [remoteManifest,app,check,gameHtml,gameCss,gameJs,mvpJs,sharedJs,stateJs,boundaryJs,progressJs,helpJs,guideJs,briefJs,nicoTutorialJs,nicoSprite]=await Promise.all([
+ const [remoteManifest,app,check,gameHtml,gameCss,gameJs,mvpJs,sharedJs,stateJs,boundaryJs,progressJs,helpJs,guideJs,briefJs,nicoTutorialJs,nicoSprite,incidentModuleJs]=await Promise.all([
   req('release.json',attempt),
   req('src/app.js?v='+release.assetRevision,attempt),
   req('src/release-status.js?v='+release.assetRevision,attempt),
@@ -40,7 +40,8 @@ async function verify(attempt){
   req('src/i2-game-guide.js',attempt),
   req('src/i2-first-mission-briefing.js',attempt),
   req('src/i2-nico-tutorial.js',attempt),
-  req('juego/nico.svg',attempt)
+  req('juego/nico.svg',attempt),
+  req('src/i2-incident-response.js',attempt)
  ]);
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
@@ -53,6 +54,14 @@ async function verify(attempt){
   ||!gameHtml.includes('id="gameScene"')||!gameHtml.includes('src="./app.js"'))
   throw new Error('Published game route is stale or malformed');
  if(!gameCss.includes('--primary:#f97316'))throw new Error('Published game stylesheet is missing');
+ // I2-35.5c2: enforce that the visible incident decision is live, not merely
+ // merged on GitHub. An older cached game cannot pass the current release.
+ if(!gameJs.includes('function incidentResponseScene')
+  ||!gameJs.includes('function operationalIncidentCard')
+  ||!gameCss.includes('.i2-incident-choice')
+  ||!incidentModuleJs.includes('i2IncidentDecisionCheckpoint')
+  ||!stateJs.includes('eventSeed'))
+  throw new Error('Published operational incident decision is missing or stale');
  if(!gameHtml.includes('id="gameChapter"')||!gameHtml.includes('id="gameMapOpen"')
   ||!gameHtml.includes('role="progressbar"'))throw new Error('Published I2-11 roadmap or progressbar missing');
  // Verify the module dependency chain that is actually served after I2-04/05/06.
