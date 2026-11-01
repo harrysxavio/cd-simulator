@@ -52,4 +52,4 @@ El modo `--publish` crea commit y hace push a la rama activa, **sin modificar ju
 
 **Lo que NO se ha hecho:** los 24 PNG de la expansión no están publicados en el repositorio, la bandera permanece apagada, no hay evidencia de QA Android/TalkBack humana ni despliegue Pages de las nuevas poses.
 
-**Próximo paso después de instalar los binarios:** verificar los 24 SHA-256 y URLs HTTP 200 en GitHub Pages; sustituir únicamente la bandera de disponibilidad, completar E2E móvil y actualizar manifest. No modificar el motor físico, historial V1, semillas ni estado de campaña por efectos visuales.
+**Próximo paso de publicación:** después de fusionar este PR, ejecutar `python tools/import-nico-expansion.py RUTA_ZIP --publish` sobre la rama activa. El importador verifica los 24 SHA-256, copia los PNG y el manifiesto y activa `I2_NICO_EXPANSION_READY=true` en un único commit. Luego verificar que GitHub Pages sirva las 24 rutas HTTP 200 y completar E2E móvil/TalkBack. El importador no modifica el motor físico, las semillas ni el estado de campaña.
