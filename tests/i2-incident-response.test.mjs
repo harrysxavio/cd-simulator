@@ -80,6 +80,13 @@ test('I2-35.5c2: una orden fechada preserva PO, incidente, física y un único b
     result.scorecard.actualOrders.value);
    assert.equal(result.reading.originalPurchaseCommitmentCLP,
     pre.baselineComparison.committedPurchaseValue);
+   // A purchase or reserve move issued after the incident MUST NOT
+   // change any earlier day in the canonical physical journal.
+   const scenario=i2CompareMultiRecovery({state:s,plans:[action]});
+   const ledger=scenario.results[0].comparison.recovered.ledger;
+   for(let day=0;day<=checkpoint.decisionDay;day++)
+    assert.deepEqual(ledger[day],pre.baseline.integrated.actual.ledger[day],
+     'retroactive physical mutation on day '+day+' for '+kind);
   }
  }
 });
