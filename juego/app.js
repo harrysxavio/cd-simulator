@@ -470,11 +470,11 @@ function operationalIncidentCard(){
    else{
     // Random assignment is independent of demand seed, choices or score.
     // Persist immediately so reloading never redraws a different incident.
+    if(i2IsQualityGuided(state))state=i2LeaveQualityGuided(state);
     const sample=new Uint32Array(1);
     window.crypto.getRandomValues(sample);
     state.eventSeed=I2_OPERATIONAL_EVENT_SEEDS[sample[0]%I2_OPERATIONAL_EVENT_SEEDS.length];
     if(i2IsPickingPilot(state))state=i2LeavePickingPilot(state);
-    if(i2IsQualityGuided(state))state=i2LeaveQualityGuided(state);
    }
    persist();render();
   }catch(e){showError(e)}
