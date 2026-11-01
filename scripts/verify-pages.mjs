@@ -63,8 +63,10 @@ async function verify(attempt){
   ||!operationsCss.includes('background:var(--panel);color:var(--text)')
   ||!operationsCss.includes('.i2-operational-drill-button')
   ||!operationsCss.includes('border-inline-start:4px solid var(--primary)')
-  ||/var\\(--(?:surface|line|muted-surface)\\b/.test(operationsCss)
-  ||/#2563eb\\b/i.test(operationsCss))
+  ||operationsCss.includes('var(--surface')
+  ||operationsCss.includes('var(--line')
+  ||operationsCss.includes('var(--muted-surface')
+  ||operationsCss.includes('#2563eb'))
   throw new Error('Published game incident panels are missing the dark-orange theme fix');
  // I2-35.5c2: enforce that the visible incident decision is live, not merely
  // merged on GitHub. An older cached game cannot pass the current release.
