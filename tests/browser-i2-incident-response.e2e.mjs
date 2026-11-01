@@ -39,9 +39,24 @@ for(const response of ['No intervenir','Compra urgente']){
    }else{
     await page.getByRole('button',{name:/Compra urgente · llega día 3/}).click();
    }
+   // Segunda observación, ya impactada por la primera orden.
+   await page.getByRole('heading',{name:/Día 4 · Nuevo problema/}).waitFor();
+   const second=await page.locator('#gameScene').innerText();
+   assert.match(second,/Calidad suspendió liberaciones/);
+   assert.doesNotMatch(second,/Las consecuencias de tu combinación|CIERRE DÍA 12/);
+   const mid=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),KEY);
+   assert.equal(mid.phase,'recover');
+   assert.equal(mid.incidentStep,1);
+   // Con una compra ya emitida la siguiente opción no puede emitirla otra vez.
+   if(response==='Compra urgente'){
+    assert.equal(await page.getByRole('button',{name:/Nueva compra urgente/}).count(),0);
+   }
+   await page.getByRole('button',{name:/Mantener decisiones · sin nuevo gasto/}).click();
    await page.locator('.i2-six-question-summary').waitFor();
    const persisted=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
    assert.equal(persisted.phase,'result');
+   assert.equal(persisted.incidentStep,2);
+   assert.equal(persisted.incidentSecondDecision,'hold');
    assert.equal(persisted.eventSeed,'ops-combined-01');
    assert.equal(persisted.recoveryConfirmation.actions.capacityBoost.enabled,false);
    if(response==='Compra urgente'){

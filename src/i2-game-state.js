@@ -4,7 +4,7 @@ import {I2_MVP_CASE} from './i2-mvp-adapter.js';
 import {I2_DEFAULT_SEED,i2ChallengeForSeed} from './i2-challenge-config.js';
 import {I2_DEFAULT_ADVANCED,i2ValidateAdvanced} from './i2-advanced-settings.js';
 import {i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
-import {I2_OPERATIONAL_EVENT_SEEDS} from './operational-event-schedule.js';
+import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventsForSeed} from './operational-event-schedule.js';
 
 /** I2-05: only educational choices and navigation are saved.
  * Never persist a physical SKU ledger, a recovery preview or V1's session. */
@@ -101,6 +101,49 @@ export function normalizeI2GameState(raw){
    observedOrders:c.observedOrders,baselineKey:c.baselineKey,actions
   };
  }
+ // A second dated response is additive to the frozen first command.
+ // It cannot activate earlier-day actions or rewrite the first PO manifest.
+ let incidentStep=null,incidentFirstActions=null,incidentSecondDecision=null;
+ if(Object.hasOwn(raw,'incidentStep')){
+  if(![1,2].includes(raw.incidentStep)||!Number.isSafeInteger(raw.incidentStep)
+   ||!recoveryConfirmation||!raw.eventSeed
+   ||i2OperationalEventsForSeed(raw.eventSeed).length!==2)return null;
+  incidentStep=raw.incidentStep;
+  // No admitir un cierre forzado después de observar el segundo incidente.
+  if(incidentStep===1&&raw.phase==='result')return null;
+  if(incidentStep===2){
+   const allowed=['hold','urgent-next','reserve-next','urgent-and-reserve'];
+   if(!allowed.includes(raw.incidentSecondDecision)||!raw.incidentFirstActions)
+    return null;
+   try{
+    incidentFirstActions=i2NormalizeMultiRecovery(raw.incidentFirstActions);
+    if(JSON.stringify(incidentFirstActions)!==JSON.stringify(raw.incidentFirstActions))
+     return null;
+   }catch{return null}
+   incidentSecondDecision=raw.incidentSecondDecision;
+   const first=incidentFirstActions,last=recoveryConfirmation.actions;
+   const secondDay=i2OperationalEventsForSeed(raw.eventSeed)[1].startDay;
+   const buy=['urgent-next','urgent-and-reserve'].includes(incidentSecondDecision);
+   const reserve=['reserve-next','urgent-and-reserve'].includes(incidentSecondDecision);
+   if(first.capacityBoost.enabled||last.capacityBoost.enabled
+    ||(first.urgentPurchase.enabled&&(
+      !last.urgentPurchase.enabled||
+      first.urgentPurchase.arrivalDay!==last.urgentPurchase.arrivalDay||
+      first.urgentPurchase.coveragePercent!==last.urgentPurchase.coveragePercent))
+    ||(first.reserveTransfer.enabled&&(
+      !last.reserveTransfer.enabled||
+      first.reserveTransfer.releaseDay!==last.reserveTransfer.releaseDay))
+    ||(buy&&(first.urgentPurchase.enabled||!last.urgentPurchase.enabled
+      ||last.urgentPurchase.arrivalDay!==secondDay+1))
+    ||(!buy&&first.urgentPurchase.enabled!==last.urgentPurchase.enabled)
+    ||(reserve&&(first.reserveTransfer.enabled||!last.reserveTransfer.enabled
+      ||last.reserveTransfer.releaseDay!==secondDay+1))
+    ||(!reserve&&first.reserveTransfer.enabled!==last.reserveTransfer.enabled))
+    return null;
+  }else if(Object.hasOwn(raw,'incidentFirstActions')
+     ||Object.hasOwn(raw,'incidentSecondDecision'))return null;
+ }else if(Object.hasOwn(raw,'incidentFirstActions')
+   ||Object.hasOwn(raw,'incidentSecondDecision'))return null;
  // Commit order is exactly the sequence of the eight operational areas.
  // Returning to a past step or intro is allowed, but never changing the plan
  // after the reveal or skipping a planning area.
@@ -120,7 +163,11 @@ export function normalizeI2GameState(raw){
   advanced,
   confirmedAreas:[...confirmed],reveal:raw.reveal,
   ...(eventSeed===null?{}:{eventSeed}),
-  ...(recoveryConfirmation===null?{}:{recoveryConfirmation})
+  ...(recoveryConfirmation===null?{}:{recoveryConfirmation}),
+  ...(incidentStep===null?{}:{incidentStep}),
+  ...(incidentFirstActions===null?{}:{
+   incidentFirstActions,incidentSecondDecision
+  })
  };
 }
 export function saveI2GameState(storage,state){
