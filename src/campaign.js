@@ -210,7 +210,7 @@ export function campaignSnapshot({comparison,campaignId='DEMO-SKU',plannedOrders
    &&economicAudit.totals.completeShipments===shipments.length
    &&economicAudit.totals.dispatchedMaterialsCLP===inventoryValuation.totals.shippedToDateCLP
    &&economicAudit.totals.deployedReinforcementCLP===
-    operationalCost.totals.totalCostCLP+(comparison.qualityBridgeCostCLP??0)
+    operationalCost.totals.totalCostCLP+(comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0)
    &&economicAudit.totals.partialContributionCLP===economicResult.totals.partialContributionCLP,
   economicResult:economicResult.passed
    &&economicResult.scope==='sku-cohort'
