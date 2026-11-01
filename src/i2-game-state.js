@@ -17,12 +17,16 @@ const PHASES=Object.freeze(['intro','area','reveal','recover','review','result']
 const ARRIVALS=Object.freeze([1,2,5,10,13]);
 const COVERAGES=Object.freeze([0,25,50,75,100]);
 
-export function newI2GameState({seed=SEED,advanced=I2_DEFAULT_ADVANCED,eventSeed=null}={}){
+export function newI2GameState({seed=SEED,advanced=I2_DEFAULT_ADVANCED,
+ eventSeed=null,guidedScenario=null}={}){
  // No se acepta una semilla libre ni un resultado dictado por el jugador.
  i2ChallengeForSeed(seed);
  const config=i2ValidateAdvanced(advanced);
  if(eventSeed!==null&&!I2_OPERATIONAL_EVENT_SEEDS.includes(eventSeed))
   throw new Error('I2-35.5c: evento de misión desconocido');
+ if(guidedScenario!==null&&
+   (guidedScenario!=='quality-low-stock'||eventSeed!==null))
+  throw new Error('I2-35.2: misión guiada inválida');
  return {
   schema:I2_GAME_SCHEMA,campaignId:I2_MVP_CASE.campaignId,seed,
   phase:'intro',substep:'briefing',index:0,
@@ -30,7 +34,8 @@ export function newI2GameState({seed=SEED,advanced=I2_DEFAULT_ADVANCED,eventSeed
   recovery:'wait',arrivalDay:2,coverage:100,advanced:config,
   confirmedAreas:[],reveal:false,
   // Absent for legacy games: opt-in and never a silent migration to an incident.
-  ...(eventSeed===null?{}:{eventSeed})
+  ...(eventSeed===null?{}:{eventSeed}),
+  ...(guidedScenario===null?{}:{guidedScenario})
  };
 }
 function stepFor(phase){
