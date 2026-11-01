@@ -45,9 +45,9 @@ El modo `--publish` crea commit y hace push a la rama activa, **sin modificar ju
 
 **Implementado en código, no fusionado ni publicado aún:**
 
-- `src/i2-nico-expansion.js`: catálogo puro de 24 rutas nuevas y selector de 21 momentos, con `I2_NICO_EXPANSION_READY=false` hasta que estén los binarios y se confirme HTTP 200. Usa una expresión antigua **ya existente** como fallback sin pedir recursos 404.
+- `src/i2-nico-expansion.js`: catálogo puro de 24 rutas nuevas y selector de 29 momentos (siete tutoriales, ocho áreas, eventos y resultados), con `I2_NICO_EXPANSION_READY=false` hasta que estén los binarios y se confirme HTTP 200. Usa una expresión antigua **ya existente** como fallback sin pedir recursos 404.
 - `juego/nico-journey-dialog.js`: los siete pasos del tutorial ahora admiten ilustraciones distintas, preservando cerrar, saltar y foco de retorno.
-- `juego/app.js`: Nico reacciona diferente antes y después de revelar demanda, ante interrupciones y sus decisiones, en recuperación, y en el cierre según evaluación. Las decisiones e indicadores siguen naciendo del motor canónico.
+- `juego/app.js`: Nico también presenta gestos distintos en las ocho áreas y reacciona antes y después de revelar demanda, ante interrupciones y sus decisiones, en recuperación, y en el cierre según evaluación. Las decisiones e indicadores siguen naciendo del motor canónico.
 - Pruebas nuevas: `tests/i2-nico-expansion.test.mjs` y `tests/browser-i2-nico-expansion.e2e.mjs` (24 rutas y 7 pasos visuales, sin spoilers ni 404). Deben estar verdes en CI antes de declarar cierre técnico.
 
 **Lo que NO se ha hecho:** los 24 PNG de la expansión no están publicados en el repositorio, la bandera permanece apagada, no hay evidencia de QA Android/TalkBack humana ni despliegue Pages de las nuevas poses.
