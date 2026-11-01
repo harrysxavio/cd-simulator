@@ -44,7 +44,9 @@ test('Nico: tutorial rota gestos sin revelar la demanda ni pedir PNG aún no pub
    'Si los PNG están verificados, el tutorial debe servirlos');
   else assert.deepEqual(requestedExpansion,[],'Nunca pedir PNG no publicados');
   await page.locator('.nico-journey-next').click();
-  assert.equal(await page.locator('.nico-journey-dialog').count(),0);
+  // HTMLDialogElement.close() dispatches its close event asynchronously.
+  // Wait for the UI to detach instead of asserting within the same tick.
+  await page.locator('.nico-journey-dialog').waitFor({state:'detached'});
   assert.equal(await page.evaluate(()=>localStorage.getItem('supply-lab-i2-v1')),
    original,'Solo cambiar imágenes no modifica decisiones ni semillas');
   assert.deepEqual(errors,[]);
