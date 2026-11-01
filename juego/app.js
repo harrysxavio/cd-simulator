@@ -13,6 +13,7 @@ import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
 import {i2DailyOperationsSnapshot} from '../src/i2-daily-operations.js';
 import {I2_QUALITY_BRIDGE} from '../src/i2-quality-bridge.js';
+import {I2_RECEIVING_SHIFT} from '../src/i2-receiving-shift.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
  i2OperationalEventsForSeed} from '../src/operational-event-schedule.js';
 import {i2ProgressView} from '../src/i2-game-progress.js';
@@ -1110,12 +1111,21 @@ function incidentDailyScene(){
     ['En cola de Recepción',model.waitingDockSkuUnits+' SKU'],
     ['Retenidos en Calidad',model.waitingQualitySkuUnits+' SKU'],
     ['Recibidos hoy',model.receivedSkuUnits+' SKU'],
+    ...(state.receivingResponse?[['Cupos extra usados en Recepción',
+     model.receivingShiftUsedSkuUnits+' SKU']]:[]),
     ...(state.operationalResponse?[['Liberados por línea alternativa',
      model.qualityBridgeReleasedSkuUnits+' SKU']]:[])
    ].map(([label,value])=>section('metric-card',[
     node('span',{text:label}),node('strong',{text:String(value)})
    ]))
   ]),
+  ...(model.receivingShiftCostCLP?[section('i2-quality-bridge-reading',[
+   node('strong',{text:'Turno extraordinario de Recepción · jornada contratada'}),
+   p('Capacidad adicional usada: '+num.format(model.receivingShiftUsedSkuUnits)+
+    ' de '+I2_RECEIVING_SHIFT.extraCapacitySkuUnits+
+    ' SKU · costo: '+money.format(model.receivingShiftCostCLP)+'.','note'),
+   p('No reabre la interrupción anterior ni garantiza más pedidos: Calidad, Picking y Transporte pueden limitar el resultado.','footnote')
+  ])]:[]),
   ...(model.qualityBridgeCostCLP?[section('i2-quality-bridge-reading',[
    node('strong',{text:'Línea alternativa de Calidad · jornada contratada'}),
    p('Liberados: '+num.format(model.qualityBridgeReleasedSkuUnits)+
@@ -1212,7 +1222,7 @@ function incidentSecondResponseScene(){
     p(description,'footnote')
    ]))
   ]),
-  p('Si no hay compras o reservas disponibles, la opción responsable es no contratar recursos ficticios. Aún no existe una palanca de refuerzo de Recepción/Calidad con inicio y costo diarios.','footnote'),
+  p('Si no hay compras o reservas disponibles, evita contratar recursos innecesarios: la línea alternativa de Calidad tiene capacidad limitada y un costo fijo por turno.','footnote'),
   p(checkpoint.boundary,'footnote')
  ]);
  setActions({
@@ -1236,6 +1246,13 @@ function incidentResponseScene(){
  progress.style.width='92%';
  const actions=[
   ['wait','No intervenir','Observar la operación y no contratar recursos adicionales.'],
+  ...(checkpoint.incidentKind==='receiving-stop'?[[
+   'dock-shift','Contratar turno extra de Recepción · día '+I2_RECEIVING_SHIFT.day,
+   'Agregar hasta '+I2_RECEIVING_SHIFT.extraCapacitySkuUnits+
+   ' cupos SKU a la capacidad normal el día siguiente. Costo didáctico fijo de '+
+   money.format(I2_RECEIVING_SHIFT.shiftCostCLP)+
+   '. Si no hay cola adicional, se paga igual; no reabre el muelle del día 2.'
+  ]]:[]),
   ['urgent-fast','Compra urgente · llega día '+checkpoint.nextDay,
    'Compras SKU faltantes con recargo; no se salta Recepción ni Calidad.'],
   ['urgent-conservative','Compra urgente · llega día '+checkpoint.conservativeDay,
@@ -1299,7 +1316,7 @@ function incidentResponseScene(){
     })
    ])
   ]),
-  p('Las compras adicionales se modelan con tarifa didáctica y fecha; el traslado de reserva no inventa inventario. Todavía no se pueden contratar refuerzos de dotación desde una jornada, porque esa capacidad no está modelada con un inicio temporal.','footnote'),
+  p('Comprar no elimina una parada. El turno de Recepción es un supuesto didáctico: comienza el día 3, aumenta la capacidad física y se cobra aunque los cupos queden ociosos.','footnote'),
   p(checkpoint.boundary,'footnote')
  ]);
  setActions({
@@ -1470,6 +1487,9 @@ function multiResultsScene(){
    ' % del faltante, llegada día '+a.urgentPurchase.arrivalDay:null,
   a.reserveTransfer.enabled?'Traslado RESERVA-CD: día '+a.reserveTransfer.releaseDay:null,
   a.capacityBoost.enabled?'Refuerzo: +80 cupos/jornada':null,
+  state.receivingResponse?'Refuerzo Recepción día '+state.receivingResponse.day+
+   ': hasta '+state.receivingResponse.extraCapacitySkuUnits+' cupos SKU extra, '+
+   money.format(state.receivingResponse.shiftCostCLP):null,
   state.operationalResponse?'Línea alternativa de Calidad día '+
    state.operationalResponse.day+': hasta '+state.operationalResponse.capacitySkuUnits+
    ' SKU, '+money.format(state.operationalResponse.shiftCostCLP):null
@@ -1539,7 +1559,14 @@ function multiResultsScene(){
    p('Compra urgente '+money.format(row.urgentPurchaseValueCLP)+
     ' · recargo '+money.format(row.urgentSurchargeCLP)+
     ' · turnos extra '+money.format(row.extraCapacityCostCLP)+
-    ' · línea alternativa de Calidad '+money.format(row.qualityBridgeCostCLP)+'.','footnote'),
+    ' · línea alternativa de Calidad '+money.format(row.qualityBridgeCostCLP)+
+    ' · turno Recepción '+money.format(row.receivingShiftCostCLP)+'.','footnote'),
+   ...(state.receivingResponse?[
+    p('El turno adicional de Recepción procesó '+num.format(row.receivingShiftUsedSkuUnits)+
+     ' SKU por encima de la capacidad base el día '+state.receivingResponse.day+
+     '. Costo fijo de '+money.format(row.receivingShiftCostCLP)+
+     ', aunque haya cupos sin usar.','note')
+   ]:[]),
    ...(state.operationalResponse?[
     p('La línea alternativa liberó '+num.format(row.qualityBridgeReleasedSkuUnits)+
      ' SKU (máximo contratado: '+state.operationalResponse.capacitySkuUnits+

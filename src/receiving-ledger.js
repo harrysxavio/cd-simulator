@@ -6,6 +6,7 @@
  * No second event simulation, forecast or inventory calculation is allowed.
  */
 import {normalizeOperationalEvents} from './operational-event-schedule.js';
+import {i2ValidateReceivingShift} from './i2-receiving-shift.js';
 const sum=(a,f)=>a.reduce((n,x)=>n+f(x),0);
 const nonneg=n=>Number.isSafeInteger(n)&&n>=0;
 const freeze=value=>{
@@ -41,6 +42,7 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
  const daily=[];
  const cap=replay.receivingUnitCapacity;
  const calendar=normalizeOperationalEvents(replay.operationalEvents??[],replay.days);
+ const shift=i2ValidateReceivingShift(replay.receivingShift??null,calendar);
  for(let day=0;day<=replay.days;day++){
   const eventDay=replay.ledger[day];
   const closed=calendar.some(e=>e.kind==='receiving-stop'
@@ -74,7 +76,9 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
    actualByPo.set(p.id,actualByPo.get(p.id)+r.qty);
   }
   // Muelle detenido: FIFO permanece, pero la capacidad efectiva es cero.
-  let remainingCapacity=closed?0:(cap===null?Infinity:cap);
+  const shiftToday=Boolean(shift&&day===shift.day&&!closed);
+  const effectiveCapacity=closed?0:(cap===null?Infinity:cap+(shiftToday?shift.extraCapacitySkuUnits:0));
+  let remainingCapacity=effectiveCapacity;
   for(const p of orderedByArrival){
    if(p.modeledArrivalDay>day)break;
    // FIFO by modeled arrival day and stable PO insertion order.
@@ -86,8 +90,15 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
    remainingCapacity-=expected;
   }
   const receivedToday=sum(actual,r=>r.qty);
-  if(eventDay.receivingUsedSkuUnits!==receivedToday||receivedToday>(closed?0:(cap??Infinity))
-   ||sum(Object.values(eventDay.received),x=>x)!==receivedToday){
+  if(eventDay.receivingUsedSkuUnits!==receivedToday||receivedToday>effectiveCapacity
+   ||sum(Object.values(eventDay.received),x=>x)!==receivedToday
+   ||(shiftToday&&(eventDay.receivingShiftCostCLP!==shift.shiftCostCLP
+    ||eventDay.receivingShiftExtraCapacitySkuUnits!==shift.extraCapacitySkuUnits
+    ||eventDay.receivingShiftUsedSkuUnits!==Math.max(0,receivedToday-(cap??Infinity))))
+   ||(!shiftToday&&(eventDay.receivingShiftCostCLP!==undefined
+    ||eventDay.receivingShiftExtraCapacitySkuUnits!==undefined
+    ||eventDay.receivingShiftUsedSkuUnits!==undefined))){
+
    fail('Capacidad de Recepción superada');
   }
   receivedTotal+=receivedToday;
@@ -114,6 +125,10 @@ export function warehouseReceivingReadModel({replay,supplierLedger,receipts}={})
   daily.push({
    day,capacitySkuUnits:cap,
    ...(closed?{effectiveCapacitySkuUnits:0,interruption:'receiving-stop'}:{}),
+   ...(shiftToday?{effectiveCapacitySkuUnits:effectiveCapacity,
+    shiftExtraCapacitySkuUnits:shift.extraCapacitySkuUnits,
+    shiftUsedSkuUnits:eventDay.receivingShiftUsedSkuUnits,
+    shiftCostCLP:shift.shiftCostCLP}:{}),
    arrivedSkuUnits:incoming,
    receivedSkuUnits:receivedToday,receivedLots:actual.length,
    waitingSkuUnits:waiting,oldestWaitingDays:oldest,

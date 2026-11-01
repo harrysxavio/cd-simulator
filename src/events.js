@@ -3,12 +3,13 @@ import {deliveryTimeline} from './timeline.js';
 import {stagingIntegrityReadModel} from './staging-ledger.js';
 import {normalizeOperationalEvents} from './operational-event-schedule.js';
 import {i2ValidateQualityBridge} from './i2-quality-bridge.js';
+import {i2ValidateReceivingShift} from './i2-receiving-shift.js';
 
 /** Actual daily dispatch ledger for one fixed order cohort.
  * Day 0 demand is allocated by largest remainder; pending orders persist.
  * Supplier receipts become usable on arrival day, never earlier.
  */
-export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,fixedPurchases=null,extraDeliveries=[],reserveStock={},reserveReleaseDay=null,separateTransport=false,operationalEvents=[],qualityBridge=null}={}){
+export function eventSimulation({policy='service',orders=200,stock={},delayDays={},supplierFill={},days=12,dailyCapacity=200,receivingUnitCapacity=null,pickingUnitCapacity=null,transportUnitCapacity=null,qualityReleasePercent=100,inventoryAccuracyPercent=100,fixedPurchases=null,extraDeliveries=[],reserveStock={},reserveReleaseDay=null,separateTransport=false,operationalEvents=[],qualityBridge=null,receivingShift=null}={}){
  if(typeof separateTransport!=='boolean')throw new Error('Separación física de Transporte inválida');
  if(!Number.isInteger(days)||days<0||days>365||!Number.isInteger(dailyCapacity)||dailyCapacity<0||dailyCapacity>100000)throw new Error('Horizonte o capacidad inválidos');
  for(const [key,cap] of Object.entries({receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity})){
@@ -17,6 +18,7 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
  // Calendario externo congelado, independiente de decisiones y demanda.
  const scheduledEvents=normalizeOperationalEvents(operationalEvents,days);
  const bridge=i2ValidateQualityBridge(qualityBridge,scheduledEvents);
+ const dockShift=i2ValidateReceivingShift(receivingShift,scheduledEvents);
  const timeline=deliveryTimeline({policy,orders,stock,delayDays,supplierFill,fixedPurchases,checkpoints:[0]});
  const initial={...timeline.initial};
  if(reserveStock===null||typeof reserveStock!=='object'||Array.isArray(reserveStock)||Object.keys(reserveStock).some(id=>!SKU_CATALOG.some(p=>p.id===id)))throw new Error('Ubicación de reserva inválida');
@@ -76,7 +78,12 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
    dockArrivals.push({purchaseOrderId,skuId:d.id,qty:d.qty,day,urgent:true});
   }
   // Cierre temporal de muelle: los arribos permanecen en FIFO.
-  let receivingRemaining=receivingStopped?0:(receivingUnitCapacity===null?Infinity:receivingUnitCapacity);
+  // The day-2 dock remains stopped. A contract on day 2 can add only
+  // physical processing slots on day 3, never reopen yesterday's dock.
+  const dockBonus=dockShift&&day===dockShift.day&&!receivingStopped
+   ?dockShift.extraCapacitySkuUnits:0;
+  let receivingRemaining=receivingStopped?0:
+   (receivingUnitCapacity===null?Infinity:receivingUnitCapacity+dockBonus);
   for(const shipment of pendingReceipts){
    if(receivingRemaining<=0)break;
    // Already unloaded deliveries remain in the timeline for audit, but must
@@ -98,6 +105,10 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   }));
   const waitingReceiving=receivingQueue.reduce((sum,x)=>sum+x.remainingSkuUnits,0);
   const receivingUsedSkuUnits=receiptEvents.reduce((sum,x)=>sum+x.qty,0);
+  // Only truly utilized extra slots count as capacity used; the contracted
+  // shift is charged even when idle or the dock queue has already cleared.
+  const dockShiftUsedSkuUnits=dockShift&&day===dockShift.day
+   ?Math.max(0,receivingUsedSkuUnits-(receivingUnitCapacity??Infinity)):0;
   // Quality is a separate physical holding state: received does not mean pickable.
   // Apply a daily release rate to this queue. At 100% all receipts clear same day.
   // The ceiling prevents tiny but positive daily batches from becoming permanently stuck.
@@ -179,6 +190,11 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
   const completed=queue.filter(o=>o.fulfilledDay!==null).length;
   const backlog=n-completed;
   ledger.push({day,activeOperationalEvents,receivingStopped,qualityStopped,
+   ...(dockShift&&day===dockShift.day?{
+    receivingShiftCostCLP:dockShift.shiftCostCLP,
+    receivingShiftExtraCapacitySkuUnits:dockBonus,
+    receivingShiftUsedSkuUnits:dockShiftUsedSkuUnits
+   }:{}),
    ...(bridge&&day===bridge.day?{qualityBridgeReleasedSkuUnits:alternativeCapacity
     ?Object.values(released).reduce((n,x)=>n+x,0):0,
     qualityBridgeCostCLP:day===bridge.day?bridge.shiftCostCLP:0,
@@ -189,7 +205,8 @@ export function eventSimulation({policy='service',orders=200,stock={},delayDays=
  const consumed=Object.fromEntries(SKU_CATALOG.map(p=>[p.id,initial[p.id]+ledger.reduce((total,entry)=>total+entry.received[p.id],0)-available[p.id]-heldReserve[p.id]-qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)-stagingStock[p.id]]));
  const late=queue.filter(o=>o.fulfilledDay!==null&&o.fulfilledDay>0);
  const backlogAgeDays=queue.filter(o=>o.fulfilledDay===null).length*(days+1);
- const result={orders:n,operationalEvents:scheduledEvents,...(bridge?{qualityBridge:bridge}:{}),ordersDetail:queue.map(o=>({id:o.id,templateId:types[o.type].id,lines:{...types[o.type].lines},pickedDay:o.pickedDay,fulfilledDay:o.fulfilledDay})),policy,days,dailyCapacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,ledger,types,initial,openingReserve,endingReserveStock:{...heldReserve},reserveReleaseDay,separateTransport,endingStagingStock:{...stagingStock},endingStagingOrders:stagingQueue.filter(o=>o.fulfilledDay===null).length,endingStock:available,endingPickableStock:{...ledger.at(-1).pickableStock},endingUnverifiedStock:{...ledger.at(-1).unverifiedStock},heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)])),consumed,deliveries:timeline.deliveries,extraDeliveries,waitingReceiving:ledger.at(-1).waitingReceiving,waitingQuality:ledger.at(-1).waitingQuality,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Las entregas esperan capacidad de Recepción, y las unidades recibidas permanecen retenidas hasta su liberación por Calidad. La tasa de liberación es diaria sobre el stock en control (no defectos ni rechazos). El stock inicial ubicado en RESERVA-CD es parte del inventario físico inicial (nunca se suma una segunda vez) y solo pasa a PICK-FACE mediante un evento de traslado verificable en su día efectivo. Inventario conserva la totalidad del stock físico y separa la fracción confiable para picking de la fracción no verificable, reestimada diariamente; no equivale a merma, pérdida ni cuarentena de Calidad. En modo estándar Picking y expedición ocurren el mismo día. M3-12a permite ensayar separación física con staging y cola por pedido; todavía no está conectada a las ocho áreas hasta M3-12b. Sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
+ const result={orders:n,operationalEvents:scheduledEvents,...(bridge?{qualityBridge:bridge}:{}),
+  ...(dockShift?{receivingShift:dockShift}:{}),ordersDetail:queue.map(o=>({id:o.id,templateId:types[o.type].id,lines:{...types[o.type].lines},pickedDay:o.pickedDay,fulfilledDay:o.fulfilledDay})),policy,days,dailyCapacity,receivingUnitCapacity,pickingUnitCapacity,transportUnitCapacity,qualityReleasePercent,inventoryAccuracyPercent,ledger,types,initial,openingReserve,endingReserveStock:{...heldReserve},reserveReleaseDay,separateTransport,endingStagingStock:{...stagingStock},endingStagingOrders:stagingQueue.filter(o=>o.fulfilledDay===null).length,endingStock:available,endingPickableStock:{...ledger.at(-1).pickableStock},endingUnverifiedStock:{...ledger.at(-1).unverifiedStock},heldQuality:Object.fromEntries(SKU_CATALOG.map(p=>[p.id,qualityQueue.filter(x=>x.id===p.id).reduce((n,x)=>n+x.remaining,0)])),consumed,deliveries:timeline.deliveries,extraDeliveries,waitingReceiving:ledger.at(-1).waitingReceiving,waitingQuality:ledger.at(-1).waitingQuality,completed,pending:n-completed,onTime:ledger[0].completed,late:late.length,averageDelayDays:late.length?late.reduce((a,o)=>a+o.fulfilledDay,0)/late.length:0,backlogAgeDays,assumptions:'Cohorte fija creada en día 0, sin pedidos nuevos. Los pendientes se reintentan diariamente. Se permite saltar pedidos bloqueados; la capacidad diaria limita órdenes completas. Las entregas esperan capacidad de Recepción, y las unidades recibidas permanecen retenidas hasta su liberación por Calidad. La tasa de liberación es diaria sobre el stock en control (no defectos ni rechazos). El stock inicial ubicado en RESERVA-CD es parte del inventario físico inicial (nunca se suma una segunda vez) y solo pasa a PICK-FACE mediante un evento de traslado verificable en su día efectivo. Inventario conserva la totalidad del stock físico y separa la fracción confiable para picking de la fracción no verificable, reestimada diariamente; no equivale a merma, pérdida ni cuarentena de Calidad. En modo estándar Picking y expedición ocurren el mismo día. M3-12a permite ensayar separación física con staging y cola por pedido; todavía no está conectada a las ocho áreas hasta M3-12b. Sin vencimientos, cancelaciones ni costos de almacenamiento temporal.'};
  // Reject a corrupted experimental physical replay before returning.
  if(separateTransport)result.stagingAudit=stagingIntegrityReadModel(result);
  return result;

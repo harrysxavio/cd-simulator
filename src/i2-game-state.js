@@ -6,6 +6,7 @@ import {I2_DEFAULT_ADVANCED,i2ValidateAdvanced} from './i2-advanced-settings.js'
 import {i2NormalizeMultiRecovery} from './i2-multi-recovery.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventsForSeed} from './operational-event-schedule.js';
 import {i2ValidateQualityBridge} from './i2-quality-bridge.js';
+import {i2ValidateReceivingShift} from './i2-receiving-shift.js';
 
 /** I2-05: only educational choices and navigation are saved.
  * Never persist a physical SKU ledger, a recovery preview or V1's session. */
@@ -105,7 +106,16 @@ export function normalizeI2GameState(raw){
  // A second dated response is additive to the frozen first command.
  // It cannot activate earlier-day actions or rewrite the first PO manifest.
  let incidentStep=null,incidentFirstActions=null,incidentSecondDecision=null;
- let operationalResponse=null;
+ let operationalResponse=null,receivingResponse=null;
+ if(Object.hasOwn(raw,'receivingResponse')){
+  if(!recoveryConfirmation||!eventSeed||
+    i2OperationalEventsForSeed(eventSeed)[0]?.kind!=='receiving-stop')return null;
+  try{
+   receivingResponse=i2ValidateReceivingShift(
+    raw.receivingResponse,i2OperationalEventsForSeed(eventSeed));
+  }catch{return null}
+  if(!receivingResponse)return null;
+ }
  if(Object.hasOwn(raw,'incidentStep')){
   if(![1,2].includes(raw.incidentStep)||!Number.isSafeInteger(raw.incidentStep)
    ||!recoveryConfirmation||!raw.eventSeed
@@ -195,6 +205,7 @@ export function normalizeI2GameState(raw){
   ...(incidentStep===null?{}:{incidentStep}),
   ...(incidentViewDay===null?{}:{incidentViewDay}),
   ...(operationalResponse===null?{}:{operationalResponse}),
+  ...(receivingResponse===null?{}:{receivingResponse}),
   ...(incidentFirstActions===null?{}:{
    incidentFirstActions,incidentSecondDecision
   })

@@ -162,7 +162,8 @@ export function skuEconomicAuditReadModel({
   // Picking reinforcement remains owned by its legacy M4-17 ledger.
   // The alternate Quality line is owned by the physical day-5 journal.
   const bridgeCostCLP=money(r.qualityBridgeCostCLP??0,'línea alternativa Calidad');
-  const resourceCLP=money(op.costCLP+bridgeCostCLP,'refuerzo');
+  const receivingShiftCLP=money(r.receivingShiftCostCLP??0,'turno Recepción');
+  const resourceCLP=money(op.costCLP+bridgeCostCLP+receivingShiftCLP,'refuerzo');
   const shiftActive=operationalCost.extraCapacityOrdersPerDay>0&&(op.pickedOrders>0||op.shippedOrders>0);
   if(op.activated!==shiftActive
    ||!units(op.chargeableShiftCount)
@@ -227,10 +228,12 @@ export function skuEconomicAuditReadModel({
  requireSame(cumulativeReceipts,inventory.receivedToDateCLP,'inventario recibido');
  requireSame(cumulativeMaterial,purchase.shippedMaterialAtStandardCostCLP,'material en compras');
  requireSame(cumulativeMaterial,inventory.shippedToDateCLP,'material en stock');
- requireSame(cumulativeResources,labour.totalCostCLP+(comparison.qualityBridgeCostCLP??0),
+ requireSame(cumulativeResources,labour.totalCostCLP+(comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0),
   'jornadas aplicadas (Picking y Calidad)');
  requireSame(replay.ledger.reduce((n,d)=>n+(d.qualityBridgeCostCLP??0),0),
   comparison.qualityBridgeCostCLP??0,'gasto físico de línea alternativa Calidad');
+ requireSame(replay.ledger.reduce((n,d)=>n+(d.receivingShiftCostCLP??0),0),
+  comparison.receivingShiftCostCLP??0,'gasto físico del turno de Recepción');
  requireSame(cumulativeValue,result.potentialDispatchValueCLP,'valor potencial cierre');
  requireSame(cumulativeMaterial,result.dispatchedMaterialCostCLP,'costo material cierre');
  requireSame(cumulativeResources,result.incrementalOperatingCostCLP,'costo de refuerzo cierre');
@@ -243,7 +246,7 @@ export function skuEconomicAuditReadModel({
  requireSame(purchaseCost.proxy.urgentSurchargeCLP,comparison.urgentSurcharge,'recargo de compra');
  requireSame(comparison.incrementalExpense,
   comparison.urgentBase+comparison.urgentSurcharge+comparison.extraLabor+
-  (comparison.qualityBridgeCostCLP??0),'proxy de desembolso');
+  (comparison.qualityBridgeCostCLP??0)+(comparison.receivingShiftCostCLP??0),'proxy de desembolso');
  requireSame(comparison.netCashDelta,comparison.incrementalRevenue-comparison.incrementalExpense,'proxy de caja');
  requireSame(comparison.economicProxyDelta,comparison.netCashDelta+
   comparison.penaltySaved-comparison.holdingDelta,'proxy económico');
@@ -276,7 +279,7 @@ export function skuEconomicAuditReadModel({
   {id:'shipped-material',role:'standard-cost-expense',signedFactor:-1,amountCLP:cumulativeMaterial,
    source:'campaign.shipments.lines x SKU catalog',meaning:'Costo estándar del material expedido; incluye stock inicial'},
   {id:'deployed-reinforcement',role:'illustrative-operating-expense',signedFactor:-1,amountCLP:cumulativeResources,
-   source:'operationalCost.daily + recovered.ledger.qualityBridgeCostCLP',
+   source:'operationalCost.daily + recovered.ledger.qualityBridgeCostCLP + recovered.ledger.receivingShiftCostCLP',
    meaning:'Jornadas de Picking y línea alternativa Calidad activadas; no nómina pagada'}
  ];
  const excluded=[

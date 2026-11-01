@@ -52,6 +52,8 @@ export function i2DailyOperationsSnapshot(raw){
   waitingQualitySkuUnits:day.waitingQuality,
   qualityBridgeReleasedSkuUnits:day.qualityBridgeReleasedSkuUnits??0,
   qualityBridgeCostCLP:day.qualityBridgeCostCLP??0,
+  receivingShiftCostCLP:day.receivingShiftCostCLP??0,
+  receivingShiftUsedSkuUnits:day.receivingShiftUsedSkuUnits??0,
   activeIncidents:active,
   // Deliberately do not return: future incident dates, final projected
   // dispatch, future costs, campaign-wide replay or hidden outcome.
