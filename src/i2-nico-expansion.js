@@ -2,14 +2,13 @@ import {i2NicoPoseAsset} from './i2-nico-art.js';
 
 /**
  * I2 · Nico's extra reaction artwork. The approved 24 PNG files live in a ZIP
- * until someone imports and verifies them in the repository.
+ * and are now committed to main (all 24 PNGs plus manifest).
  *
- * IMPORTANT: Keep false until ALL required PNGs are checked into main, the
- * SHA-256 manifest matches, and the public asset URLs return HTTP 200.
- * While false every moment uses one of the 12 already published Nico images:
- * the UI still becomes contextual, without triggering missing PNG requests.
+ * CI validates the 24 hashes from the versioned manifest. The UI also has
+ * a published-pose and SVG fallback to recover from failed image requests.
+ * Never use image availability to determine the simulation result.
  */
-export const I2_NICO_EXPANSION_READY=false;
+export const I2_NICO_EXPANSION_READY=true;
 
 export const I2_NICO_EXPANSION_CATALOG=Object.freeze({
   'hint-context':'escenas/13_pista_contextual.png',
