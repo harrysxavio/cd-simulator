@@ -37,6 +37,7 @@ test('I2-35.5c3b: day-3 journal reflects first commitment but no future incident
  assert.doesNotMatch(JSON.stringify(reading),/EVT-QUALITY|quality-stop|day.?12|originalPurchaseOrders|future/);
  assert.ok(Object.isFrozen(reading));
  assert.throws(()=>navigateI2GameState(state,'finish'),/jornadas|segunda decisión/);
+ assert.throws(()=>i2ConfirmNextIncidentResponse(state,'hold'),/todavía no observable/);
  const atSecond=navigateI2GameState(state,'advance-incident-day');
  assert.equal(atSecond.incidentStep,1);
  assert.equal(atSecond.incidentViewDay,undefined);
