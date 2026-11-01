@@ -50,6 +50,11 @@ const MOMENTS=Object.freeze({
   'observed-demand':Object.freeze({asset:'demand-reveal',fallback:'reveal'}),
   'incident-observed':Object.freeze({asset:'unexpected-event',fallback:'alert'}),
   'incident-decision':Object.freeze({asset:'risk',fallback:'doubt'}),
+  // Only use these images after the corresponding physical day is observed.
+  'incident-quality-decision':Object.freeze({asset:'idea',fallback:'hint'}),
+  'daily-normal':Object.freeze({asset:'present-data',fallback:'analysis'}),
+  'daily-interruption':Object.freeze({asset:'concern',fallback:'alert'}),
+  'daily-quality-bridge':Object.freeze({asset:'explain-impact',fallback:'recovery'}),
   'recovery-options':Object.freeze({asset:'balance',fallback:'analysis'}),
   'results-success':Object.freeze({asset:'success',fallback:'result'}),
   'results-partial':Object.freeze({asset:'partial',fallback:'analysis'}),
