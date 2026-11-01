@@ -109,6 +109,8 @@ export function normalizeI2GameState(raw){
    ||!recoveryConfirmation||!raw.eventSeed
    ||i2OperationalEventsForSeed(raw.eventSeed).length!==2)return null;
   incidentStep=raw.incidentStep;
+  // No admitir un cierre forzado después de observar el segundo incidente.
+  if(incidentStep===1&&raw.phase==='result')return null;
   if(incidentStep===2){
    const allowed=['hold','urgent-next','reserve-next','urgent-and-reserve'];
    if(!allowed.includes(raw.incidentSecondDecision)||!raw.incidentFirstActions)
