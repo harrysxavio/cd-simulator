@@ -1095,7 +1095,10 @@ function incidentDailyScene(){
  replace([
   p('OPERACIÓN EN MARCHA · DIARIO GERENCIAL','eyebrow'),
   heading('Jornada '+model.day+' de '+model.horizonDays),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait(model.activeIncidents.length?'alert':'analysis')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait(
+   model.qualityBridgeCostCLP?'daily-quality-bridge':
+    model.activeIncidents.length?'daily-interruption':'daily-normal'
+  )]:[]),
   p(model.activeIncidents.length
    ?'Nico: hoy hay una etapa detenida. Observa los pendientes; los SKU retenidos no son mercancía perdida.'
    :'Nico: hoy procesamos el plan y las órdenes ya confirmadas. Mira los despachos y las colas que quedan.','lead'),
@@ -1172,7 +1175,7 @@ function incidentSecondResponseScene(){
  replace([
   p('LA OPERACIÓN CONTINÚA · SEGUNDO INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Nuevo problema en el CD'),
-  ...(I2_NICO_ASSETS_READY?[nicoScenePortrait('alert')]:[]),
+  ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-quality-decision')]:[]),
   p(checkpoint.description,'lead'),
   p('La primera decisión sigue vigente y ya afectó las jornadas anteriores. No puedes retirarla ni cambiar su fecha.','note'),
   section('i2-incident-first-commitment',[
