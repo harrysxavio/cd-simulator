@@ -567,8 +567,10 @@ function qualityGuidedDebriefPanel(){
   try{
    const evidence=i2QualityGuidedReflection(state);
    panel.append(section('i2-quality-guided-findings',[
-    p('Tu política: '+evidence.chosenQuality+
-     ' · política comparada: '+evidence.alternativeQuality,'note'),
+    p('Tu política: '+I2_AREAS.find(a=>a.id==='quality').choices.find(c=>
+      c.optionId===evidence.chosenQuality)?.label+
+     ' · política comparada: '+I2_AREAS.find(a=>a.id==='quality').choices.find(c=>
+      c.optionId===evidence.alternativeQuality)?.label,'note'),
     section('metrics-grid',[
      section('metric-card',[
       node('span',{text:'Tu plan · retenidos'}),
@@ -660,7 +662,7 @@ function intro(){
  stage.textContent=i2IsQualityGuided(state)?'Reto guiado · Calidad':
   i2IsPickingPilot(state)?'Reto guiado · Picking':'Misión 01 · Tu primer turno';
  replace([
-  p((i2IsPickingPilot(state)?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
+  p(((i2IsPickingPilot(state)||i2IsQualityGuided(state))?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
   heading(brief.title),
   p(brief.meaning,'intro-meaning'),
   p(brief.objective,'lead'),
