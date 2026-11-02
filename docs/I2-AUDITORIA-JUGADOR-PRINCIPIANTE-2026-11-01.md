@@ -115,3 +115,8 @@ de Nico y no convertir el mapa en un segundo menú.
 
 **Simulador público (siempre indicar si los cambios están en rama):**
 https://harrysxavio.github.io/cd-simulator/juego/
+
+
+## Seguimiento Lab13 · I2-36.10: separar confirmación clásica y multiacción
+
+**Solución en rama; no cerrar sin gates:** el panel de estrategias múltiples abre por defecto y no presenta el botón inferior de opción simple. Al abrir el modo clásico, se pliega el plan de varias acciones y aparece su botón inferior; al regresar al múltiple se deshabilita/oculta la confirmación simple. **No cambia simulación ni guardado por alternar modos.** Se añade E2E para cancelación, cero acciones, confirmación del clásico, 320/360 px y estado persistente. Contrato [I2-36.10](I2-36-10-RECUPERACION-MODOS-2026-11-01.md). Queda pendiente la portada I2-36.6 y simplificación del diagnóstico I2-36.9, sin presentar lo propuesto como ya publicado.
