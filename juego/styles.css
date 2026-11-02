@@ -1523,3 +1523,145 @@ html,body{height:100%;overflow:hidden}
  .cd-iso-compact{grid-template-columns:64px minmax(0,1fr);gap:6px}
  .cd-iso-compact .cd-iso-image{height:64px}
 }
+
+
+/* Lab14 · La misión se elige en una superficie diferenciada del formulario.
+ * Acciones de 44px, naranja propio del juego y modales adaptables. */
+.i2-mission-hub{
+ display:grid;gap:7px;padding:13px;margin:12px 0 14px;
+ border:2px solid var(--primary);border-radius:16px;
+ background:linear-gradient(135deg,#3b291e,var(--panel) 70%)
+}
+.i2-mission-hub-title,.i2-cd-area-eyebrow{
+ font-size:.68rem;letter-spacing:.09em;font-weight:850;color:var(--detail-label)
+}
+.i2-mission-active{font-size:1.14rem;line-height:1.3}
+.i2-mission-hub-description,.i2-mission-hub-status{font-size:.83rem;line-height:1.4;margin:0!important}
+.i2-mission-hub-status{color:var(--muted)}
+.i2-mission-hub-trigger,.i2-area-explore,.i2-daily-explain-button{
+ display:block;min-height:48px;width:100%;text-align:center;
+ padding:10px 13px;border:1px solid var(--primary);
+ border-radius:11px;background:var(--primary);color:var(--action-label);
+ font:inherit;font-weight:800;font-size:.87rem;cursor:pointer
+}
+.i2-area-explore{background:var(--detail-bg);color:var(--detail-label);
+ text-align:left;margin:5px 0 10px;border-style:dashed}
+.i2-daily-explain-button{margin-top:7px;background:var(--detail-bg);
+ color:var(--detail-label);text-align:left}
+.i2-mission-dialog,.i2-cd-area-guide-dialog{
+ box-sizing:border-box;width:min(96vw,650px);
+ max-height:calc(100dvh - 20px);margin:auto;
+ overflow-y:auto;overscroll-behavior:contain;padding:13px;
+ color:var(--text);background:var(--panel);
+ border:1px solid var(--border);border-radius:18px;
+ box-shadow:0 20px 60px #0009
+}
+.i2-mission-dialog::backdrop,.i2-cd-area-guide-dialog::backdrop{background:#06101ee8}
+.i2-mission-dialog-head,.i2-cd-area-guide-head{
+ position:sticky;top:-13px;z-index:2;display:flex;gap:10px;
+ align-items:center;justify-content:space-between;
+ margin:-13px -13px 9px;padding:13px;background:var(--panel);
+ border-bottom:1px solid var(--border)
+}
+.i2-mission-dialog-head h2,.i2-cd-area-guide-head h2{
+ margin:0;font-size:1.07rem;line-height:1.34
+}
+.i2-mission-dialog-close,.i2-cd-area-guide-close{
+ min-height:44px;min-width:44px;max-width:52%;
+ background:var(--detail-bg);border:1px solid var(--border);
+ border-radius:9px;color:var(--text);font:inherit;font-size:.8rem;
+ font-weight:750;padding:8px;cursor:pointer
+}
+.i2-mission-dialog-message{font-size:.88rem;line-height:1.45}
+.i2-mission-options{display:grid;gap:8px;margin:12px 0}
+.i2-mission-choice{
+ min-height:64px;display:grid;gap:4px;width:100%;text-align:left;
+ background:var(--detail-bg);color:var(--text);font:inherit;
+ border:1px solid var(--border);border-radius:12px;padding:10px;
+ cursor:pointer
+}
+.i2-mission-choice[aria-pressed=true]{border:2px solid var(--primary);background:#37281d}
+.i2-mission-choice strong{font-size:.95rem}
+.i2-mission-choice span{font-size:.81rem;color:var(--muted);line-height:1.4}
+.i2-mission-confirm-bar{border:1px solid var(--primary);
+ border-radius:12px;padding:10px;background:var(--detail-bg);display:grid;gap:9px}
+.i2-mission-confirm-bar[hidden]{display:none}
+.i2-mission-confirm-bar p{font-size:.85rem;line-height:1.45;margin:0}
+.i2-mission-approve,.i2-mission-cancel{
+ min-height:44px;border-radius:9px;border:1px solid var(--primary);
+ font:inherit;font-weight:750;padding:7px 9px;cursor:pointer
+}
+.i2-mission-approve{background:var(--primary);color:var(--action-label)}
+.i2-mission-cancel{background:var(--detail-bg);color:var(--text)}
+.i2-cd-area-guide-visual{
+ padding:10px;border-radius:13px;background:var(--detail-bg);
+ margin:7px 0 12px;text-align:center
+}
+.i2-cd-area-guide-image{
+ display:block;width:100%;max-height:min(35dvh,320px);
+ object-fit:contain;margin:auto;image-rendering:pixelated
+}
+.i2-cd-area-guide-visual .note{margin:7px 0 0!important}
+.i2-cd-area-guide-topics{display:grid;gap:9px}
+.i2-cd-area-guide-topic{
+ border:1px solid var(--border);background:var(--detail-bg);
+ border-left:3px solid var(--primary);padding:10px;border-radius:9px
+}
+.i2-cd-area-guide-topic strong{font-size:.9rem}
+.i2-cd-area-guide-topic p{font-size:.83rem;line-height:1.55;margin:5px 0 0}
+.i2-demand-observed-hero{
+ display:grid;gap:7px;margin:10px 0 13px;padding:12px;
+ background:linear-gradient(145deg,#442817,var(--panel));
+ border:2px solid var(--primary);border-radius:15px
+}
+.i2-demand-observed-hero>strong{color:#ffca9e;font-size:.81rem;letter-spacing:.035em}
+.i2-demand-observed-hero .metric-card{background:var(--detail-bg);margin:0}
+.i2-demand-observed-hero .metric-card strong{font-size:1.38rem}
+.i2-demand-observed-hero p{margin:0!important;line-height:1.48}
+.i2-demand-observed-hero.is-compact{padding:9px;gap:3px}
+.i2-daily-action-status{padding:11px;margin:10px 0;border:1px solid var(--border);
+ border-left:3px solid var(--primary);border-radius:11px;background:var(--detail-bg)}
+.i2-daily-action-status strong{display:block;font-size:.9rem}
+.i2-daily-action-status p{margin:7px 0!important}
+.i2-mission-hub-trigger:focus-visible,.i2-mission-dialog button:focus-visible,
+.i2-area-explore:focus-visible,.i2-cd-area-guide-dialog button:focus-visible,
+.i2-daily-explain-button:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+@media(max-width:355px){
+ .i2-mission-hub{padding:10px}
+ .i2-mission-dialog,.i2-cd-area-guide-dialog{width:98vw;padding:9px}
+ .i2-mission-dialog-head,.i2-cd-area-guide-head{margin:-9px -9px 9px;top:-9px;padding:9px}
+ .i2-cd-area-guide-image{max-height:29dvh}
+ .i2-demand-observed-hero .metric-card strong{font-size:1.14rem}
+}
+@media(forced-colors:active){
+ .i2-mission-hub,.i2-mission-dialog,.i2-cd-area-guide-dialog,
+ .i2-cd-area-guide-topic,.i2-daily-action-status,.i2-demand-observed-hero{
+  background:Canvas;color:CanvasText;border-color:CanvasText
+ }
+ .i2-mission-choice,.i2-mission-hub-trigger,.i2-area-explore,
+ .i2-daily-explain-button,.i2-mission-approve,.i2-mission-cancel{
+  background:ButtonFace;color:ButtonText;border-color:ButtonText
+ }
+}
+
+/* Lab14 · Vista previa visible sin ejecutar el motor físico antes del reveal. */
+.i2-live-plan-preview{margin:10px 0 14px;padding:10px;border:1px solid var(--border);
+ border-radius:12px;background:var(--panel)}
+.i2-live-plan-preview>strong{display:block;font-size:.87rem;color:var(--detail-label);margin-bottom:7px}
+.i2-live-plan-pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.i2-live-plan-metric{display:grid;gap:4px;padding:9px;border:1px solid var(--border);
+ border-radius:9px;background:var(--detail-bg);min-width:0}
+.i2-live-plan-metric span{font-size:.74rem;color:var(--muted);line-height:1.3}
+.i2-live-plan-metric strong{font-size:1.01rem;overflow-wrap:anywhere}
+.i2-live-plan-preview .note,.i2-live-plan-preview .footnote{margin:7px 0 0!important}
+@media(forced-colors:active){.i2-live-plan-preview,.i2-live-plan-metric{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+.i2-demand-observed-hero .i2-demand-delta{
+ grid-column:1/-1;margin:0!important;padding:8px 10px;
+ border-radius:9px;background:var(--detail-bg);
+ font-size:.9rem;font-weight:800;color:var(--detail-label);
+ text-align:center
+}
+@media(forced-colors:active){.i2-demand-observed-hero .i2-demand-delta{
+ background:Canvas;color:CanvasText;border:1px solid Highlight}}

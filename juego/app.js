@@ -9,6 +9,8 @@ import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {openI2NicoJourney} from './nico-journey-dialog.js';
 import {renderI2CdScene} from './cd-isometric-scenes.js';
+import {openI2CdAreaGuide} from './cd-area-guide-dialog.js';
+import {renderI2MissionHub} from './mission-selector.js';
 import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
 import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
@@ -479,10 +481,10 @@ function operationalIncidentCard(){
  const active=!!state.eventSeed,locked=state.confirmedAreas.length>0;
  const btn=node('button',{className:'i2-operational-drill-button',
   attrs:{type:'button',id:'gameOperationalDrill'},
-  text:active?'Desactivar sorpresa operacional':'Activar misión con incidente sorpresa'});
- btn.disabled=locked;
+  text:locked?'Cambiar reto (requiere reiniciar plan)':active?'Desactivar sorpresa operacional':'Activar misión con incidente sorpresa'});
+ btn.disabled=false;
  btn.addEventListener('click',()=>{
-  if(locked)return;
+  if(locked){root.querySelector('.i2-mission-hub-trigger')?.click();return;}
   try{
    if(active){delete state.eventSeed}
    else{
@@ -510,9 +512,10 @@ function pickingPilotStartCard(){
  const active=i2IsPickingPilot(state);
  const locked=state.confirmedAreas.length>0;
  const control=node('button',{className:'i2-picking-pilot-button',attrs:{type:'button'},
-  text:active?'Volver al reto inicial':'Activar reto de diagnóstico'});
- control.disabled=locked||!!state.eventSeed||i2IsQualityGuided(state);
+  text:locked?'Cambiar reto (requiere reiniciar plan)':active?'Volver al reto inicial':'Activar reto de diagnóstico'});
+ control.disabled=!locked&&(!!state.eventSeed||i2IsQualityGuided(state));
  control.addEventListener('click',()=>{
+  if(locked){root.querySelector('.i2-mission-hub-trigger')?.click();return;}
   try{
    if(state.eventSeed||i2IsQualityGuided(state))return;
    state=active?i2LeavePickingPilot(state):i2StartPickingPilot(state);
@@ -538,9 +541,10 @@ function qualityGuidedStartCard(){
  const locked=state.confirmedAreas.length>0;
  const control=node('button',{className:'i2-quality-guided-button',
   attrs:{type:'button',id:'gameQualityGuided'},
-  text:active?'Volver a la misión inicial':'Activar reto de Calidad'});
- control.disabled=locked||!!state.eventSeed||i2IsPickingPilot(state);
+  text:locked?'Cambiar reto (requiere reiniciar plan)':active?'Volver a la misión inicial':'Activar reto de Calidad'});
+ control.disabled=!locked&&(!!state.eventSeed||i2IsPickingPilot(state));
  control.addEventListener('click',()=>{
+  if(locked){root.querySelector('.i2-mission-hub-trigger')?.click();return;}
   try{
    if(state.eventSeed||i2IsPickingPilot(state))return;
    state=active?i2LeaveQualityGuided(state):i2StartQualityGuided(state);
@@ -660,6 +664,31 @@ function nicoSixQuestionPanel(score,evaluation){
   p(summary.boundary,'footnote')
  ]);
 }
+function chooseI2Mission(mode){
+ // Cambiar reto siempre crea una campaña nueva; el modal exige confirmación
+ // cuando ya existen decisiones comprometidas. No se falsifican resultados.
+ try{
+  let candidate=init();
+  if(mode==='picking')candidate=i2StartPickingPilot(candidate);
+  else if(mode==='quality')candidate=i2StartQualityGuided(candidate);
+  else if(mode==='incident'){
+   const sample=new Uint32Array(1);
+   window.crypto.getRandomValues(sample);
+   candidate={...candidate,eventSeed:
+    I2_OPERATIONAL_EVENT_SEEDS[sample[0]%I2_OPERATIONAL_EVENT_SEEDS.length]};
+  }else if(mode!=='initial')throw new Error('Modo de reto no reconocido');
+  state=candidate;
+  preview=null;multiDraft=i2EmptyRecoveryActions();
+  multiPreview=null;multiOpened=true;classicOpened=false;areaTab='decision';
+  persist();render();
+ }catch(error){showError(error)}
+}
+function currentI2MissionMode(){
+ if(state.eventSeed)return 'incident';
+ if(i2IsPickingPilot(state))return 'picking';
+ if(i2IsQualityGuided(state))return 'quality';
+ return 'initial';
+}
 function intro(){
  const brief=i2FirstMissionBriefing(state);
  stage.textContent=i2IsQualityGuided(state)?'Reto guiado · Calidad':
@@ -669,6 +698,11 @@ function intro(){
   heading(brief.title),
   p(brief.meaning,'intro-meaning'),
   p(brief.objective,'lead'),
+  renderI2MissionHub({
+   active:currentI2MissionMode(),
+   locked:state.confirmedAreas.length>0,
+   onSelect:chooseI2Mission
+  }),
   section('intro-facts',brief.quickFacts.map(fact=>
    section('intro-fact',[
     node('strong',{text:fact.value}),
@@ -941,6 +975,18 @@ function areaScene(){
   ]),
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  // Feedback inmediato: muestra supuestos previstos, no demanda observada.
+  section('i2-live-plan-preview',[
+   node('strong',{text:'Vista previa de tu planificación'}),
+   section('i2-live-plan-pairs',model.metrics.slice(0,2).map(metric=>
+    section('i2-live-plan-metric',[
+     node('span',{text:metric.label}),
+     node('strong',{text:metric.formatted})
+    ])
+   )),
+   p(model.consequence,'note'),
+   p('Son hipótesis conocidas al planificar. El resultado físico real se descubre después.','footnote')
+  ]),
   ...(area.id==='transport'?[p('Una ruta adicional solo ayuda si ya hay pedidos completos. Preparado, expedido y entregado son estados distintos.','commercial-brief')]:[]),
   ...(area.id==='picking'?[p('Picking necesita todos los SKU del pedido completo; reforzar operarios no repara faltantes ni asegura salida del CD.','commercial-brief')]:[]),
   ...(area.id==='picking'&&i2IsPickingPilot(state)?[
@@ -1046,9 +1092,15 @@ function areaScene(){
   p('DECISIÓN '+(state.index+1)+' DE 8','eyebrow'),
   heading(original.icon+' '+original.title),
   p(area.question,'lead'),
-  renderI2CdScene(area.id,{variant:'compact'}),
+  node('button',{className:'i2-area-explore',
+   text:'🗺️ Conocer el área · mapa isométrico y guía de Nico',
+   attrs:{type:'button','aria-haspopup':'dialog'}}),
   shell
  ],{guide:false});
+ const explore=root.querySelector('.i2-area-explore');
+ explore.addEventListener('click',()=>openI2CdAreaGuide(area.id,{
+  source:explore,level:guideLevel
+ }));
  updateFooter();
 }
 function revealScene(){
@@ -1208,6 +1260,7 @@ function incidentDailyScene(){
  replace([
   p('OPERACIÓN EN MARCHA · DIARIO GERENCIAL','eyebrow'),
   heading('Jornada '+model.day+' de '+model.horizonDays),
+  observedDemandPanel({compact:true}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait(
    model.qualityBridgeCostCLP?'daily-quality-bridge':
     model.activeIncidents.length?'daily-interruption':'daily-normal'
@@ -1256,8 +1309,31 @@ function incidentDailyScene(){
    p(closing?'Terminó el horizonte de doce jornadas. Ahora puedes analizar el resultado completo.':
     'Aún no conoces las jornadas siguientes ni el resultado final. Avanza para observar el próximo día.','footnote')
   ]),
+  section('i2-daily-action-status',[
+   node('strong',{text:'Jornada de seguimiento · sin orden nueva'}),
+   p('Hoy observas cómo se ejecuta el plan y las órdenes ya autorizadas. Este modelo ofrece otra decisión solo cuando aparece un incidente observable; no permite cambiar a posteriori las ocho políticas iniciales.','note'),
+   node('button',{className:'i2-daily-explain-button',
+    text:'¿Por qué no puedo cambiar otras áreas hoy?',
+    attrs:{type:'button','aria-haspopup':'dialog'}})
+  ]),
   p(model.note,'footnote')
  ]);
+ const why=root.querySelector('.i2-daily-explain-button');
+ why.addEventListener('click',()=>openI2HelpDialog({
+  title:'Qué puedes decidir y qué está bloqueado',
+  paragraphs:[
+   'El plan de ocho áreas se confirmó antes de conocer la demanda. No puedes cambiarlo para aprovechar información futura.',
+   'Una orden nueva se emite únicamente al observar un incidente. No todas las jornadas incluyen incidentes ni todas las áreas tienen una intervención física implementada.',
+   // La ayuda breve admite como máximo cinco párrafos. Agrupar las
+   // ocho decisiones en dos bloques mantiene la información y evita
+   // un diálogo que no abre por exceder el contrato de accesibilidad.
+   'Áreas 1–4: '+I2_AREAS.slice(0,4).map(area=>
+    area.title+': '+(area.choices.find(c=>c.optionId===state.choices[area.id])?.label??'Sin política')).join(' · '),
+   'Áreas 5–8: '+I2_AREAS.slice(4).map(area=>
+    area.title+': '+(area.choices.find(c=>c.optionId===state.choices[area.id])?.label??'Sin política')).join(' · '),
+   'Pendiente de ampliación: acciones diarias por las ocho áreas con impacto real en unidades, capacidad, costos y fechas. Aún no existen ocho nuevas órdenes por jornada.'
+  ]
+ },why));
  setActions({
   next:closing?'Ver cierre de la campaña →':'Avanzar a jornada '+(model.day+1)+' →',
   onNext:()=>gameTransition(closing?'finish':'advance-incident-day'),
@@ -1297,6 +1373,7 @@ function incidentSecondResponseScene(){
  replace([
   p('LA OPERACIÓN CONTINÚA · SEGUNDO INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Nuevo problema en el CD'),
+  observedDemandPanel({compact:true}),
   renderI2CdScene('quality',{variant:'compact'}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-quality-decision')]:[]),
   p(checkpoint.description,'lead'),
@@ -1379,6 +1456,7 @@ function incidentResponseScene(){
  replace([
   p('OPERACIÓN EN MARCHA · PRIMER INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Necesitamos tu decisión'),
+  observedDemandPanel(),
   renderI2CdScene(checkpoint.incidentKind==='receiving-stop'?'receiving':'quality',
    {variant:'compact'}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-decision')]:[]),
@@ -1441,6 +1519,36 @@ function incidentResponseScene(){
   onBack:()=>gameTransition('back')
  });
 }
+function observedDemandPanel({compact=false}={}){
+ // Una vez mostrada la demanda, conservar la comparación en incidentes
+ // y diario. No se llama mientras el evento permanece sellado.
+ if(!state.reveal)throw new Error('Demanda observada todavía sellada');
+ const revealed=i2DemandEventObserved(state);
+ const delta=(revealed.varianceOrders>0?'+':'')+
+  num.format(revealed.varianceOrders);
+ const card=section('i2-demand-observed-hero'+(compact?' is-compact':''),[
+  node('strong',{text:'DEMANDA REAL REVELADA · PLAN COMPROMETIDO'}),
+  ...(compact?[
+   p(num.format(revealed.plannedOrders)+' previstos → '+
+    num.format(revealed.observedOrders)+' observados ('+delta+' pedidos).','note')
+  ]:[
+   section('metrics-grid i2-observed-demand',[
+    section('metric-card',[
+     node('span',{text:'Pedidos previstos'}),
+     node('strong',{text:num.format(revealed.plannedOrders)+' pedidos'})
+    ]),
+    section('metric-card',[
+     node('span',{text:'Demanda real observada'}),
+     node('strong',{text:num.format(revealed.observedOrders)+' pedidos'})
+    ]),
+    p('Cambio real vs. previsto: '+delta+' pedidos','i2-demand-delta')
+   ]),
+   p('Las compras iniciales ya estaban comprometidas. No se reescriben después de conocer la demanda.','footnote')
+  ])
+ ]);
+ card.setAttribute('aria-label','Demanda real observada después de revelar');
+ return card;
+}
 function recoveryScene(){
  if(!state.reveal){state.phase='reveal';render();return}
  // Único acceso al evento observado, permitido solo tras la transición reveal.
@@ -1455,15 +1563,7 @@ function recoveryScene(){
   heading(reveal.heading),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('observed-demand')]:[]),
   p('Se planificó una muestra de '+num.format(reveal.plannedOrders)+' pedidos, pero se observaron '+num.format(reveal.observedOrders)+'. El plan original quedó congelado. Ahora debes elegir cómo responder.','lead'),
-  section('metrics-grid i2-observed-demand',[
-   section('metric-card',[
-    node('span',{text:'Demanda observada'}),node('strong',{text:num.format(reveal.observedOrders)+' pedidos'})
-   ]),
-   section('metric-card',[
-    node('span',{text:'Diferencia con lo previsto'}),
-    node('strong',{text:(reveal.varianceOrders>0?'+':'')+num.format(reveal.varianceOrders)+' pedidos'})
-   ])
-  ]),
+  observedDemandPanel(),
   p(reveal.teaching,'note'),
   p(reveal.context,'note'),
   p(reveal.boundary,'footnote'),

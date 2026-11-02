@@ -56,17 +56,20 @@ test('I2-36: tutorial de Nico y ocho decisiones usan arte contextual en teléfon
   await page.locator('#gameNext').click();
   for(let i=0;i<I2_CD_AREA_ORDER.length;i++){
    const key=I2_CD_AREA_ORDER[i];
-   const scene=page.locator('.cd-iso-compact');
-   assert.equal(await scene.getAttribute('data-cd-scene'),key);
-   assert.ok(await scene.locator('img').getAttribute('alt'));
-   await scene.locator('img').evaluate(img=>img.decode());
-   if(i===0){
-    const expand=scene.getByRole('button',{name:/Ampliar ilustración/});
-    await expand.click();
-    assert.equal(await page.locator('.cd-iso-dialog[open]').count(),1);
-    await page.getByRole('button',{name:'Cerrar imagen'}).click();
-    assert.equal(await expand.evaluate(node=>document.activeElement===node),true);
-   }
+   assert.equal(await page.locator('.cd-iso-compact').count(),0,
+    'La ilustración ahora vive en la sección explicativa aparte');
+   const explore=page.locator('.i2-area-explore');
+   assert.equal(await explore.count(),1);
+   await explore.click();
+   const learning=page.locator('.i2-cd-area-guide-dialog');
+   assert.equal(await learning.isVisible(),true);
+   const pic=learning.locator('.i2-cd-area-guide-image');
+   assert.ok(await pic.getAttribute('alt'));
+   await pic.evaluate(img=>img.decode());
+   assert.match(await learning.innerText(),/Qué decides tú como gerente/);
+   await learning.getByRole('button',{name:/Cerrar explicación/}).click();
+   await learning.waitFor({state:'detached'});
+   assert.equal(await explore.evaluate(x=>document.activeElement===x),true);
    const sizes=await page.evaluate(()=>({
     viewport:document.documentElement.clientWidth,
     scroll:document.documentElement.scrollWidth,

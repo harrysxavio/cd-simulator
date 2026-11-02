@@ -24,6 +24,7 @@ test('I2-36.10: dos métodos de recuperación nunca tienen confirmaciones simult
   await startAtRecovery(page);
   const before=await page.evaluate(key=>localStorage.getItem(key),STORAGE);
   assert.equal(await page.locator('.multi-lever-panel').evaluate(el=>el.open),true);
+  await page.waitForFunction(()=>document.querySelector('.i2-classic-recovery')?.open===false);
   assert.equal(await page.locator('.i2-classic-recovery').evaluate(el=>el.open),false);
   assert.equal(await page.locator('#gameNext').isVisible(),false,
    'La confirmación simple NO puede competir con la estrategia múltiple');
@@ -36,6 +37,7 @@ test('I2-36.10: dos métodos de recuperación nunca tienen confirmaciones simult
 
   await page.locator('.i2-classic-recovery summary').click();
   assert.equal(await page.locator('.i2-classic-recovery').evaluate(el=>el.open),true);
+  await page.waitForFunction(()=>document.querySelector('.multi-lever-panel')?.open===false);
   assert.equal(await page.locator('.multi-lever-panel').evaluate(el=>el.open),false);
   assert.equal(await page.locator('#gameNext').isVisible(),true);
   assert.match(await page.locator('#gameNext').innerText(),/Confirmar opción simple/);
