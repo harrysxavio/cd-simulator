@@ -8,6 +8,7 @@ import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {openI2NicoJourney} from './nico-journey-dialog.js';
+import {renderI2CdScene} from './cd-isometric-scenes.js';
 import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
 import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
@@ -1027,6 +1028,7 @@ function areaScene(){
   p('DECISIÓN '+(state.index+1)+' DE 8','eyebrow'),
   heading(original.icon+' '+original.title),
   p(area.question,'lead'),
+  renderI2CdScene(area.id,{variant:'compact'}),
   shell
  ],{guide:false});
  updateFooter();
@@ -1083,6 +1085,7 @@ function managementDiagnosisPanel(model){
  const sku=i2WhySkuAndDays();
  panel.append(
   node('summary',{text:'Diagnóstico de Nico · ¿dónde se detienen los pedidos?'}),
+  renderI2CdScene('monitoring',{variant:'monitor',showQuestion:true}),
   p(model.coach.observation,'note'),
   p('Esto es una lectura del plan original, sin recuperación; ninguna señal prueba por sí sola qué intervención funcionará.','footnote'),
   section('diagnosis-metric-grid',[
@@ -1276,6 +1279,7 @@ function incidentSecondResponseScene(){
  replace([
   p('LA OPERACIÓN CONTINÚA · SEGUNDO INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Nuevo problema en el CD'),
+  renderI2CdScene('quality',{variant:'compact'}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-quality-decision')]:[]),
   p(checkpoint.description,'lead'),
   p('La primera decisión sigue vigente y ya afectó las jornadas anteriores. No puedes retirarla ni cambiar su fecha.','note'),
@@ -1357,6 +1361,8 @@ function incidentResponseScene(){
  replace([
   p('OPERACIÓN EN MARCHA · PRIMER INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Necesitamos tu decisión'),
+  renderI2CdScene(checkpoint.incidentKind==='receiving-stop'?'receiving':'quality',
+   {variant:'compact'}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-decision')]:[]),
   p(checkpoint.description,'lead'),
   section('metrics-grid i2-incident-checkpoint',[
