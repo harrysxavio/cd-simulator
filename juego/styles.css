@@ -1665,3 +1665,26 @@ html,body{height:100%;overflow:hidden}
 }
 @media(forced-colors:active){.i2-demand-observed-hero .i2-demand-delta{
  background:Canvas;color:CanvasText;border:1px solid Highlight}}
+
+/* I2-35.9 · Datos de jornada: tendencia observada, no predicción. */
+.i2-daily-radar{margin:11px 0;padding:12px;border-radius:15px;
+ background:linear-gradient(145deg,var(--detail-bg),var(--panel));
+ border:1px solid var(--primary)}
+.i2-daily-radar>strong{display:block;font-size:.79rem;letter-spacing:.04em;
+ color:var(--detail-label);font-weight:900}
+.i2-daily-radar>.footnote{margin:5px 0 10px!important}
+.i2-daily-trend-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.i2-daily-trend{min-width:0;padding:9px;border:1px solid var(--border);
+ border-radius:11px;background:var(--panel);display:grid;gap:3px}
+.i2-daily-trend>span{font-size:.73rem;color:var(--muted);line-height:1.34}
+.i2-daily-trend>strong{font-size:1.03rem;line-height:1.25;
+ font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.i2-daily-trend-change{font-size:.72rem!important;line-height:1.42!important;
+ color:var(--detail-label);margin:3px 0 0!important;overflow-wrap:anywhere}
+@media(max-width:355px){
+ .i2-daily-trend-grid{gap:5px}
+ .i2-daily-trend{padding:7px}
+ .i2-daily-trend>strong{font-size:.92rem}
+}
+@media(forced-colors:active){.i2-daily-radar,.i2-daily-trend{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
