@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab14 · I2-35.9 radar de jornada (02-11-2026, candidato):** se agrega lectura numérica en cada jornada observada: expedidos hoy vs ayer, variación de pedidos pendientes, cambio de cola Recepción y retenidos Calidad, todos concilian con el mismo ledger físico canónico. No calcula futuro ni permite falsos botones de intervención. La fase siguiente sigue siendo **I2-35.7 contrato de órdenes por área/día** y I2-35.8a–c para impacto real; no sustituye I2-36.15 centro de mando. [Contrato y pruebas](I2-35-9-RADAR-DIARIO-2026-11-02.md). **Candidato hasta CI/merge/Pages; 35/41 padres completados**.
+
+
 > **Lab14 · reordenamiento correctivo (01-11-2026; candidato):** prioridad P0 a I2-36.14a–d: selección y cambio de retos desde partidas guardadas, demanda observada visible en toda misión post-reveal, isométricos en guía didáctica separada y explicación de bloqueo en jornadas. Después, construir **I2-35.7** contrato de órdenes fechadas por área, **I2-35.8a–c** impacto físico y económico por Compras/Inventario/Picking, Recepción/Calidad y Transporte + reglas posteriores Comercial/Planificación, **I2-36.15** centro de mando con botones y diálogos realmente ligados al motor, **I2-37.5** consecuencias de cada acción, **I2-38.3–39.3** QA, **I2-40.3** UAT/release. Cada orden exige `areaId, decidedDay, effectiveDay, capacityDelta, expenseCLP` y auditoría SKU, no acciones falsas. [Plan y fallos detallados](I2-LAB14-JUGADOR-ACCIONES-2026-11-01.md). No cerrar padres: **35/41**. CI/merge/Pages de este corte pendientes.
 
 
