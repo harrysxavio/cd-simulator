@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab14 · I2-36.16 centro de mando por las 8 áreas (02-11-2026, candidato):** el jugador puede recorrer las ocho áreas en Recuperación y abrir desde la etapa que le corresponde las tres palancas con física ya implementada: Compras, Inventario con reserva y Picking. Las cinco etapas restantes muestran política comprometida y limitación actual en diálogo accesible; *no se anuncian acciones ficticias*. Se registra test de 320×568, sin spoilers ni cambios de estado por navegar. [Contrato](I2-36-16-CENTRO-MANDO-AREAS-2026-11-02.md). I2-35.7/35.8 siguen prioritarios para órdenes reales por jornada, después I2-36.15. **35/41 padres**; PR/CI/Pages pendientes.
+
+
 > **Lab14 · I2-35.9 radar de jornada (02-11-2026, candidato):** se agrega lectura numérica en cada jornada observada: expedidos hoy vs ayer, variación de pedidos pendientes, cambio de cola Recepción y retenidos Calidad, todos concilian con el mismo ledger físico canónico. No calcula futuro ni permite falsos botones de intervención. La fase siguiente sigue siendo **I2-35.7 contrato de órdenes por área/día** y I2-35.8a–c para impacto real; no sustituye I2-36.15 centro de mando. [Contrato y pruebas](I2-35-9-RADAR-DIARIO-2026-11-02.md). **Candidato hasta CI/merge/Pages; 35/41 padres completados**.
 
 
