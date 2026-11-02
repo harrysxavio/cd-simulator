@@ -1688,3 +1688,32 @@ html,body{height:100%;overflow:hidden}
 }
 @media(forced-colors:active){.i2-daily-radar,.i2-daily-trend{
  background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* I2-36.16 · Centro de mando táctil de ocho áreas, tres palancas reales.
+ * La superficie no simula órdenes para áreas todavía no soportadas. */
+.i2-command-deck{margin:15px 0 12px;padding:11px;border-radius:14px;
+ border:1px solid var(--primary);background:var(--panel)}
+.i2-command-deck-head strong{font-size:.82rem;color:var(--detail-label);
+ letter-spacing:.035em}
+.i2-command-deck-head p,.i2-command-deck-note{margin:6px 0 10px!important;
+ font-size:.81rem;line-height:1.45;color:var(--muted)}
+.i2-command-deck-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.i2-command-area-card{display:flex;min-width:0;gap:7px;text-align:left;align-items:center;
+ min-height:64px;border-radius:11px;border:1px solid var(--border);
+ background:var(--detail-bg);color:var(--text);
+ padding:7px;cursor:pointer;font:inherit}
+.i2-command-area-card[data-available=true]{border-color:var(--primary);
+ background:linear-gradient(135deg,#432818,var(--detail-bg))}
+.i2-command-area-icon{font-size:1.25rem;flex:0 0 1.45rem}
+.i2-command-area-words{display:grid;gap:3px;min-width:0}
+.i2-command-area-words strong{font-size:.77rem;overflow-wrap:anywhere;line-height:1.3}
+.i2-command-area-status{font-size:.7rem;line-height:1.35;color:var(--muted)}
+.i2-command-area-card[data-available=true] .i2-command-area-status{color:var(--detail-label)}
+.i2-command-area-card:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+.i2-command-deck-note{margin:10px 0 0!important}
+@media(max-width:355px){.i2-command-deck{padding:7px}.i2-command-deck-grid{gap:5px}
+ .i2-command-area-card{padding:6px;gap:4px}
+ .i2-command-area-icon{font-size:1.12rem;flex-basis:1.3rem}
+ .i2-command-area-words strong{font-size:.74rem}}
+@media(forced-colors:active){.i2-command-deck,.i2-command-area-card{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
