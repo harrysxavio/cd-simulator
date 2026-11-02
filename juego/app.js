@@ -1400,7 +1400,7 @@ function incidentDailyScene(){
   title:'Qué puedes decidir y qué está bloqueado',
   paragraphs:[
    'El plan de ocho áreas se confirmó antes de conocer la demanda. No puedes cambiarlo para aprovechar información futura.',
-   'Solo puedes emitir nuevas órdenes cuando el motor admite una respuesta física con fecha futura. Por ejemplo, después de la parada del muelle puedes contratar un turno en el día 3 para el día 4. No todas las jornadas ni áreas lo permiten.',
+   'No todas las jornadas incluyen incidentes. Algunas jornadas posteriores a un incidente sí permiten emitir nuevas órdenes con fecha futura cuando el motor tiene una respuesta física modelada: después de la parada del muelle puedes contratar un turno en el día 3 para el día 4. No todas las áreas tienen acciones adicionales.',
    // La ayuda breve admite como máximo cinco párrafos. Agrupar las
    // ocho decisiones en dos bloques mantiene la información y evita
    // un diálogo que no abre por exceder el contrato de accesibilidad.
