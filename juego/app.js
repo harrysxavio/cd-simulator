@@ -975,6 +975,18 @@ function areaScene(){
   ]),
   p('Selecciona una alternativa','option-heading'),
   choiceList(area),
+  // Feedback inmediato: muestra supuestos previstos, no demanda observada.
+  section('i2-live-plan-preview',[
+   node('strong',{text:'Vista previa de tu planificación'}),
+   section('i2-live-plan-pairs',model.metrics.slice(0,2).map(metric=>
+    section('i2-live-plan-metric',[
+     node('span',{text:metric.label}),
+     node('strong',{text:metric.formatted})
+    ])
+   )),
+   p(model.consequence,'note'),
+   p('Son hipótesis conocidas al planificar. El resultado físico real se descubre después.','footnote')
+  ]),
   ...(area.id==='transport'?[p('Una ruta adicional solo ayuda si ya hay pedidos completos. Preparado, expedido y entregado son estados distintos.','commercial-brief')]:[]),
   ...(area.id==='picking'?[p('Picking necesita todos los SKU del pedido completo; reforzar operarios no repara faltantes ni asegura salida del CD.','commercial-brief')]:[]),
   ...(area.id==='picking'&&i2IsPickingPilot(state)?[
