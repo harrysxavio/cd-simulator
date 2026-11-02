@@ -417,3 +417,23 @@ Las metas numéricas son criterios futuros, **no mediciones ya obtenidas**.
 - **Riesgo humano:** I2-38.2 no aprobable por Chromium emulado ni revisión de IA.
 - **Checkpoint obligatorio en STATUS:** último merge, rama/PR en curso, SHA, pruebas ejecutadas y resultado, Pages+HTTP o no comprobado, bloqueo, archivos tocados, siguiente prueba/acción y criterios faltantes.
 - **Primer paso exacto:** tomar matriz de restricciones en `src/i2-mvp-adapter.js` y contratos de Recepción, Calidad, Picking y Transporte; producir fixtures para ARC-01–08 y distinguir soporte actual vs cambio mínimo antes de modificar PR #127.
+
+
+## Lab12 · Rebaselining de experiencia del jugador (01-11-2026)
+
+**Vigente como propuesta de ejecución tras auditoría**, sin sustituir las 41 fases padre ni marcar sus pendientes como cerrados. El documento rector de hallazgos, riesgos y pruebas es [Auditoría principiante, botones y experiencia móvil](I2-AUDITORIA-JUGADOR-PRINCIPIANTE-2026-11-01.md). Esta evaluación diferencia auditoría de código, ejecución de pruebas y aceptación humana.
+
+**Orden obligatorio de trabajo en las fases abiertas:**
+
+1. **I2-36.5**: resolver P0 de usabilidad sobre selección de alternativas (24 decisiones), conservación de scroll y foco, distinguir propuesta/confirmación, reinicios de presets y etiquetas humanas; validación con Chromium/Node.
+2. **I2-36.6–36.10**: portada con ruta de entrada sencilla, tutorial progresivo con Nico, ficha pedagógica de las ocho áreas, diagnóstico relevante y única confirmación inequívoca en recuperación 0/1/N acciones.
+3. **I2-35.6**: cinco misiones con restricciones físicas/temporales realmente distintas y consecuencias auditables; no solo nuevas semillas de demanda. Conservar el motor SKU y la irreversibilidad de compras y de días ya ocurridos.
+4. **I2-36.11–36.13**: mapa orientativo sin hotspots, integración de diez imágenes del CD sin tapar controles, versiones web ligeras con originales intactos y glosario técnico en lenguaje de principiante.
+5. **I2-37.4/37.2**: cierre gerencial didáctico y reintentos comparables bajo misma semilla con hipótesis voluntaria y diferencias observadas.
+6. **I2-38.1/38.2**: matriz de botones y estados, pruebas viewport 320–430/zoom/teclado/Chromium, revisión humana de Android físico/TalkBack y comprensión real.
+7. **I2-39.1/39.2**: reconciliación de indicadores, SKU/BOM, tiempo, inventario y gasto, aceptación de gestión CD por retos diferenciados.
+8. **I2-40.1/40.2**: release con CI pre-merge, GitHub Pages/HTTP, integridad SHA arte/CD, versión reproducible, documentación para continuidad y UAT de producto.
+
+**Puertas:** un PR por corte verificable, E2E positivo antes de merge, no alterar V1, ni exponer shock previo, ni confundir gasto incremental con costo total. No dar por terminado un padre hasta todas sus hijas y aceptaciones aprobadas. **35/41 padres aceptados; I2-35 a I2-40 siguen abiertos.**
+
+**Trabajo realizado en rama de auditoría:** corrección de re-render que hacía saltar scroll y foco tras seleccionar en las ocho áreas; aviso explícito de propuesta editable; preservar la modalidad Calidad al usar el reinicio superior; etiquetas legibles de las políticas y del reto. Prueba E2E de las 24 alternativas añadida; **no declarar verificada hasta CI**. El arte isométrico sigue en PR #146 hasta integración verificada.
