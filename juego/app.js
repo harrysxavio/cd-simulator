@@ -481,10 +481,10 @@ function operationalIncidentCard(){
  const active=!!state.eventSeed,locked=state.confirmedAreas.length>0;
  const btn=node('button',{className:'i2-operational-drill-button',
   attrs:{type:'button',id:'gameOperationalDrill'},
-  text:active?'Desactivar sorpresa operacional':'Activar misión con incidente sorpresa'});
- btn.disabled=locked;
+  text:locked?'Cambiar reto (requiere reiniciar plan)':active?'Desactivar sorpresa operacional':'Activar misión con incidente sorpresa'});
+ btn.disabled=false;
  btn.addEventListener('click',()=>{
-  if(locked)return;
+  if(locked){root.querySelector('.i2-mission-hub-trigger')?.click();return;}
   try{
    if(active){delete state.eventSeed}
    else{
@@ -512,9 +512,10 @@ function pickingPilotStartCard(){
  const active=i2IsPickingPilot(state);
  const locked=state.confirmedAreas.length>0;
  const control=node('button',{className:'i2-picking-pilot-button',attrs:{type:'button'},
-  text:active?'Volver al reto inicial':'Activar reto de diagnóstico'});
- control.disabled=locked||!!state.eventSeed||i2IsQualityGuided(state);
+  text:locked?'Cambiar reto (requiere reiniciar plan)':active?'Volver al reto inicial':'Activar reto de diagnóstico'});
+ control.disabled=!locked&&(!!state.eventSeed||i2IsQualityGuided(state));
  control.addEventListener('click',()=>{
+  if(locked){root.querySelector('.i2-mission-hub-trigger')?.click();return;}
   try{
    if(state.eventSeed||i2IsQualityGuided(state))return;
    state=active?i2LeavePickingPilot(state):i2StartPickingPilot(state);
@@ -540,9 +541,10 @@ function qualityGuidedStartCard(){
  const locked=state.confirmedAreas.length>0;
  const control=node('button',{className:'i2-quality-guided-button',
   attrs:{type:'button',id:'gameQualityGuided'},
-  text:active?'Volver a la misión inicial':'Activar reto de Calidad'});
- control.disabled=locked||!!state.eventSeed||i2IsPickingPilot(state);
+  text:locked?'Cambiar reto (requiere reiniciar plan)':active?'Volver a la misión inicial':'Activar reto de Calidad'});
+ control.disabled=!locked&&(!!state.eventSeed||i2IsPickingPilot(state));
  control.addEventListener('click',()=>{
+  if(locked){root.querySelector('.i2-mission-hub-trigger')?.click();return;}
   try{
    if(state.eventSeed||i2IsPickingPilot(state))return;
    state=active?i2LeaveQualityGuided(state):i2StartQualityGuided(state);
