@@ -1411,3 +1411,90 @@ html,body{height:100%;overflow:hidden}
  .i2-quality-bridge-reading{background:Canvas;color:CanvasText;border-color:CanvasText}
  .i2-quality-bridge-reading{border-inline-start-color:Highlight}
 }
+
+/* I2-36 · Escenarios isométricos reutilizables de CD; tema oscuro/naranja. */
+/* La vista de 8 áreas conserva la decisión prioritaria, sin grandes banners. */
+.cd-iso-card{
+ display:grid;grid-template-columns:minmax(0,104px) minmax(0,1fr);
+ align-items:center;gap:10px;min-width:0;margin:9px 0 12px;padding:10px;
+ border:1px solid var(--border);border-radius:13px;
+ background:var(--panel);color:var(--text)
+}
+.cd-iso-art{
+ display:grid;place-items:center;min-width:0;
+ border-radius:10px;background:var(--detail-bg);
+ min-height:86px;overflow:hidden
+}
+.cd-iso-image{
+ display:block;max-width:100%;width:100%;height:104px;
+ object-fit:contain;image-rendering:pixelated
+}
+.cd-iso-copy{min-width:0;display:grid;gap:5px;align-content:center}
+.cd-iso-title{font-size:.91rem;line-height:1.3}
+.cd-iso-meaning,.cd-iso-question,.cd-iso-boundary{
+ margin:0!important;font-size:.79rem;line-height:1.42;overflow-wrap:anywhere
+}
+.cd-iso-question{color:var(--text)}
+.cd-iso-boundary{color:var(--muted)}
+.cd-iso-expand,.cd-iso-dialog-close{
+ display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+ width:fit-content;max-width:100%;border:1px solid var(--primary);
+ border-radius:9px;background:var(--detail-bg);color:var(--text);
+ padding:8px 12px;cursor:pointer;font:inherit;font-size:.82rem;font-weight:750
+}
+.cd-iso-expand:focus-visible,.cd-iso-dialog-close:focus-visible{
+ outline:3px solid var(--primary);outline-offset:2px
+}
+.cd-iso-fallback{padding:8px;font-size:.78rem;line-height:1.4;overflow-wrap:anywhere}
+.cd-iso-tutorial{grid-template-columns:minmax(0,1fr);gap:8px}
+.cd-iso-tutorial .cd-iso-art{min-height:96px}
+.cd-iso-tutorial .cd-iso-image{height:140px}
+.cd-iso-tutorial .cd-iso-meaning{font-size:.84rem}
+.cd-iso-monitor{grid-template-columns:minmax(0,96px) minmax(0,1fr);margin:9px 0}
+.cd-iso-monitor .cd-iso-image{height:100px}
+.cd-iso-route{margin:5px 0 8px}
+.cd-iso-route-caption{margin:0 0 6px!important;font-size:.82rem;font-weight:750}
+.cd-iso-route-list{
+ display:flex;flex-wrap:wrap;gap:5px;list-style:none;
+ padding:0;margin:0
+}
+.cd-iso-route-list li{
+ border:1px solid var(--border);border-radius:7px;
+ background:var(--detail-bg);padding:5px 7px;
+ font-size:.75rem;line-height:1.35
+}
+.cd-iso-route-list li[data-kind="management"]{border-left:3px solid var(--primary)}
+.cd-iso-route-list li[data-kind="physical"]{border-left:3px solid var(--detail-label)}
+.cd-iso-route .footnote{font-size:.76rem}
+.cd-iso-dialog{
+ position:fixed;inset:0;margin:auto;box-sizing:border-box;
+ width:min(96vw,680px);max-height:calc(100dvh - 18px);
+ padding:12px;overflow-y:auto;border:1px solid var(--border);border-radius:16px;
+ background:var(--panel);color:var(--text);
+ box-shadow:0 20px 76px #0009
+}
+.cd-iso-dialog::backdrop{background:#040a14e0}
+.cd-iso-dialog-head{display:flex;align-items:center;justify-content:space-between;
+ gap:10px;margin-bottom:8px}
+.cd-iso-dialog-head h2{margin:0;font-size:1.06rem;line-height:1.3}
+.cd-iso-dialog-image{height:auto;max-height:min(55dvh,480px);max-width:100%;
+ object-fit:contain;margin:auto;background:var(--detail-bg);border-radius:11px}
+.cd-iso-dialog .note,.cd-iso-dialog .footnote{font-size:.87rem;line-height:1.5}
+@media(max-width:355px){
+ .cd-iso-card{grid-template-columns:90px minmax(0,1fr);gap:8px;padding:8px}
+ .cd-iso-image{height:96px}
+ .cd-iso-tutorial{grid-template-columns:minmax(0,1fr)}
+ .cd-iso-monitor{grid-template-columns:90px minmax(0,1fr)}
+ .cd-iso-copy{gap:3px}
+ .cd-iso-meaning{font-size:.77rem}
+}
+@media(orientation:landscape) and (max-height:530px){
+ .cd-iso-tutorial .cd-iso-image{height:90px}
+ .cd-iso-dialog-image{max-height:40dvh}
+}
+@media(forced-colors:active){
+ .cd-iso-card,.cd-iso-dialog,.cd-iso-art,.cd-iso-expand,
+ .cd-iso-dialog-close,.cd-iso-route-list li{
+  background:Canvas;color:CanvasText;border-color:CanvasText
+ }
+}
