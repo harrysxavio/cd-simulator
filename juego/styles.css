@@ -1717,3 +1717,25 @@ html,body{height:100%;overflow:hidden}
  .i2-command-area-words strong{font-size:.74rem}}
 @media(forced-colors:active){.i2-command-deck,.i2-command-area-card{
  background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* I2-35.7a · bitácora de órdenes realmente confirmadas en el motor. */
+.i2-ops-command-log{margin:12px 0;padding:12px;border:1px solid var(--primary);
+ border-radius:14px;background:var(--panel);min-width:0}
+.i2-ops-command-log>strong{display:block;color:var(--detail-label);
+ font-weight:850;font-size:.83rem;letter-spacing:.025em}
+.i2-ops-command-log>.note,.i2-ops-command-log>.footnote{
+ margin:8px 0!important;font-size:.8rem;line-height:1.45}
+.i2-ops-command-item{border-left:3px solid var(--primary);border-radius:9px;
+ margin:8px 0;padding:10px;background:var(--detail-bg);min-width:0}
+.i2-ops-command-item>strong{font-size:.87rem;line-height:1.35}
+.i2-ops-command-item p{margin:5px 0 0!important;font-size:.79rem;line-height:1.4}
+.i2-ops-command-status{color:var(--detail-label);font-weight:750}
+@media(max-width:355px){
+ .i2-ops-command-log{padding:9px}
+ .i2-ops-command-item{padding:8px}
+}
+@media(forced-colors:active){
+ .i2-ops-command-log,.i2-ops-command-item{
+  color:CanvasText;background:Canvas;border-color:CanvasText
+ }
+}
