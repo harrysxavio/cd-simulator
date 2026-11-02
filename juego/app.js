@@ -29,6 +29,7 @@ import {i2ManagementDiagnosis} from '../src/i2-management-diagnosis.js';
 import {i2EmptyRecoveryActions,i2NormalizeMultiRecovery} from '../src/i2-multi-recovery.js';
 import {i2MultiLeverPreview} from '../src/i2-multilever-preview.js';
 import {renderI2MultiLeverPanel} from './multi-lever-panel.js';
+import {renderI2RecoveryAreaBoard} from './recovery-command-board.js';
 import {i2ManagerResultBoard} from '../src/i2-manager-result-board.js';
 import {renderI2ManagerResultBoard} from './manager-result-panel.js';
 import {i2AreaPhysicalTimeline} from '../src/i2-area-physical-timeline.js';
@@ -1620,6 +1621,35 @@ function recoveryScene(){
     p('No intervenir también es una decisión válida. Pagar refuerzos no garantiza pedidos adicionales.','footnote')
    ])
   ]),
+  renderI2RecoveryAreaBoard(state,{
+   onNavigate:(areaId,targetId,source)=>{
+    const multi=root.querySelector('.multi-lever-panel');
+    const classic=root.querySelector('.i2-classic-recovery');
+    if(classic?.open){classic.open=false;classicOpened=false}
+    if(multi&&!multi.open)multi.open=true;
+    multiOpened=true;
+    syncRecoveryModeFooter();
+    const target=root.querySelector('#'+targetId);
+    if(!target||target.disabled){
+     showError(new Error('La acción de '+areaId+' no está habilitada en esta misión'));
+     return;
+    }
+    target.scrollIntoView({block:'center',behavior:'auto'});
+    target.focus({preventScroll:true});
+   },
+   onExplain:(area,reason,source)=>{
+    const chosen=area.choices.find(c=>c.optionId===state.choices[area.id]);
+    openI2HelpDialog({
+     title:area.title+' · Estado gerencial',
+     paragraphs:[
+      'Política comprometida: '+(chosen?.label??'No disponible')+'.',
+      reason,
+      'La demanda ya fue revelada y las políticas iniciales no pueden modificarse retroactivamente. Aquí no existe una nueva orden física de esta área.',
+      'Si el modelo incorpora esta orden en próximas fases, deberá tener fecha, costo, restricciones y un efecto verificable. Puedes seguir comparando las tres palancas reales disponibles.'
+     ]
+    },source);
+   }
+  }),
   section('i2-recovery-workbench-title',[
    node('strong',{text:'1 · Arma tu plan de acciones'}),
    p('Modo recomendado: marca cero, una o varias acciones, compara el servicio y gasto, y confirma DENTRO del panel. El botón inferior solo sirve para el modo clásico.','note')
