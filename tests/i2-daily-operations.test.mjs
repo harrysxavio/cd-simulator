@@ -108,3 +108,25 @@ test('I2-35.5c3b: impossible saved journal dates cannot bypass incident stage',(
  const tampered={...first,incidentViewDay:3,recoveryConfirmation:undefined};
  assert.equal(normalizeI2GameState(tampered),null);
 });
+
+/** I2-35.9: la comparación gerencial utiliza solo dos jornadas ya observadas. */
+test('I2-35.9: radar de hoy contra ayer concilia exactamente con el ledger SKU',()=>{
+ for(const seed of ['ops-dock-01','ops-quality-01','ops-combined-01']){
+  const state=firstResponse(seed,'wait');
+  const model=i2DailyOperationsSnapshot(state);
+  const replay=i2CompareMultiRecovery({
+   state,plans:[state.recoveryConfirmation.actions]
+  }).results[0].comparison.recovered;
+  const today=replay.ledger[model.day],yesterday=replay.ledger[model.day-1];
+  assert.equal(model.yesterdayShippedOrders,yesterday.shipped);
+  assert.equal(model.changePendingOrders,today.backlog-yesterday.backlog);
+  assert.equal(model.changeDockQueueSkuUnits,
+   today.waitingReceiving-yesterday.waitingReceiving);
+  assert.equal(model.changeQualityQueueSkuUnits,
+   today.waitingQuality-yesterday.waitingQuality);
+  assert.equal(model.newlyShippedOrders,today.shipped);
+  assert.ok(!Object.hasOwn(model,'tomorrowPendingOrders'));
+  assert.ok(!Object.hasOwn(model,'futureIncident'));
+  assert.ok(Object.isFrozen(model));
+ }
+});
