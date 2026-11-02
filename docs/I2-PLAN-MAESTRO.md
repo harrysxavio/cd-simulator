@@ -1,5 +1,7 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab13 · SIGUIENTE MICROCORTE I2-36.10 (01-11-2026, candidato):** tras fusionar #145, #146 y #147, se implementó en rama `feat/i2-36-10-recovery-confirmation-modes` la separación de modos de recuperación: **un solo CTA de confirmación por modo**, sin modificar simulación, inventario, costo ni sorpresa. E2E nuevo valida 0 acciones, cancelación y retorno entre paneles; **esperar CI/merge/Pages** antes de aprobar I2-36.10. Sigue prioridad: I2-36.6 portada simple, I2-36.8 fichas por área, I2-36.9 diagnóstico priorizado, I2-35.6 misiones físicas, I2-37 aprendizaje y aceptación I2-38–40. [Especificación](I2-36-10-RECUPERACION-MODOS-2026-11-01.md). **35/41 padres**; seis abiertos I2-35–I2-40.
+
 > **Lab13 · MICROCORTES UX I2-36.8a (01-11-2026):** tarjeta isométrica de cada área compacta (70/64 px + botón táctil 44 px) y explicación íntegra en modal; sin duplicar texto sobre las 24 alternativas, sin modificar físicas/PO/costos. Prueba browser en 320×568, foco, ocho imágenes, estado persistente y scroll exterior. **CI/merge/Pages no confirmados**. [Contrato](I2-36-8-ARTE-COMPACTO-2026-11-01.md). Predecesores: arte original PR #146 ya publicado, navegación PR #147 ya publicada. Otra rama independiente aborda I2-36.10 (CTA de recuperación). Mantener **35/41** fases padre hasta aceptación completa.
 
 
