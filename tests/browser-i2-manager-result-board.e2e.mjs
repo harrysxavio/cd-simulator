@@ -23,6 +23,7 @@ for(const mode of ['classic','multi']){
  try{
   await toRecovery(page);
   if(mode==='classic'){
+   await page.locator('.i2-classic-recovery summary').click();
    await page.locator('#gameNext').click();
   }else{
    if(!(await page.locator('.multi-lever-panel').evaluate(el=>el.open)))await page.locator('.multi-lever-panel > summary').click();
