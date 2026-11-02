@@ -37,6 +37,7 @@ test('I2-14: configuración por semilla, demanda sin spoilers, bloqueo y replay 
   await page.locator('#gameNext').click(); // Revelación explícita.
   assert.match(await page.locator('#gameScene h1').innerText(),/disminuyó un 15 %/);
   assert.match(await page.locator('#gameScene').innerText(),/170/);
+  await page.locator('.i2-classic-recovery summary').click(); // modo simple explícito
   await page.locator('#gameNext').click(); // Confirmar recuperación sin intervenir.
   assert.match(await page.locator('#gameScene').innerText(),/170 pedidos completos/);
   await page.locator('#gameNext').click(); // Nueva partida con las mismas condiciones.
