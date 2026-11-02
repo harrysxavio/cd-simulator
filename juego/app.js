@@ -16,6 +16,8 @@ import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
 import {i2DailyOperationsSnapshot} from '../src/i2-daily-operations.js';
 import {i2DatedOrdersForObservedDay} from '../src/i2-dated-operational-orders.js';
+import {i2ConfirmDay3ReceivingFollowup} from '../src/i2-day3-receiving-followup.js';
+import {openI2Day3ReceivingDialog} from './day3-receiving-dialog.js';
 import {I2_QUALITY_BRIDGE} from '../src/i2-quality-bridge.js';
 import {I2_RECEIVING_SHIFT} from '../src/i2-receiving-shift.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
@@ -1252,6 +1254,10 @@ function incidentDailyScene(){
   committed=i2DatedOrdersForObservedDay(state);
  }catch(e){showError(e);return}
  const closing=model.day===model.horizonDays;
+ // Una orden nueva real solo después de observar el día 3.
+ const canApproveDockFollowup=model.day===3&&!state.receivingResponse&&
+  state.incidentStep!==2&&
+  i2OperationalEventsForSeed(state.eventSeed)[0]?.kind==='receiving-stop';
  stage.textContent='Diario del CD · Jornada '+model.day;
  // The journey bar must not move backwards when transitioning between
  // the two incident checkpoints and their day-by-day observations.
@@ -1362,8 +1368,19 @@ function incidentDailyScene(){
    p(closing?'Terminó el horizonte de doce jornadas. Ahora puedes analizar el resultado completo.':
     'Aún no conoces las jornadas siguientes ni el resultado final. Avanza para observar el próximo día.','footnote')
   ]),
+  ...(canApproveDockFollowup?[
+   section('i2-daily-followup-action',[
+    node('strong',{text:'DECISIÓN DISPONIBLE · RECEPCIÓN'}),
+    p('En el día 3 puedes autorizar un turno extra para el día 4: +80 cupos SKU, costo fijo $55.000. Primero mira la cola de muelle. No cambia el día 2 ni lo ejecutado hoy.','note'),
+    node('button',{className:'i2-daily-followup-trigger',
+     text:'Evaluar turno extra de Recepción para día 4',
+     attrs:{type:'button','aria-haspopup':'dialog'}})
+   ])
+  ]:[]),
   section('i2-daily-action-status',[
-   node('strong',{text:'Jornada de seguimiento · sin orden nueva'}),
+   node('strong',{text:canApproveDockFollowup?
+    'Jornada de seguimiento · puedes autorizar un turno para mañana':
+    'Jornada de seguimiento · sin nueva orden disponible'}),
    p('Hoy observas cómo se ejecuta el plan y las órdenes ya autorizadas. Este modelo ofrece otra decisión solo cuando aparece un incidente observable; no permite cambiar a posteriori las ocho políticas iniciales.','note'),
    node('button',{className:'i2-daily-explain-button',
     text:'¿Por qué no puedo cambiar otras áreas hoy?',
@@ -1371,6 +1388,13 @@ function incidentDailyScene(){
   ]),
   p(model.note,'footnote')
  ]);
+ const lateAction=root.querySelector('.i2-daily-followup-trigger');
+ if(lateAction)lateAction.addEventListener('click',()=>{
+  openI2Day3ReceivingDialog({source:lateAction,onCommit:()=>{
+   state=i2ConfirmDay3ReceivingFollowup(state);
+   saveAndRender();
+  }});
+ });
  const why=root.querySelector('.i2-daily-explain-button');
  why.addEventListener('click',()=>openI2HelpDialog({
   title:'Qué puedes decidir y qué está bloqueado',
