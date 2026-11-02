@@ -112,6 +112,43 @@ async function verify(attempt){
    console.log('Nico image verified:',image.path,bytes.length,'bytes');
   }));
  }
+ // Lab12 · I2-36: verify the ten original isometric CD files by binary SHA.
+ // A build may succeed even when /juego/ references a wrong or stale image.
+ const [artCatalog,sceneUi,tourUi]=await Promise.all([
+  req('src/i2-cd-isometric-art.js',attempt),
+  req('juego/cd-isometric-scenes.js',attempt),
+  req('juego/nico-journey-dialog.js',attempt)
+ ]);
+ if(!artCatalog.includes('I2_CD_ART')||
+    !sceneUi.includes('renderI2CdScene')||
+    !gameJs.includes("renderI2CdScene(area.id")||
+    !tourUi.includes("renderI2CdScene(artKey")||
+    !gameCss.includes('.cd-iso-card'))
+  throw Error('Published isometric CD tutorial/area UI is absent or stale');
+ const sceneImages=[
+  '01_centro_logistico_completo.png',
+  'areas/02_comercial.png','areas/03_planificacion.png',
+  'areas/04_compras.png','areas/05_recepcion.png',
+  'areas/06_calidad.png','areas/07_inventario_almacen.png',
+  'areas/08_picking.png','areas/09_transporte_despacho.png',
+  'areas/10_monitoreo_gerencia.png'
+ ];
+ for(let i=0;i<sceneImages.length;i+=2){
+  await Promise.all(sceneImages.slice(i,i+2).map(async file=>{
+   const local=readFileSync(new URL('../juego/assets/cd-isometrico/'+file,import.meta.url));
+   const url=new URL('juego/assets/cd-isometrico/'+file,base);
+   url.searchParams.set('cd_art_sha_check',release.assetRevision+'-'+attempt);
+   const response=await fetch(url,{cache:'no-store',
+    signal:AbortSignal.timeout(18000),headers:{'Cache-Control':'no-cache'}});
+   if(!response.ok)throw Error('CD isometric image missing '+file+' HTTP '+response.status);
+   const remote=Buffer.from(await response.arrayBuffer());
+   const expectedHash=createHash('sha256').update(local).digest('hex');
+   const remoteHash=createHash('sha256').update(remote).digest('hex');
+   if(remote.length!==local.length||remoteHash!==expectedHash)
+    throw Error('CD isometric art differs from original bytes '+file);
+   console.log('CD isometric image verified:',file,remote.length,'bytes');
+  }));
+ }
  let manifest;
  try{manifest=JSON.parse(remoteManifest)}catch{throw Error('Published release.json not valid JSON')}
  if(manifest.version!==release.version||manifest.assetRevision!==release.assetRevision)throw new Error('Published release manifest differs from repository HEAD');

@@ -1,5 +1,6 @@
 import {I2_NICO_MANAGER_TOUR} from '../src/i2-nico-manager-learning.js';
 import {I2_NICO_LEVELS} from '../src/i2-nico-tutorial.js';
+import {renderI2CdScene,renderI2CdRoute} from './cd-isometric-scenes.js';
 
 /**
  * I2-36.3: seven short, sequential managerial teaching steps in a real dialog.
@@ -85,7 +86,18 @@ export function openI2NicoJourney({source,portraitSrc='./nico.svg',portraitForSt
   const bubble=build('p','nico-journey-bubble',part.body);
   const example=build('p','nico-journey-example','Imagina esto: '+part.example.replace(/^Ejemplo(?: didáctico basado en el catálogo)?:\s*/i,''));
   const question=build('p','nico-journey-question','Pregunta de gerente: '+part.watch);
-  content.append(bubble,example,question);
+  content.append(bubble);
+  // A single contextual image for the CURRENT step; no eager download of all 10.
+  // Future events and physical results are never queried by this visual guide.
+  const artKey={
+   gerencia:'overview',recorrido:'overview',plan:'planning',
+   sku:'picking',metricas:'monitoring'
+  }[part.id];
+  if(artKey)content.append(renderI2CdScene(artKey,{
+   variant:'tutorial',showQuestion:false
+  }));
+  if(part.id==='recorrido')content.append(renderI2CdRoute());
+  content.append(example,question);
   if(level==='avanzado'||level==='intermedio'){
    const depth=build('details','nico-journey-depth');
    const summary=build('summary','','¿Qué ocurre en la operación y el cliente?');
