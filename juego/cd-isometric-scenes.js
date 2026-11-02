@@ -81,7 +81,11 @@ export function renderI2CdScene(key,{variant='compact',showQuestion=false}={}){
  action.setAttribute('aria-haspopup','dialog');
  action.setAttribute('aria-label','Ampliar ilustración de '+scene.title);
  action.addEventListener('click',()=>openI2CdSceneDialog(key,action));
- copy.append(title,meaning);
+ // Las ocho decisiones ya incluyen una explicación operativa de Nico.
+ // Repetir el mismo párrafo junto a una imagen grande empuja las alternativas
+ // bajo el pliegue de un teléfono. El modal conserva el texto íntegro.
+ if(variant==='compact')copy.append(title);
+ else copy.append(title,meaning);
  if(showQuestion)copy.append(el('p','cd-iso-question','Nico: '+scene.question));
  if(key==='monitoring')copy.append(el('p','cd-iso-boundary',
   'Los indicadores dibujados son ilustrativos. Los KPI de tu partida se calculan por separado.'));
