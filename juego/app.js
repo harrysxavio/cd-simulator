@@ -15,6 +15,7 @@ import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards
 import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
 import {i2DailyOperationsSnapshot} from '../src/i2-daily-operations.js';
+import {i2DatedOrdersForObservedDay} from '../src/i2-dated-operational-orders.js';
 import {I2_QUALITY_BRIDGE} from '../src/i2-quality-bridge.js';
 import {I2_RECEIVING_SHIFT} from '../src/i2-receiving-shift.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
@@ -1245,8 +1246,11 @@ function operationalIncidentOutcomePanel(){
  */
 /** Reloj de operaciones: sólo las observaciones del día actual, sin spoilers. */
 function incidentDailyScene(){
- let model;
- try{model=i2DailyOperationsSnapshot(state)}catch(e){showError(e);return}
+ let model,committed;
+ try{
+  model=i2DailyOperationsSnapshot(state);
+  committed=i2DatedOrdersForObservedDay(state);
+ }catch(e){showError(e);return}
  const closing=model.day===model.horizonDays;
  stage.textContent='Diario del CD · Jornada '+model.day;
  // The journey bar must not move backwards when transitioning between
@@ -1298,6 +1302,25 @@ function incidentDailyScene(){
    ?'Nico: hoy hay una etapa detenida. Observa los pendientes; los SKU retenidos no son mercancía perdida.'
    :'Nico: hoy procesamos el plan y las órdenes ya confirmadas. Mira los despachos y las colas que quedan.','lead'),
   radar,
+  section('i2-ops-command-log',[
+   node('strong',{text:'ÓRDENES GERENCIALES · HISTORIAL CONFIRMADO'}),
+   p(committed.committedCount
+    ?committed.committedCount+' intervención(es) autorizada(s): '+
+     committed.objectiveToday+' con fecha objetivo hoy y '+
+     committed.waitingForDate+' programada(s) para jornadas siguientes.'
+    :'Aún no has autorizado órdenes adicionales. Mantener la operación sin gastar también es una decisión.','note'),
+   ...committed.orders.map(order=>section('i2-ops-command-item',[
+    node('strong',{text:order.icon+' '+order.title}),
+    p('Emitida día '+order.issuedDay+' · fecha objetivo día '+
+     order.effectiveDay+' · '+order.statusLabel,'i2-ops-command-status'),
+    p(order.detail,'note'),
+    ...(order.extraCostCLP===null?[]:[
+     p('Costo extraordinario fijo comprometido: '+money.format(order.extraCostCLP)+
+      '. Es un supuesto educativo.','footnote')
+    ])
+   ])),
+   p(committed.note,'footnote')
+  ]),
   section('metrics-grid i2-daily-metrics',[
    ...[
     ['Expedidos hoy',model.newlyShippedOrders+' pedidos'],
