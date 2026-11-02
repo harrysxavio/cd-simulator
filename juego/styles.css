@@ -1506,3 +1506,20 @@ html,body{height:100%;overflow:hidden}
  font-size:.84rem;line-height:1.46;overflow-wrap:anywhere}
 @media(forced-colors:active){.choice-commit-guide{background:Canvas;
  color:CanvasText;border-color:Highlight}}
+
+
+/* I2-36.8 · El arte acompaña la decisión, no la aleja del primer pliegue.
+ * La explicación íntegra sigue a un toque en «Ampliar escena». */
+.cd-iso-compact{
+ grid-template-columns:72px minmax(0,1fr);gap:8px;
+ padding:7px 9px;margin:5px 0 8px
+}
+.cd-iso-compact .cd-iso-art{min-height:68px}
+.cd-iso-compact .cd-iso-image{height:70px}
+.cd-iso-compact .cd-iso-copy{gap:2px}
+.cd-iso-compact .cd-iso-title{font-size:.84rem}
+.cd-iso-compact .cd-iso-expand{min-height:44px;font-size:.81rem}
+@media(max-width:355px){
+ .cd-iso-compact{grid-template-columns:64px minmax(0,1fr);gap:6px}
+ .cd-iso-compact .cd-iso-image{height:64px}
+}
