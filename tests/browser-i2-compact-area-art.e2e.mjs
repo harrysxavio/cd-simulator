@@ -19,24 +19,20 @@ test('I2-36.8: las ocho imágenes son compactas y las explicaciones completas se
   await page.goto(BASE+'/juego/',{waitUntil:'networkidle'});
   await page.locator('#gameNext').click();
   for(const key of I2_CD_AREA_ORDER){
-   const art=page.locator('.cd-iso-compact');
-   assert.equal(await art.getAttribute('data-cd-scene'),key);
-   const size=await art.boundingBox();
-   assert.ok(size.height<=110,'El arte de '+key+' no debe ocupar un bloque gigante: '+size.height);
-   assert.equal(await art.locator('.cd-iso-meaning').count(),0,
-    'El texto íntegro no se duplica antes de las alternativas en '+key);
-   const expand=art.getByRole('button',{name:/Ampliar ilustración/});
-   const target=await expand.boundingBox();
-   assert.ok(target.height>=44,'Tap target en '+key);
+   assert.equal(await page.locator('.cd-iso-compact').count(),0);
+   const explore=page.locator('.i2-area-explore');
+   const target=await explore.boundingBox();
+   assert.ok(target.height>=44,'Botón para estudiar el área: '+key);
    const before=await page.evaluate(k=>localStorage.getItem(k),KEY);
-   await expand.click();
-   const modal=page.locator('.cd-iso-dialog');
+   await explore.click();
+   const modal=page.locator('.i2-cd-area-guide-dialog');
    assert.equal(await modal.isVisible(),true);
-   assert.match(await modal.innerText(),new RegExp(i2CdSceneFor(key).meaning.slice(0,18).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+   assert.ok((await modal.innerText()).includes(i2CdSceneFor(key).meaning));
    assert.equal(await modal.locator('img').count(),1);
-   await modal.getByRole('button',{name:'Cerrar imagen'}).click();
+   assert.equal(await modal.locator('.i2-cd-area-guide-topic').count(),6);
+   await modal.getByRole('button',{name:/Cerrar explicación/}).click();
    await modal.waitFor({state:'detached'});
-   assert.equal(await expand.evaluate(el=>document.activeElement===el),true);
+   assert.equal(await explore.evaluate(el=>document.activeElement===el),true);
    assert.equal(await page.evaluate(k=>localStorage.getItem(k),KEY),before);
    assert.equal(await page.locator('.game-choice').count(),3);
    const geometry=await page.evaluate(()=>({
