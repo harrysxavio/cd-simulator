@@ -1498,3 +1498,11 @@ html,body{height:100%;overflow:hidden}
   background:Canvas;color:CanvasText;border-color:CanvasText
  }
 }
+
+/* Lab12 · Estado visible de propuesta frente a compromiso definitivo. */
+.choice-commit-guide{margin:0 0 7px!important;padding:9px 11px;
+ border-left:3px solid var(--primary);border-radius:7px;
+ background:var(--detail-bg);color:var(--text);
+ font-size:.84rem;line-height:1.46;overflow-wrap:anywhere}
+@media(forced-colors:active){.choice-commit-guide{background:Canvas;
+ color:CanvasText;border-color:Highlight}}
