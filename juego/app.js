@@ -8,6 +8,7 @@ import {i2SafeScorecard} from '../src/i2-result-boundary.js';
 import {navigateI2GameState,i2FooterLabels} from '../src/i2-game-navigation.js';
 import {openI2HelpDialog} from './help-dialog.js';
 import {openI2NicoJourney} from './nico-journey-dialog.js';
+import {renderI2CdScene} from './cd-isometric-scenes.js';
 import {i2OperationalSituationCards} from '../src/i2-operational-situation-cards.js';
 import {i2IncidentDecisionCheckpoint,i2ConfirmIncidentResponse,
  i2ConfirmNextIncidentResponse} from '../src/i2-incident-response.js';
@@ -221,30 +222,16 @@ function updateFooter({beforeAdvance=null}={}){
 }
 function choiceList(area){
  const locked=state.confirmedAreas.includes(area.id);
- const current=area.choices.find(c=>c.optionId===state.choices[area.id]);
- const cards=area.choices.map((c,index)=>{
+ const cards=area.choices.map(c=>{
   const option=button(c.label,()=>{
    if(locked)return;
-   // Mantener la posición y el foco: elegir otra tarjeta no significa
-   // cambiar de etapa ni debe obligar a recorrer de nuevo la pantalla.
-   const previousScroll=root.scrollTop;
-   state.choices[area.id]=c.optionId;
-   saveAndRender();
-   const fresh=root.querySelectorAll('.game-choice')[index];
-   fresh?.focus({preventScroll:true});
-   root.scrollTop=previousScroll;
+   state.choices[area.id]=c.optionId;saveAndRender();
   },{selected:state.choices[area.id]===c.optionId,description:c.description});
   option.disabled=locked;
   return option;
  });
- const list=section('choice-list',[
-  p((locked?'Decisión confirmada: ':'Propuesta actual: ')+
-   (current?.label??'Sin alternativa')+
-   (locked?'. Puedes consultarla, pero no editarla en esta partida.':
-    '. Puedes cambiarla antes de pulsar el botón inferior de confirmación.'),
-   'choice-commit-guide'),
-  ...cards
- ]);
+ const list=section('choice-list',cards);
+ if(locked)list.append(p('Decisión confirmada. Puedes consultarla, pero para cambiarla debes reiniciar la campaña.','note'));
  return list;
 }
 function objectivesSummary(){
@@ -567,10 +554,8 @@ function qualityGuidedDebriefPanel(){
   try{
    const evidence=i2QualityGuidedReflection(state);
    panel.append(section('i2-quality-guided-findings',[
-    p('Tu política: '+I2_AREAS.find(a=>a.id==='quality').choices.find(c=>
-      c.optionId===evidence.chosenQuality)?.label+
-     ' · política comparada: '+I2_AREAS.find(a=>a.id==='quality').choices.find(c=>
-      c.optionId===evidence.alternativeQuality)?.label,'note'),
+    p('Tu política: '+evidence.chosenQuality+
+     ' · política comparada: '+evidence.alternativeQuality,'note'),
     section('metrics-grid',[
      section('metric-card',[
       node('span',{text:'Tu plan · retenidos'}),
@@ -662,7 +647,7 @@ function intro(){
  stage.textContent=i2IsQualityGuided(state)?'Reto guiado · Calidad':
   i2IsPickingPilot(state)?'Reto guiado · Picking':'Misión 01 · Tu primer turno';
  replace([
-  p(((i2IsPickingPilot(state)||i2IsQualityGuided(state))?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
+  p((i2IsPickingPilot(state)?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
   heading(brief.title),
   p(brief.meaning,'intro-meaning'),
   p(brief.objective,'lead'),
@@ -1043,6 +1028,7 @@ function areaScene(){
   p('DECISIÓN '+(state.index+1)+' DE 8','eyebrow'),
   heading(original.icon+' '+original.title),
   p(area.question,'lead'),
+  renderI2CdScene(area.id,{variant:'compact'}),
   shell
  ],{guide:false});
  updateFooter();
@@ -1099,6 +1085,7 @@ function managementDiagnosisPanel(model){
  const sku=i2WhySkuAndDays();
  panel.append(
   node('summary',{text:'Diagnóstico de Nico · ¿dónde se detienen los pedidos?'}),
+  renderI2CdScene('monitoring',{variant:'monitor',showQuestion:true}),
   p(model.coach.observation,'note'),
   p('Esto es una lectura del plan original, sin recuperación; ninguna señal prueba por sí sola qué intervención funcionará.','footnote'),
   section('diagnosis-metric-grid',[
@@ -1292,6 +1279,7 @@ function incidentSecondResponseScene(){
  replace([
   p('LA OPERACIÓN CONTINÚA · SEGUNDO INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Nuevo problema en el CD'),
+  renderI2CdScene('quality',{variant:'compact'}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-quality-decision')]:[]),
   p(checkpoint.description,'lead'),
   p('La primera decisión sigue vigente y ya afectó las jornadas anteriores. No puedes retirarla ni cambiar su fecha.','note'),
@@ -1373,6 +1361,8 @@ function incidentResponseScene(){
  replace([
   p('OPERACIÓN EN MARCHA · PRIMER INCIDENTE OBSERVADO','eyebrow'),
   heading('Día '+checkpoint.decisionDay+' · Necesitamos tu decisión'),
+  renderI2CdScene(checkpoint.incidentKind==='receiving-stop'?'receiving':'quality',
+   {variant:'compact'}),
   ...(I2_NICO_ASSETS_READY?[nicoMomentPortrait('incident-decision')]:[]),
   p(checkpoint.description,'lead'),
   section('metrics-grid i2-incident-checkpoint',[
@@ -2080,7 +2070,6 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced,eventSeed:state.eventSeed??null,
- guidedScenario:state.guidedScenario??null});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced,eventSeed:state.eventSeed??null});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
 });
 render();
