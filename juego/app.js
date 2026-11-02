@@ -37,6 +37,8 @@ import {i2ChallengeReplayMatrix} from '../src/i2-challenge-replay-matrix.js';
 import {i2SixQuestionSummary} from '../src/i2-six-question-summary.js';
 import {I2_PICKING_PILOT,i2IsPickingPilot,i2StartPickingPilot,
  i2LeavePickingPilot,i2PickingPilotReflection} from '../src/i2-guided-picking-pilot.js';
+import {I2_QUALITY_GUIDED,i2IsQualityGuided,i2StartQualityGuided,
+ i2LeaveQualityGuided,i2QualityGuidedReflection} from '../src/i2-quality-guided-mission.js';
 import {renderI2NicoEvidenceLearning} from './nico-learning-panel.js';
 import {i2ConfirmMultiRecovery,i2ClearMultiRecovery,i2ConfirmedMultiOutcome} from '../src/i2-recovery-confirmation.js';
 import {I2_NICO_LEVELS,readI2NicoLevel,saveI2NicoLevel,
@@ -250,6 +252,8 @@ function challengeField(locked){
   try{
    // El escenario queda precomprometido antes de la primera confirmación.
    state.seed=i2ChallengeForSeed(select.value).seed;
+   // Un cambio libre de semilla sale del reto guiado sin alterar el plan.
+   if(i2IsQualityGuided(state))delete state.guidedScenario;
    persist();
    const label=root.querySelector('#gameChallengeLabel');
    if(label)label.textContent='Reto activo: '+i2ChallengeForSeed(state.seed).level;
@@ -341,6 +345,10 @@ function advancedSettings(){
   try{
    const next=i2ValidateAdvanced(draft);
    state.advanced=next;
+   // Un perfil personalizado deja de ser el preset conocido.
+   if(i2IsQualityGuided(state)&&
+      (next.stockProfile!=='low'||next.pickingLimitSkuPerDay!=='base'))
+    delete state.guidedScenario;
    persist();
    const label=root.querySelector('#advancedSummary');
    if(label)label.textContent=advancedSummary();
@@ -463,6 +471,7 @@ function operationalIncidentCard(){
    else{
     // Random assignment is independent of demand seed, choices or score.
     // Persist immediately so reloading never redraws a different incident.
+    if(i2IsQualityGuided(state))state=i2LeaveQualityGuided(state);
     const sample=new Uint32Array(1);
     window.crypto.getRandomValues(sample);
     state.eventSeed=I2_OPERATIONAL_EVENT_SEEDS[sample[0]%I2_OPERATIONAL_EVENT_SEEDS.length];
@@ -485,10 +494,10 @@ function pickingPilotStartCard(){
  const locked=state.confirmedAreas.length>0;
  const control=node('button',{className:'i2-picking-pilot-button',attrs:{type:'button'},
   text:active?'Volver al reto inicial':'Activar reto de diagnóstico'});
- control.disabled=locked||!!state.eventSeed;
+ control.disabled=locked||!!state.eventSeed||i2IsQualityGuided(state);
  control.addEventListener('click',()=>{
   try{
-   if(state.eventSeed)return;
+   if(state.eventSeed||i2IsQualityGuided(state))return;
    state=active?i2LeavePickingPilot(state):i2StartPickingPilot(state);
    persist();render();
   }catch(error){showError(error)}
@@ -501,6 +510,83 @@ function pickingPilotStartCard(){
   ...(locked?[p('Ya confirmaste una decisión. Para cambiar de reto, reinicia la campaña.','footnote')]:[]),
   control
  ]);
+}
+
+/**
+ * Segunda misión física guiada: no suplanta el shock ni promete mejoras.
+ * El botón se presenta como decisión de diagnóstico, no como desplegable largo.
+ */
+function qualityGuidedStartCard(){
+ const active=i2IsQualityGuided(state);
+ const locked=state.confirmedAreas.length>0;
+ const control=node('button',{className:'i2-quality-guided-button',
+  attrs:{type:'button',id:'gameQualityGuided'},
+  text:active?'Volver a la misión inicial':'Activar reto de Calidad'});
+ control.disabled=locked||!!state.eventSeed||i2IsPickingPilot(state);
+ control.addEventListener('click',()=>{
+  try{
+   if(state.eventSeed||i2IsPickingPilot(state))return;
+   state=active?i2LeaveQualityGuided(state):i2StartQualityGuided(state);
+   persist();render();
+  }catch(error){showError(error)}
+ });
+ return section('i2-quality-guided-card',[
+  node('strong',{text:I2_QUALITY_GUIDED.title}),
+  p(active?'Reto activo: comenzaste con stock reducido de los tres SKU.':
+   'Opcional: comienza con 75 % del inventario normal y decide cómo gestionar Calidad sin conocer todavía la demanda real.','note'),
+  p('Aprendizaje: reducir unidades retenidas no garantiza que salgan más pedidos. Nico comparará tu política con otra usando exactamente la misma demanda y las mismas compras originales.','footnote'),
+  ...(locked?[p('La planificación está confirmada. Reinicia para cambiar de reto.','footnote')]:[]),
+  control
+ ]);
+}
+
+/** Explicación bajo demanda y sin modificar estado, compras o resultado. */
+function qualityGuidedDebriefPanel(){
+ const panel=section('i2-quality-guided-debrief',[
+  node('strong',{text:'Nico · ¿Liberar más inventario mejora el servicio?'}),
+  p('Compara dos políticas de Calidad sobre tu plan original. No altera lo que decidiste.','note')
+ ]);
+ const control=node('button',{className:'i2-quality-guided-button',
+  attrs:{type:'button',id:'gameQualityAnalyze','aria-expanded':'false'},
+  text:'Ver comparación de Calidad'});
+ control.addEventListener('click',()=>{
+  try{
+   const evidence=i2QualityGuidedReflection(state);
+   panel.append(section('i2-quality-guided-findings',[
+    p('Tu política: '+evidence.chosenQuality+
+     ' · política comparada: '+evidence.alternativeQuality,'note'),
+    section('metrics-grid',[
+     section('metric-card',[
+      node('span',{text:'Tu plan · retenidos'}),
+      node('strong',{text:num.format(evidence.chosenHeldSku)+' unidades SKU'})
+     ]),
+     section('metric-card',[
+      node('span',{text:'Otra política · retenidos'}),
+      node('strong',{text:num.format(evidence.alternativeHeldSku)+' unidades SKU'})
+     ]),
+     section('metric-card',[
+      node('span',{text:'Tu plan · expedidos'}),
+      node('strong',{text:num.format(evidence.chosenShipped)+' pedidos'})
+     ]),
+     section('metric-card',[
+      node('span',{text:'Otra política · expedidos'}),
+      node('strong',{text:num.format(evidence.alternativeShipped)+' pedidos'})
+     ])
+    ]),
+    p(evidence.finding,'note'),
+    p('Pregunta gerencial: '+evidence.question,'note'),
+    p(evidence.boundary,'footnote')
+   ]));
+   control.setAttribute('aria-expanded','true');
+   control.textContent='Comparación mostrada';
+   control.disabled=true;
+  }catch(error){
+   console.error('I2-35.2 reflexión Calidad:',error);
+   panel.append(p('No fue posible verificar los resultados físicos.','note'));
+  }
+ });
+ panel.append(control);
+ return panel;
 }
 
 /** Optional retrospective explanation; only computes after the user requests it. */
@@ -557,7 +643,8 @@ function nicoSixQuestionPanel(score,evaluation){
 }
 function intro(){
  const brief=i2FirstMissionBriefing(state);
- stage.textContent=i2IsPickingPilot(state)?'Reto guiado · Picking':'Misión 01 · Tu primer turno';
+ stage.textContent=i2IsQualityGuided(state)?'Reto guiado · Calidad':
+  i2IsPickingPilot(state)?'Reto guiado · Picking':'Misión 01 · Tu primer turno';
  replace([
   p((i2IsPickingPilot(state)?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
   heading(brief.title),
@@ -574,6 +661,7 @@ function intro(){
    p(brief.resumeLabel+'. Puedes continuar sin perder lo que ya decidiste.','intro-resume')
   ]:[]),
   pickingPilotStartCard(),
+  qualityGuidedStartCard(),
   operationalIncidentCard(),
   nicoWelcome(),
   p('Primero planificarás las ocho áreas. Después verás qué cambió y podrás combinar intervenciones para responder.','note'),
@@ -844,6 +932,9 @@ function areaScene(){
   ]:[]),
   ...(area.id==='inventory'?[p('Una caja puede existir físicamente y aun así no estar localizada o lista para Picking. Conciliar mejora lo que podemos prometer, no inventa unidades.','commercial-brief')]:[]),
   ...(area.id==='quality'?[p('Calidad revisa los productos que ya entraron al CD. Una unidad retenida está esperando revisión: no significa que esté dañada o perdida.','commercial-brief')]:[]),
+  ...(area.id==='quality'&&i2IsQualityGuided(state)?[
+   p('Reto guiado: el stock inicial es reducido. Evalúa si la liberación de Calidad se transforma en pedidos expedidos o si otra etapa sigue limitando. Las cifras reales se verán al cierre.','note')
+  ]:[]),
   ...(area.id==='receiving'?[p('Aquí importa cuánto podemos registrar cada jornada. Las unidades que lleguen y no alcancemos a procesar seguirán en el muelle, no en stock.','commercial-brief')]:[]),
   ...(area.id==='purchasing'?[p('La entrega del proveedor es una hipótesis; solo Recepción registra unidades físicas. Mira Indicadores para separar compromiso, cumplimiento y plazo.','commercial-brief')]:[]),
   ...(area.id==='planning'?[p('La cobertura elegida modifica la compra SKU planificada, no el stock disponible hoy. Revisa Indicadores para evaluar unidades y compromiso.','commercial-brief')]:[]),
@@ -1549,6 +1640,7 @@ function multiResultsScene(){
   renderI2EconomicManagerPanel(economics),
   renderI2NicoEvidenceLearning(learning),
   ...(i2IsPickingPilot(state)?[pickingPilotDebriefPanel()]:[]),
+  ...(i2IsQualityGuided(state)?[qualityGuidedDebriefPanel()]:[]),
   replayTradeoffPanel(),
   section('multi-committed-summary',[
    node('strong',{text:actions.length?'Acciones confirmadas':'Decisión: no intervenir'}),
@@ -1901,6 +1993,7 @@ function resultsScene(){
   renderI2EconomicManagerPanel(economics),
   renderI2NicoEvidenceLearning(learning),
   ...(i2IsPickingPilot(state)?[pickingPilotDebriefPanel()]:[]),
+  ...(i2IsQualityGuided(state)?[qualityGuidedDebriefPanel()]:[]),
   replayTradeoffPanel(),
   forecast,
   planning,
