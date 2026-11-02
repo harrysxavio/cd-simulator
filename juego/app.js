@@ -200,7 +200,9 @@ function gameTransition(action){
   areaTab='decision';
   preview=null;
   if(action==='restart'){
+   // Un nuevo intento vuelve a la recuperación gerencial recomendada.
    multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;
+   classicOpened=false;
   }
   saveAndRender();
  }catch(e){showError(e)}
@@ -1496,7 +1498,15 @@ function recoveryScene(){
   renderI2MultiLeverPanel({
    state,objectives,draft:multiDraft,opened:multiOpened,preview:multiPreview,
    onDraft:next=>{multiDraft=next;multiPreview=null},
-   onOpen:value=>{multiOpened=value},
+   onOpen:value=>{
+    multiOpened=value;
+    if(value){
+     // Sólo puede estar activo un método de confirmación a la vez.
+     const classic=root.querySelector('.i2-classic-recovery');
+     if(classic?.open){classic.open=false;classicOpened=false}
+    }
+    syncRecoveryModeFooter();
+   },
    onPreview:model=>{multiPreview=model},
    onConfirm:actions=>{
     state=i2ConfirmMultiRecovery(state,actions);
@@ -1527,7 +1537,16 @@ function recoveryScene(){
  ]);
  const classic=root.querySelector('.i2-classic-recovery');
  classic.open=classicOpened;
- classic.addEventListener('toggle',()=>{classicOpened=classic.open});
+ classic.addEventListener('toggle',()=>{
+  classicOpened=classic.open;
+  if(classicOpened){
+   // Al entrar al modo clásico, la mesa de acciones deja de estar activa.
+   multiOpened=false;
+   const multi=root.querySelector('.multi-lever-panel');
+   if(multi?.open)multi.open=false;
+  }
+  syncRecoveryModeFooter();
+ });
  const impact=root.querySelector('.impact-btn');
  impact.addEventListener('click',()=>{
   try{
@@ -1549,8 +1568,23 @@ function recoveryScene(){
   // Explicit legacy CTA cannot silently commit an old multi event.
   if(state.recoveryConfirmation)state=i2ClearMultiRecovery(state);
  }});
- primary.textContent='Confirmar opción simple →';
- primary.classList.add('recovery-classic-footer');
+ syncRecoveryModeFooter();
+ // I2-36.10: no se puede confirmar el modo clásico sin abrirlo.
+ // La estrategia múltiple mantiene su propia confirmación explícita.
+ function syncRecoveryModeFooter(){
+  if(state.phase!=='recover'||state.eventSeed)return;
+  if(classicOpened){
+   primary.textContent='Confirmar opción simple →';
+   primary.hidden=false;
+   primary.disabled=false;
+   primary.classList.add('recovery-classic-footer');
+  }else{
+   primary.hidden=true;
+   primary.disabled=true;
+   primary.onclick=null;
+   primary.classList.remove('recovery-classic-footer');
+  }
+ }
 }
 /** After revealing, the manager can review decisions without revising the sealed plan. */
 function reviewScene(){
