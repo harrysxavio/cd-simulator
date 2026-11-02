@@ -55,7 +55,8 @@ export function renderI2MissionHub({active='initial',locked=false,onSelect=()=>{
    item.append(tag('strong','',''+mode.icon+' '+mode.name),
     tag('span','',mode.summary));
    item.addEventListener('click',()=>{
-    if(mode.id===active){modal.close();return}
+    // El reto activo también permite reiniciar si ya hubo compromisos.
+    if(mode.id===active&&!locked){modal.close();return}
     if(locked){
      selected=mode.id;
      warning.textContent='Atención: al pasar a «'+mode.name+
