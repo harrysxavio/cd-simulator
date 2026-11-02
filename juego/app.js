@@ -1324,9 +1324,14 @@ function incidentDailyScene(){
   paragraphs:[
    'El plan de ocho áreas se confirmó antes de conocer la demanda. No puedes cambiarlo para aprovechar información futura.',
    'Una orden nueva se emite únicamente al observar un incidente. No todas las jornadas incluyen incidentes ni todas las áreas tienen una intervención física implementada.',
-   ...I2_AREAS.map(area=>area.title+': '+(area.choices.find(c=>
-    c.optionId===state.choices[area.id])?.label??'Política no disponible')),
-   'Pendiente de ampliación: acciones diarias en cada área con impacto en unidades, capacidad, costos y fechas. El modelo actual todavía no ofrece ocho nuevas órdenes por jornada.'
+   // La ayuda breve admite como máximo cinco párrafos. Agrupar las
+   // ocho decisiones en dos bloques mantiene la información y evita
+   // un diálogo que no abre por exceder el contrato de accesibilidad.
+   'Áreas 1–4: '+I2_AREAS.slice(0,4).map(area=>
+    area.title+': '+(area.choices.find(c=>c.optionId===state.choices[area.id])?.label??'Sin política')).join(' · '),
+   'Áreas 5–8: '+I2_AREAS.slice(4).map(area=>
+    area.title+': '+(area.choices.find(c=>c.optionId===state.choices[area.id])?.label??'Sin política')).join(' · '),
+   'Pendiente de ampliación: acciones diarias por las ocho áreas con impacto real en unidades, capacidad, costos y fechas. Aún no existen ocho nuevas órdenes por jornada.'
   ]
  },why));
  setActions({
