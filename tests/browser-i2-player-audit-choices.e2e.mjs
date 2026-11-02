@@ -24,7 +24,7 @@ test('Lab12: las 24 alternativas de ocho áreas son elegibles sin saltos de foco
   await page.locator('#gameMapOpen').click();
   assert.equal(await page.locator('.i2-help-dialog[open]').count(),1);
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('.i2-help-dialog').count(),0);
+  await page.locator('.i2-help-dialog').waitFor({state:'detached'});
   assert.equal(await page.evaluate(()=>document.activeElement?.id),'gameMapOpen');
   for(let index=0;index<I2_AREAS.length;index++){
    const area=I2_AREAS[index];
@@ -55,6 +55,7 @@ test('Lab12: las 24 alternativas de ocho áreas son elegibles sin saltos de foco
     await helper.click();
     assert.equal(await page.locator('.i2-help-dialog[open]').count(),1);
     await page.locator('.i2-help-close').click();
+    await page.locator('.i2-help-dialog').waitFor({state:'detached'});
     assert.equal(await helper.evaluate(el=>document.activeElement===el),true);
     assert.equal(await page.evaluate(k=>localStorage.getItem(k),KEY),before);
     await page.getByRole('tab',{name:'Indicadores'}).click();
