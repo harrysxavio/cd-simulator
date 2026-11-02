@@ -31,7 +31,9 @@ test('Lab14: cuatro retos elegibles, cambio cancelable y reinicio explícito de 
   await page.locator('#gameBack').click();
   assert.equal(await page.locator('.i2-mission-hub-trigger').isEnabled(),true);
   assert.match(await page.locator('.i2-mission-hub-status').innerText(),/confirmadas/);
-  await page.locator('.i2-mission-hub-trigger').click();
+  // También los antiguos botones de la portada deben abrir el selector.
+  await page.locator('.i2-picking-pilot-button').click();
+  assert.equal(await page.locator('.i2-mission-dialog').isVisible(),true);
   await page.locator('[data-mode="picking"]').click();
   assert.equal(await page.locator('.i2-mission-confirm-bar').isVisible(),true);
   await page.locator('.i2-mission-cancel').click();
