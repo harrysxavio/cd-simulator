@@ -1381,7 +1381,7 @@ function incidentDailyScene(){
    node('strong',{text:canApproveDockFollowup?
     'Jornada de seguimiento · puedes autorizar un turno para mañana':
     'Jornada de seguimiento · sin nueva orden disponible'}),
-   p('Hoy observas cómo se ejecuta el plan y las órdenes ya autorizadas. Este modelo ofrece otra decisión solo cuando aparece un incidente observable; no permite cambiar a posteriori las ocho políticas iniciales.','note'),
+   p('Hoy observas cómo se ejecuta el plan y las órdenes ya autorizadas. Este modelo permite algunas órdenes futuras después de observar incidentes, como el refuerzo de Recepción desde el día 3. Las ocho políticas iniciales no se pueden reescribir.','note'),
    node('button',{className:'i2-daily-explain-button',
     text:'¿Por qué no puedo cambiar otras áreas hoy?',
     attrs:{type:'button','aria-haspopup':'dialog'}})
@@ -1400,7 +1400,7 @@ function incidentDailyScene(){
   title:'Qué puedes decidir y qué está bloqueado',
   paragraphs:[
    'El plan de ocho áreas se confirmó antes de conocer la demanda. No puedes cambiarlo para aprovechar información futura.',
-   'Una orden nueva se emite únicamente al observar un incidente. No todas las jornadas incluyen incidentes ni todas las áreas tienen una intervención física implementada.',
+   'Solo puedes emitir nuevas órdenes cuando el motor admite una respuesta física con fecha futura. Por ejemplo, después de la parada del muelle puedes contratar un turno en el día 3 para el día 4. No todas las jornadas ni áreas lo permiten.',
    // La ayuda breve admite como máximo cinco párrafos. Agrupar las
    // ocho decisiones en dos bloques mantiene la información y evita
    // un diálogo que no abre por exceder el contrato de accesibilidad.
