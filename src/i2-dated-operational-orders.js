@@ -1,6 +1,5 @@
 import {normalizeI2GameState} from './i2-game-state.js';
 import {i2OperationalEventsForSeed} from './operational-event-schedule.js';
-import {I2_RECEIVING_SHIFT} from './i2-receiving-shift.js';
 import {I2_QUALITY_BRIDGE} from './i2-quality-bridge.js';
 
 /**
@@ -78,10 +77,12 @@ export function i2DatedOrdersForObservedDay(raw){
    'Mover unidades previamente separadas: no se crea inventario nuevo.');
  }
  if(state.receivingResponse){
-  push('dock',1,first.startDay,I2_RECEIVING_SHIFT.day,
-   'Hasta '+I2_RECEIVING_SHIFT.extraCapacitySkuUnits+
+  const day=state.receivingResponse.day;
+  const issued=state.receivingFollowupIssuedDay===3?3:first.startDay;
+  push('dock',issued===3?2:1,issued,day,
+   'Hasta '+state.receivingResponse.extraCapacitySkuUnits+
    ' cupos SKU adicionales en la jornada contratada.',
-   I2_RECEIVING_SHIFT.shiftCostCLP);
+   state.receivingResponse.shiftCostCLP);
  }
  if(state.incidentStep===2){
   const second=events[1];
