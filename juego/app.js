@@ -222,16 +222,30 @@ function updateFooter({beforeAdvance=null}={}){
 }
 function choiceList(area){
  const locked=state.confirmedAreas.includes(area.id);
- const cards=area.choices.map(c=>{
+ const current=area.choices.find(c=>c.optionId===state.choices[area.id]);
+ const cards=area.choices.map((c,index)=>{
   const option=button(c.label,()=>{
    if(locked)return;
-   state.choices[area.id]=c.optionId;saveAndRender();
+   // Mantener la posición y el foco: elegir otra tarjeta no significa
+   // cambiar de etapa ni debe obligar a recorrer de nuevo la pantalla.
+   const previousScroll=root.scrollTop;
+   state.choices[area.id]=c.optionId;
+   saveAndRender();
+   const fresh=root.querySelectorAll('.game-choice')[index];
+   fresh?.focus({preventScroll:true});
+   root.scrollTop=previousScroll;
   },{selected:state.choices[area.id]===c.optionId,description:c.description});
   option.disabled=locked;
   return option;
  });
- const list=section('choice-list',cards);
- if(locked)list.append(p('Decisión confirmada. Puedes consultarla, pero para cambiarla debes reiniciar la campaña.','note'));
+ const list=section('choice-list',[
+  p((locked?'Decisión confirmada: ':'Propuesta actual: ')+
+   (current?.label??'Sin alternativa')+
+   (locked?'. Puedes consultarla, pero no editarla en esta partida.':
+    '. Puedes cambiarla antes de pulsar el botón inferior de confirmación.'),
+   'choice-commit-guide'),
+  ...cards
+ ]);
  return list;
 }
 function objectivesSummary(){
@@ -554,8 +568,10 @@ function qualityGuidedDebriefPanel(){
   try{
    const evidence=i2QualityGuidedReflection(state);
    panel.append(section('i2-quality-guided-findings',[
-    p('Tu política: '+evidence.chosenQuality+
-     ' · política comparada: '+evidence.alternativeQuality,'note'),
+    p('Tu política: '+I2_AREAS.find(a=>a.id==='quality').choices.find(c=>
+      c.optionId===evidence.chosenQuality)?.label+
+     ' · política comparada: '+I2_AREAS.find(a=>a.id==='quality').choices.find(c=>
+      c.optionId===evidence.alternativeQuality)?.label,'note'),
     section('metrics-grid',[
      section('metric-card',[
       node('span',{text:'Tu plan · retenidos'}),
@@ -647,7 +663,7 @@ function intro(){
  stage.textContent=i2IsQualityGuided(state)?'Reto guiado · Calidad':
   i2IsPickingPilot(state)?'Reto guiado · Picking':'Misión 01 · Tu primer turno';
  replace([
-  p((i2IsPickingPilot(state)?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
+  p(((i2IsPickingPilot(state)||i2IsQualityGuided(state))?'RETO GUIADO · ':'MISIÓN 01 · ')+brief.role,'eyebrow'),
   heading(brief.title),
   p(brief.meaning,'intro-meaning'),
   p(brief.objective,'lead'),
@@ -2070,6 +2086,7 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced,eventSeed:state.eventSeed??null});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced,eventSeed:state.eventSeed??null,
+ guidedScenario:state.guidedScenario??null});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
 });
 render();
