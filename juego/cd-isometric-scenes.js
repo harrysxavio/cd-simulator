@@ -37,7 +37,7 @@ export function openI2CdSceneDialog(key,source){
  const header=el('div','cd-iso-dialog-head');
  const title=el('h2','',scene.title);title.id='cd-iso-dialog-title';
  const close=el('button','cd-iso-dialog-close','Cerrar imagen');
- close.type='button';close.setAttribute('aria-label','Cerrar ilustración y volver al juego');
+ close.type='button';close.setAttribute('aria-label','Cerrar imagen');
  close.addEventListener('click',()=>dialog.close());
  header.append(title,close);
  const image=cdImage(scene,{eager:true});
