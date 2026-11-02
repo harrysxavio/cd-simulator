@@ -45,6 +45,7 @@ test('I2-24: Picking BOM visible, antes no se revela demanda y después hay deta
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene').innerText(),/se observaron 280/);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click();
   const panel=page.locator('.picking-outcome');
   assert.equal(await panel.count(),1);

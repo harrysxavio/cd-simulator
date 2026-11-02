@@ -44,6 +44,7 @@ test('I2-20: proveedor confiable, POs originales, recepción y demanda sellada e
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click(); // reveal explicitly
   assert.match(await page.locator('#gameScene').innerText(),/se observaron 280/);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click(); // keep wait, final
   const result=page.locator('.supplier-purchasing-outcome');
   assert.equal(await result.count(),1);

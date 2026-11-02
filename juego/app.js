@@ -200,7 +200,9 @@ function gameTransition(action){
   areaTab='decision';
   preview=null;
   if(action==='restart'){
+   // Un nuevo intento vuelve a la recuperación gerencial recomendada.
    multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;
+   classicOpened=false;
   }
   saveAndRender();
  }catch(e){showError(e)}
@@ -1491,12 +1493,20 @@ function recoveryScene(){
   ]),
   section('i2-recovery-workbench-title',[
    node('strong',{text:'1 · Arma tu plan de acciones'}),
-   p('Marca las acciones compatibles, ajusta sus fechas y calcula el resultado conjunto antes de confirmar.','note')
+   p('Modo recomendado: marca cero, una o varias acciones, compara el servicio y gasto, y confirma DENTRO del panel. El botón inferior solo sirve para el modo clásico.','note')
   ]),
   renderI2MultiLeverPanel({
    state,objectives,draft:multiDraft,opened:multiOpened,preview:multiPreview,
    onDraft:next=>{multiDraft=next;multiPreview=null},
-   onOpen:value=>{multiOpened=value},
+   onOpen:value=>{
+    multiOpened=value;
+    if(value){
+     // Sólo puede estar activo un método de confirmación a la vez.
+     const classic=root.querySelector('.i2-classic-recovery');
+     if(classic?.open){classic.open=false;classicOpened=false}
+    }
+    syncRecoveryModeFooter();
+   },
    onPreview:model=>{multiPreview=model},
    onConfirm:actions=>{
     state=i2ConfirmMultiRecovery(state,actions);
@@ -1512,7 +1522,7 @@ function recoveryScene(){
   }),
   node('details',{className:'i2-classic-recovery'},[
    node('summary',{text:'O usar una decisión simple (modo clásico)'}),
-   p('Este es el modo anterior de cinco respuestas individuales. Para combinar acciones utiliza el plan de arriba.','footnote'),
+   p('Modo alternativo: al abrir esta sección se habilita abajo «Confirmar opción simple». No combina intervenciones. Puedes cerrar este modo y volver a la estrategia recomendada sin confirmar nada.','footnote'),
    p('Selecciona una alternativa simple','option-heading'),
    section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
     state=i2ClearMultiRecovery(state);
@@ -1527,7 +1537,16 @@ function recoveryScene(){
  ]);
  const classic=root.querySelector('.i2-classic-recovery');
  classic.open=classicOpened;
- classic.addEventListener('toggle',()=>{classicOpened=classic.open});
+ classic.addEventListener('toggle',()=>{
+  classicOpened=classic.open;
+  if(classicOpened){
+   // Al entrar al modo clásico, la mesa de acciones deja de estar activa.
+   multiOpened=false;
+   const multi=root.querySelector('.multi-lever-panel');
+   if(multi?.open)multi.open=false;
+  }
+  syncRecoveryModeFooter();
+ });
  const impact=root.querySelector('.impact-btn');
  impact.addEventListener('click',()=>{
   try{
@@ -1549,8 +1568,24 @@ function recoveryScene(){
   // Explicit legacy CTA cannot silently commit an old multi event.
   if(state.recoveryConfirmation)state=i2ClearMultiRecovery(state);
  }});
- primary.textContent='Confirmar opción simple →';
- primary.classList.add('recovery-classic-footer');
+ syncRecoveryModeFooter();
+ // I2-36.10: no se puede confirmar el modo clásico sin abrirlo.
+ // La estrategia múltiple mantiene su propia confirmación explícita.
+ function syncRecoveryModeFooter(){
+  if(state.phase!=='recover'||state.eventSeed)return;
+  if(classicOpened){
+   primary.textContent='Confirmar opción simple →';
+   primary.hidden=false;
+   primary.disabled=false;
+   primary.classList.add('recovery-classic-footer');
+  }else{
+   primary.hidden=true;
+   primary.disabled=true;
+   // Conservar el handler instalado por updateFooter: al abrir el modo
+   // clásico el mismo botón debe funcionar sin reconstruir la escena.
+   primary.classList.remove('recovery-classic-footer');
+  }
+ }
 }
 /** After revealing, the manager can review decisions without revising the sealed plan. */
 function reviewScene(){

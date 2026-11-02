@@ -53,7 +53,8 @@ test('I2-11: chapter progress, non-skippable roadmap and mobile footer through c
   await page.locator('#gameBack').click();
   assert.match(await page.locator('#gameChapter').innerText(),/Capítulo 3 de 4/);
   assert.equal(await page.locator('#gameProgressTrack').getAttribute('aria-valuenow'),'92');
-  await page.locator('#gameNext').click();
+  await page.locator('#gameNext').click(); // Volver desde revisión
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameChapter').innerText(),/Capítulo 4 de 4/);
   assert.equal(await page.locator('#gameProgressTrack').getAttribute('aria-valuenow'),'100');

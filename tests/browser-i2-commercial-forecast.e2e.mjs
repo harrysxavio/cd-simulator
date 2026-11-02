@@ -44,6 +44,7 @@ test('I2-18: forecast cambia en Comercial sin mostrar demanda real y se compara 
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click(); // revelación
   assert.match(await page.locator('#gameScene').innerText(),/280/);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click(); // recuperación wait
   const result=page.locator('.commercial-result');
   assert.equal(await result.count(),1);

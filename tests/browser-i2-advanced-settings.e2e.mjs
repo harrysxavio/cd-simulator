@@ -64,6 +64,7 @@ test('I2-15: editar cuatro supuestos, cancelar, guardar, recargar y bloquear en 
   });
   await page.locator('#gameNext').click(); // revelar demanda +40 %
   assert.match(await page.locator('#gameScene').innerText(),/224/);
+  await page.locator('.i2-classic-recovery summary').click(); // elegir modo clásico explícito
   await page.locator('#gameNext').click(); // confirmar recuperación
   assert.match(await page.locator('#gameScene').innerText(),/224 pedidos completos/);
   assert.deepEqual(errors,[]);

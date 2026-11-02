@@ -44,6 +44,7 @@ test('I2-23: inventario verificable y reserva, Nico, sorpresa sellada y cierre f
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene').innerText(),/se observaron 280/);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click();
   const result=page.locator('.inventory-outcome');
   assert.equal(await result.count(),1);

@@ -44,6 +44,7 @@ test('I2-22: Calidad, opciones y consejo de Nico, revelación sellada, resultado
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene').innerText(),/se observaron 280/);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click();
   const final=page.locator('.quality-outcome');
   assert.equal(await final.count(),1);

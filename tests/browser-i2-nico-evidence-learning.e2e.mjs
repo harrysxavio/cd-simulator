@@ -19,7 +19,10 @@ for(const mode of ['classic','multi']){
    assert.equal(await page.locator('.nico-learning-result').count(),0);
    await page.locator('#gameNext').click();
    assert.equal(await page.locator('.nico-learning-result').count(),0);
-   if(mode==='classic')await page.locator('#gameNext').click();
+   if(mode==='classic'){
+     await page.locator('.i2-classic-recovery summary').click();
+     await page.locator('#gameNext').click();
+    }
    else{
     if(!(await page.locator('.multi-lever-panel').evaluate(el=>el.open)))await page.locator('.multi-lever-panel > summary').click();
     await page.locator('#multiBuy').check();

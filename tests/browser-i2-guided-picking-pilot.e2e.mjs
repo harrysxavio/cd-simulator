@@ -38,6 +38,7 @@ test('I2-35.2: Picking pilot is playable, persisted and explained only after res
   assert.equal(await page.locator('.i2-picking-pilot-debrief').count(),0);
   await page.locator('#gameNext').click(); // reveal
   assert.equal(await page.locator('.i2-picking-pilot-debrief').count(),0);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click(); // no intervention, result
   await page.locator('#gameScene h1').filter({hasText:'consecuencias'}).waitFor();
   const debrief=page.locator('.i2-picking-pilot-debrief');

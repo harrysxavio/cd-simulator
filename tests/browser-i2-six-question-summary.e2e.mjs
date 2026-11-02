@@ -20,6 +20,7 @@ for(const mode of ['classic','multi']){
    assert.equal(await page.locator('.i2-six-question-summary').count(),0);
    await page.locator('#gameNext').click();
    if(mode==='classic'){
+    await page.locator('.i2-classic-recovery summary').click();
     await page.locator('#gameNext').click();
    }else{
     await page.locator('#multiBuy').check();

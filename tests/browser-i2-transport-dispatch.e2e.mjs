@@ -26,6 +26,7 @@ test('I2-25: Transporte móvil, sin spoilers, expedición auditada y V1 intacta'
   await page.locator('#gameNext').click(); // Cierra plan.
   assert.match(await page.locator('#gameScene h1').innerText(),/Algo cambió/);
   await page.locator('#gameNext').click(); // Muestra demanda observada.
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click(); // Avanza al cierre con resultados.
   const panel=page.locator('.transport-outcome');
   assert.equal(await panel.count(),1);
