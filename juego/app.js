@@ -1581,7 +1581,8 @@ function recoveryScene(){
   }else{
    primary.hidden=true;
    primary.disabled=true;
-   primary.onclick=null;
+   // Conservar el handler instalado por updateFooter: al abrir el modo
+   // clásico el mismo botón debe funcionar sin reconstruir la escena.
    primary.classList.remove('recovery-classic-footer');
   }
  }
