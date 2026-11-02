@@ -30,6 +30,7 @@ test('I2-35.2: reto de Calidad visible, jugable y sin revelar demanda anticipada
   assert.equal(await page.locator('.i2-quality-guided-findings').count(),0);
   await page.locator('#gameNext').click(); // Revelar demanda
   assert.equal(await page.locator('.i2-quality-guided-debrief').count(),0);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click(); // No intervenir; cerrar
   await page.locator('#gameScene h1').filter({hasText:'consecuencias'}).waitFor();
   const debrief=page.locator('.i2-quality-guided-debrief');
