@@ -17,11 +17,11 @@ export function i2ValidateReceivingShift(raw,events=[]){
  if(raw===null)return null;
  if(!raw||typeof raw!=='object'||Array.isArray(raw)||
   Object.keys(raw).sort().join(',')!=='day,extraCapacitySkuUnits,kind,shiftCostCLP')
-  throw Error('I2-35.8a: refuerzo de Recepción inválido');
+  throw Error('I2-35.5c3d / I2-35.8a: refuerzo de Recepción inválido');
  const template=[I2_RECEIVING_SHIFT,I2_RECEIVING_FOLLOWUP_SHIFT].find(item=>
   Object.keys(item).every(k=>raw[k]===item[k]));
  if(!template||!events.some(e=>e.kind==='receiving-stop'
   &&e.startDay===2&&e.startDay+e.durationDays<=template.day))
-  throw Error('I2-35.8a: refuerzo de Recepción no autorizado por incidente de muelle');
+  throw Error('I2-35.5c3d / I2-35.8a: refuerzo de Recepción no autorizado por incidente de muelle');
  return template;
 }
