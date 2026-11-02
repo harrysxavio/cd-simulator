@@ -1493,7 +1493,7 @@ function recoveryScene(){
   ]),
   section('i2-recovery-workbench-title',[
    node('strong',{text:'1 · Arma tu plan de acciones'}),
-   p('Marca las acciones compatibles, ajusta sus fechas y calcula el resultado conjunto antes de confirmar.','note')
+   p('Modo recomendado: marca cero, una o varias acciones, compara el servicio y gasto, y confirma DENTRO del panel. El botón inferior solo sirve para el modo clásico.','note')
   ]),
   renderI2MultiLeverPanel({
    state,objectives,draft:multiDraft,opened:multiOpened,preview:multiPreview,
@@ -1522,7 +1522,7 @@ function recoveryScene(){
   }),
   node('details',{className:'i2-classic-recovery'},[
    node('summary',{text:'O usar una decisión simple (modo clásico)'}),
-   p('Este es el modo anterior de cinco respuestas individuales. Para combinar acciones utiliza el plan de arriba.','footnote'),
+   p('Modo alternativo: al abrir esta sección se habilita abajo «Confirmar opción simple». No combina intervenciones. Puedes cerrar este modo y volver a la estrategia recomendada sin confirmar nada.','footnote'),
    p('Selecciona una alternativa simple','option-heading'),
    section('choice-list',I2_RECOVERIES.map(c=>button(c.label,()=>{
     state=i2ClearMultiRecovery(state);
