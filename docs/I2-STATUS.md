@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **Lab14 · I2-36.16 tablero de áreas durante Recuperación (02-11-2026, candidato):** 8 tarjetas, botones de acción real para Compras y Picking (Inventario solo con reserva preparada); las demás abren explicación honesta, sin cambiar plan. 320 px/alto contraste, lector de pantalla, prueba E2E de 8 áreas, foco y no persistencia por explorar. [Documento](I2-36-16-CENTRO-MANDO-AREAS-2026-11-02.md). Falta CI, merge y Pages. **35/41 fases padre cerradas**, I2-35..40 abiertas.
+
+
 > **Lab14 · I2-35.9 tendencias gerenciales en la jornada (02-11-2026, candidato):** se añade radar con cuatro indicadores físicos comparados con el día anterior, fechas observadas, unidades y origen rastreable. Código `src/i2-daily-operations.js` y `juego/app.js`; pruebas Node y Chromium en Pixel 7 / 320×568. Sin modificar la física, la compra, las decisiones, ni mostrar próximos incidentes. **Pendiente CI, PR, merge y Pages/HTTP**. [Documento](I2-35-9-RADAR-DIARIO-2026-11-02.md). No implica todavía órdenes por las 8 áreas cada jornada. **35/41 padres**, I2-35..40 abiertos.
 
 
