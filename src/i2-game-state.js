@@ -132,6 +132,14 @@ export function normalizeI2GameState(raw){
   }catch{return null}
   if(!receivingResponse)return null;
  }
+ // La orden tardía del día 4 solo existe cuando hubo autorización
+ // explícita en la jornada observada 3. No aceptar una fecha libre.
+ const receivingFollowupIssuedDay=receivingResponse?.day===4?3:null;
+ if(receivingFollowupIssuedDay!==null){
+  if(raw.receivingFollowupIssuedDay!==3
+   ||(raw.incidentViewDay!==undefined&&raw.incidentViewDay<3))
+   return null;
+ }else if(Object.hasOwn(raw,'receivingFollowupIssuedDay'))return null;
  if(Object.hasOwn(raw,'incidentStep')){
   if(![1,2].includes(raw.incidentStep)||!Number.isSafeInteger(raw.incidentStep)
    ||!recoveryConfirmation||!raw.eventSeed
@@ -223,6 +231,7 @@ export function normalizeI2GameState(raw){
   ...(incidentViewDay===null?{}:{incidentViewDay}),
   ...(operationalResponse===null?{}:{operationalResponse}),
   ...(receivingResponse===null?{}:{receivingResponse}),
+  ...(receivingFollowupIssuedDay===null?{}:{receivingFollowupIssuedDay}),
   ...(incidentFirstActions===null?{}:{
    incidentFirstActions,incidentSecondDecision
   })

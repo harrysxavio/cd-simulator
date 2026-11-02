@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **Lab15 · I2-35.8a candidato (02-11-2026):** opción funcional para contratar en jornada 3 un turno de Recepción con efecto en día 4, mediante diálogo de autorización/cancelación, costo real del motor $55.000, +80 cupos SKU, guardado y bitácora. Motor SKU aplica recursos solo en día 4; verificación de igualdad exacta de días anteriores, no duplicación y persistencia en incidente combinado. [Contrato y pruebas](I2-35-8A-TURNO-DIA4-2026-11-02.md). **Pendiente PR, CI, merge, Pages y prueba Android**. Sigue pendiente ampliar nuevas órdenes a otras áreas; **35/41** padres completados.
+
+
 > **Lab15 · candidato I2-35.7a (02-11-2026):** módulo puro de órdenes operativas ya confirmadas y bitácora dinámica en el diario: Compras/Inventario/Recepción/Calidad con fecha, estado y costo fijo solo si existe. No modifica ni duplica el ledger físico. Pruebas para 0/1/2 órdenes, segunda incidencia sin spoilers, costo, recarga Pixel 7 y 320×568. [Documento](I2-35-7A-ORDENES-FECHADAS-2026-11-02.md). **Pendiente validación, PR, merge, Pages**. Próxima I2-35.7b/I2-35.8 para emitir decisiones nuevas por día y 8 áreas; **35/41** padres, I2-35..40 abiertos.
 
 
