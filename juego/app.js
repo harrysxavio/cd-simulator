@@ -1257,6 +1257,34 @@ function incidentDailyScene(){
  const progressValue=state.incidentStep===1?base:
   base+Math.floor((99-base)*(model.day-start)/Math.max(1,model.horizonDays-start));
  progress.style.width=Math.min(99,Math.max(base,progressValue))+'%';
+ // Radar con diferencias estrictamente observadas entre ayer y hoy.
+ // Las tendencias no son una predicción ni una evaluación causal.
+ const makeTrend=(label,current,change,unit)=>{
+  const previous=current-change;
+  const symbol=change>0?'↑':change<0?'↓':'=';
+  const delta=(change>0?'+':'')+num.format(change);
+  return section('i2-daily-trend',[
+   node('span',{text:label}),
+   node('strong',{text:num.format(current)+' '+unit}),
+   node('p',{className:'i2-daily-trend-change',
+    text:symbol+' '+delta+' '+unit+' desde ayer ('+
+     num.format(previous)+' '+unit+')'})
+  ]);
+ };
+ const radar=section('i2-daily-radar',[
+  node('strong',{text:'RADAR DE JORNADA · HOY VS. AYER'}),
+  p('Datos del flujo físico ya observado. Subir o bajar una cola no identifica por sí solo la causa.','footnote'),
+  section('i2-daily-trend-grid',[
+   makeTrend('Expedidos hoy',model.newlyShippedOrders,
+    model.newlyShippedOrders-model.yesterdayShippedOrders,'pedidos'),
+   makeTrend('Pedidos pendientes',model.pendingOrders,
+    model.changePendingOrders,'pedidos'),
+   makeTrend('Cola de Recepción',model.waitingDockSkuUnits,
+    model.changeDockQueueSkuUnits,'SKU'),
+   makeTrend('Retenidos en Calidad',model.waitingQualitySkuUnits,
+    model.changeQualityQueueSkuUnits,'SKU')
+  ])
+ ]);
  replace([
   p('OPERACIÓN EN MARCHA · DIARIO GERENCIAL','eyebrow'),
   heading('Jornada '+model.day+' de '+model.horizonDays),
@@ -1268,6 +1296,7 @@ function incidentDailyScene(){
   p(model.activeIncidents.length
    ?'Nico: hoy hay una etapa detenida. Observa los pendientes; los SKU retenidos no son mercancía perdida.'
    :'Nico: hoy procesamos el plan y las órdenes ya confirmadas. Mira los despachos y las colas que quedan.','lead'),
+  radar,
   section('metrics-grid i2-daily-metrics',[
    ...[
     ['Expedidos hoy',model.newlyShippedOrders+' pedidos'],
