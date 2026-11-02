@@ -1643,3 +1643,16 @@ html,body{height:100%;overflow:hidden}
   background:ButtonFace;color:ButtonText;border-color:ButtonText
  }
 }
+
+/* Lab14 · Vista previa visible sin ejecutar el motor físico antes del reveal. */
+.i2-live-plan-preview{margin:10px 0 14px;padding:10px;border:1px solid var(--border);
+ border-radius:12px;background:var(--panel)}
+.i2-live-plan-preview>strong{display:block;font-size:.87rem;color:var(--detail-label);margin-bottom:7px}
+.i2-live-plan-pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.i2-live-plan-metric{display:grid;gap:4px;padding:9px;border:1px solid var(--border);
+ border-radius:9px;background:var(--detail-bg);min-width:0}
+.i2-live-plan-metric span{font-size:.74rem;color:var(--muted);line-height:1.3}
+.i2-live-plan-metric strong{font-size:1.01rem;overflow-wrap:anywhere}
+.i2-live-plan-preview .note,.i2-live-plan-preview .footnote{margin:7px 0 0!important}
+@media(forced-colors:active){.i2-live-plan-preview,.i2-live-plan-metric{
+ background:Canvas;color:CanvasText;border-color:CanvasText}}
