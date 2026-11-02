@@ -46,6 +46,13 @@ export function i2DailyOperationsSnapshot(raw){
   day:dayNumber,horizonDays:replay.days,
   newlyShippedOrders:day.shipped,shippedOrdersToDate:day.completed,
   pendingOrders:day.backlog,
+  // KPI gerenciales comparados contra una jornada QUE YA OCURRIÓ.
+  // Nunca se leen días futuros. Derivados del ledger físico, sin
+  // aplicar acciones nuevas ni contaminar el estado guardado.
+  yesterdayShippedOrders:previous.shipped,
+  changePendingOrders:day.backlog-previous.backlog,
+  changeDockQueueSkuUnits:day.waitingReceiving-previous.waitingReceiving,
+  changeQualityQueueSkuUnits:day.waitingQuality-previous.waitingQuality,
   receivedSkuUnits:total(day.received),
   releasedSkuUnits:total(day.released),
   waitingDockSkuUnits:day.waitingReceiving,
