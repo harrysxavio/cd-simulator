@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab15 · I2-35.8a · Primera nueva orden entre jornadas (02-11-2026, candidato):** luego del incidente del muelle día 2, el gerente puede contratar en día 3, con información ya observada, un **turno adicional de Recepción que actúa físicamente en día 4** (+80 cupos SKU y $55.000 modelados). Diálogo confirma/cancela, orden queda en bitácora y persiste. Se valida que **ningún valor físico de días 0–3 cambia** y que la segunda incidencia conserva el compromiso. No se agregan órdenes ficticias para otras áreas. [Documento](I2-35-8A-TURNO-DIA4-2026-11-02.md). Tests Node, Chromium 320×568; PR/CI/Pages pendientes. Próxima I2-35.8b–c: otras áreas y costes fechados. **35/41 fases padre**.
+
+
 > **Lab15 · I2-35.7a · Bitácora de órdenes con fecha (02-11-2026, CANDIDATA):** se genera una vista verificable de los compromisos **ya autorizados** por Compras (urgente), Inventario (traslado de reserva), Recepción (turno físico día 3) y Calidad (línea alternativa día 5). Se muestra fecha de emisión, fecha objetivo, costo fijo solo cuando está modelado, estado observado y límite «compromiso no equivale a unidades ejecutadas». No se consulta ni anticipa el segundo incidente antes de su observación. Tests Node de calendario, costo, no filtración y Chromium móvil/recarga. [Especificación](I2-35-7A-ORDENES-FECHADAS-2026-11-02.md). **Aún falta I2-35.7b/35.8: emitir nuevas órdenes por área en jornadas posteriores e impactar motor SKU**. PR/CI/Pages pendientes; 35/41 padres completos.
 
 
