@@ -43,6 +43,7 @@ test('I2-21: capacidad de Recepción, FIFO opcional, revelación y muelle físic
   assert.doesNotMatch(await page.locator('#gameScene').innerText(),/280 pedidos/);
   await page.locator('#gameNext').click();
   assert.match(await page.locator('#gameScene').innerText(),/se observaron 280/);
+  await page.locator('.i2-classic-recovery summary').click();
   await page.locator('#gameNext').click();
   const final=page.locator('.receiving-outcome');
   assert.equal(await final.count(),1);
