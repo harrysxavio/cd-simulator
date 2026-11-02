@@ -114,17 +114,39 @@ async function verify(attempt){
  }
  // Lab12 · I2-36: verify the ten original isometric CD files by binary SHA.
  // A build may succeed even when /juego/ references a wrong or stale image.
- const [artCatalog,sceneUi,tourUi]=await Promise.all([
+ const [artCatalog,sceneUi,tourUi,areaGuideUi,missionSelectorUi,commandBoardUi]=await Promise.all([
   req('src/i2-cd-isometric-art.js',attempt),
   req('juego/cd-isometric-scenes.js',attempt),
-  req('juego/nico-journey-dialog.js',attempt)
+  req('juego/nico-journey-dialog.js',attempt),
+  req('juego/cd-area-guide-dialog.js',attempt),
+  req('juego/mission-selector.js',attempt),
+  req('juego/recovery-command-board.js',attempt)
  ]);
+ // Lab14: la imagen de cada área ahora vive en una ventana de aprendizaje.
+ // Exigir la tarjeta inline antigua producía un falso rojo aun con todos
+ // los PNG SHA verificados y el nuevo flujo funcional publicado.
  if(!artCatalog.includes('I2_CD_ART')||
     !sceneUi.includes('renderI2CdScene')||
-    !gameJs.includes("renderI2CdScene(area.id")||
-    !tourUi.includes("renderI2CdScene(artKey")||
+    !tourUi.includes('renderI2CdScene(artKey')||
+    !areaGuideUi.includes('openI2CdAreaGuide')||
+    !areaGuideUi.includes('i2CdSceneFor(areaId)')||
+    !gameJs.includes("openI2CdAreaGuide(area.id")||
+    !gameJs.includes("root.querySelector('.i2-area-explore')")||
+    !missionSelectorUi.includes('renderI2MissionHub')||
+    !gameJs.includes('renderI2MissionHub({')||
+    !commandBoardUi.includes('renderI2RecoveryAreaBoard')||
+    !gameJs.includes('renderI2RecoveryAreaBoard(state')||
+    !gameCss.includes('.i2-cd-area-guide-image')||
+    !gameCss.includes('.i2-command-deck')||
     !gameCss.includes('.cd-iso-card'))
-  throw Error('Published isometric CD tutorial/area UI is absent or stale');
+  throw Error('Published CD visual guide, mission selector or command board is absent or stale');
+ // Los datos por jornada vienen del modelo observado, nunca de números
+ // decorativos: verificar también el radar hoy/ayer actualmente publicado.
+ if(!dailyJs.includes('changePendingOrders')||
+    !dailyJs.includes('changeDockQueueSkuUnits')||
+    !gameJs.includes('i2-daily-radar')||
+    !gameCss.includes('.i2-daily-trend-grid'))
+  throw Error('Published physical daily comparison is absent or stale');
  const sceneImages=[
   '01_centro_logistico_completo.png',
   'areas/02_comercial.png','areas/03_planificacion.png',
