@@ -221,16 +221,30 @@ function updateFooter({beforeAdvance=null}={}){
 }
 function choiceList(area){
  const locked=state.confirmedAreas.includes(area.id);
- const cards=area.choices.map(c=>{
+ const current=area.choices.find(c=>c.optionId===state.choices[area.id]);
+ const cards=area.choices.map((c,index)=>{
   const option=button(c.label,()=>{
    if(locked)return;
-   state.choices[area.id]=c.optionId;saveAndRender();
+   // Mantener la posición y el foco: elegir otra tarjeta no significa
+   // cambiar de etapa ni debe obligar a recorrer de nuevo la pantalla.
+   const previousScroll=root.scrollTop;
+   state.choices[area.id]=c.optionId;
+   saveAndRender();
+   const fresh=root.querySelectorAll('.game-choice')[index];
+   fresh?.focus({preventScroll:true});
+   root.scrollTop=previousScroll;
   },{selected:state.choices[area.id]===c.optionId,description:c.description});
   option.disabled=locked;
   return option;
  });
- const list=section('choice-list',cards);
- if(locked)list.append(p('Decisión confirmada. Puedes consultarla, pero para cambiarla debes reiniciar la campaña.','note'));
+ const list=section('choice-list',[
+  p((locked?'Decisión confirmada: ':'Propuesta actual: ')+
+   (current?.label??'Sin alternativa')+
+   (locked?'. Puedes consultarla, pero no editarla en esta partida.':
+    '. Puedes cambiarla antes de pulsar el botón inferior de confirmación.'),
+   'choice-commit-guide'),
+  ...cards
+ ]);
  return list;
 }
 function objectivesSummary(){
@@ -2064,6 +2078,7 @@ mapOpen.addEventListener('click',()=>{
  },mapOpen);
 });
 reset.addEventListener('click',()=>{
- if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced,eventSeed:state.eventSeed??null});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
+ if(window.confirm('¿Reiniciar la campaña de Misión CD?')){state=init({seed:state.seed,advanced:state.advanced,eventSeed:state.eventSeed??null,
+ guidedScenario:state.guidedScenario??null});preview=null;multiDraft=i2EmptyRecoveryActions();multiPreview=null;multiOpened=true;saveAndRender()}
 });
 render();
