@@ -1530,15 +1530,15 @@ function observedDemandPanel({compact=false}={}){
    section('metrics-grid i2-observed-demand',[
     section('metric-card',[
      node('span',{text:'Pedidos previstos'}),
-     node('strong',{text:num.format(revealed.plannedOrders)})
+     node('strong',{text:num.format(revealed.plannedOrders)+' pedidos'})
     ]),
     section('metric-card',[
      node('span',{text:'Demanda real observada'}),
-     node('strong',{text:num.format(revealed.observedOrders)})
-    ])
+     node('strong',{text:num.format(revealed.observedOrders)+' pedidos'})
+    ]),
+    p('Cambio real vs. previsto: '+delta+' pedidos','i2-demand-delta')
    ]),
-   p('Diferencia vs. plan: '+delta+
-    ' pedidos. Las compras iniciales ya estaban comprometidas.','note')
+   p('Las compras iniciales ya estaban comprometidas. No se reescriben después de conocer la demanda.','footnote')
   ])
  ]);
  card.setAttribute('aria-label','Demanda real observada después de revelar');
