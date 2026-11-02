@@ -101,6 +101,11 @@ test('Lab14: la decisión de un área abre una guía visual modal sin modificar 
   await page.locator('#gameNext').click();
   assert.equal(await page.locator('.cd-iso-compact').count(),0);
   assert.equal(await page.locator('.game-choice').count(),3);
+  const prior=await page.locator('.i2-live-plan-preview').innerText();
+  await page.locator('.game-choice').first().click();
+  const updated=await page.locator('.i2-live-plan-preview').innerText();
+  assert.notEqual(updated,prior,'La selección debe cambiar indicadores previstos visibles');
+  assert.doesNotMatch(updated,/demanda observada 280|pedidos reales 280/i);
   const before=await page.evaluate(k=>localStorage.getItem(k),KEY);
   const open=page.locator('.i2-area-explore');
   await open.click();
