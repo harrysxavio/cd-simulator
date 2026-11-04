@@ -1748,11 +1748,11 @@ html,body{height:100%;overflow:hidden}
 .i2-daily-followup-action strong{display:block;font-size:.84rem;
  color:var(--detail-label);letter-spacing:.025em}
 .i2-daily-followup-action .note{margin:7px 0!important;font-size:.83rem}
-.i2-daily-followup-trigger,.i2-day3-command-confirm,
+.i2-daily-followup-trigger,.i2-daily-purchase-trigger,.i2-day3-command-confirm,
 .i2-day3-command-cancel{min-height:48px;padding:10px 13px;
  border-radius:10px;border:1px solid var(--primary);
  font:inherit;font-weight:800;font-size:.85rem;cursor:pointer}
-.i2-daily-followup-trigger{margin-top:10px;background:var(--primary);
+.i2-daily-followup-trigger,.i2-daily-purchase-trigger{margin-top:10px;background:var(--primary);
  color:var(--action-label);width:100%}
 .i2-day3-command-dialog{box-sizing:border-box;width:min(94vw,510px);
  max-height:calc(100dvh - 20px);overflow-y:auto;margin:auto;
@@ -1766,10 +1766,10 @@ html,body{height:100%;overflow:hidden}
 .i2-day3-command-actions{display:grid;gap:9px;margin-top:15px}
 .i2-day3-command-confirm{background:var(--primary);color:var(--action-label)}
 .i2-day3-command-cancel{background:var(--detail-bg);color:var(--text)}
-.i2-daily-followup-trigger:focus-visible,.i2-day3-command-dialog button:focus-visible{
+.i2-daily-followup-trigger:focus-visible,.i2-daily-purchase-trigger:focus-visible,.i2-day3-command-dialog button:focus-visible{
  outline:3px solid var(--focus-ring);outline-offset:3px}
 .i2-day3-command-error{color:var(--danger-text)}
 @media(forced-colors:active){.i2-daily-followup-action,.i2-day3-command-dialog,
  .i2-day3-command-cost{background:Canvas;color:CanvasText;border-color:CanvasText}
- .i2-daily-followup-trigger,.i2-day3-command-dialog button{
+ .i2-daily-followup-trigger,.i2-daily-purchase-trigger,.i2-day3-command-dialog button{
   background:ButtonFace;color:ButtonText;border-color:ButtonText}}
