@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab16 · candidato I2-35.8b (04-11-2026):** habilitar en el diario día 3 una compra urgente NUEVA para el día 4, sin compra previa, con SKU faltantes y costo compra + recargo del motor SKU; dialogar, confirmar/cancelar, preservar días 0–3 y guardar fecha real. No cambia el plan original ni permite ocho nuevas acciones/día. Próximos cortes I2-35.8b2 Picking e I2-35.8c Calidad/Transporte, luego misiones diferenciadas y QA/UAT. **Pendiente PR/CI/Pages, fase padre I2-35 abierta; 35/41.** [Especificación](I2-35-8B-COMPRA-DIA3-DIA4-2026-11-04.md).
+
+
 > **Lab15 · I2-35.8a · Primera nueva orden entre jornadas (02-11-2026, candidato):** luego del incidente del muelle día 2, el gerente puede contratar en día 3, con información ya observada, un **turno adicional de Recepción que actúa físicamente en día 4** (+80 cupos SKU y $55.000 modelados). Diálogo confirma/cancela, orden queda en bitácora y persiste. Se valida que **ningún valor físico de días 0–3 cambia** y que la segunda incidencia conserva el compromiso. No se agregan órdenes ficticias para otras áreas. [Documento](I2-35-8A-TURNO-DIA4-2026-11-02.md). Tests Node, Chromium 320×568; PR/CI/Pages pendientes. Próxima I2-35.8b–c: otras áreas y costes fechados. **35/41 fases padre**.
 
 

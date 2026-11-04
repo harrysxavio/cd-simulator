@@ -152,12 +152,16 @@ export function i2ConfirmNextIncidentResponse(raw,kind){
  // the original day-3 dock shift is restored verbatim after the second command.
  delete pending.receivingResponse;
  delete pending.receivingFollowupIssuedDay;
+ // Segunda incidencia: conservar también la compra autorizada en día 3,
+ // pero quitar momentáneamente su marcador al reconfirmar el plan.
+ delete pending.urgentFollowupIssuedDay;
  const updated=i2ConfirmMultiRecovery(pending,actions);
  const final=normalizeI2GameState({
   ...updated,incidentStep:2,incidentFirstActions:first,
   incidentSecondDecision:kind,
   ...(state.receivingResponse?{receivingResponse:state.receivingResponse}:{}),
   ...(state.receivingFollowupIssuedDay===3?{receivingFollowupIssuedDay:3}:{}),
+  ...(state.urgentFollowupIssuedDay===3?{urgentFollowupIssuedDay:3}:{}),
   ...(kind==='quality-bridge'?{operationalResponse:I2_QUALITY_BRIDGE}:{})
  });
  if(!final)invalid('segunda orden no cumple contrato de persistencia');

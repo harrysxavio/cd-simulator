@@ -140,6 +140,19 @@ export function normalizeI2GameState(raw){
    ||(raw.incidentViewDay!==undefined&&raw.incidentViewDay<3))
    return null;
  }else if(Object.hasOwn(raw,'receivingFollowupIssuedDay'))return null;
+ // I2-35.8b: una orden de Compras emitida al observar día 3 solo
+ // puede llegar día 4. No confundirla con una compra emitida día 2.
+ const urgentFollowupIssuedDay=Object.hasOwn(raw,'urgentFollowupIssuedDay')?3:null;
+ if(urgentFollowupIssuedDay!==null){
+  const urgent=recoveryConfirmation?.actions.urgentPurchase;
+  if(raw.urgentFollowupIssuedDay!==3||!urgent?.enabled
+   ||urgent.arrivalDay!==4||urgent.coveragePercent!==100
+   ||!eventSeed||i2OperationalEventsForSeed(eventSeed)[0]?.kind!=='receiving-stop'
+   ||(raw.incidentViewDay!==undefined&&raw.incidentViewDay<3)
+   ||(raw.incidentViewDay===undefined&&raw.incidentStep!==1
+    &&raw.incidentStep!==2&&raw.phase!=='result'))
+   return null;
+ }
  if(Object.hasOwn(raw,'incidentStep')){
   if(![1,2].includes(raw.incidentStep)||!Number.isSafeInteger(raw.incidentStep)
    ||!recoveryConfirmation||!raw.eventSeed
@@ -232,6 +245,7 @@ export function normalizeI2GameState(raw){
   ...(operationalResponse===null?{}:{operationalResponse}),
   ...(receivingResponse===null?{}:{receivingResponse}),
   ...(receivingFollowupIssuedDay===null?{}:{receivingFollowupIssuedDay}),
+  ...(urgentFollowupIssuedDay===null?{}:{urgentFollowupIssuedDay}),
   ...(incidentFirstActions===null?{}:{
    incidentFirstActions,incidentSecondDecision
   })

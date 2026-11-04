@@ -18,6 +18,8 @@ import {i2DailyOperationsSnapshot} from '../src/i2-daily-operations.js';
 import {i2DatedOrdersForObservedDay} from '../src/i2-dated-operational-orders.js';
 import {i2ConfirmDay3ReceivingFollowup} from '../src/i2-day3-receiving-followup.js';
 import {openI2Day3ReceivingDialog} from './day3-receiving-dialog.js';
+import {i2Day3UrgentPurchaseQuote,i2ConfirmDay3UrgentPurchase} from '../src/i2-day3-urgent-purchase.js';
+import {openI2Day3PurchasingDialog} from './day3-purchasing-dialog.js';
 import {I2_QUALITY_BRIDGE} from '../src/i2-quality-bridge.js';
 import {I2_RECEIVING_SHIFT} from '../src/i2-receiving-shift.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
@@ -1258,6 +1260,14 @@ function incidentDailyScene(){
  const canApproveDockFollowup=model.day===3&&!state.receivingResponse&&
   state.incidentStep!==2&&
   i2OperationalEventsForSeed(state.eventSeed)[0]?.kind==='receiving-stop';
+ // Una compra urgente NUEVA es independiente del turno de muelle.
+ // La cotización es de SKU faltantes, no de despachos futuros.
+ let purchaseQuote=null;
+ if(model.day===3&&state.incidentStep!==2&&
+  !state.recoveryConfirmation.actions.urgentPurchase.enabled&&
+  i2OperationalEventsForSeed(state.eventSeed)[0]?.kind==='receiving-stop'){
+  try{purchaseQuote=i2Day3UrgentPurchaseQuote(state)}catch{}
+ }
  stage.textContent='Diario del CD · Jornada '+model.day;
  // The journey bar must not move backwards when transitioning between
  // the two incident checkpoints and their day-by-day observations.
@@ -1377,11 +1387,23 @@ function incidentDailyScene(){
      attrs:{type:'button','aria-haspopup':'dialog'}})
    ])
   ]:[]),
+  ...(purchaseQuote?[
+   section('i2-daily-followup-action',[
+    node('strong',{text:'DECISIÓN DISPONIBLE · COMPRAS'}),
+    p('Se identificaron '+purchaseQuote.skuUnits+
+     ' unidades SKU faltantes. Puedes autorizar compra urgente con llegada prevista al muelle en día 4. Costo modelado: '+
+     money.format(purchaseQuote.totalCLP)+
+     ' (compra + recargo). No garantiza que se expida más.','note'),
+    node('button',{className:'i2-daily-purchase-trigger',
+     text:'Evaluar compra urgente para día 4',
+     attrs:{type:'button','aria-haspopup':'dialog'}})
+   ])
+  ]:[]),
   section('i2-daily-action-status',[
-   node('strong',{text:canApproveDockFollowup?
-    'Jornada de seguimiento · puedes autorizar un turno para mañana':
+   node('strong',{text:canApproveDockFollowup||purchaseQuote?
+    'Jornada de seguimiento · hay decisiones posibles para mañana':
     'Jornada de seguimiento · sin nueva orden disponible'}),
-   p('Hoy observas cómo se ejecuta el plan y las órdenes ya autorizadas. Este modelo permite algunas órdenes futuras después de observar incidentes, como el refuerzo de Recepción desde el día 3. Las ocho políticas iniciales no se pueden reescribir.','note'),
+   p('Hoy observas cómo se ejecuta el plan y las órdenes ya autorizadas. Algunas misiones habilitan órdenes posteriores con fecha futura y costo físico verificable. Las ocho políticas iniciales no se pueden reescribir.','note'),
    node('button',{className:'i2-daily-explain-button',
     text:'¿Por qué no puedo cambiar otras áreas hoy?',
     attrs:{type:'button','aria-haspopup':'dialog'}})
@@ -1395,12 +1417,20 @@ function incidentDailyScene(){
    saveAndRender();
   }});
  });
+ const purchaseAction=root.querySelector('.i2-daily-purchase-trigger');
+ if(purchaseAction&&purchaseQuote)purchaseAction.addEventListener('click',()=>{
+  openI2Day3PurchasingDialog({source:purchaseAction,quote:purchaseQuote,onCommit:()=>{
+   state=i2ConfirmDay3UrgentPurchase(state);
+   multiDraft=state.recoveryConfirmation.actions;
+   saveAndRender();
+  }});
+ });
  const why=root.querySelector('.i2-daily-explain-button');
  why.addEventListener('click',()=>openI2HelpDialog({
   title:'Qué puedes decidir y qué está bloqueado',
   paragraphs:[
    'El plan de ocho áreas se confirmó antes de conocer la demanda. No puedes cambiarlo para aprovechar información futura.',
-   'No todas las jornadas incluyen incidentes. Algunas jornadas posteriores a un incidente sí permiten emitir nuevas órdenes con fecha futura cuando el motor tiene una respuesta física modelada: después de la parada del muelle puedes contratar un turno en el día 3 para el día 4. No todas las áreas tienen acciones adicionales.',
+   'No todas las jornadas incluyen incidentes. Algunas jornadas permiten nuevas órdenes con fecha futura: al observar el día 3 puedes contratar Recepción o comprar SKU faltantes para el día 4, con capacidad y costo modelados. Las ocho áreas todavía no tienen acciones adicionales.',
    // La ayuda breve admite como máximo cinco párrafos. Agrupar las
    // ocho decisiones en dos bloques mantiene la información y evita
    // un diálogo que no abre por exceder el contrato de accesibilidad.
