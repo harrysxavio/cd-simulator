@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **Lab16 · I2-35.8b candidato (04-11-2026):** nueva orden de Compras autorizable en jornada 3 tras observar una interrupción de Recepción, si aún no existe compra urgente. Cotiza faltante BOM en SKU, monto y recargo reales del mismo comparador físico; compromiso con llegada día 4, sin alterar días 0–3. Incluye diálogo de confirmación/cancelación, persistencia `urgentFollowupIssuedDay`, bitácora con fecha correcta, compatibilidad con turno de Recepción y segundo incidente Calidad; pruebas Node/Chromium nuevas. **En rama, PR/CI/Pages y Android pendientes**. No completar I2-35 ni cambiar **35/41 padres**. [Contrato y alcance](I2-35-8B-COMPRA-DIA3-DIA4-2026-11-04.md).
+
+
 > **Lab15 · I2-35.8a candidato (02-11-2026):** opción funcional para contratar en jornada 3 un turno de Recepción con efecto en día 4, mediante diálogo de autorización/cancelación, costo real del motor $55.000, +80 cupos SKU, guardado y bitácora. Motor SKU aplica recursos solo en día 4; verificación de igualdad exacta de días anteriores, no duplicación y persistencia en incidente combinado. [Contrato y pruebas](I2-35-8A-TURNO-DIA4-2026-11-02.md). **Pendiente PR, CI, merge, Pages y prueba Android**. Sigue pendiente ampliar nuevas órdenes a otras áreas; **35/41** padres completados.
 
 
