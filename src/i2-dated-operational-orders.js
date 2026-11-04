@@ -68,9 +68,11 @@ export function i2DatedOrdersForObservedDay(raw){
   orders.push(makeOrder(kind,number,issue,effect,day,detail,cost));
  };
  if(actions.urgentPurchase.enabled){
-  push('buy',1,first.startDay,actions.urgentPurchase.arrivalDay,
+  const issued=state.urgentFollowupIssuedDay===3?3:first.startDay;
+  push('buy',1,issued,actions.urgentPurchase.arrivalDay,
    'Cobertura solicitada '+actions.urgentPurchase.coveragePercent+
-   ' % del faltante. Llegada prevista, sujeta a Recepción y Calidad.');
+   ' % del faltante. Llegada prevista, sujeta a Recepción y Calidad.'+
+   (issued===3?' Autorizada al observar jornada 3, sin retroactividad.':''));
  }
  if(actions.reserveTransfer.enabled){
   push('reserve',1,first.startDay,actions.reserveTransfer.releaseDay,
