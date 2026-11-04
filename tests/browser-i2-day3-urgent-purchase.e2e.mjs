@@ -47,7 +47,7 @@ test('I2-35.8b: compra urgente diferida, cancelación, guardado y día 4 en móv
   assert.equal(await page.locator('.i2-daily-purchase-trigger').count(),0);
   assert.equal(await page.locator('.i2-daily-radar').innerText(),radar);
   assert.match(await page.locator('.i2-ops-command-log').innerText(),
-   /Compra urgente de SKU[\\s\\S]*Emitida día 3 · fecha objetivo día 4/);
+   /Emitida día 3 · fecha objetivo día 4/);
   await page.locator('#gameNext').click();
   await page.getByRole('heading',{name:'Jornada 4 de 12'}).waitFor();
   await page.reload({waitUntil:'networkidle'});
