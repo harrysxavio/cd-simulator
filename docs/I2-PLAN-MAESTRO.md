@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab16 · I2-35.8b — nuevas órdenes fechadas de Compras e Inventario (05-11-2026, candidata):** luego del incidente de Recepción día 2, durante la jornada observada **3** se pueden autorizar por separado **compra urgente de SKU** (faltantes de cohorte, llegada día 4, principal y recargo CLP calculados) y **traslado de stock reservado** (día 4, solo reserva preexistente y sin gasto inventado). Se combinan entre sí y con el turno de Recepción del día 4, con bitácora y dos marcadores de emisión auditables; no reescriben pasado ni POs originales y no adelantan segundo incidente. Pruebas Node y Chromium 320×568. [Contrato](I2-35-8B-COMPRAS-INVENTARIO-DIA3-2026-11-05.md). **Pendiente CI/PR/merge/Pages; 35/41 padres completados**. Próximo I2-35.8c: órdenes de Picking y Transporte con capacidad/costos por jornada, luego I2-36.15 centro de mando dinámico, I2-37/38/39/40 QA y release.
+
+
 > **Lab15 · I2-35.8a · Primera nueva orden entre jornadas (02-11-2026, candidato):** luego del incidente del muelle día 2, el gerente puede contratar en día 3, con información ya observada, un **turno adicional de Recepción que actúa físicamente en día 4** (+80 cupos SKU y $55.000 modelados). Diálogo confirma/cancela, orden queda en bitácora y persiste. Se valida que **ningún valor físico de días 0–3 cambia** y que la segunda incidencia conserva el compromiso. No se agregan órdenes ficticias para otras áreas. [Documento](I2-35-8A-TURNO-DIA4-2026-11-02.md). Tests Node, Chromium 320×568; PR/CI/Pages pendientes. Próxima I2-35.8b–c: otras áreas y costes fechados. **35/41 fases padre**.
 
 
