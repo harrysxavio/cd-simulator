@@ -25,13 +25,26 @@ export function i2Day3SupplyAvailability(raw){
   ||i2OperationalEventsForSeed(state.eventSeed)[0]?.kind!=='receiving-stop')
   return Object.freeze({buy:false,reserve:false});
  const actions=state.recoveryConfirmation.actions;
- // La reserva inicial debe haber sido separada antes del reveal.
- const canReserve=!actions.reserveTransfer.enabled
+ // Una acción debe tener un efecto físico, no basta con activar un switch.
+ // Usar el motor único para evitar ofrecer compras de CERO SKU o traslados
+ // desde una reserva vacía. Se realiza solo en la jornada 3.
+ let canReserve=!actions.reserveTransfer.enabled
   &&(state.advanced.reservePercent??0)===25;
- return Object.freeze({
-  buy:!actions.urgentPurchase.enabled,
-  reserve:canReserve
- });
+ if(canReserve){
+  const replay=i2CompareMultiRecovery({state,plans:[actions]});
+  canReserve=replay.baseline.openingState.totals.reserveSkuUnits>0;
+ }
+ let canBuy=!actions.urgentPurchase.enabled;
+ if(canBuy){
+  const buyActions=i2NormalizeMultiRecovery({
+   urgentPurchase:{enabled:true,arrivalDay:4,coveragePercent:100},
+   reserveTransfer:actions.reserveTransfer,
+   capacityBoost:actions.capacityBoost
+  });
+  const quote=i2CompareMultiRecovery({state,plans:[buyActions]});
+  canBuy=quote.results[0].reading.orderedUrgentSkuUnits>0;
+ }
+ return Object.freeze({buy:canBuy,reserve:canReserve});
 }
 function proposal(state,kind){
  if(!['buy','reserve'].includes(kind)||!i2Day3SupplyAvailability(state)[kind])
