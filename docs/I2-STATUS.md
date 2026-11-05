@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **Lab16 · 05-11-2026 · I2-35.8b candidata:** se desarrollan ofertas y autorizaciones reales en **jornada 3** para Compras (faltantes SKU, llegada día 4, principal + recargo) e Inventario (traslado día 4 de reserva creada en la planificación); ambas combinables con el refuerzo de Recepción existente. Validadores de fecha/no duplicación/stock, snapshot y ledger días 0–3 inmutables, marcador de emisión en save y bitácora, segundo incidente compatible, dos modales con cancelar sin persistencia. Tests de motor y Chromium 320px y documentación agregados. [Explicación técnica y pedagógica](I2-35-8B-COMPRAS-INVENTARIO-DIA3-2026-11-05.md). **Candidato: no declarar publicado hasta las pruebas, fusión y Pages/HTTP.** **35/41 padres completos**, seis abiertos I2-35–40. Link último publicado: https://harrysxavio.github.io/cd-simulator/juego/ .
+
+
 > **Lab15 · I2-35.8a candidato (02-11-2026):** opción funcional para contratar en jornada 3 un turno de Recepción con efecto en día 4, mediante diálogo de autorización/cancelación, costo real del motor $55.000, +80 cupos SKU, guardado y bitácora. Motor SKU aplica recursos solo en día 4; verificación de igualdad exacta de días anteriores, no duplicación y persistencia en incidente combinado. [Contrato y pruebas](I2-35-8A-TURNO-DIA4-2026-11-02.md). **Pendiente PR, CI, merge, Pages y prueba Android**. Sigue pendiente ampliar nuevas órdenes a otras áreas; **35/41** padres completados.
 
 
