@@ -68,12 +68,14 @@ export function i2DatedOrdersForObservedDay(raw){
   orders.push(makeOrder(kind,number,issue,effect,day,detail,cost));
  };
  if(actions.urgentPurchase.enabled){
-  push('buy',1,first.startDay,actions.urgentPurchase.arrivalDay,
+  const issued=state.purchaseFollowupIssuedDay===3?3:first.startDay;
+  push('buy',issued===3?2:1,issued,actions.urgentPurchase.arrivalDay,
    'Cobertura solicitada '+actions.urgentPurchase.coveragePercent+
    ' % del faltante. Llegada prevista, sujeta a Recepción y Calidad.');
  }
  if(actions.reserveTransfer.enabled){
-  push('reserve',1,first.startDay,actions.reserveTransfer.releaseDay,
+  const issued=state.reserveFollowupIssuedDay===3?3:first.startDay;
+  push('reserve',issued===3?2:1,issued,actions.reserveTransfer.releaseDay,
    'Mover unidades previamente separadas: no se crea inventario nuevo.');
  }
  if(state.receivingResponse){
