@@ -57,8 +57,8 @@ export function i2Day3SupplyImpactReading(raw){
   -without.reading.incrementalExpenseCLP;
  const thisDayReserveEvents=current.slice(4,day+1)
   .flatMap(row=>row.reserveEvents??[]);
- const thisDayUrgentArrivals=current.slice(4,day+1)
-  .flatMap(row=>row.dockArrivals??[]).filter(x=>x.urgent);
+ const thisDayUrgentArrivals=hasBuy?current.slice(4,day+1)
+  .flatMap(row=>row.dockArrivals??[]).filter(x=>x.urgent):[];
  return freeze({
   day,scope:'sku-cohort',comparison:'same-campaign-without-day-3-supply-orders',
   modes:[...(hasBuy?['purchasing']:[]),...(hasReserve?['inventory']:[])],
