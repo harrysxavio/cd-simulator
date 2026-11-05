@@ -18,6 +18,9 @@ import {i2DailyOperationsSnapshot} from '../src/i2-daily-operations.js';
 import {i2DatedOrdersForObservedDay} from '../src/i2-dated-operational-orders.js';
 import {i2ConfirmDay3ReceivingFollowup} from '../src/i2-day3-receiving-followup.js';
 import {openI2Day3ReceivingDialog} from './day3-receiving-dialog.js';
+import {i2Day3SupplyAvailability,i2Day3SupplyQuote,
+ i2ConfirmDay3SupplyFollowup} from '../src/i2-day3-supply-followups.js';
+import {openI2Day3SupplyDialog} from './day3-supply-dialog.js';
 import {I2_QUALITY_BRIDGE} from '../src/i2-quality-bridge.js';
 import {I2_RECEIVING_SHIFT} from '../src/i2-receiving-shift.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
@@ -1258,6 +1261,8 @@ function incidentDailyScene(){
  const canApproveDockFollowup=model.day===3&&!state.receivingResponse&&
   state.incidentStep!==2&&
   i2OperationalEventsForSeed(state.eventSeed)[0]?.kind==='receiving-stop';
+ const supplyAvailable=i2Day3SupplyAvailability(state);
+ const hasSupplyOptions=supplyAvailable.buy||supplyAvailable.reserve;
  stage.textContent='Diario del CD · Jornada '+model.day;
  // The journey bar must not move backwards when transitioning between
  // the two incident checkpoints and their day-by-day observations.
@@ -1368,6 +1373,21 @@ function incidentDailyScene(){
    p(closing?'Terminó el horizonte de doce jornadas. Ahora puedes analizar el resultado completo.':
     'Aún no conoces las jornadas siguientes ni el resultado final. Avanza para observar el próximo día.','footnote')
   ]),
+  ...(hasSupplyOptions?[
+   section('i2-daily-supply-board',[
+    node('strong',{text:'DECISIONES DISPONIBLES · ABASTECIMIENTO'}),
+    p('Primero revisa las colas y el faltante real. Puedes autorizar compra urgente y traslado de reserva como órdenes independientes; ambas surten efecto desde el día 4. No cambian lo que ya ocurrió.','note'),
+    ...(supplyAvailable.buy?[
+     node('button',{className:'i2-day3-supply-trigger',text:'🛒 Evaluar compra urgente · llegada día 4',
+      attrs:{type:'button','data-kind':'buy','aria-haspopup':'dialog'}})
+    ]:[]),
+    ...(supplyAvailable.reserve?[
+     node('button',{className:'i2-day3-supply-trigger',text:'📦 Evaluar traslado de reserva · día 4',
+      attrs:{type:'button','data-kind':'reserve','aria-haspopup':'dialog'}})
+    ]:[]),
+    p('La compra se valora por SKU y recargo modelado. El traslado mueve exclusivamente stock existente. Cada acción se confirma por separado.','footnote')
+   ])
+  ]:[]),
   ...(canApproveDockFollowup?[
    section('i2-daily-followup-action',[
     node('strong',{text:'DECISIÓN DISPONIBLE · RECEPCIÓN'}),
@@ -1378,8 +1398,8 @@ function incidentDailyScene(){
    ])
   ]:[]),
   section('i2-daily-action-status',[
-   node('strong',{text:canApproveDockFollowup?
-    'Jornada de seguimiento · puedes autorizar un turno para mañana':
+   node('strong',{text:canApproveDockFollowup||hasSupplyOptions?
+    'Jornada con decisiones nuevas · revisa las órdenes disponibles':
     'Jornada de seguimiento · sin nueva orden disponible'}),
    p('Hoy observas cómo se ejecuta el plan y las órdenes ya autorizadas. Este modelo permite algunas órdenes futuras después de observar incidentes, como el refuerzo de Recepción desde el día 3. Las ocho políticas iniciales no se pueden reescribir.','note'),
    node('button',{className:'i2-daily-explain-button',
@@ -1395,12 +1415,25 @@ function incidentDailyScene(){
    saveAndRender();
   }});
  });
+ // Explorar la oferta no altera la partida. Confirmar sí emite el comando.
+ root.querySelectorAll('.i2-day3-supply-trigger').forEach(button=>{
+  button.addEventListener('click',()=>{
+   try{
+    const kind=button.dataset.kind;
+    const quote=i2Day3SupplyQuote(state,kind);
+    openI2Day3SupplyDialog({source:button,kind,quote,onCommit:()=>{
+     state=i2ConfirmDay3SupplyFollowup(state,kind);
+     saveAndRender();
+    }});
+   }catch(error){showError(error)}
+  });
+ });
  const why=root.querySelector('.i2-daily-explain-button');
  why.addEventListener('click',()=>openI2HelpDialog({
   title:'Qué puedes decidir y qué está bloqueado',
   paragraphs:[
    'El plan de ocho áreas se confirmó antes de conocer la demanda. No puedes cambiarlo para aprovechar información futura.',
-   'No todas las jornadas incluyen incidentes. Algunas jornadas posteriores a un incidente sí permiten emitir nuevas órdenes con fecha futura cuando el motor tiene una respuesta física modelada: después de la parada del muelle puedes contratar un turno en el día 3 para el día 4. No todas las áreas tienen acciones adicionales.',
+   'No todas las jornadas incluyen incidentes. Tras la parada del muelle, el día 3 puedes evaluar compras urgentes, trasladar reserva existente y contratar un turno de Recepción para el día 4, según los recursos disponibles. En otras jornadas o áreas no siempre existen nuevas órdenes físicas.',
    // La ayuda breve admite como máximo cinco párrafos. Agrupar las
    // ocho decisiones en dos bloques mantiene la información y evita
    // un diálogo que no abre por exceder el contrato de accesibilidad.
