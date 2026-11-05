@@ -12,10 +12,10 @@ import {i2Day3SupplyAvailability,i2Day3SupplyQuote,
  i2ConfirmDay3SupplyFollowup} from '../src/i2-day3-supply-followups.js';
 
 /** Partida con demanda ya revelada y día 3 físicamente observado. */
-function atDay3({seed='ops-dock-01',kind='wait',reservePercent=0}={}){
+function atDay3({seed='ops-dock-01',kind='wait',reservePercent=0,stockProfile='standard'}={}){
  let s=newI2GameState({
   seed:'alpha-case-04',eventSeed:seed,
-  advanced:{...I2_DEFAULT_ADVANCED,reservePercent}
+  advanced:{...I2_DEFAULT_ADVANCED,reservePercent,stockProfile}
  });
  s=navigateI2GameState(s,'start');
  for(let i=0;i<8;i++)s=navigateI2GameState(s,'forward');
@@ -147,4 +147,22 @@ test('I2-35.8b: marcador falsificado, día incorrecto y pedido duplicado se rech
  const early={...s};delete early.incidentViewDay;
  assert.deepEqual(i2Day3SupplyAvailability(early),{buy:false,reserve:false});
  assert.equal(i2ConfirmDay3SupplyFollowup.length,2);
+});
+
+test('I2-35.8b: ofertas solo si hay unidades físicas que comprar o mover',()=>{
+ for(const stockProfile of ['low','standard','high']){
+  for(const reservePercent of [0,25]){
+   const state=atDay3({stockProfile,reservePercent});
+   const possible=i2Day3SupplyAvailability(state);
+   if(possible.buy){
+    const quote=i2Day3SupplyQuote(state,'buy');
+    assert.ok(quote.committedSkuUnits>0,'No se permite compra de cero SKU');
+    assert.ok(quote.incrementalPurchaseCLP>0);
+   }else assert.throws(()=>i2Day3SupplyQuote(state,'buy'),/I2-35.8b/);
+   if(possible.reserve){
+    const quote=i2Day3SupplyQuote(state,'reserve');
+    assert.ok(quote.existingReserveSkuUnits>0,'No se mueve reserva inexistente');
+   }else assert.throws(()=>i2Day3SupplyQuote(state,'reserve'),/I2-35.8b/);
+  }
+ }
 });
