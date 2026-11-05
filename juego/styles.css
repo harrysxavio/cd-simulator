@@ -1773,3 +1773,44 @@ html,body{height:100%;overflow:hidden}
  .i2-day3-command-cost{background:Canvas;color:CanvasText;border-color:CanvasText}
  .i2-daily-followup-trigger,.i2-day3-command-dialog button{
   background:ButtonFace;color:ButtonText;border-color:ButtonText}}
+
+/* I2-35.8b · Dos órdenes gerenciales del día 3, con confirmación modal.
+ * Se preserva la paleta oscuro+naranja y controles táctiles de 48 px. */
+.i2-daily-supply-board{margin:12px 0;padding:12px;display:grid;gap:9px;
+ border:2px solid var(--primary);border-radius:15px;
+ background:linear-gradient(135deg,#422919,var(--panel))}
+.i2-daily-supply-board>strong{color:var(--detail-label);font-size:.83rem;
+ letter-spacing:.02em}
+.i2-daily-supply-board>.note,.i2-daily-supply-board>.footnote{
+ margin:0!important;font-size:.83rem;line-height:1.48}
+.i2-day3-supply-trigger{display:block;width:100%;min-height:48px;
+ border:1px solid var(--primary);border-radius:11px;
+ background:var(--detail-bg);color:var(--detail-label);
+ text-align:left;padding:10px 12px;font:inherit;font-size:.88rem;
+ font-weight:800;cursor:pointer}
+.i2-supply-dialog{box-sizing:border-box;width:min(96vw,530px);
+ max-height:calc(100dvh - 16px);overflow-y:auto;margin:auto;
+ padding:16px;color:var(--text);background:var(--panel);
+ border:2px solid var(--primary);border-radius:16px}
+.i2-supply-dialog::backdrop{background:#06101ee8}
+.i2-supply-dialog h2{font-size:1.12rem;line-height:1.38;margin:0 0 10px}
+.i2-supply-dialog>p{font-size:.87rem;line-height:1.55}
+.i2-supply-quote{border-radius:11px;padding:12px;
+ background:var(--detail-bg);border-left:3px solid var(--primary)}
+.i2-supply-quote strong{display:block;font-size:1.04rem}
+.i2-supply-quote p{font-size:.84rem;line-height:1.5;margin:6px 0 0!important}
+.i2-supply-quote .i2-supply-cost{font-weight:850;color:var(--detail-label)}
+.i2-supply-dialog-actions{display:grid;gap:9px;margin-top:14px}
+.i2-supply-dialog-actions button{min-height:48px;padding:9px 12px;
+ font:inherit;font-size:.86rem;font-weight:800;border-radius:10px;
+ border:1px solid var(--primary);cursor:pointer}
+.i2-supply-cancel{background:var(--detail-bg);color:var(--text)}
+.i2-supply-confirm{background:var(--primary);color:var(--action-label)}
+.i2-supply-alert{color:var(--danger-text);font-weight:750}
+.i2-day3-supply-trigger:focus-visible,.i2-supply-dialog-actions button:focus-visible{
+ outline:3px solid var(--focus-ring);outline-offset:3px}
+@media(max-width:355px){.i2-daily-supply-board,.i2-supply-dialog{padding:10px}
+ .i2-supply-quote{padding:9px}}
+@media(forced-colors:active){.i2-daily-supply-board,.i2-supply-dialog,
+ .i2-supply-quote,.i2-day3-supply-trigger,.i2-supply-dialog-actions button{
+  background:Canvas;color:CanvasText;border-color:CanvasText}}

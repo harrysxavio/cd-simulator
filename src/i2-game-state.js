@@ -140,6 +140,30 @@ export function normalizeI2GameState(raw){
    ||(raw.incidentViewDay!==undefined&&raw.incidentViewDay<3))
    return null;
  }else if(Object.hasOwn(raw,'receivingFollowupIssuedDay'))return null;
+ // I2-35.8b: Compras e Inventario admiten decisiones nuevas en el día 3,
+ // siempre con efecto día 4. Las fechas no son inputs editables libres.
+ // El segundo incidente conserva estas órdenes ya comprometidas.
+ const day3FollowupValid=()=>eventSeed!==null
+  &&i2OperationalEventsForSeed(eventSeed)[0]?.kind==='receiving-stop'
+  &&recoveryConfirmation!==null
+  &&(raw.phase==='result'||raw.phase==='review'
+   ||(raw.phase==='recover'&&(
+    (Number.isSafeInteger(raw.incidentViewDay)&&raw.incidentViewDay>=3)
+    ||raw.incidentStep===1||raw.incidentStep===2)));
+ const purchaseFollowupIssuedDay=Object.hasOwn(raw,'purchaseFollowupIssuedDay')?3:null;
+ if(purchaseFollowupIssuedDay!==null&&(
+  raw.purchaseFollowupIssuedDay!==3||!day3FollowupValid()
+  ||!recoveryConfirmation.actions.urgentPurchase.enabled
+  ||recoveryConfirmation.actions.urgentPurchase.arrivalDay!==4
+  ||recoveryConfirmation.actions.urgentPurchase.coveragePercent!==100))
+  return null;
+ const reserveFollowupIssuedDay=Object.hasOwn(raw,'reserveFollowupIssuedDay')?3:null;
+ if(reserveFollowupIssuedDay!==null&&(
+  raw.reserveFollowupIssuedDay!==3||!day3FollowupValid()
+  ||(advanced.reservePercent??0)!==25
+  ||!recoveryConfirmation.actions.reserveTransfer.enabled
+  ||recoveryConfirmation.actions.reserveTransfer.releaseDay!==4))
+  return null;
  if(Object.hasOwn(raw,'incidentStep')){
   if(![1,2].includes(raw.incidentStep)||!Number.isSafeInteger(raw.incidentStep)
    ||!recoveryConfirmation||!raw.eventSeed
@@ -232,6 +256,8 @@ export function normalizeI2GameState(raw){
   ...(operationalResponse===null?{}:{operationalResponse}),
   ...(receivingResponse===null?{}:{receivingResponse}),
   ...(receivingFollowupIssuedDay===null?{}:{receivingFollowupIssuedDay}),
+  ...(purchaseFollowupIssuedDay===null?{}:{purchaseFollowupIssuedDay}),
+  ...(reserveFollowupIssuedDay===null?{}:{reserveFollowupIssuedDay}),
   ...(incidentFirstActions===null?{}:{
    incidentFirstActions,incidentSecondDecision
   })
