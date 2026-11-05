@@ -1,5 +1,8 @@
 # Implementación 2 · Estado verificable de Misión CD
 
+> **Lab16 · I2-37.5a candidata (05-11-2026):** lectura comparativa causal visible desde el día 4 cuando hubo Compras/Inventario nuevas en día 3: con y sin esas órdenes, misma cohorte y calendario, cuatro KPI, gasto comprometido y movimientos SKU. Nico no convierte inversión en mejora automática: puede mostrar 0 pedidos extra o mayor cola. Pruebas de no retroactividad, no spoilers, persistencia y Pixel 7 incluidas. [Documento](I2-37-5A-ATRIBUCION-ORDENES-2026-11-05.md). **Pendiente CI, PR, merge, Pages/HTTP**. Fases principales 35/41, I2-35–40 siguen abiertas.
+
+
 > **Lab16 · 05-11-2026 · I2-35.8b candidata:** se desarrollan ofertas y autorizaciones reales en **jornada 3** para Compras (faltantes SKU, llegada día 4, principal + recargo) e Inventario (traslado día 4 de reserva creada en la planificación); ambas combinables con el refuerzo de Recepción existente. Validadores de fecha/no duplicación/stock, snapshot y ledger días 0–3 inmutables, marcador de emisión en save y bitácora, segundo incidente compatible, dos modales con cancelar sin persistencia. Tests de motor y Chromium 320px y documentación agregados. [Explicación técnica y pedagógica](I2-35-8B-COMPRAS-INVENTARIO-DIA3-2026-11-05.md). **Candidato: no declarar publicado hasta las pruebas, fusión y Pages/HTTP.** **35/41 padres completos**, seis abiertos I2-35–40. Link último publicado: https://harrysxavio.github.io/cd-simulator/juego/ .
 
 

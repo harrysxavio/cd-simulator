@@ -1814,3 +1814,27 @@ html,body{height:100%;overflow:hidden}
 @media(forced-colors:active){.i2-daily-supply-board,.i2-supply-dialog,
  .i2-supply-quote,.i2-day3-supply-trigger,.i2-supply-dialog-actions button{
   background:Canvas;color:CanvasText;border-color:CanvasText}}
+
+/* I2-37.5a · Resultado observado de órdenes, no promesa de futuro. */
+.i2-observed-order-impact{display:grid;gap:9px;margin:12px 0;
+ padding:13px;border:2px solid var(--primary);border-radius:15px;
+ background:linear-gradient(125deg,#36251a,var(--panel))}
+.i2-observed-order-impact>strong{font-size:.83rem;letter-spacing:.025em;
+ color:var(--detail-label)}
+.i2-observed-order-impact>.note,.i2-observed-order-impact>.footnote{
+ margin:0!important;font-size:.81rem;line-height:1.45}
+.i2-impact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.i2-impact-metric{min-width:0;display:grid;gap:4px;padding:10px;
+ background:var(--detail-bg);border:1px solid var(--border);
+ border-radius:11px}
+.i2-impact-metric>span{font-size:.73rem;color:var(--muted);line-height:1.35}
+.i2-impact-metric>strong{font-size:1.06rem;overflow-wrap:anywhere;
+ font-variant-numeric:tabular-nums}
+.i2-impact-metric .footnote{margin:0!important;font-size:.69rem;line-height:1.45}
+.i2-impact-coach{margin:0!important;padding:10px;
+ background:var(--detail-bg);border-left:3px solid var(--primary);
+ border-radius:9px;font-size:.85rem;line-height:1.55}
+@media(max-width:355px){.i2-observed-order-impact{padding:9px}
+ .i2-impact-metric{padding:7px}.i2-impact-metric>strong{font-size:.95rem}}
+@media(forced-colors:active){.i2-observed-order-impact,.i2-impact-metric,
+ .i2-impact-coach{background:Canvas;color:CanvasText;border-color:CanvasText}}

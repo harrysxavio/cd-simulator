@@ -21,6 +21,7 @@ import {openI2Day3ReceivingDialog} from './day3-receiving-dialog.js';
 import {i2Day3SupplyAvailability,i2Day3SupplyQuote,
  i2ConfirmDay3SupplyFollowup} from '../src/i2-day3-supply-followups.js';
 import {openI2Day3SupplyDialog} from './day3-supply-dialog.js';
+import {i2Day3SupplyImpactReading} from '../src/i2-day3-supply-impact.js';
 import {I2_QUALITY_BRIDGE} from '../src/i2-quality-bridge.js';
 import {I2_RECEIVING_SHIFT} from '../src/i2-receiving-shift.js';
 import {I2_OPERATIONAL_EVENT_SEEDS,i2OperationalEventSealed,
@@ -1251,10 +1252,11 @@ function operationalIncidentOutcomePanel(){
  */
 /** Reloj de operaciones: sólo las observaciones del día actual, sin spoilers. */
 function incidentDailyScene(){
- let model,committed;
+ let model,committed,impact;
  try{
   model=i2DailyOperationsSnapshot(state);
   committed=i2DatedOrdersForObservedDay(state);
+  impact=i2Day3SupplyImpactReading(state);
  }catch(e){showError(e);return}
  const closing=model.day===model.horizonDays;
  // Una orden nueva real solo después de observar el día 3.
@@ -1313,6 +1315,33 @@ function incidentDailyScene(){
    ?'Nico: hoy hay una etapa detenida. Observa los pendientes; los SKU retenidos no son mercancía perdida.'
    :'Nico: hoy procesamos el plan y las órdenes ya confirmadas. Mira los despachos y las colas que quedan.','lead'),
   radar,
+  ...(impact?[section('i2-observed-order-impact',[
+   node('strong',{text:'NICO · ¿QUÉ CAMBIARON TUS ÓRDENES DEL DÍA 3?'}),
+   p('Comparación contra la misma operación, pero SIN las nuevas órdenes de Compras/Inventario emitidas en el día 3. Se mantiene todo lo demás.','note'),
+   section('i2-impact-grid',[
+    ...[
+     ['Pedidos expedidos acumulados',impact.shippedToDate,impact.shippedWithoutToDate,'pedidos'],
+     ['Pendientes al cierre de hoy',impact.pendingOrders,impact.pendingWithout,'pedidos'],
+     ['Cola de Recepción',impact.waitingReceivingSkuUnits,impact.waitingReceivingWithoutSkuUnits,'SKU'],
+     ['Gasto adicional comprometido',impact.additionalCommittedCLP,0,'CLP']
+    ].map(([label,actual,previous,unit])=>section('i2-impact-metric',[
+     node('span',{text:label}),
+     node('strong',{text:unit==='CLP'?money.format(actual):num.format(actual)+' '+unit}),
+     p(unit==='CLP'?'vs. sin estas órdenes: '+money.format(previous):
+      'sin nuevas órdenes: '+num.format(previous)+' '+unit,'footnote')
+    ]))
+   ]),
+   p(impact.additionalShippedToDate>0
+    ?'Nico: con estas órdenes salieron '+num.format(impact.additionalShippedToDate)+
+      ' pedidos adicionales del CD hasta hoy. Verifica si el costo justifica la mejora.'
+    :impact.additionalShippedToDate===0
+     ?'Nico: hasta hoy estas órdenes NO han aumentado las salidas acumuladas del CD. Una compra o un movimiento no garantiza despachos.'
+     :'Nico: hasta hoy la combinación genera menos despachos que el escenario sin esas órdenes. Revisa la secuencia de cuellos de botella.','i2-impact-coach'),
+   p('Movido desde reserva desde el día 4: '+num.format(impact.movedReserveSkuUnitsToDate)+
+    ' SKU · llegadas urgentes al muelle: '+num.format(impact.urgentSkuUnitsArrivedAtDockToDate)+
+    ' SKU. No equivalen a pedidos entregados.','footnote'),
+   p(impact.note,'footnote')
+  ])]:[]),
   section('i2-ops-command-log',[
    node('strong',{text:'ÓRDENES GERENCIALES · HISTORIAL CONFIRMADO'}),
    p(committed.committedCount

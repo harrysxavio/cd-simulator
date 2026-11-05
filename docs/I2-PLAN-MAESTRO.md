@@ -1,5 +1,8 @@
 # Implementación 2 · Plan maestro de 41 microfases (I2-00 a I2-40)
 
+> **Lab16 · I2-37.5a · Evidencia de impacto observado (05-11-2026; candidata):** tras las nuevas órdenes día 3 de Compras/Inventario, desde la jornada 4 observada Nico compara **la misma campaña SKU con y sin esas órdenes**: pedidos expedidos acumulados, pendientes, cola de Recepción, gasto CLP y movimientos físicos. Mismo baseline, semilla, POs y ledger idéntico días 0–3; sin futuro, sin contabilizar compras como entregas. No aparece el panel antes del efecto ni sin intervención. [Contrato y QA](I2-37-5A-ATRIBUCION-ORDENES-2026-11-05.md). **Rama apilada sobre I2-35.8b; pendiente CI/merge/Pages; 35/41 padres**. Próximas: Picking fechado, Transporte, cierre pedagógico, Android y UAT.
+
+
 > **Lab16 · I2-35.8b — nuevas órdenes fechadas de Compras e Inventario (05-11-2026, candidata):** luego del incidente de Recepción día 2, durante la jornada observada **3** se pueden autorizar por separado **compra urgente de SKU** (faltantes de cohorte, llegada día 4, principal y recargo CLP calculados) y **traslado de stock reservado** (día 4, solo reserva preexistente y sin gasto inventado). Se combinan entre sí y con el turno de Recepción del día 4, con bitácora y dos marcadores de emisión auditables; no reescriben pasado ni POs originales y no adelantan segundo incidente. Pruebas Node y Chromium 320×568. [Contrato](I2-35-8B-COMPRAS-INVENTARIO-DIA3-2026-11-05.md). **Pendiente CI/PR/merge/Pages; 35/41 padres completados**. Próximo I2-35.8c: órdenes de Picking y Transporte con capacidad/costos por jornada, luego I2-36.15 centro de mando dinámico, I2-37/38/39/40 QA y release.
 
 
